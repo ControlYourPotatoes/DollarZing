@@ -1,14 +1,12 @@
-import { useState } from 'react'
-import GameSimulation from './components/p2pgameVisual'
-import './App.css'
+import './styles/tailwind.css';
+import SimulationPage from './pages/SimulationPage';
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
       <div>
-        <GameSimulation />
+        <SimulationPage />
       </div>
     </>
   )
