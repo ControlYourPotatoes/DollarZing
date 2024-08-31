@@ -216,7 +216,7 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
 
   const InfoCard: React.FC<{ gameState, isRunning, toggleSimulation }> = ({ gameState, isRunning, toggleSimulation }) => {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-lg">
+      <div className="bg-grey p-6 rounded-lg shadow-lg w-50">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg text-gray-500">Day</h1>
@@ -263,7 +263,7 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
     <div >
       <h2 className="text-2xl font-bold mb-6">P2P Game Simulation Dashboard with {gameState.totalPlayers} users</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
         <div>
           <InfoCard gameState={gameState} isRunning={isRunning} toggleSimulation={() => setIsRunning(!isRunning)} />
         </div>
