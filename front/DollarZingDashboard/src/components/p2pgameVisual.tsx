@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
-const TOTAL_DAYS = 100;
+const TOTAL_DAYS = 30;
 const PLATFORM_FEE = 0.10;
 const BILLS_PER_DAY = 7;
 const AVG_DONATION_PERCENTAGE = 0.125; // 12.5% average donation
@@ -216,18 +216,12 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
 
   const InfoCard: React.FC<{ gameState, isRunning, toggleSimulation }> = ({ gameState, isRunning, toggleSimulation }) => {
     return (
-      <div className="bg-grey p-6 rounded-lg shadow-lg w-50">
-        <div className="flex items-center justify-between">
+      <div className="bg-blue-100 p-6 rounded-lg shadow-lg dark:bg-surface-dark dark:text-white">
+        <div className="">
           <div>
             <h1 className="text-lg text-gray-500">Day</h1>
             <p className="text-2xl font-bold text-gray-900">{gameState.day} / {TOTAL_DAYS}</p>
           </div>
-          <button
-            onClick={toggleSimulation}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-          >
-            {isRunning ? 'Pause' : 'Start'} Simulation
-          </button>
         </div>
         <div className="mt-4">
           <p className="text-sm text-gray-500">Total Charity</p>
@@ -249,24 +243,48 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
           <p className="text-sm text-gray-500">Total Winnings</p>
           <p className="text-lg font-bold text-gray-900">${gameState.totalWinnings.toFixed(2)}</p>
         </div>
-        <div className="mt-4 flex items-center">
+        <div className="mt-2">
           <p className="text-sm text-gray-500">Charity Percentage</p>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden ml-2">
-            <div className="h-full bg-teal-500" style={{ width: `${(gameState.totalCharity / gameState.totalWinnings * 100).toFixed(2)}%` }}></div>
+          <p className="text-lg font-bold text-teal-500">
+            {(gameState.totalCharity / gameState.totalWinnings * 100).toFixed(2)}%
+          </p>
+        </div>
+        <div className="mt-2">
+          <div className="mt-4 flex justify-center items-center">
+          <p className="text-sm text-gray-500">Total Players </p>
+          <p className="text-lg font-bold text-gray-900 pl-5">{gameState.totalPlayers}</p>
           </div>
+          <input
+            type="range"
+            min="100"
+            max="10000"
+            value={gameState.totalPlayers}
+            onChange={(e) => updateTotalPlayers(parseInt(e.target.value))}
+            className="w-full"
+          />
+        </div>
+        <div className="mt-4 flex justify-center ">
+          <button
+            onClick={toggleSimulation}
+            className={`bg-${isRunning ? 'red' : 'green'}-500 text-white px-4 py-2 rounded-md`}
+          >
+            {isRunning ? 'Stop Simulation' : 'Start Simulation'}
+          </button>
         </div>
       </div>
     );
   };
 
   return (
-    <div >
+    <div>
       <h2 className="text-2xl font-bold mb-6">P2P Game Simulation Dashboard with {gameState.totalPlayers} users</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-10 p-6">
         <div>
           <InfoCard gameState={gameState} isRunning={isRunning} toggleSimulation={() => setIsRunning(!isRunning)} />
         </div>
+
+        
 
         
       </div>
