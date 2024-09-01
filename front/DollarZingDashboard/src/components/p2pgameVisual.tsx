@@ -6,6 +6,7 @@ const TOTAL_DAYS = 30;
 const PLATFORM_FEE = 0.10;
 const BILLS_PER_DAY = 7;
 const AVG_DONATION_PERCENTAGE = 0.125; // 12.5% average donation
+const governmentSharePerGame = 0.01; // 5% of the game fee goes to the government
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
 
@@ -31,7 +32,8 @@ const GameSimulation = () => {
     totalGamesPlayed: 0,
     platformEarnings: 0,
     totalWinnings: 10000,
-    totalPlayers: 1000
+    totalPlayers: 1000,
+    governmentEarnings: 0
   });
 
   //States for the chart selection options
@@ -49,9 +51,15 @@ const GameSimulation = () => {
     return Math.floor(activePlayers * BILLS_PER_DAY / 2);
   };
 
+  const calculateGovernmentEarnings = (dailyGamesPlayed: number) => {
+    return dailyGamesPlayed * governmentSharePerGame;
+  };
+
   // Calculate platform earnings based on games played
   const calculatePlatformEarnings = (dailyGamesPlayed: number) => {
-    return dailyGamesPlayed * PLATFORM_FEE * 2;
+    const totalPlatformFee = dailyGamesPlayed * PLATFORM_FEE * 2;
+    const governmentShare = dailyGamesPlayed * governmentSharePerGame;
+    return totalPlatformFee - governmentShare;
   };
 
 // Calculate winnings, charity contributions, and winners for each level
