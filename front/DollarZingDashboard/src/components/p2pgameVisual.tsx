@@ -29,7 +29,7 @@ const GameSimulation = () => {
     chartData: [initialChartData],
     jackpotWinners: 1,
     totalGamesPlayed: 0,
-    platformEarnings: 500,
+    platformEarnings: 0,
     totalWinnings: 10000,
     totalPlayers: 1000
   });
@@ -151,7 +151,7 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
     }));
   };
 
-  useEffect(() => {
+  useEffect(() => { 
     let timer: NodeJS.Timeout;
     if (isRunning) {
       timer = setInterval(simulateDay, 1000);
@@ -332,3 +332,4 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
 };
 
 export default GameSimulation;
+
