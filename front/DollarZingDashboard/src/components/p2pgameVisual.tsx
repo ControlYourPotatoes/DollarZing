@@ -3,6 +3,7 @@ import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, Cartesia
 import InfoCard from './InfoCard';
 import ChartComponent from './DistributionChart';
 import ComparisonChartComponent from './ComparisonChart';
+import AdjustableChartComponent from './AdjustableChart';
 
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
 const TOTAL_DAYS = 30;
