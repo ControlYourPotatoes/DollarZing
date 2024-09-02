@@ -269,13 +269,19 @@ const GameSimulation = () => {
             data={gameState1.chartData} 
             title="Financial Distribution"  
           />
+
+          <AdjustableChartComponent 
+            data={gameState2.chartData} 
+            title="Adjustable Chart" 
+            cashOutStrategy={cashOutStrategy1}
+            setCashOutStrategy={setCashOutStrategy1}
+            adoptionRate={adoptionRate1}
+            setAdoptionRate={setAdoptionRate1}
+          />
         </div>
 
         <div>
-          <ChartComponent 
-            data={gameState2.chartData} 
-            title="Financial Distribution"  
-          />
+          
         </div>
 
         <div className="p-6">
