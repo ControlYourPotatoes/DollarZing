@@ -1,5 +1,7 @@
 import React from 'react';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Slider } from "@/components/ui/slider";
+
 
 interface InfoCardProps {
   gameState: {
@@ -10,14 +12,27 @@ interface InfoCardProps {
     platformEarnings: number;
     totalWinnings: number;
     totalPlayers: number;
-    governmentEarnings: number;  // New property
+    governmentEarnings: number;
   };
   isRunning: boolean;
   toggleSimulation: () => void;
   updateTotalPlayers: (players: number) => void;
 }
 
-const InfoCard: React.FC<InfoCardProps> = ({ gameState, isRunning, toggleSimulation, updateTotalPlayers }) => {
+const InfoCard: React.FC<InfoCardProps> = ({ 
+  gameState, 
+  isRunning, 
+  toggleSimulation, 
+  updateTotalPlayers 
+}) => {
+
+  const handleSliderChange = (value: number[]) => {
+    if (value.length > 0) {
+      updateTotalPlayers(value[0]);
+    }
+  };
+
+  
   return (
     <Card className="bg-blue-100 p-6 rounded-lg shadow-lg dark:bg-surface-dark dark:text-white">
       <CardContent>
@@ -60,13 +75,13 @@ const InfoCard: React.FC<InfoCardProps> = ({ gameState, isRunning, toggleSimulat
             <p className="text-sm text-gray-500">Total Players</p>
             <p className="text-lg font-bold text-gray-900">{gameState.totalPlayers}</p>
           </div>
-          <input
-            type="range"
-            min="100"
-            max="10000"
-            value={gameState.totalPlayers}
-            onChange={(e) => updateTotalPlayers(parseInt(e.target.value))}
-            className="w-full mt-2"
+          <Slider
+            min={100}
+            max={10000}
+            step={25}
+            value={[gameState.totalPlayers]}
+            onValueChange={handleSliderChange}
+            className="mt-2"
           />
         </div>
         <div className="mt-4 flex justify-center">

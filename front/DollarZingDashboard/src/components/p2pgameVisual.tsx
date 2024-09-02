@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import InfoCard from './InfoCard';
+import ChartComponent from './DistributionChart';
 
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
 const TOTAL_DAYS = 30;
@@ -62,8 +64,8 @@ const GameSimulation = () => {
     return totalPlatformFee - governmentShare;
   };
 
-// Calculate winnings, charity contributions, and winners for each level
-const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | 'average' | 'high') => {
+  // Calculate winnings, charity contributions, and winners for each level
+  const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | 'average' | 'high') => {
   let dailyWinnings = 0;
   let dailyCharity = 0;
   let dailyJackpotWinners = 0;
@@ -108,47 +110,51 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
   }, {});
 
   return { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners };
-};
+  };
 
 
   // Main function to simulate a single day
-  const simulateDay = () => {
-    setGameState(prevState => {
-      if (prevState.day >= TOTAL_DAYS) {
-        setIsRunning(false);
-        return prevState;
-      }
-
-      const newDay = prevState.day + 1;
-      const activePlayers = calculateActivePlayers(prevState.totalPlayers);
-      const dailyGamesPlayed = calculateDailyGamesPlayed(activePlayers);
-      const dailyPlatformEarnings = calculatePlatformEarnings(dailyGamesPlayed);
-      const { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners } = calculateLevelData(dailyGamesPlayed, 'average');
-
-      // Update game state with new calculations
-      const newChartData = [
-        ...prevState.chartData,
-        {
-          day: newDay,
-          charityContributions: dailyCharity,
-          platformEarnings: dailyPlatformEarnings,
-          jackpotWinners: dailyJackpotWinners,
-          gamesPlayed: dailyGamesPlayed,
-          ...levelData
-        }
-      ];
-
-      return {
+  const simulateDay = (prevState, cashOutStrategy, adoptionRate) => {
+    if (prevState.day >= TOTAL_DAYS) {
+      return prevState;
+    }
+  
+    const newDay = prevState.day + 1;
+    
+    // Simulate user growth based on adoption rate
+    const newTotalPlayers = Math.floor(prevState.totalPlayers * (1 + adoptionRate));
+    
+    const activePlayers = calculateActivePlayers(newTotalPlayers);
+    const dailyGamesPlayed = calculateDailyGamesPlayed(activePlayers);
+    const dailyPlatformEarnings = calculatePlatformEarnings(dailyGamesPlayed);
+    const dailyGovernmentEarnings = calculateGovernmentEarnings(dailyGamesPlayed);
+    
+    const { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners } = calculateLevelData(dailyGamesPlayed, cashOutStrategy);
+  
+    const newChartData = [
+      ...prevState.chartData,
+      {
         day: newDay,
-        totalCharity: prevState.totalCharity + dailyCharity,
-        chartData: newChartData,
-        jackpotWinners: prevState.jackpotWinners + dailyJackpotWinners,
-        totalGamesPlayed: prevState.totalGamesPlayed + dailyGamesPlayed,
-        platformEarnings: prevState.platformEarnings + dailyPlatformEarnings,
-        totalWinnings: prevState.totalWinnings + dailyWinnings,
-        totalPlayers: prevState.totalPlayers
-      };
-    });
+        charityContributions: dailyCharity,
+        platformEarnings: dailyPlatformEarnings,
+        jackpotWinners: dailyJackpotWinners,
+        gamesPlayed: dailyGamesPlayed,
+        totalPlayers: newTotalPlayers,
+        ...levelData
+      }
+    ];
+  
+    return {
+      day: newDay,
+      totalCharity: prevState.totalCharity + dailyCharity,
+      chartData: newChartData,
+      jackpotWinners: prevState.jackpotWinners + dailyJackpotWinners,
+      totalGamesPlayed: prevState.totalGamesPlayed + dailyGamesPlayed,
+      platformEarnings: prevState.platformEarnings + dailyPlatformEarnings,
+      governmentEarnings: prevState.governmentEarnings + dailyGovernmentEarnings,
+      totalWinnings: prevState.totalWinnings + dailyWinnings,
+      totalPlayers: newTotalPlayers
+    };
   };
 
   // Function to update the number of total players based on slider input
@@ -168,31 +174,7 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
   }, [isRunning]);
 
 
-  const renderChart = () => {
-    const Chart = selectedChart === 'bar' ? BarChart : selectedChart === 'line' ? LineChart : AreaChart;
-    const DataComponent = selectedChart === 'bar' ? Bar : selectedChart === 'line' ? Line : Area;
-
-    return (
-      <Chart data={gameState.chartData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="day" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        {selectedMetric === 'playerLevels' && 
-          LEVELS.map((level, index) => (
-            <DataComponent key={level} type="monotone" dataKey={`$${level}`} stackId="1" stroke={COLORS[index % COLORS.length]} fill={COLORS[index % COLORS.length]} />
-          ))
-        }
-        {selectedMetric === 'earnings' && (
-          <DataComponent type="monotone" dataKey="platformEarnings" stroke="#82ca9d" fill="#82ca9d" />
-        )}
-        {selectedMetric === 'charity' && (
-          <DataComponent type="monotone" dataKey="charityContributions" stroke="#8884d8" fill="#8884d8" />
-        )}
-      </Chart>
-    );
-  };
+  
 
   const renderPieChart = () => {
     const data = [
@@ -222,76 +204,23 @@ const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: 'low' | '
     );
   };
 
-  const InfoCard: React.FC<{ gameState, isRunning, toggleSimulation }> = ({ gameState, isRunning, toggleSimulation }) => {
-    return (
-      <div className="bg-blue-100 p-6 rounded-lg shadow-lg dark:bg-surface-dark dark:text-white">
-        <div className="">
-          <div>
-            <h1 className="text-lg text-gray-500">Day</h1>
-            <p className="text-2xl font-bold text-gray-900">{gameState.day} / {TOTAL_DAYS}</p>
-          </div>
-        </div>
-        <div className="mt-4">
-          <p className="text-sm text-gray-500">Total Charity</p>
-          <p className="text-lg font-bold text-green-500">${gameState.totalCharity.toFixed(2)}</p>
-        </div>
-        <div className="mt-2">
-          <p className="text-sm text-gray-500">Total $1,024 Winners</p>
-          <p className="text-lg font-bold text-gray-900">{gameState.jackpotWinners}</p>
-        </div>
-        <div className="mt-2">
-          <p className="text-sm text-gray-500">Total Games Played</p>
-          <p className="text-lg font-bold text-gray-900">{gameState.totalGamesPlayed}</p>
-        </div>
-        <div className="mt-2">
-          <p className="text-sm text-gray-500">Platform Earnings</p>
-          <p className="text-lg font-bold text-indigo-500">${gameState.platformEarnings.toFixed(2)}</p>
-        </div>
-        <div className="mt-2">
-          <p className="text-sm text-gray-500">Total Winnings</p>
-          <p className="text-lg font-bold text-gray-900">${gameState.totalWinnings.toFixed(2)}</p>
-        </div>
-        <div className="mt-2">
-          <p className="text-sm text-gray-500">Charity Percentage</p>
-          <p className="text-lg font-bold text-teal-500">
-            {(gameState.totalCharity / gameState.totalWinnings * 100).toFixed(2)}%
-          </p>
-        </div>
-        <div className="mt-2">
-          <div className="mt-4 flex justify-center items-center">
-          <p className="text-sm text-gray-500">Total Players </p>
-          <p className="text-lg font-bold text-gray-900 pl-5">{gameState.totalPlayers}</p>
-          </div>
-          <input
-            type="range"
-            min="100"
-            max="10000"
-            value={gameState.totalPlayers}
-            onChange={(e) => updateTotalPlayers(parseInt(e.target.value))}
-            className="w-full"
-          />
-        </div>
-        <div className="mt-4 flex justify-center ">
-          <button
-            onClick={toggleSimulation}
-            className={`bg-${isRunning ? 'red' : 'green'}-500 text-white px-4 py-2 rounded-md`}
-          >
-            {isRunning ? 'Stop Simulation' : 'Start Simulation'}
-          </button>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">P2P Game Simulation Dashboard with {gameState.totalPlayers} users</h2>
+      <h2 className="text-2xl text-black font-bold mb-6">P2P Game Simulation Dashboard with {gameState.totalPlayers} users</h2>
       
       <div className="grid grid-cols-2 md:grid-cols-2 gap-10 p-6">
         <div>
-          <InfoCard gameState={gameState} isRunning={isRunning} toggleSimulation={() => setIsRunning(!isRunning)} />
+          <InfoCard gameState={gameState} isRunning={isRunning} updateTotalPlayers={updateTotalPlayers} toggleSimulation={() => setIsRunning(!isRunning)} />
         </div>
 
+        <div>
+          <ChartComponent 
+            data={gameState.chartData} 
+            title="Platform Earnings" 
+            metricKey="platformEarnings" 
+          />
+        </div>
         
 
         
