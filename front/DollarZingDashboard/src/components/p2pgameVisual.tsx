@@ -12,24 +12,24 @@ const governmentSharePerGame = 0.01; // 5% of the game fee goes to the governmen
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
 
-// Mock data for initial render
-const initialChartData = [
-  {
-    day: 1,
-    charityContributions: 1000,
-    platformEarnings: 500,
-    jackpotWinners: 1,
-    gamesPlayed: 5000,
-    ...LEVELS.reduce((acc, level, index) => ({ ...acc, [`$${level}`]: 500 - index * 50 }), {})
-  }
-];
+interface GameState {
+  day: number;
+  totalCharity: number;
+  chartData: any[];
+  jackpotWinners: number;
+  totalGamesPlayed: number;
+  platformEarnings: number;
+  totalWinnings: number;
+  totalPlayers: number;
+  governmentEarnings: number;
+}
 
 const GameSimulation = () => {
   //Initialize game state
-  const [gameState, setGameState] = useState({
+  const [gameState, setGameState] = useState<GameState>({
     day: 0,
     totalCharity: 0,
-    chartData: [initialChartData],
+    chartData: [],
     jackpotWinners: 1,
     totalGamesPlayed: 0,
     platformEarnings: 0,
@@ -38,9 +38,7 @@ const GameSimulation = () => {
     governmentEarnings: 0
   });
 
-  //States for the chart selection options
-  const [selectedChart, setSelectedChart] = useState('bar');
-  const [selectedMetric, setSelectedMetric] = useState('playerLevels');
+  // Initialize simulation state
   const [isRunning, setIsRunning] = useState(false);
 
   // Calculate the number of active players each day
@@ -226,44 +224,8 @@ const GameSimulation = () => {
         
       </div>
 
-      <div className="mb-4">
-        <h3 className="font-bold">Visualization Controls:</h3>
-        <div className="flex space-x-4">
-          <select 
-            value={selectedChart} 
-            onChange={(e) => setSelectedChart(e.target.value)}
-            className="border rounded p-2"
-          >
-            <option value="bar">Bar Chart</option>
-            <option value="line">Line Chart</option>
-            <option value="area">Area Chart</option>
-          </select>
-          <select 
-            value={selectedMetric} 
-            onChange={(e) => setSelectedMetric(e.target.value)}
-            className="border rounded p-2"
-          >
-            <option value="playerLevels">Player Levels</option>
-            <option value="earnings">Platform Earnings</option>
-            <option value="charity">Charity Contributions</option>
-          </select>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="h-96">
-          <h3 className="font-bold mb-2">Time Series Data:</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            {renderChart()}
-          </ResponsiveContainer>
-        </div>
-        <div className="h-96">
-          <h3 className="font-bold mb-2">Financial Distribution:</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            {renderPieChart()}
-          </ResponsiveContainer>
-        </div>
-      </div>
+
     </div>
   );
 };

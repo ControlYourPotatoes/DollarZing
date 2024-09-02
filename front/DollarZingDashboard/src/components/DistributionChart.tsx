@@ -6,9 +6,13 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { BarChart as BarChartIcon, LineChart as LineChartIcon, AreaChart as AreaChartIcon } from 'lucide-react'
 
 // Define the structure of our data
-interface ChartDataPoint {
+export interface ChartDataPoint {
     day: number;
-    [key: string]: number | string; // This allows for dynamic metric keys
+    charityContributions: number;
+    platformEarnings: number;
+    jackpotWinners: number;
+    gamesPlayed: number;
+    [key: string]: number; // This allows for additional numeric properties
   }
   
   // Define the props for our component
