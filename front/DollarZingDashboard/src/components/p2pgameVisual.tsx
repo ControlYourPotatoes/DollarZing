@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import InfoCard from './InfoCard';
 import ChartComponent from './DistributionChart';
@@ -24,6 +24,8 @@ interface GameState {
   governmentEarnings: number;
 }
 
+type CashOutStrategy = 'low' | 'average' | 'high';
+
 const GameSimulation = () => {
   //Initialize game state
   const [gameState, setGameState] = useState<GameState>({
@@ -40,6 +42,8 @@ const GameSimulation = () => {
 
   // Initialize simulation state
   const [isRunning, setIsRunning] = useState(false);
+  const [cashOutStrategy, setCashOutStrategy] = useState<CashOutStrategy>('average');
+  const [adoptionRate, setAdoptionRate] = useState(0.01); 
 
   // Calculate the number of active players each day
   const calculateActivePlayers = (totalPlayers: number) => {
@@ -112,48 +116,48 @@ const GameSimulation = () => {
 
 
   // Main function to simulate a single day
-  const simulateDay = (prevState, cashOutStrategy, adoptionRate) => {
-    if (prevState.day >= TOTAL_DAYS) {
-      return prevState;
-    }
-  
-    const newDay = prevState.day + 1;
-    
-    // Simulate user growth based on adoption rate
-    const newTotalPlayers = Math.floor(prevState.totalPlayers * (1 + adoptionRate));
-    
-    const activePlayers = calculateActivePlayers(newTotalPlayers);
-    const dailyGamesPlayed = calculateDailyGamesPlayed(activePlayers);
-    const dailyPlatformEarnings = calculatePlatformEarnings(dailyGamesPlayed);
-    const dailyGovernmentEarnings = calculateGovernmentEarnings(dailyGamesPlayed);
-    
-    const { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners } = calculateLevelData(dailyGamesPlayed, cashOutStrategy);
-  
-    const newChartData = [
-      ...prevState.chartData,
-      {
-        day: newDay,
-        charityContributions: dailyCharity,
-        platformEarnings: dailyPlatformEarnings,
-        jackpotWinners: dailyJackpotWinners,
-        gamesPlayed: dailyGamesPlayed,
-        totalPlayers: newTotalPlayers,
-        ...levelData
+  const simulateDay = useCallback((prevState: GameState): GameState => {
+      if (prevState.day >= TOTAL_DAYS) {
+        return prevState;
       }
-    ];
   
-    return {
-      day: newDay,
-      totalCharity: prevState.totalCharity + dailyCharity,
-      chartData: newChartData,
-      jackpotWinners: prevState.jackpotWinners + dailyJackpotWinners,
-      totalGamesPlayed: prevState.totalGamesPlayed + dailyGamesPlayed,
-      platformEarnings: prevState.platformEarnings + dailyPlatformEarnings,
-      governmentEarnings: prevState.governmentEarnings + dailyGovernmentEarnings,
-      totalWinnings: prevState.totalWinnings + dailyWinnings,
-      totalPlayers: newTotalPlayers
-    };
-  };
+      const newDay = prevState.day + 1;
+      
+      // Simulate user growth based on adoption rate
+      const newTotalPlayers = Math.floor(prevState.totalPlayers * (1 + adoptionRate));
+      
+      const activePlayers = calculateActivePlayers(newTotalPlayers);
+      const dailyGamesPlayed = calculateDailyGamesPlayed(activePlayers);
+      const dailyPlatformEarnings = calculatePlatformEarnings(dailyGamesPlayed);
+      const dailyGovernmentEarnings = calculateGovernmentEarnings(dailyGamesPlayed);
+      
+      const { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners } = calculateLevelData(dailyGamesPlayed, cashOutStrategy);
+  
+      const newChartData = [
+        ...prevState.chartData,
+        {
+          day: newDay,
+          charityContributions: dailyCharity,
+          platformEarnings: dailyPlatformEarnings,
+          jackpotWinners: dailyJackpotWinners,
+          gamesPlayed: dailyGamesPlayed,
+          totalPlayers: newTotalPlayers,
+          ...levelData
+        }
+      ];
+  
+      return {
+        day: newDay,
+        totalCharity: prevState.totalCharity + dailyCharity,
+        chartData: newChartData,
+        jackpotWinners: prevState.jackpotWinners + dailyJackpotWinners,
+        totalGamesPlayed: prevState.totalGamesPlayed + dailyGamesPlayed,
+        platformEarnings: prevState.platformEarnings + dailyPlatformEarnings,
+        governmentEarnings: prevState.governmentEarnings + dailyGovernmentEarnings,
+        totalWinnings: prevState.totalWinnings + dailyWinnings,
+        totalPlayers: newTotalPlayers
+      };
+    }, [cashOutStrategy, adoptionRate]);
 
   // Function to update the number of total players based on slider input
   const updateTotalPlayers = (newPlayerCount: number) => {
@@ -163,13 +167,15 @@ const GameSimulation = () => {
     }));
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isRunning) {
-      timer = setInterval(simulateDay, 1000);
+      timer = setInterval(() => {
+        setGameState(prevState => simulateDay(prevState));
+      }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isRunning]);
+  }, [isRunning, simulateDay]);
 
 
   
