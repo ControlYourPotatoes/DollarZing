@@ -21,12 +21,15 @@ interface ChartComponentProps {
 }
 
 type ChartType = 'bar' | 'line' | 'area';
+const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
 
 const ChartComponent: React.FC<ChartComponentProps> = ({ data, title }) => {
   const [chartType, setChartType] = useState<ChartType>('bar');
   const [selectedMetric, setSelectedMetric] = useState<string>('platformEarnings');
 
   const metricOptions = [
+    { value: 'playerLevels', label: 'Player Levels Distribution' },
     { value: 'platformEarnings', label: 'Platform Earnings' },
     { value: 'charityContributions', label: 'Charity Contributions' },
     { value: 'jackpotWinners', label: 'Jackpot Winners' },
@@ -35,41 +38,31 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ data, title }) => {
   ];
 
   const renderChart = () => {
-    switch (chartType) {
-      case 'bar':
-        return (
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="day" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar type="monotone" dataKey={selectedMetric} fill="#8884d8" />
-          </BarChart>
-        );
-      case 'line':
-        return (
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="day" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey={selectedMetric} stroke="#8884d8" />
-          </LineChart>
-        );
-      case 'area':
-        return (
-          <AreaChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="day" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Area type="monotone" dataKey={selectedMetric} fill="#8884d8" stroke="#8884d8" />
-          </AreaChart>
-        );
-    }
+    const Chart = chartType === 'bar' ? BarChart : chartType === 'line' ? LineChart : AreaChart;
+    const DataComponent = chartType === 'bar' ? Bar : chartType === 'line' ? Line : Area;
+
+    return (
+      <Chart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="day" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        {selectedMetric === 'playerLevels' 
+          ? LEVELS.map((level, index) => (
+              <DataComponent
+                key={level}
+                type="monotone"
+                dataKey={`$${level}`}
+                stackId="1"
+                stroke={COLORS[index % COLORS.length]}
+                fill={COLORS[index % COLORS.length]}
+              />
+            ))
+          : <DataComponent type="monotone" dataKey={selectedMetric} fill="#8884d8" stroke="#8884d8" />
+        }
+      </Chart>
+    );
   };
 
   return (

@@ -221,8 +221,7 @@ const GameSimulation = () => {
         <div>
           <ChartComponent 
             data={gameState.chartData} 
-            title="Financial Distribution" 
-            metricKey="platformEarnings" 
+            title="Financial Distribution"  
           />
         </div>
         
