@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useState, useEffect, useCallback } from 'react';
 import InfoCard from './InfoCard';
 import ChartComponent from './DistributionChart';
 import ComparisonChartComponent from './ComparisonChart';
@@ -13,14 +12,12 @@ const CHARITY_SHARE = 0.20;
 const PLAYER_SHARE = 0.40;
 const OUTREACH_POT_PER_GAME = 0.01;
 
-const TOTAL_DAYS = 30;
-const BILLS_PER_DAY = 5;
-const AVG_DONATION_PERCENTAGE = 0.125; // 12.5% average donation
-const governmentSharePerGame = 0.01; // 5% of the game fee goes to the government
 const PANAMA_LOTTERY_USERS = 1000000; // Assuming 1 million users
+const BILLS_PER_DAY = 5;
+
+// const TOTAL_DAYS = 30;
 
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
 
 
 
@@ -49,7 +46,7 @@ type SimulateDayFunction = (
 
 const GameSimulation = () => {
   //Initialize game state
-  const [gameState, setGameState] = useState<GameState>({
+  const [gameState] = useState<GameState>({
     day: 0,
     totalCharity: 0,
     chartData: [],
@@ -72,68 +69,68 @@ const GameSimulation = () => {
   const [adoptionRate1, setAdoptionRate1] = useState(0.01);
   const [adoptionRate2, setAdoptionRate2] = useState(0.05);
 
-  // Calculate the number of active players each day
-  const calculateActivePlayers = (totalPlayers: number) => {
-    return Math.floor(totalPlayers * (Math.random() * 0.2 + 0.8));
-  };
+  // // Calculate the number of active players each day
+  // const calculateActivePlayers = (totalPlayers: number) => {
+  //   return Math.floor(totalPlayers * (Math.random() * 0.2 + 0.8));
+  // };
 
-  // Calculate the number of games played each day
-  const calculateDailyGamesPlayed = (activePlayers: number) => {
-    return Math.floor(activePlayers * BILLS_PER_DAY / 2);
-  };
+  // // Calculate the number of games played each day
+  // const calculateDailyGamesPlayed = (activePlayers: number) => {
+  //   return Math.floor(activePlayers * BILLS_PER_DAY / 2);
+  // };
 
-  const calculateGovernmentEarnings = (dailyGamesPlayed: number) => {
-    return dailyGamesPlayed * governmentSharePerGame;
-  };
+  // const calculateGovernmentEarnings = (dailyGamesPlayed: number) => {
+  //   return dailyGamesPlayed * governmentSharePerGame;
+  // };
 
-  // Calculate platform earnings based on games played
-  const calculatePlatformEarnings = (dailyGamesPlayed: number) => {
-    const totalPlatformFee = dailyGamesPlayed * PLATFORM_FEE * 2;
-    return totalPlatformFee;
-  };
+  // // Calculate platform earnings based on games played
+  // const calculatePlatformEarnings = (dailyGamesPlayed: number) => {
+  //   const totalPlatformFee = dailyGamesPlayed * PLATFORM_FEE * 2;
+  //   return totalPlatformFee;
+  // };
 
-  // Calculate winnings, charity contributions, and winners for each level
-  const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: CashOutStrategy) => {
-    let dailyWinnings = 0;
-    let dailyCharity = 0;
-    let dailyJackpotWinners = 0;
+  // // Calculate winnings, charity contributions, and winners for each level
+  // const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: CashOutStrategy) => {
+  //   let dailyWinnings = 0;
+  //   let dailyCharity = 0;
+  //   let dailyJackpotWinners = 0;
   
-    const levelData = LEVELS.reduce((acc, level) => {
-      const gamesAtLevel = Math.floor(dailyGamesPlayed / Math.pow(2, LEVELS.indexOf(level)));
-      const winnersAtLevel = Math.floor(gamesAtLevel / 2);
+  //   const levelData = LEVELS.reduce((acc, level) => {
+  //     const gamesAtLevel = Math.floor(dailyGamesPlayed / Math.pow(2, LEVELS.indexOf(level)));
+  //     const winnersAtLevel = Math.floor(gamesAtLevel / 2);
   
-      let cashOutProbability: number;
-      switch (cashOutStrategy) {
-        case 'low':
-          cashOutProbability = level <= 4 ? 0.9 : 0.3;
-          break;
-        case 'high':
-          cashOutProbability = level >= 64 ? 0.8 : 0.1;
-          break;
-        case 'average':
-        default:
-          cashOutProbability = 0.5;
-          break;
-      }
+  //     let cashOutProbability: number;
+  //     switch (cashOutStrategy) {
+  //       case 'low':
+  //         cashOutProbability = level <= 4 ? 0.9 : 0.3;
+  //         break;
+  //       case 'high':
+  //         cashOutProbability = level >= 64 ? 0.8 : 0.1;
+  //         break;
+  //       case 'average':
+  //       default:
+  //         cashOutProbability = 0.5;
+  //         break;
+  //     }
   
-      const cashOutWinners = Math.floor(winnersAtLevel * cashOutProbability);
-      const cashOutWinnings = cashOutWinners * level * 2;
-      dailyWinnings += cashOutWinnings;
-      dailyCharity += cashOutWinnings * AVG_DONATION_PERCENTAGE;
+  //     const cashOutWinners = Math.floor(winnersAtLevel * cashOutProbability);
+  //     const cashOutWinnings = cashOutWinners * level * 2;
+  //     dailyWinnings += cashOutWinnings;
+  //     dailyCharity += cashOutWinnings * AVG_DONATION_PERCENTAGE;
   
-      if (level === 512) {
-        const jackpotWinnings = winnersAtLevel * 1024;
-        dailyWinnings += jackpotWinnings;
-        dailyCharity += jackpotWinnings * AVG_DONATION_PERCENTAGE;
-        dailyJackpotWinners += winnersAtLevel;
-      }
+  //     if (level === 512) {
+  //       const jackpotWinnings = winnersAtLevel * 1024;
+  //       dailyWinnings += jackpotWinnings;
+  //       dailyCharity += jackpotWinnings * AVG_DONATION_PERCENTAGE;
+  //       dailyJackpotWinners += winnersAtLevel;
+  //     }
   
-      acc[`$${level}`] = gamesAtLevel;
-      return acc;
-    }, {} as Record<string, number>);
+  //     acc[`$${level}`] = gamesAtLevel;
+  //     return acc;
+  //   }, {} as Record<string, number>);
   
-    return { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners };
-  };
+  //   return { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners };
+  // };
 
   // Main function to simulate a single day
   const simulateDay: SimulateDayFunction = useCallback((
@@ -146,8 +143,12 @@ const GameSimulation = () => {
     const newDay = prevState.day + 1;
     
     // Simulate user growth, and Calculate new total players and active players
+    const potentialActivePlayers = Math.min(
+      PANAMA_LOTTERY_USERS,
+      Math.floor(prevState.totalPlayers * (1 + adoptionRate))
+    );
     const activePlayerPercentage = 0.2 + (0.6 * (1 - Math.exp(-newDay / 10))); // Starts at 20%, asymptotically approaches 80%
-    const activePlayers = Math.floor(prevState.totalPlayers * activePlayerPercentage * (1 + adoptionRate));
+    const activePlayers = Math.floor(potentialActivePlayers * activePlayerPercentage);
     
     // Calculate daily games played using BILLS_PER_DAY
     const dailyGamesPlayed = Math.floor(activePlayers * BILLS_PER_DAY / 2);
@@ -226,13 +227,13 @@ const GameSimulation = () => {
 }, []);
 
 
-  // Function to update the number of total players based on slider input
-  const updateTotalPlayers = (newPlayerCount: number) => {
-    setGameState(prevState => ({
-      ...prevState,
-      totalPlayers: newPlayerCount,
-    }));
-  };
+  // // Function to update the number of total players based on slider input
+  // const updateTotalPlayers = (newPlayerCount: number) => {
+  //   setGameState(prevState => ({
+  //     ...prevState,
+  //     totalPlayers: newPlayerCount,
+  //   }));
+  // };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -249,33 +250,33 @@ const GameSimulation = () => {
 
   
 
-  const renderPieChart = () => {
-    const data = [
-      { name: 'Charity Donations', value: gameState.totalCharity },
-      { name: 'Platform Earnings', value: gameState.platformEarnings },
-      { name: 'Player Winnings', value: gameState.totalWinnings - gameState.totalCharity }
-    ];
-    return (
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          outerRadius={80}
-          fill="#8884d8"
-          dataKey="value"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip />
-        <Legend />
-      </PieChart>
-    );
-  };
+  // const renderPieChart = () => {
+  //   const data = [
+  //     { name: 'Charity Donations', value: gameState.totalCharity },
+  //     { name: 'Platform Earnings', value: gameState.platformEarnings },
+  //     { name: 'Player Winnings', value: gameState.totalWinnings - gameState.totalCharity }
+  //   ];
+  //   return (
+  //     <PieChart>
+  //       <Pie
+  //         data={data}
+  //         cx="50%"
+  //         cy="50%"
+  //         labelLine={false}
+  //         outerRadius={80}
+  //         fill="#8884d8"
+  //         dataKey="value"
+  //         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+  //       >
+  //         {data.map((entry, index) => (
+  //           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+  //         ))}
+  //       </Pie>
+  //       <Tooltip />
+  //       <Legend />
+  //     </PieChart>
+  //   );
+  // };
 
 
   return (

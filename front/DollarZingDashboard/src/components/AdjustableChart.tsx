@@ -21,7 +21,7 @@ export interface ChartDataPoint {
   interface AdjustableChartComponentProps {
     data: ChartDataPoint[];
     title: string;
-    cashOutStrategy: string;
+    cashOutStrategy: CashOutStrategy;
     setCashOutStrategy: React.Dispatch<React.SetStateAction<CashOutStrategy>>;
     adoptionRate: number;
     setAdoptionRate: (rate: number) => void;
@@ -55,6 +55,9 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
 
   type ChartComponentProps = BarProps | LineProps | AreaProps;
 
+  const handleCashOutStrategyChange = (value: string) => {
+    setCashOutStrategy(value as CashOutStrategy);
+  };
 
   
   const renderChart = () => {
@@ -117,7 +120,7 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
             </Select>
           </div>
           <div className="flex justify-between items-center p-1">
-            <Select onValueChange={setCashOutStrategy} value={cashOutStrategy}>
+            <Select onValueChange={handleCashOutStrategyChange} value={cashOutStrategy}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Cash-out strategy" />
               </SelectTrigger>

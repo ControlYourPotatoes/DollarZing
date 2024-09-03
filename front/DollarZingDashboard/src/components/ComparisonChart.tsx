@@ -4,6 +4,8 @@ import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, Cartesia
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { BarChart as BarChartIcon, LineChart as LineChartIcon, AreaChart as AreaChartIcon } from 'lucide-react'
+import { BarProps, LineProps, AreaProps } from 'recharts';
+
 
 export interface ChartDataPoint {
   day: number;
@@ -39,9 +41,14 @@ const ComparisonChartComponent: React.FC<ComparisonChartComponentProps> = ({ dat
     { value: 'totalPlayers', label: 'Total Players' },
   ];
 
+  type ChartComponentProps = BarProps | LineProps | AreaProps;
+
+
   const renderChart = () => {
     const Chart = chartType === 'bar' ? BarChart : chartType === 'line' ? LineChart : AreaChart;
-    const DataComponent = chartType === 'bar' ? Bar : chartType === 'line' ? Line : Area;
+    const DataComponent = (chartType === 'bar' ? Bar : 
+      chartType === 'line' ? Line : 
+      Area) as React.ComponentType<ChartComponentProps>;
 
     const combinedData = data1.map((item, index) => ({
       ...item,
