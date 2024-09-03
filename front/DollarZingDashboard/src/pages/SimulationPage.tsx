@@ -4,7 +4,7 @@ import GameSimulation from '../components/p2pgameVisual'; // Adjust the path if 
 const SimulationPage: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="p-4 w-full max-w-6xl bg-white rounded-xl shadow-md overflow-hidden">
+      <div className="p-4 w-full max-w-custom bg-white rounded-xl shadow-md overflow-hidden">
         <GameSimulation />
       </div>
     </div>

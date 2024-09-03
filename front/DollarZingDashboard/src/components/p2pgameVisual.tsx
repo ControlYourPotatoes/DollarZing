@@ -281,8 +281,20 @@ const GameSimulation = () => {
 
   return (
     <div>
-      <h2 className="text-2xl text-black font-bold mb-6">P2P Game Simulation Dashboard with {gameState.totalPlayers} users</h2>
-      
+    {/* Container for the image and heading */}
+    <div className="flex items-center justify-between mb-6">
+      {/* Image */}
+      <img 
+        src="/src/assets/small_brand-remove.png" 
+        alt="Logo" 
+        className="h-16 w-auto object-contain"
+        style={{ maxWidth: '480px' }}
+      />
+      {/* Centered Heading */}
+      <h2 className="text-2xl text-black font-bold mx-auto">
+        P2P Game Simulation Dashboard with {gameState.totalPlayers} users
+      </h2>
+    </div>
       <div className="grid grid-cols-2 md:grid-cols-2 gap-10 p-6">
         <div className=''>
           <InfoCard 

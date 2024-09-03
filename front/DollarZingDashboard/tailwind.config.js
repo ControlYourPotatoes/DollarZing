@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
   	extend: {
+		maxWidth: {
+			'custom': '1800px', //adjust the max width of the container
+		  },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

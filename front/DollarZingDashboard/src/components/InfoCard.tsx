@@ -176,7 +176,11 @@ const InfoCard: React.FC<InfoCardProps> = ({
         <div className="mt-4 flex justify-center">
           <button
             onClick={toggleSimulation}
-            className={`bg-${isRunning ? 'red' : 'green'}-500 text-white px-4 py-2 rounded-md`}
+            className={`px-4 py-2 rounded-md text-white ${
+              isRunning
+                ? 'bg-red-500 dark:bg-red-700'
+                : 'bg-green-500 dark:bg-green-700'
+            }`}
           >
             {isRunning ? 'Stop Simulation' : 'Start Simulation'}
           </button>
