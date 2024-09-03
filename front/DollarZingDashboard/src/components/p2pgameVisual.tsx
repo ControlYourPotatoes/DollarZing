@@ -141,10 +141,8 @@ const GameSimulation = () => {
     cashOutStrategy: CashOutStrategy,
     adoptionRate: number
   ): GameState => {
-    if (prevState.day >= TOTAL_DAYS) {
-      return prevState;
-    }
-  
+    if (prevState.day >= 30) return prevState;
+
     const newDay = prevState.day + 1;
     
     // Simulate user growth based on adoption rate
