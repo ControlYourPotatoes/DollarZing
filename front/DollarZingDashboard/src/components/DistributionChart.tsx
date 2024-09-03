@@ -34,7 +34,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ data, title }) => {
     { value: 'charityContributions', label: 'Charity Contributions' },
     { value: 'jackpotWinners', label: 'Jackpot Winners' },
     { value: 'gamesPlayed', label: 'Games Played' },
-    { value: 'totalPlayers', label: 'Total Players' },
+    { value: 'activePlayers', label: 'Active Players' },
   ];
 
   const renderChart = () => {
