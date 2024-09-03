@@ -30,8 +30,8 @@ const initialGameState: GameState = {
   totalGamesPlayed: 0,
   platformEarnings: 0,
   totalWinnings: 0,
-  totalPlayers: 1000, // Starting with 1000 players
-  activePlayers: 0,
+  totalPlayers: 1000,
+  activePlayers: 1000,
   outreachPot: 0,
   governmentEarnings: 0
 };
@@ -46,19 +46,6 @@ type SimulateDayFunction = (
 
 const GameSimulation = () => {
   //Initialize game state
-  const [gameState] = useState<GameState>({
-    day: 0,
-    totalCharity: 0,
-    chartData: [],
-    jackpotWinners: 1,
-    totalGamesPlayed: 0,
-    platformEarnings: 0,
-    totalWinnings: 10000,
-    totalPlayers: 1000,
-    activePlayers: 0,
-    governmentEarnings: 0,
-    outreachPot: 0,
-  });
 
   // Initialize simulation state
   const [gameState1, setGameState1] = useState<GameState>(initialGameState);
@@ -66,8 +53,7 @@ const GameSimulation = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [cashOutStrategy1, setCashOutStrategy1] = useState<CashOutStrategy>('average');
   const [cashOutStrategy2, setCashOutStrategy2] = useState<CashOutStrategy>('average');
-  const [adoptionRate1, setAdoptionRate1] = useState(0.01);
-  const [adoptionRate2, setAdoptionRate2] = useState(0.05);
+  const [adoptionRate2, setAdoptionRate2] = useState(0.01);
 
 
   // Main function to simulate a single day
@@ -80,16 +66,24 @@ const GameSimulation = () => {
 
     const newDay = prevState.day + 1;
     
-    // Simulate user growth, and Calculate new total players and active players
-    const potentialActivePlayers = Math.min(
+  // Calculate new active players based on adoption rate
+  let newActivePlayers;
+  if (adoptionRate === 0 || adoptionRate === undefined) {
+    // Natural growth when no adoption rate is specified
+    const naturalGrowthRate = 0.1; // 0.1% daily growth, adjust as needed
+    newActivePlayers = Math.floor(prevState.activePlayers * (1 + naturalGrowthRate));
+  } else {
+    // Adoption rate growth
+    const adoptedPanamaUsers = Math.floor(PANAMA_LOTTERY_USERS * adoptionRate);
+    newActivePlayers = Math.min(
       PANAMA_LOTTERY_USERS,
-      Math.floor(prevState.totalPlayers * (1 + adoptionRate))
+      prevState.activePlayers + adoptedPanamaUsers
     );
-    const activePlayerPercentage = 0.2 + (0.6 * (1 - Math.exp(-newDay / 10))); // Starts at 20%, asymptotically approaches 80%
-    const activePlayers = Math.floor(potentialActivePlayers * activePlayerPercentage);
-    
+  }
+
+    console.log(`Day ${newDay}: ${adoptionRate === 0 ? 'Natural' : 'Adoption'} growth - Total players: ${prevState.totalPlayers}, Active players: ${newActivePlayers}`);
     // Calculate daily games played using BILLS_PER_DAY
-    const dailyGamesPlayed = Math.floor(activePlayers * BILLS_PER_DAY / 2);
+    const dailyGamesPlayed = Math.floor(newActivePlayers * BILLS_PER_DAY / 2);
     
     // Initialize daily totals
     let dailyCharity = 0;
@@ -142,7 +136,7 @@ const GameSimulation = () => {
     jackpotWinners: dailyJackpotWinners,
     gamesPlayed: dailyGamesPlayed,
     totalPlayers: prevState.totalPlayers,
-    activePlayers,
+    activePlayers: newActivePlayers,
     governmentEarnings: dailyGovernmentEarnings,
     outreachPot: dailyOutreachPot,
     playerWinnings: dailyPlayerWinnings,
@@ -160,26 +154,27 @@ const GameSimulation = () => {
     outreachPot: (prevState.outreachPot || 0) + dailyOutreachPot,
     totalWinnings: prevState.totalWinnings + dailyPlayerWinnings,
     totalPlayers: prevState.totalPlayers,
-    activePlayers
+    activePlayers: newActivePlayers
   };
 }, []);
 
 
+  // Function to update total players (baseline) from user input
   const updateTotalPlayers = (newCount: number) => {
-    setGameState1(prev => ({ ...prev, totalPlayers: newCount }));
-    setGameState2(prev => ({ ...prev, totalPlayers: newCount }));
+    setGameState1(prev => ({ ...prev, totalPlayers: newCount, activePlayers: newCount }));
+    setGameState2(prev => ({ ...prev, totalPlayers: newCount, activePlayers: newCount }));
   };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isRunning) {
       timer = setInterval(() => {
-        setGameState1((prevState) => simulateDay(prevState, cashOutStrategy1, adoptionRate1));
+        setGameState1((prevState) => simulateDay(prevState, cashOutStrategy1, 0)); // Always 0 for natural growth
         setGameState2((prevState) => simulateDay(prevState, cashOutStrategy2, adoptionRate2));
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isRunning, simulateDay, cashOutStrategy1, cashOutStrategy2, adoptionRate1, adoptionRate2]);
+  }, [isRunning, simulateDay, cashOutStrategy1, cashOutStrategy2, adoptionRate2]);
 
 
   return (
@@ -195,7 +190,7 @@ const GameSimulation = () => {
       />
       {/* Centered Heading */}
       <h2 className="text-2xl text-black font-bold mx-auto">
-        P2P Game Simulation Dashboard with {gameState.totalPlayers} users
+        P2P Game Simulation Dashboard with {gameState1.totalPlayers} users
       </h2>
     </div>
       <div className="grid grid-cols-2 md:grid-cols-2 gap-10 p-6">
@@ -208,8 +203,6 @@ const GameSimulation = () => {
               toggleSimulation={() => setIsRunning(!isRunning)}
               cashOutStrategy={cashOutStrategy1}
               setCashOutStrategy={setCashOutStrategy1}
-              adoptionRate={adoptionRate1}
-              setAdoptionRate={setAdoptionRate1}
             />        
         </div>
 

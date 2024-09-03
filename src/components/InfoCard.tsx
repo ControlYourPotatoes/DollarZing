@@ -24,8 +24,6 @@ interface InfoCardProps {
   updateTotalPlayers: (players: number) => void;
   cashOutStrategy: CashOutStrategy;
   setCashOutStrategy: (strategy: CashOutStrategy) => void;
-  adoptionRate: number;
-  setAdoptionRate: (rate: number) => void;
 }
 
 interface CustomLabelProps {
