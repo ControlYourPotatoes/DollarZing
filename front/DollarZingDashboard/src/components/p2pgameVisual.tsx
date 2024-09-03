@@ -69,68 +69,6 @@ const GameSimulation = () => {
   const [adoptionRate1, setAdoptionRate1] = useState(0.01);
   const [adoptionRate2, setAdoptionRate2] = useState(0.05);
 
-  // // Calculate the number of active players each day
-  // const calculateActivePlayers = (totalPlayers: number) => {
-  //   return Math.floor(totalPlayers * (Math.random() * 0.2 + 0.8));
-  // };
-
-  // // Calculate the number of games played each day
-  // const calculateDailyGamesPlayed = (activePlayers: number) => {
-  //   return Math.floor(activePlayers * BILLS_PER_DAY / 2);
-  // };
-
-  // const calculateGovernmentEarnings = (dailyGamesPlayed: number) => {
-  //   return dailyGamesPlayed * governmentSharePerGame;
-  // };
-
-  // // Calculate platform earnings based on games played
-  // const calculatePlatformEarnings = (dailyGamesPlayed: number) => {
-  //   const totalPlatformFee = dailyGamesPlayed * PLATFORM_FEE * 2;
-  //   return totalPlatformFee;
-  // };
-
-  // // Calculate winnings, charity contributions, and winners for each level
-  // const calculateLevelData = (dailyGamesPlayed: number, cashOutStrategy: CashOutStrategy) => {
-  //   let dailyWinnings = 0;
-  //   let dailyCharity = 0;
-  //   let dailyJackpotWinners = 0;
-  
-  //   const levelData = LEVELS.reduce((acc, level) => {
-  //     const gamesAtLevel = Math.floor(dailyGamesPlayed / Math.pow(2, LEVELS.indexOf(level)));
-  //     const winnersAtLevel = Math.floor(gamesAtLevel / 2);
-  
-  //     let cashOutProbability: number;
-  //     switch (cashOutStrategy) {
-  //       case 'low':
-  //         cashOutProbability = level <= 4 ? 0.9 : 0.3;
-  //         break;
-  //       case 'high':
-  //         cashOutProbability = level >= 64 ? 0.8 : 0.1;
-  //         break;
-  //       case 'average':
-  //       default:
-  //         cashOutProbability = 0.5;
-  //         break;
-  //     }
-  
-  //     const cashOutWinners = Math.floor(winnersAtLevel * cashOutProbability);
-  //     const cashOutWinnings = cashOutWinners * level * 2;
-  //     dailyWinnings += cashOutWinnings;
-  //     dailyCharity += cashOutWinnings * AVG_DONATION_PERCENTAGE;
-  
-  //     if (level === 512) {
-  //       const jackpotWinnings = winnersAtLevel * 1024;
-  //       dailyWinnings += jackpotWinnings;
-  //       dailyCharity += jackpotWinnings * AVG_DONATION_PERCENTAGE;
-  //       dailyJackpotWinners += winnersAtLevel;
-  //     }
-  
-  //     acc[`$${level}`] = gamesAtLevel;
-  //     return acc;
-  //   }, {} as Record<string, number>);
-  
-  //   return { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners };
-  // };
 
   // Main function to simulate a single day
   const simulateDay: SimulateDayFunction = useCallback((
