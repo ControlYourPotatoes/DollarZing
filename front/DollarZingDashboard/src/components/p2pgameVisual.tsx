@@ -227,13 +227,10 @@ const GameSimulation = () => {
 }, []);
 
 
-  // // Function to update the number of total players based on slider input
-  // const updateTotalPlayers = (newPlayerCount: number) => {
-  //   setGameState(prevState => ({
-  //     ...prevState,
-  //     totalPlayers: newPlayerCount,
-  //   }));
-  // };
+  const updateTotalPlayers = (newCount: number) => {
+    setGameState1(prev => ({ ...prev, totalPlayers: newCount }));
+    setGameState2(prev => ({ ...prev, totalPlayers: newCount }));
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -245,38 +242,6 @@ const GameSimulation = () => {
     }
     return () => clearInterval(timer);
   }, [isRunning, simulateDay, cashOutStrategy1, cashOutStrategy2, adoptionRate1, adoptionRate2]);
-
-
-
-  
-
-  // const renderPieChart = () => {
-  //   const data = [
-  //     { name: 'Charity Donations', value: gameState.totalCharity },
-  //     { name: 'Platform Earnings', value: gameState.platformEarnings },
-  //     { name: 'Player Winnings', value: gameState.totalWinnings - gameState.totalCharity }
-  //   ];
-  //   return (
-  //     <PieChart>
-  //       <Pie
-  //         data={data}
-  //         cx="50%"
-  //         cy="50%"
-  //         labelLine={false}
-  //         outerRadius={80}
-  //         fill="#8884d8"
-  //         dataKey="value"
-  //         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-  //       >
-  //         {data.map((entry, index) => (
-  //           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-  //         ))}
-  //       </Pie>
-  //       <Tooltip />
-  //       <Legend />
-  //     </PieChart>
-  //   );
-  // };
 
 
   return (
@@ -296,11 +261,12 @@ const GameSimulation = () => {
       </h2>
     </div>
       <div className="grid grid-cols-2 md:grid-cols-2 gap-10 p-6">
-        <div className=''>
+        <div className='row-span-1'>
+
           <InfoCard 
               gameState={gameState1} 
               isRunning={isRunning} 
-              updateTotalPlayers={(newCount: number) => setGameState1(prev => ({ ...prev, totalPlayers: newCount }))}
+              updateTotalPlayers={updateTotalPlayers}
               toggleSimulation={() => setIsRunning(!isRunning)}
               cashOutStrategy={cashOutStrategy1}
               setCashOutStrategy={setCashOutStrategy1}
@@ -309,20 +275,14 @@ const GameSimulation = () => {
             />        
         </div>
 
-        <div className='flex flex-col justify-center items-center'>
-          <ChartComponent 
-            data={gameState1.chartData} 
-            title="Financial Distribution"  
-          />
-
-          
+        <div className='row-span-1 '>
+          <div className='mt-40' >
+            <ChartComponent data={gameState1.chartData} title="Simulation Distribution" />
+          </div>
         </div>
 
-
-        
-
-          <div>
-            <AdjustableChartComponent 
+        <div>
+          <AdjustableChartComponent 
             data={gameState2.chartData} 
             title="Adjustable Simulation"
             cashOutStrategy={cashOutStrategy2}
@@ -330,15 +290,16 @@ const GameSimulation = () => {
             adoptionRate={adoptionRate2}
             setAdoptionRate={setAdoptionRate2}
             totalPlayers={gameState2.totalPlayers}
-          />
-          </div>
-          <div className='flex items-center'>
-            <ComparisonChartComponent 
+          />  
+        </div>
+
+        <div className='row-span-1'>
+          <ComparisonChartComponent 
             data1={gameState1.chartData}
             data2={gameState2.chartData}
             title="Comparison Chart"
-          />
-          </div>
+          />  
+        </div>
           
         
 
