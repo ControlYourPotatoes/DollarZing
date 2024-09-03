@@ -7,23 +7,24 @@ import { Slider } from "@/components/ui/slider"
 import { BarChart as BarChartIcon, LineChart as LineChartIcon, AreaChart as AreaChartIcon } from 'lucide-react'
 
 export interface ChartDataPoint {
-  day: number;
-  charityContributions: number;
-  platformEarnings: number;
-  jackpotWinners: number;
-  gamesPlayed: number;
-  totalPlayers: number;
-  [key: string]: number;
-}
-
-interface AdjustableChartComponentProps {
-  data: ChartDataPoint[];
-  title: string;
-  cashOutStrategy: string;
-  setCashOutStrategy: (strategy: string) => void;
-  adoptionRate: number;
-  setAdoptionRate: (rate: number) => void;
-}
+    day: number;
+    charityContributions: number;
+    platformEarnings: number;
+    jackpotWinners: number;
+    gamesPlayed: number;
+    activePlayers: number;
+    [key: string]: number;
+  }
+  
+  interface AdjustableChartComponentProps {
+    data: ChartDataPoint[];
+    title: string;
+    cashOutStrategy: string;
+    setCashOutStrategy: (strategy: string) => void;
+    adoptionRate: number;
+    setAdoptionRate: (rate: number) => void;
+    totalPlayers: number;
+  }
 
 type ChartType = 'bar' | 'line' | 'area';
 
@@ -47,7 +48,7 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
     { value: 'charityContributions', label: 'Charity Contributions' },
     { value: 'jackpotWinners', label: 'Jackpot Winners' },
     { value: 'gamesPlayed', label: 'Games Played' },
-    { value: 'totalPlayers', label: 'Total Players' },
+    { value: 'activePlayers', label: 'Active Players' },
   ];
 
   const renderChart = () => {

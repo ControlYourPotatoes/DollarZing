@@ -4,11 +4,17 @@ import InfoCard from './InfoCard';
 import ChartComponent from './DistributionChart';
 import ComparisonChartComponent from './ComparisonChart';
 import AdjustableChartComponent from './AdjustableChart';
+import { GameState, ChartDataPoint, CashOutStrategy } from '@/types/types';
 
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
-const TOTAL_DAYS = 30;
 const PLATFORM_FEE = 0.10;
-const BILLS_PER_DAY = 7;
+const GOVERNMENT_SHARE = 0.40;
+const CHARITY_SHARE = 0.20;
+const PLAYER_SHARE = 0.40;
+const OUTREACH_POT_PER_GAME = 0.01;
+
+const TOTAL_DAYS = 30;
+const BILLS_PER_DAY = 5;
 const AVG_DONATION_PERCENTAGE = 0.125; // 12.5% average donation
 const governmentSharePerGame = 0.01; // 5% of the game fee goes to the government
 const PANAMA_LOTTERY_USERS = 1000000; // Assuming 1 million users
@@ -16,28 +22,7 @@ const PANAMA_LOTTERY_USERS = 1000000; // Assuming 1 million users
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
 
-interface GameState {
-  day: number;
-  totalCharity: number;
-  chartData: ChartDataPoint[];
-  jackpotWinners: number;
-  totalGamesPlayed: number;
-  platformEarnings: number;
-  totalWinnings: number;
-  totalPlayers: number;
-  governmentEarnings: number;
-}
 
-
-interface ChartDataPoint {
-  day: number;
-  charityContributions: number;
-  platformEarnings: number;
-  jackpotWinners: number;
-  gamesPlayed: number;
-  totalPlayers: number;
-  [key: string]: number;
-}
 
 // Initial game state
 const initialGameState: GameState = {
@@ -49,6 +34,8 @@ const initialGameState: GameState = {
   platformEarnings: 0,
   totalWinnings: 0,
   totalPlayers: 1000, // Starting with 1000 players
+  activePlayers: 0,
+  outreachPot: 0,
   governmentEarnings: 0
 };
 
@@ -59,7 +46,6 @@ type SimulateDayFunction = (
   adoptionRate: number
 ) => GameState;
 
-type CashOutStrategy = 'low' | 'average' | 'high';
 
 const GameSimulation = () => {
   //Initialize game state
@@ -72,7 +58,9 @@ const GameSimulation = () => {
     platformEarnings: 0,
     totalWinnings: 10000,
     totalPlayers: 1000,
-    governmentEarnings: 0
+    activePlayers: 0,
+    governmentEarnings: 0,
+    outreachPot: 0,
   });
 
   // Initialize simulation state
@@ -101,8 +89,7 @@ const GameSimulation = () => {
   // Calculate platform earnings based on games played
   const calculatePlatformEarnings = (dailyGamesPlayed: number) => {
     const totalPlatformFee = dailyGamesPlayed * PLATFORM_FEE * 2;
-    const governmentShare = dailyGamesPlayed * governmentSharePerGame;
-    return totalPlatformFee - governmentShare;
+    return totalPlatformFee;
   };
 
   // Calculate winnings, charity contributions, and winners for each level
@@ -272,11 +259,12 @@ const GameSimulation = () => {
 
           <AdjustableChartComponent 
             data={gameState2.chartData} 
-            title="Adjustable Chart" 
-            cashOutStrategy={cashOutStrategy1}
-            setCashOutStrategy={setCashOutStrategy1}
-            adoptionRate={adoptionRate1}
-            setAdoptionRate={setAdoptionRate1}
+            title="Adjustable Simulation"
+            cashOutStrategy={cashOutStrategy2}
+            setCashOutStrategy={setCashOutStrategy2}
+            adoptionRate={adoptionRate2}
+            setAdoptionRate={setAdoptionRate2}
+            totalPlayers={gameState2.totalPlayers}
           />
         </div>
 
