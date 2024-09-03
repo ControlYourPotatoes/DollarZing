@@ -107,7 +107,7 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center p-1">
             <Select onValueChange={setCashOutStrategy} value={cashOutStrategy}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Cash-out strategy" />
@@ -118,7 +118,7 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
                 <SelectItem value="high">High Risk</SelectItem>
               </SelectContent>
             </Select>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col items-center space-x-2">
               <span>Adoption Rate:</span>
               <Slider
                 min={0}
@@ -126,7 +126,7 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
                 step={0.1}
                 value={[adoptionRate * 100]}
                 onValueChange={(value) => setAdoptionRate(value[0] / 100)}
-                className="w-[200px]"
+                className="w-[200px] m-2"
               />
               <span>{(adoptionRate * 100).toFixed(1)}%</span>
             </div>

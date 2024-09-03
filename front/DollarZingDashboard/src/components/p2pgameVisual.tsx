@@ -283,7 +283,7 @@ const GameSimulation = () => {
       <h2 className="text-2xl text-black font-bold mb-6">P2P Game Simulation Dashboard with {gameState.totalPlayers} users</h2>
       
       <div className="grid grid-cols-2 md:grid-cols-2 gap-10 p-6">
-        <div>
+        <div className=''>
           <InfoCard 
               gameState={gameState1} 
               isRunning={isRunning} 
@@ -296,13 +296,20 @@ const GameSimulation = () => {
             />        
         </div>
 
-        <div>
+        <div className='flex flex-col justify-center items-center'>
           <ChartComponent 
             data={gameState1.chartData} 
             title="Financial Distribution"  
           />
 
-          <AdjustableChartComponent 
+          
+        </div>
+
+
+        
+
+          <div>
+            <AdjustableChartComponent 
             data={gameState2.chartData} 
             title="Adjustable Simulation"
             cashOutStrategy={cashOutStrategy2}
@@ -311,19 +318,16 @@ const GameSimulation = () => {
             setAdoptionRate={setAdoptionRate2}
             totalPlayers={gameState2.totalPlayers}
           />
-        </div>
-
-        <div>
-          
-        </div>
-
-        <div className="p-6">
-          <ComparisonChartComponent 
+          </div>
+          <div className='flex items-center'>
+            <ComparisonChartComponent 
             data1={gameState1.chartData}
             data2={gameState2.chartData}
             title="Comparison Chart"
           />
-        </div>
+          </div>
+          
+        
 
         
 

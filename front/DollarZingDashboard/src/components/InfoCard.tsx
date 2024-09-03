@@ -142,9 +142,9 @@ const InfoCard: React.FC<InfoCardProps> = ({
         {/* Bottom: Slider and Button */}
         <div className="mt-4">
           <Slider
-            min={100}
-            max={10000}
-            step={25}
+            min={1000}
+            max={100000}
+            step={15}
             value={[gameState.totalPlayers]}
             onValueChange={handleSliderChange}
             className="mt-2"
