@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Slider } from "@/components/ui/slider"
 import { BarChart as BarChartIcon, LineChart as LineChartIcon, AreaChart as AreaChartIcon } from 'lucide-react'
+import { BarProps, LineProps, AreaProps } from 'recharts';
+import { CashOutStrategy } from '@/types/types';
 
 export interface ChartDataPoint {
     day: number;
@@ -20,7 +22,7 @@ export interface ChartDataPoint {
     data: ChartDataPoint[];
     title: string;
     cashOutStrategy: string;
-    setCashOutStrategy: (strategy: string) => void;
+    setCashOutStrategy: React.Dispatch<React.SetStateAction<CashOutStrategy>>;
     adoptionRate: number;
     setAdoptionRate: (rate: number) => void;
     totalPlayers: number;
@@ -51,9 +53,16 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
     { value: 'activePlayers', label: 'Active Players' },
   ];
 
+  type ChartComponentProps = BarProps | LineProps | AreaProps;
+
+
+  
   const renderChart = () => {
     const Chart = chartType === 'bar' ? BarChart : chartType === 'line' ? LineChart : AreaChart;
-    const DataComponent = chartType === 'bar' ? Bar : chartType === 'line' ? Line : Area;
+    const DataComponent = (chartType === 'bar' ? Bar : 
+      chartType === 'line' ? Line : 
+      Area) as React.ComponentType<ChartComponentProps>;
+
 
     return (
       <Chart data={data}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from "@/components/ui/slider";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { CashOutStrategy } from '@/types/types';
 
 
 
@@ -16,10 +17,25 @@ interface InfoCardProps {
     totalPlayers: number;
     governmentEarnings: number;
     activePlayers: number;
+    outreachPot: number;
   };
   isRunning: boolean;
   toggleSimulation: () => void;
   updateTotalPlayers: (players: number) => void;
+  cashOutStrategy: CashOutStrategy;
+  setCashOutStrategy: (strategy: CashOutStrategy) => void;
+  adoptionRate: number;
+  setAdoptionRate: (rate: number) => void;
+}
+
+interface CustomLabelProps {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+  index: number;
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
@@ -29,7 +45,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
   gameState, 
   isRunning, 
   toggleSimulation, 
-  updateTotalPlayers 
+  updateTotalPlayers,
 }) => {
 
   const handleSliderChange = (value: number[]) => {
@@ -46,7 +62,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
   ];
 
   const RADIAN = Math.PI / 180;
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: CustomLabelProps) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -71,12 +87,19 @@ const InfoCard: React.FC<InfoCardProps> = ({
           fill="#8884d8"
           dataKey="value"
         >
-          {distributionData.map((entry, index) => (
+          {distributionData.map((_, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
 
-        <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+        <Tooltip 
+          formatter={(value: number | string) => {
+            if (typeof value === 'number') {
+              return `$${value.toFixed(2)}`;
+            }
+            return value;
+          }}
+        />
         <Legend layout="vertical" wrapperStyle={{ bottom: -15, right: 30, backgroundColor: '#f5f5f5', border: '1px solid #d5d5d5', borderRadius: 3, padding: 5}} />
       </PieChart>
     </ResponsiveContainer>

@@ -4,6 +4,8 @@ import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, Cartesia
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { BarChart as BarChartIcon, LineChart as LineChartIcon, AreaChart as AreaChartIcon } from 'lucide-react'
+import { BarProps, LineProps, AreaProps } from 'recharts';
+
 
 export interface ChartDataPoint {
   day: number;
@@ -37,9 +39,19 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ data, title }) => {
     { value: 'activePlayers', label: 'Active Players' },
   ];
 
+  type ChartComponentProps = BarProps | LineProps | AreaProps;
+
+
+
+
   const renderChart = () => {
-    const Chart = chartType === 'bar' ? BarChart : chartType === 'line' ? LineChart : AreaChart;
-    const DataComponent = chartType === 'bar' ? Bar : chartType === 'line' ? Line : Area;
+    const Chart: React.ComponentType<any> = 
+      chartType === 'bar' ? BarChart : 
+      chartType === 'line' ? LineChart : 
+      AreaChart;
+      const DataComponent = (chartType === 'bar' ? Bar : 
+        chartType === 'line' ? Line : 
+        Area) as React.ComponentType<ChartComponentProps>;
 
     return (
       <Chart data={data}>
@@ -49,17 +61,22 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ data, title }) => {
         <Tooltip />
         <Legend />
         {selectedMetric === 'playerLevels' 
-          ? LEVELS.map((level, index) => (
-              <DataComponent
-                key={level}
-                type="monotone"
-                dataKey={`$${level}`}
-                stackId="1"
-                stroke={COLORS[index % COLORS.length]}
-                fill={COLORS[index % COLORS.length]}
-              />
-            ))
-          : <DataComponent type="monotone" dataKey={selectedMetric} fill="#8884d8" stroke="#8884d8" />
+        ? LEVELS.map((level, index) => (
+            <DataComponent
+              key={level}
+              type="monotone"
+              dataKey={`$${level}`}
+              stackId="1"
+              stroke={COLORS[index % COLORS.length]}
+              fill={COLORS[index % COLORS.length]}
+            />
+          ))
+        : <DataComponent 
+            type="monotone" 
+            dataKey={selectedMetric} 
+            fill="#8884d8" 
+            stroke="#8884d8" 
+          />
         }
       </Chart>
     );
