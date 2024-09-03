@@ -145,39 +145,86 @@ const GameSimulation = () => {
 
     const newDay = prevState.day + 1;
     
-    // Simulate user growth based on adoption rate
-    const newTotalPlayers = Math.floor(prevState.totalPlayers * (1 + adoptionRate));
+    // Simulate user growth, and Calculate new total players and active players
+    const activePlayerPercentage = 0.2 + (0.6 * (1 - Math.exp(-newDay / 10))); // Starts at 20%, asymptotically approaches 80%
+    const activePlayers = Math.floor(prevState.totalPlayers * activePlayerPercentage * (1 + adoptionRate));
     
-    const activePlayers = calculateActivePlayers(newTotalPlayers);
-    const dailyGamesPlayed = calculateDailyGamesPlayed(activePlayers);
-    const dailyPlatformEarnings = calculatePlatformEarnings(dailyGamesPlayed);
-    const dailyGovernmentEarnings = calculateGovernmentEarnings(dailyGamesPlayed);
+    // Calculate daily games played using BILLS_PER_DAY
+    const dailyGamesPlayed = Math.floor(activePlayers * BILLS_PER_DAY / 2);
     
-    const { levelData, dailyWinnings, dailyCharity, dailyJackpotWinners } = calculateLevelData(dailyGamesPlayed, cashOutStrategy);
-  
-    const newChartDataPoint = {
-      day: newDay,
-      charityContributions: dailyCharity,
-      platformEarnings: dailyPlatformEarnings,
-      jackpotWinners: dailyJackpotWinners,
-      gamesPlayed: dailyGamesPlayed,
-      totalPlayers: newTotalPlayers,
-      ...levelData
+    // Initialize daily totals
+    let dailyCharity = 0;
+    let dailyPlatformEarnings = 0;
+    let dailyGovernmentEarnings = 0;
+    let dailyOutreachPot = 0;
+    let dailyPlayerWinnings = 0;
+    let dailyJackpotWinners = 0;
+    const levelData: Record<string, number> = {};
+
+    // Function to get cash-out probability based on strategy and level
+    const getCashOutProbability = (level: number, strategy: CashOutStrategy): number => {
+      switch (strategy) {
+        case 'low':
+          return Math.max(0.9 - (level / 100), 0.1);
+        case 'average':
+          return 0.5;
+        case 'high':
+          return Math.min(0.1 + (level / 100), 0.9);
+      }
     };
-  
-    return {
-      day: newDay,
-      totalCharity: prevState.totalCharity + dailyCharity,
-      chartData: [...prevState.chartData, newChartDataPoint],
-      jackpotWinners: prevState.jackpotWinners + dailyJackpotWinners,
-      totalGamesPlayed: prevState.totalGamesPlayed + dailyGamesPlayed,
-      platformEarnings: prevState.platformEarnings + dailyPlatformEarnings,
-      governmentEarnings: prevState.governmentEarnings + dailyGovernmentEarnings,
-      totalWinnings: prevState.totalWinnings + dailyWinnings,
-      totalPlayers: newTotalPlayers
-    };
-  }, []);
-  
+    // Simulate games for each level
+  LEVELS.forEach((level, index) => {
+    const gamesAtLevel = Math.floor(dailyGamesPlayed / Math.pow(2, index));
+    const winnersAtLevel = Math.floor(gamesAtLevel / 2);
+    const cashOutProbability = getCashOutProbability(level, cashOutStrategy);
+    const cashOutWinners = Math.floor(winnersAtLevel * cashOutProbability);
+    const totalWinningsAtLevel = cashOutWinners * level * 2;
+
+    // Distribute winnings
+    dailyPlayerWinnings += totalWinningsAtLevel * PLAYER_SHARE;
+    dailyGovernmentEarnings += totalWinningsAtLevel * GOVERNMENT_SHARE;
+    dailyCharity += totalWinningsAtLevel * CHARITY_SHARE;
+
+    // Platform earnings and outreach pot
+    dailyPlatformEarnings += gamesAtLevel * PLATFORM_FEE;
+    dailyOutreachPot += gamesAtLevel * OUTREACH_POT_PER_GAME;
+
+    if (level === 512) {
+      dailyJackpotWinners += cashOutWinners;
+    }
+
+    levelData[`$${level}`] = gamesAtLevel;
+  });
+
+  const newChartDataPoint: ChartDataPoint = {
+    day: newDay,
+    charityContributions: dailyCharity,
+    platformEarnings: dailyPlatformEarnings,
+    jackpotWinners: dailyJackpotWinners,
+    gamesPlayed: dailyGamesPlayed,
+    totalPlayers: prevState.totalPlayers,
+    activePlayers,
+    governmentEarnings: dailyGovernmentEarnings,
+    outreachPot: dailyOutreachPot,
+    playerWinnings: dailyPlayerWinnings,
+    ...levelData
+  };
+
+  return {
+    day: newDay,
+    totalCharity: prevState.totalCharity + dailyCharity,
+    chartData: [...prevState.chartData, newChartDataPoint],
+    jackpotWinners: prevState.jackpotWinners + dailyJackpotWinners,
+    totalGamesPlayed: prevState.totalGamesPlayed + dailyGamesPlayed,
+    platformEarnings: prevState.platformEarnings + dailyPlatformEarnings,
+    governmentEarnings: prevState.governmentEarnings + dailyGovernmentEarnings,
+    outreachPot: (prevState.outreachPot || 0) + dailyOutreachPot,
+    totalWinnings: prevState.totalWinnings + dailyPlayerWinnings,
+    totalPlayers: prevState.totalPlayers,
+    activePlayers
+  };
+}, []);
+
 
   // Function to update the number of total players based on slider input
   const updateTotalPlayers = (newPlayerCount: number) => {
