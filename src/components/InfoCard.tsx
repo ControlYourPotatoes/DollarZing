@@ -56,7 +56,6 @@ const InfoCard: React.FC<InfoCardProps> = ({
     { name: 'Players', value: gameState.totalWinnings },
     { name: 'Government', value: gameState.governmentEarnings },
     { name: 'Charity', value: gameState.totalCharity },
-    { name: 'Platform', value: gameState.platformEarnings }
   ];
 
   const RADIAN = Math.PI / 180;

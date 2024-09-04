@@ -183,7 +183,7 @@ const GameSimulation = () => {
     <div className="flex items-center justify-between mb-6">
       {/* Image */}
       <img 
-        src="/src/assets/small_brand-remove.png" 
+        src="/small_brand-remove.png" 
         alt="Logo" 
         className="h-16 w-auto object-contain"
         style={{ maxWidth: '480px' }}
