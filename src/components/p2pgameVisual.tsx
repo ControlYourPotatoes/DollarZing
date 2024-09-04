@@ -79,18 +79,23 @@ const GameSimulation = () => {
     
   // Calculate new active players based on adoption rate
   let newActivePlayers;
-  if (adoptionRate === 0 || adoptionRate === undefined) {
-    // Natural growth when no adoption rate is specified
-    const naturalGrowthRate = 0.1; // 0.1% daily growth, adjust as needed
-    newActivePlayers = Math.floor(prevState.activePlayers * (1 + naturalGrowthRate));
-  } else {
-    // Adoption rate growth
-    const adoptedPanamaUsers = Math.floor(PANAMA_LOTTERY_USERS * adoptionRate);
-    newActivePlayers = Math.min(
-      PANAMA_LOTTERY_USERS,
-      prevState.activePlayers + adoptedPanamaUsers
-    );
-  }
+    if (adoptionRate === 0 || adoptionRate === undefined) {
+      // Natural growth with randomness and overall upward trend
+      const baseGrowthRate = 0.01; // 1% daily base growth
+      const randomFactor = (Math.random() + 0.5) * 0.05; // Random factor between 0.5% and 1.0%
+      const timeFactorb = Math.log(newDay + 1) / 10; // Logarithmic time factor for gradual slowdown
+      const effectiveGrowthRate = (baseGrowthRate + randomFactor) * (1 + timeFactorb);
+      newActivePlayers = Math.floor(prevState.activePlayers * (1 + effectiveGrowthRate));
+    } else {
+      // Adoption rate growth with randomness
+      const baseAdoptedUsers = Math.floor(PANAMA_LOTTERY_USERS * adoptionRate);
+      const randomFactor = Math.floor(Math.random() * baseAdoptedUsers * 0.2) - Math.floor(baseAdoptedUsers * 0.1);
+      const adoptedPanamaUsers = baseAdoptedUsers + randomFactor;
+      newActivePlayers = Math.min(
+        PANAMA_LOTTERY_USERS,
+        prevState.activePlayers + adoptedPanamaUsers
+      );
+    }
 
     console.log(`Day ${newDay}: ${adoptionRate === 0 ? 'Natural' : 'Adoption'} growth - Total players: ${prevState.totalPlayers}, Active players: ${newActivePlayers}`);
     // Calculate daily games played using BILLS_PER_DAY
