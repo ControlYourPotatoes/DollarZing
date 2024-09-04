@@ -42,7 +42,7 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
   setAdoptionRate
 }) => {
   const [chartType, setChartType] = useState<ChartType>('bar');
-  const [selectedMetric, setSelectedMetric] = useState<string>('platformEarnings');
+  const [selectedMetric, setSelectedMetric] = useState<string>('activePlayers');
 
   const metricOptions = [
     { value: 'playerLevels', label: 'Player Levels Distribution' },
@@ -143,8 +143,8 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
               <span>Adoption Rate:</span>
               <Slider
                 min={0}
-                max={10}
-                step={0.1}
+                max={1}
+                step={0.01}
                 value={[adoptionRate * 100]}
                 onValueChange={(value) => setAdoptionRate(value[0] / 100)}
                 className="w-[200px] m-2"

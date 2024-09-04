@@ -13,7 +13,7 @@ const PLAYER_SHARE = 0.40;
 const OUTREACH_POT_PER_GAME = 0.01;
 
 const PANAMA_LOTTERY_USERS = 1000000; // Assuming 1 million users
-const BILLS_PER_DAY = 5;
+
 
 // const TOTAL_DAYS = 30;
 
@@ -53,7 +53,7 @@ const GameSimulation = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [cashOutStrategy1, setCashOutStrategy1] = useState<CashOutStrategy>('average');
   const [cashOutStrategy2, setCashOutStrategy2] = useState<CashOutStrategy>('average');
-  const [adoptionRate2, setAdoptionRate2] = useState(0.01);
+  const [adoptionRate2, setAdoptionRate2] = useState(0.001);
 
   const resetSimulation = useCallback(() => {
     setGameState1(initialGameState);
@@ -61,8 +61,26 @@ const GameSimulation = () => {
     setIsRunning(false);
     setCashOutStrategy1('average');
     setCashOutStrategy2('high');
-    setAdoptionRate2(0.01);
+    setAdoptionRate2(0.001);
   }, []);
+
+  const getBillsPerDay = (strategy: CashOutStrategy): number => {
+    const getRandomInt = (min: number, max: number): number => {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+  
+    switch (strategy) {
+      case 'low':
+        return getRandomInt(1, 4);
+      case 'average':
+        return getRandomInt(5, 7);
+      case 'high':
+        return getRandomInt(8, 12);
+      default:
+        return getRandomInt(5, 7); // Default to average if strategy is not recognized
+    }
+  };
+  
 
 
   // Main function to simulate a single day
@@ -97,9 +115,12 @@ const GameSimulation = () => {
       );
     }
 
-    console.log(`Day ${newDay}: ${adoptionRate === 0 ? 'Natural' : 'Adoption'} growth - Total players: ${prevState.totalPlayers}, Active players: ${newActivePlayers}`);
-    // Calculate daily games played using BILLS_PER_DAY
-    const dailyGamesPlayed = Math.floor(newActivePlayers * BILLS_PER_DAY / 2);
+    console.log(`Day ${newDay}: ${adoptionRate === 0 ? 'Natural' : 'Adoption'} growth - Total players: ${prevState.totalPlayers}, Active players: ${newActivePlayers}, Cashout strategy: ${cashOutStrategy}`, );
+    
+    
+    // Calculate daily games played using cash out strategy
+    const billsPerDay = getBillsPerDay(cashOutStrategy);
+    const dailyGamesPlayed = Math.floor(newActivePlayers * billsPerDay / 2);
     
     // Initialize daily totals
     let dailyCharity = 0;
