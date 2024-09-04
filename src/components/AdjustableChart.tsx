@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -59,6 +59,11 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
     setCashOutStrategy(value as CashOutStrategy);
   };
 
+  const currentActivePlayers = useMemo(() => {
+    const lastDataPoint = data[data.length - 1];
+    return lastDataPoint ? lastDataPoint.activePlayers : 0;
+  }, [data]);
+
   
   const renderChart = () => {
     const Chart = chartType === 'bar' ? BarChart : chartType === 'line' ? LineChart : AreaChart;
@@ -95,6 +100,10 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
+        <div className="mt-2 flex justify-between items-center">
+          <p className="text-sm text-gray-500">Active Players</p>
+          <p className="text-lg font-bold text-blue-500">{currentActivePlayers.toLocaleString()}</p>
+        </div>
         <div className="flex flex-col space-y-4">
           <div className="flex justify-between items-center">
             <ToggleGroup type="single" value={chartType} onValueChange={(value: ChartType) => value && setChartType(value)}>
