@@ -29,8 +29,8 @@ const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'];
 
 const ComparisonChartComponent: React.FC<ComparisonChartComponentProps> = ({ data1, data2, title }) => {
-  const [chartType, setChartType] = useState<ChartType>('line');
-  const [selectedMetric, setSelectedMetric] = useState<string>('platformEarnings');
+  const [chartType, setChartType] = useState<ChartType>('bar');
+  const [selectedMetric, setSelectedMetric] = useState<string>('charityContributions');
 
   const metricOptions = [
     { value: 'playerLevels', label: 'Player Levels Distribution' },
