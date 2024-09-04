@@ -13,7 +13,7 @@ export interface ChartDataPoint {
   platformEarnings: number;
   jackpotWinners: number;
   gamesPlayed: number;
-  totalPlayers: number;
+  activePlayers: number;
   [key: string]: number;
 }
 
@@ -38,7 +38,7 @@ const ComparisonChartComponent: React.FC<ComparisonChartComponentProps> = ({ dat
     { value: 'charityContributions', label: 'Charity Contributions' },
     { value: 'jackpotWinners', label: 'Jackpot Winners' },
     { value: 'gamesPlayed', label: 'Games Played' },
-    { value: 'totalPlayers', label: 'Total Players' },
+    { value: 'activePlayers', label: 'Active Players' },
   ];
 
   type ChartComponentProps = BarProps | LineProps | AreaProps;

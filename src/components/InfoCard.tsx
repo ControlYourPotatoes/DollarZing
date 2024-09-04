@@ -24,6 +24,7 @@ interface InfoCardProps {
   updateTotalPlayers: (players: number) => void;
   cashOutStrategy: CashOutStrategy;
   setCashOutStrategy: (strategy: CashOutStrategy) => void;
+  resetSimulation: () => void;
 }
 
 interface CustomLabelProps {
@@ -44,6 +45,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
   isRunning, 
   toggleSimulation, 
   updateTotalPlayers,
+  resetSimulation
 }) => {
 
   const handleSliderChange = (value: number[]) => {
@@ -97,10 +99,12 @@ const InfoCard: React.FC<InfoCardProps> = ({
             return value;
           }}
         />
-        <Legend layout="vertical" wrapperStyle={{ bottom: -15, right: 30, backgroundColor: '#f5f5f5', border: '1px solid #d5d5d5', borderRadius: 3, padding: 5}} />
+        <Legend layout="vertical" wrapperStyle={{ bottom: -15, right: 120, backgroundColor: '#f5f5f5', border: '1px solid #d5d5d5', borderRadius: 3, padding: 5}} />
       </PieChart>
     </ResponsiveContainer>
   );
+
+
 
   return (
     <Card className="bg-blue-100 p-6 rounded-lg shadow-lg dark:bg-surface-dark dark:text-white">
@@ -153,8 +157,8 @@ const InfoCard: React.FC<InfoCardProps> = ({
           </div>
 
           {/* Right side: Pie Chart */}
-          <div className="flex-1 pl-4">
-            <p className="text-sm text-gray-500 mb-2">Distribution</p>
+          <div className="flex-1">
+            <p className="text-sm text-gray-500 mb-2 pl-20">Distribution</p>
             {renderPieChart()}
           </div>
         </div>
@@ -171,7 +175,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
           />
         </div>
         <div className="mt-4 flex justify-center">
-          <button
+        <button
             onClick={toggleSimulation}
             className={`px-4 py-2 rounded-md text-white ${
               isRunning
@@ -180,6 +184,12 @@ const InfoCard: React.FC<InfoCardProps> = ({
             }`}
           >
             {isRunning ? 'Stop Simulation' : 'Start Simulation'}
+          </button>
+          <button
+            onClick={resetSimulation}
+            className="px-4 py-2 rounded-md text-white bg-blue-500 dark:bg-blue-700"
+          >
+            Reset Simulation
           </button>
         </div>
       </CardContent>

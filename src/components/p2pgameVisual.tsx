@@ -55,6 +55,15 @@ const GameSimulation = () => {
   const [cashOutStrategy2, setCashOutStrategy2] = useState<CashOutStrategy>('average');
   const [adoptionRate2, setAdoptionRate2] = useState(0.01);
 
+  const resetSimulation = useCallback(() => {
+    setGameState1(initialGameState);
+    setGameState2(initialGameState);
+    setIsRunning(false);
+    setCashOutStrategy1('average');
+    setCashOutStrategy2('high');
+    setAdoptionRate2(0.01);
+  }, []);
+
 
   // Main function to simulate a single day
   const simulateDay: SimulateDayFunction = useCallback((
@@ -62,6 +71,8 @@ const GameSimulation = () => {
     cashOutStrategy: CashOutStrategy,
     adoptionRate: number
   ): GameState => {
+
+    // Check if the simulation has reached the end
     if (prevState.day >= 30) return prevState;
 
     const newDay = prevState.day + 1;
@@ -203,6 +214,7 @@ const GameSimulation = () => {
               toggleSimulation={() => setIsRunning(!isRunning)}
               cashOutStrategy={cashOutStrategy1}
               setCashOutStrategy={setCashOutStrategy1}
+              resetSimulation={resetSimulation}
             />        
         </div>
 
