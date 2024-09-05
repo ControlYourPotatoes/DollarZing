@@ -40,7 +40,7 @@ const logDetailedSimulation = (
     }
   };
 
-  LEVELS.forEach((level, index) => {
+  LEVELS.forEach((level, _) => {
     const gamesAtLevel = levelData[`$${level}`] || 0;
     totalCalculatedGames += gamesAtLevel;
     const winnersAtLevel = Math.floor(gamesAtLevel / 2);
