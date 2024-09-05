@@ -109,8 +109,8 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
           <p className="text-lg font-bold text-blue-500">{currentActivePlayers.toLocaleString()}</p>
         </div>
         <div className="mt-2 flex justify-between items-center">
-          <p className="text-sm text-gray-500">Games Played</p>
-          <p className="text-lg font-bold text-blue-500">{(totalGamesPlayed * 2).toLocaleString()}</p>
+          <p className="text-sm text-gray-500">Total Games Played</p>
+          <p className="text-lg font-bold text-green-500">{(totalGamesPlayed * 2).toLocaleString()}</p>
         </div>
 
         <div className="flex flex-col space-y-4">
