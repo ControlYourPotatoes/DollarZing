@@ -73,7 +73,7 @@ const GameSimulation = () => {
       case 'low':
         return getRandomInt(1, 4);
       case 'average':
-        return 1;
+        return getRandomInt(5, 7);
       case 'high':
         return getRandomInt(8, 12);
       default:
