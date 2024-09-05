@@ -65,7 +65,12 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
   }, [data]);
 
   const totalGamesPlayed = useMemo(() => {
-    return data.reduce((acc, item) => acc + item.gamesPlayed, 0);
+    return data.reduce((acc, item) => {
+      const gamesAtAllLevels = LEVELS.reduce((levelAcc, level) => {
+        return levelAcc + (item[`$${level}`] || 0);
+      }, 0);
+      return acc + gamesAtAllLevels;
+    }, 0);
   }, [data]);
 
   
