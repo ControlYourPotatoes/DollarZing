@@ -73,7 +73,7 @@ const GameSimulation = () => {
       case 'low':
         return getRandomInt(1, 4);
       case 'average':
-        return getRandomInt(5, 7);
+        return 1;
       case 'high':
         return getRandomInt(8, 12);
       default:
@@ -123,6 +123,7 @@ const GameSimulation = () => {
     const dailyGamesPlayed = Math.floor(newActivePlayers * billsPerDay / 2);
     
     // Initialize daily totals
+    let totalDailyGames = 0;
     let dailyCharity = 0;
     let dailyPlatformEarnings = 0;
     let dailyGovernmentEarnings = 0;
@@ -145,6 +146,7 @@ const GameSimulation = () => {
     // Simulate games for each level
   LEVELS.forEach((level, index) => {
     const gamesAtLevel = Math.floor(dailyGamesPlayed / Math.pow(2, index));
+    totalDailyGames += gamesAtLevel;
     const winnersAtLevel = Math.floor(gamesAtLevel / 2);
     const cashOutProbability = getCashOutProbability(level, cashOutStrategy);
     const cashOutWinners = Math.floor(winnersAtLevel * cashOutProbability);
@@ -171,7 +173,7 @@ const GameSimulation = () => {
     charityContributions: dailyCharity,
     platformEarnings: dailyPlatformEarnings,
     jackpotWinners: dailyJackpotWinners,
-    gamesPlayed: dailyGamesPlayed,
+    gamesPlayed: totalDailyGames,
     totalPlayers: prevState.totalPlayers,
     activePlayers: newActivePlayers,
     governmentEarnings: dailyGovernmentEarnings,
@@ -185,7 +187,7 @@ const GameSimulation = () => {
     totalCharity: prevState.totalCharity + dailyCharity,
     chartData: [...prevState.chartData, newChartDataPoint],
     jackpotWinners: prevState.jackpotWinners + dailyJackpotWinners,
-    totalGamesPlayed: prevState.totalGamesPlayed + dailyGamesPlayed,
+    totalGamesPlayed: prevState.totalGamesPlayed + totalDailyGames,
     platformEarnings: prevState.platformEarnings + dailyPlatformEarnings,
     governmentEarnings: prevState.governmentEarnings + dailyGovernmentEarnings,
     outreachPot: (prevState.outreachPot || 0) + dailyOutreachPot,

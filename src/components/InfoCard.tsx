@@ -126,7 +126,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
             </div>
             <div className="mt-2">
               <p className="text-sm text-gray-500">Total Games Played</p>
-              <p className="text-lg font-bold text-gray-900">{(gameState.totalGamesPlayed * 2)}</p>
+              <p className="text-lg font-bold text-gray-900">{gameState.totalGamesPlayed}</p>
             </div>
             <div className="mt-2">
               <p className="text-sm text-gray-500">Platform Earnings</p>
