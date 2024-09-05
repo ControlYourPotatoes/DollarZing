@@ -64,11 +64,6 @@ const AdjustableChartComponent: React.FC<AdjustableChartComponentProps> = ({
     return lastDataPoint ? lastDataPoint.activePlayers : 0;
   }, [data]);
 
-  const currentGamesPlayed = useMemo(() => {
-    const lastDataPoint = data[data.length - 1];
-    return lastDataPoint ? lastDataPoint.gamesPlayed : 0;
-  }, [data]);
-
   const totalGamesPlayed = useMemo(() => {
     return data.reduce((acc, item) => acc + item.gamesPlayed, 0);
   }, [data]);
