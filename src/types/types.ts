@@ -14,6 +14,16 @@ export interface ChartDataPoint {
   [key: string]: number; // For level data
 }
 
+export interface WeeklyStats {
+  week: number;
+  totalCharity: number;
+  totalPlatformEarnings: number;
+  totalJackpotWinners: number;
+  totalGamesPlayed: number;
+  activePlayersGrowth: number;
+  averageDailyGames: number;
+}
+
 export interface GameState {
   day: number;
   totalCharity: number;
@@ -26,9 +36,11 @@ export interface GameState {
   totalWinnings: number;
   totalPlayers: number;
   activePlayers: number;
+  weeklyStats: WeeklyStats[];
 }
 
 export interface SimulationProps {
   cashOutStrategy: CashOutStrategy;
   adoptionRate: number;
 }
+

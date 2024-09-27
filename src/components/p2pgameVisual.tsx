@@ -77,7 +77,8 @@ const initialGameState: GameState = {
   totalPlayers: 1000,
   activePlayers: 1000,
   outreachPot: 0,
-  governmentEarnings: 0
+  governmentEarnings: 0,
+  weeklyStats: []
 };
 
 // Type for the simulateDay function
