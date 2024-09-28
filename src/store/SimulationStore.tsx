@@ -230,7 +230,7 @@ const useSimulationStore = create<SimulationStore>()((set, get) => ({
     const totalMoneyInSystem = totalBet + dailyPlatformEarnings;
     const totalDistributed = dailyCharity + dailyGovernmentEarnings + dailyPlayerWinnings;
 
-    
+
 
     const newChartDataPoint: ChartDataPoint = {
       day: newDay,
@@ -246,20 +246,20 @@ const useSimulationStore = create<SimulationStore>()((set, get) => ({
       ...levelData
     };
 
-    console.log(`Day ${newDay} Simulation Results:`, {
-      activePlayers: newActivePlayers,
-      totalGames: totalDailyGames,
-      totalBet,
-      totalMoneyInSystem,
-      platformEarnings: dailyPlatformEarnings,
-      charity: dailyCharity,
-      governmentEarnings: dailyGovernmentEarnings,
-      playerWinnings: dailyPlayerWinnings,
-      jackpotWinners: dailyJackpotWinners,
-      remainingInPot: remainingBets,
-      totalDistributed,
-      outreachPot: dailyOutreachPot,
-    });
+    // console.log(`Day ${newDay} Simulation Results:`, {
+    //   activePlayers: newActivePlayers,
+    //   totalGames: totalDailyGames,
+    //   totalBet,
+    //   totalMoneyInSystem,
+    //   platformEarnings: dailyPlatformEarnings,
+    //   charity: dailyCharity,
+    //   governmentEarnings: dailyGovernmentEarnings,
+    //   playerWinnings: dailyPlayerWinnings,
+    //   jackpotWinners: dailyJackpotWinners,
+    //   remainingInPot: remainingBets,
+    //   totalDistributed,
+    //   outreachPot: dailyOutreachPot,
+    // });
 
     const newChartData = [...prevState.chartData, newChartDataPoint];
     const newWeeklyStats = get().calculateWeeklyStats(newChartData);
