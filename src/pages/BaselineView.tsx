@@ -62,6 +62,11 @@ const BaselineView: React.FC = () => {
             value={formatCurrency(gameState1.platformEarnings)}
             previousValue={gameState1.chartData[gameState1.chartData.length - 2]?.platformEarnings}
           />
+          <KeyMetric
+            label="Government Earnings"
+            value={formatCurrency(gameState1.governmentEarnings)}
+            previousValue={gameState1.chartData[gameState1.chartData.length - 2]?.governmentEarnings}
+          />
         </div>
         
         <Tabs defaultValue="overview">
@@ -97,7 +102,11 @@ const BaselineView: React.FC = () => {
                 <Bar dataKey="$4" fill="#ffc658" />
                 <Bar dataKey="$8" fill="#ff8042" />
                 <Bar dataKey="$16" fill="#a4de6c" />
-                {/* Add more bars for other levels as needed */}
+                <Bar dataKey="$32" fill="#8884d8" />
+                <Bar dataKey="$64" fill="#82ca9d" />
+                <Bar dataKey="$128" fill="#ffc658" />
+                <Bar dataKey="$256" fill="#ff8042" />
+                <Bar dataKey="$512" fill="#a4de6c" />
               </BarChart>
             </ResponsiveContainer>
           </TabsContent>
