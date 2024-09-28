@@ -5,6 +5,7 @@ import BaselineView from './BaselineView';
 import AdjustedView from './AdjustedView';
 import ComparisonView from './ComparisonView';
 import useSimulationStore from '../store/SimulationStore';
+import SimulationEngine from '@/components/SimulationEngine';
 
 type View = 'baseline' | 'adjusted' | 'comparison';
 
@@ -40,6 +41,7 @@ const SimulationPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar currentView={currentView} setCurrentView={setCurrentView} />
+      <SimulationEngine />
       <div className="p-4 w-full max-w-custom mx-auto bg-white rounded-xl shadow-md overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div

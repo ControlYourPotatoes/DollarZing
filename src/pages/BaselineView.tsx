@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{ useEffect} from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -11,6 +11,10 @@ const BaselineView: React.FC = () => {
 
   const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
   const formatCurrency = (num: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+
+  useEffect(() => {
+    console.log('BaselineView: gameState1 updated', gameState1);
+  }, [gameState1]);
 
   const KeyMetric = ({ label, value, previousValue }) => (
     <motion.div
