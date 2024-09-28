@@ -88,7 +88,8 @@ const useSimulationStore = create<SimulationStore>()((set, get) => ({
     isRunning: false,
     cashOutStrategy1: 'average',
     cashOutStrategy2: 'average',
-    adoptionRate2: 0.001
+    adoptionRate2: 0.001,
+    weeklyStats: [],
   }),
 
 
