@@ -82,7 +82,7 @@ const BaselineView: React.FC = () => {
           <KeyMetric 
             label="Total Charity" 
             value={gameState1.totalCharity}
-            previousValue={getPreviousValue('totalCharity')}
+            previousValue={getPreviousValue('charityContributions')}
             metricType="currency"
           />
           <KeyMetric 
@@ -100,7 +100,7 @@ const BaselineView: React.FC = () => {
           <KeyMetric 
             label="Total Games" 
             value={gameState1.totalGamesPlayed}
-            previousValue={getPreviousValue('totalGamesPlayed')}
+            previousValue={getPreviousValue('gamesPlayed')}
             metricType="number"
           />
         </div>
