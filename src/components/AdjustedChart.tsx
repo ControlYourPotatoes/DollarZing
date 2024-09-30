@@ -2,17 +2,18 @@ import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card"
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
 import { BarChart as BarChartIcon, LineChart as LineChartIcon, AreaChart as AreaChartIcon } from 'lucide-react'
 import useSimulationStore from '../store/SimulationStore';
 
-interface BaseChartProps {
+interface AdjustedChartProps {
   selectedTab: string;
 }
 
-
-const BaseChart: React.FC<BaseChartProps> = ({ selectedTab }) => {
+const AdjustedChart: React.FC<AdjustedChartProps> = ({ selectedTab }) => {
   const [chartType, setChartType] = useState<'bar' | 'line' | 'area'>('line');
-  const { gameState1 } = useSimulationStore();
+  const { gameState2, setCashOutStrategy2, setAdoptionRate2, cashOutStrategy2, adoptionRate2 } = useSimulationStore();
 
   const CustomTooltip = ({ active, payload, label, tab }) => {
     if (active && payload && payload.length) {
@@ -26,19 +27,19 @@ const BaseChart: React.FC<BaseChartProps> = ({ selectedTab }) => {
             </div>
           );
         case 'players':
-            const data = payload[0].payload;
-            return (
-              <div className="custom-tooltip bg-white p-4 border border-green-200 rounded shadow-md ml-10">
-                <p className="label font-bold">{`Level: $${data.level}`}</p>
-                <p className="text-purple-600">{`Games Played: ${data.gamesAtLevel}`}</p>
-                <p className="text-green-600">{`Cash Out Players: ${data.cashOutPlayers}`}</p>
-                <p className="text-red-600">{`Losing Players: ${data.losingPlayers}`}</p>
-                <hr className="border-t-2 border-green-600 my-2" />
-                <p className="text-blue-600">{`Platform Earnings: $${data.platformEarnings.toFixed(2)}`}</p>
-                <p className="text-green-500">{`Charity Contribution: $${data.charityContribution.toFixed(2)}`}</p>
-                <p className="text-orange-400">{`Government Earnings: $${data.governmentEarnings.toFixed(2)}`}</p>
-              </div>
-            );
+          const data = payload[0].payload;
+          return (
+            <div className="custom-tooltip bg-white p-4 border border-green-200 rounded shadow-md ml-10">
+              <p className="label font-bold">{`Level: $${data.level}`}</p>
+              <p className="text-purple-600">{`Games Played: ${data.gamesAtLevel}`}</p>
+              <p className="text-green-600">{`Cash Out Players: ${data.cashOutPlayers}`}</p>
+              <p className="text-red-600">{`Losing Players: ${data.losingPlayers}`}</p>
+              <hr className="border-t-2 border-green-600 my-2" />
+              <p className="text-blue-600">{`Platform Earnings: $${data.platformEarnings.toFixed(2)}`}</p>
+              <p className="text-green-500">{`Charity Contribution: $${data.charityContribution.toFixed(2)}`}</p>
+              <p className="text-orange-400">{`Government Earnings: $${data.governmentEarnings.toFixed(2)}`}</p>
+            </div>
+          );
         case 'financials':
           return (
             <div className="custom-tooltip bg-white p-4 border border-gray-200 rounded shadow-md">
@@ -60,7 +61,7 @@ const BaseChart: React.FC<BaseChartProps> = ({ selectedTab }) => {
     const DataComponent = chartType === 'bar' ? Bar : Line;
 
     return (
-      <ChartComponent data={gameState1.chartData.slice(-30)}>
+      <ChartComponent data={gameState2.chartData.slice(-30)}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="day" />
         <YAxis yAxisId="left" />
@@ -75,14 +76,14 @@ const BaseChart: React.FC<BaseChartProps> = ({ selectedTab }) => {
 
   const renderPlayersChart = () => {
     return (
-      <BarChart data={gameState1.currentDayLevelData}>
+      <BarChart data={gameState2.currentDayLevelData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="level" tickFormatter={(value) => `$${value}`} />
         <YAxis />
         <Tooltip content={<CustomTooltip tab="players" />} />
         <Legend />
-        <Bar dataKey="charityContribution"  fill="#0ca80c"  name="Charity" />
-        <Bar dataKey="governmentEarnings" fill="#ffc658"  name="Government" />
+        <Bar dataKey="charityContribution" fill="#0ca80c" name="Charity" />
+        <Bar dataKey="governmentEarnings" fill="#ffc658" name="Government" />
         <Bar dataKey="platformEarnings" fill="#2563eb" name="Platform" />
       </BarChart>
     );
@@ -93,7 +94,7 @@ const BaseChart: React.FC<BaseChartProps> = ({ selectedTab }) => {
     const DataComponent = chartType === 'bar' ? Bar : chartType === 'line' ? Line : Area;
 
     return (
-      <ChartComponent data={gameState1.chartData.slice(-30)}>
+      <ChartComponent data={gameState2.chartData.slice(-30)}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="day" />
         <YAxis />
@@ -119,31 +120,45 @@ const BaseChart: React.FC<BaseChartProps> = ({ selectedTab }) => {
     }
   };
 
-  const renderChartTypeToggle = () => {
-    if (selectedTab === 'players') return null;
-
-    const options = selectedTab === 'overview'
-      ? [{ value: 'bar', icon: BarChartIcon }, { value: 'line', icon: LineChartIcon }]
-      : [{ value: 'bar', icon: BarChartIcon }, { value: 'line', icon: LineChartIcon }, { value: 'area', icon: AreaChartIcon }];
-
-    return (
-      <ToggleGroup type="single" value={chartType} onValueChange={(value: 'bar' | 'line' | 'area') => value && setChartType(value)}>
-        {options.map(({ value, icon: Icon }) => (
-          <ToggleGroupItem key={value} value={value} aria-label={`${value} Chart`}>
-            <Icon className="h-5 w-5" />
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-    );
-  };
-
   return (
-    <Card className='bg-green-50 mb-5'>
+    <Card className='mt-4'>
       <CardContent>
-        <div className="flex justify-left mt-3 mb-4">
-          {renderChartTypeToggle()}
+        <div className="flex justify-evenly gap-24 items-center mt-5 mb-6 ">
+          <ToggleGroup type="single" value={chartType} onValueChange={(value: 'bar' | 'line' | 'area') => value && setChartType(value)}>
+            <ToggleGroupItem value="bar" aria-label="Bar Chart">
+              <BarChartIcon className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="line" aria-label="Line Chart">
+              <LineChartIcon className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="area" aria-label="Area Chart">
+              <AreaChartIcon className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <Select onValueChange={setCashOutStrategy2} value={cashOutStrategy2}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Cash-out strategy" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Low Risk</SelectItem>
+              <SelectItem value="average">Average Risk</SelectItem>
+              <SelectItem value="high">High Risk</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex items-center space-x-2">
+            <span>Adoption Rate:</span>
+            <Slider
+              min={0}
+              max={1}
+              step={0.01}
+              value={[adoptionRate2]}
+              onValueChange={(value) => setAdoptionRate2(value[0])}
+              className="w-[200px]"
+            />
+            <span>{(adoptionRate2 * 100).toFixed(1)}%</span>
+          </div>
         </div>
-        <ResponsiveContainer width="95%" height={450}>
+        <ResponsiveContainer width="100%" height={450}>
           {renderChart()}
         </ResponsiveContainer>
       </CardContent>
@@ -151,4 +166,4 @@ const BaseChart: React.FC<BaseChartProps> = ({ selectedTab }) => {
   );
 };
 
-export default BaseChart;
+export default AdjustedChart;

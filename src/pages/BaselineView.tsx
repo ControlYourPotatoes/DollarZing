@@ -105,11 +105,26 @@ const BaselineView: React.FC = () => {
           />
         </div>
         
-        <Tabs defaultValue="overview" onValueChange={setSelectedTab}>
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="players">Players</TabsTrigger>
-            <TabsTrigger value="financials">Financials</TabsTrigger>
+        <Tabs defaultValue="overview" onValueChange={setSelectedTab} className="w-full">
+          <TabsList className="flex p-1 rounded-lg">
+            <TabsTrigger 
+              value="overview" 
+              className="text-lg font-semibold bg-slate-300 data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-md"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="players" 
+              className="text-lg font-semibold bg-slate-300 data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-md"
+            >
+              Players
+            </TabsTrigger>
+            <TabsTrigger 
+              value="financials" 
+              className="text-lg font-semibold bg-slate-300 data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-md"
+            >
+              Financials
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
             <BaseChart selectedTab={selectedTab} />

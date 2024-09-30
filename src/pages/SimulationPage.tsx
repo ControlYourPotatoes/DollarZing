@@ -42,7 +42,7 @@ const SimulationPage: React.FC = () => {
     <div className="min-h-screen bg-gray-100">
       <Navbar currentView={currentView} setCurrentView={setCurrentView} />
       <SimulationEngine />
-      <div className="p-4 w-full max-w-custom mx-auto bg-white rounded-xl shadow-md overflow-hidden flex-grow justify-items-center px-8">
+      <div className="p-4 w-full mx-auto bg-white rounded-xl shadow-md overflow-hidden px-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}

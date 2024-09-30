@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { PlayCircle, StopCircle, RotateCcw } from 'lucide-react'
 import useSimulationStore from '../store/SimulationStore';
@@ -20,17 +20,17 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setCurrentView }) => {
 
   return (
     <nav className="flex justify-between items-center p-4 bg-white shadow-md">
-      <ToggleGroup type="single" value={currentView} onValueChange={(value: View) => setCurrentView(value)}>
-        <ToggleGroupItem value="baseline" aria-label="Baseline View">
-          Baseline
-        </ToggleGroupItem>
-        <ToggleGroupItem value="adjusted" aria-label="Adjusted View">
-          Adjusted
-        </ToggleGroupItem>
-        <ToggleGroupItem value="comparison" aria-label="Comparison View">
-          Comparison
-        </ToggleGroupItem>
-      </ToggleGroup>
+
+      <div className=''>
+        <Tabs value={currentView} onValueChange={(value: View) => setCurrentView(value)}>
+          <TabsList className="gap-3">
+            <TabsTrigger className="text-lg" value="baseline">Baseline</TabsTrigger>
+            <TabsTrigger className="text-lg"value="adjusted">Adjusted</TabsTrigger>
+            <TabsTrigger className="text-lg"value="comparison">Comparison</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+      
 
       <div className="flex space-x-2">
         <Button onClick={handleToggleSimulation} variant={isRunning ? "destructive" : "default"}>
