@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GameState, ChartDataPoint, CashOutStrategy, SimulationProps, WeeklyStats  } from '@/types/types';
+import { GameState, ChartDataPoint, CashOutStrategy, SimulationProps, WeeklyStats, LevelData, BillsPerDayRange  } from '@/types/types';
 
 // Constants
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
@@ -37,8 +37,11 @@ const initialGameState: GameState = {
   activePlayers: 1000,
   outreachPot: 0,
   governmentEarnings: 0,
-  weeklyStats: []
+  weeklyStats: [],
+  currentDayLevelData: [],
 };
+
+
 
 interface SimulationStore {
   gameState1: GameState;
@@ -59,6 +62,12 @@ interface SimulationStore {
   weeklyStats: WeeklyStats[];
   calculateWeeklyStats: (chartData: ChartDataPoint[]) => WeeklyStats[];
 }
+
+const BILLS_PER_DAY_RANGE: Record<CashOutStrategy, BillsPerDayRange> = {
+  low: { min: 1, max: 4 },
+  average: { min: 5, max: 7 },
+  high: { min: 8, max: 12 }
+};
 
 const useSimulationStore = create<SimulationStore>()((set, get) => ({
   gameState1: initialGameState,
@@ -113,24 +122,25 @@ const useSimulationStore = create<SimulationStore>()((set, get) => ({
     }
     return weeklyStats;
   },
-
+  
+  
   
   simulateDay: (prevState: GameState, { cashOutStrategy, adoptionRate }: SimulationProps): GameState => {
     const newDay = prevState.day + 1;
     const rng = new SeededRandom(newDay); // Use seeded RNG for consistency
 
-    // Memoized helper functions
-    const getBillsPerDay = (strategy: CashOutStrategy): number => {
-      const getRandomInt = (min: number, max: number): number => {
-        return Math.floor(rng.next() * (max - min + 1)) + min;
-      };
-      switch (strategy) {
-        case 'low': return getRandomInt(1, 4);
-        case 'average': return getRandomInt(5, 7);
-        case 'high': return getRandomInt(8, 12);
-        default: return getRandomInt(5, 7);
-      }
+    // Calculate bills per day range based on cash out strategy. This is to simulate how many initial bills each player will play in a day.
+    const BILLS_PER_DAY_RANGE: Record<CashOutStrategy, BillsPerDayRange> = {
+      low: { min: 1, max: 4 },
+      average: { min: 5, max: 7 },
+      high: { min: 8, max: 12 }
     };
+
+    const getBillsPerDay = (strategy: CashOutStrategy, rng: SeededRandom): number => {
+      const range = BILLS_PER_DAY_RANGE[strategy] || BILLS_PER_DAY_RANGE.average;
+      return Math.floor(rng.next() * (range.max - range.min + 1)) + range.min;
+    };
+    
   
 
     const getCashOutProbability = (level: number, strategy: CashOutStrategy): number => {
@@ -138,11 +148,14 @@ const useSimulationStore = create<SimulationStore>()((set, get) => ({
         case 'low':
           return Math.max(0.9 - (level / 100), 0.1);
         case 'average':
-          return 0.5;
+          return 0.3;
         case 'high':
           return Math.min(0.1 + (level / 100), 0.9);
       }
     };
+
+    
+
     // Calculate new active players
     let newActivePlayers;
     if (adoptionRate === 0) {
@@ -158,45 +171,63 @@ const useSimulationStore = create<SimulationStore>()((set, get) => ({
       newActivePlayers = Math.min(PANAMA_LOTTERY_USERS, prevState.activePlayers + adoptedPanamaUsers);
     }
 
-    // Calculate daily games played old
-    // const billsPerDay = getBillsPerDay(cashOutStrategy);
-    // const averageBet = billsPerDay;
-    // const totalBet = newActivePlayers * averageBet;
-
-    // Calculate initial total bet (without fees)
-    let totalBet = 0;
+    // Calculate initial bets for the first level
+    let initialGames = 0;
     for (let i = 0; i < newActivePlayers; i++) {
-      totalBet += getBillsPerDay(cashOutStrategy);
+      initialGames += getBillsPerDay(cashOutStrategy, rng);
     }
 
-
+    
     let dailyCharity = 0;
     let dailyPlatformEarnings = 0;
     let dailyGovernmentEarnings = 0;
     let dailyOutreachPot = 0;
     let dailyPlayerWinnings = 0;
     let dailyJackpotWinners = 0;
-    let totalDailyGames = 0;
     const levelData: Record<string, number> = {};
-    let remainingBets = totalBet;
-    let playersAtLevel = newActivePlayers;
+    let currentDayLevelData: LevelData[] = [];
+    let totalGamesPlayed = 0;
+
+    let gamesAtCurrentLevel = initialGames;
+
+
 
 
     LEVELS.forEach((level) => {
-      const gamesAtLevel = playersAtLevel;
-      totalDailyGames += gamesAtLevel;
-      
-      const cashOutProbability = getCashOutProbability(level, cashOutStrategy);
-      const cashOutPlayers = Math.floor(playersAtLevel * cashOutProbability);
-      const losingPlayers = Math.floor((playersAtLevel - cashOutPlayers) / 2);
-      
-      // Platform earnings for all games at this level
-      const platformEarningsAtLevel = gamesAtLevel * PLATFORM_FEE;
-      dailyPlatformEarnings += platformEarningsAtLevel;
-      dailyOutreachPot += gamesAtLevel * OUTREACH_POT_PER_GAME;
+      if (gamesAtCurrentLevel <= 0) return;
   
-      // Winnings distribution for players who cash out
-      const winningsToDistribute = cashOutPlayers * level * 2;
+      levelData[`$${level}`] = gamesAtCurrentLevel;
+      totalGamesPlayed += gamesAtCurrentLevel;
+  
+      // Platform earnings and outreach pot
+      const platformEarningsAtLevel = gamesAtCurrentLevel * PLATFORM_FEE;
+      dailyPlatformEarnings += platformEarningsAtLevel;
+      dailyOutreachPot += gamesAtCurrentLevel * OUTREACH_POT_PER_GAME;
+  
+      // Calculate winners
+  
+      let cashOutPlayers: number;
+      let winningsToDistribute: number;
+      let losingPlayers: number;
+
+      
+  
+      if (level === 512) {
+        // In P2P, every game at 512 results in a jackpot win
+        cashOutPlayers = gamesAtCurrentLevel; // Every game has a winner
+        losingPlayers = gamesAtCurrentLevel; // Every game also has a loser
+        winningsToDistribute = gamesAtCurrentLevel * 1024; // Each winner gets 1024
+        dailyJackpotWinners += gamesAtCurrentLevel;
+      } else {
+        // For other levels, keep the existing logic
+        const winnersAtLevel = Math.floor(gamesAtCurrentLevel / 2);
+        const cashOutProbability = getCashOutProbability(level, cashOutStrategy);
+        cashOutPlayers = Math.floor(winnersAtLevel * cashOutProbability);
+        losingPlayers = gamesAtCurrentLevel - winnersAtLevel;
+        winningsToDistribute = cashOutPlayers * level * 2;
+      }
+    
+  
       const charityAtLevel = winningsToDistribute * CHARITY_SHARE;
       const governmentAtLevel = winningsToDistribute * GOVERNMENT_SHARE;
       const playerWinningsAtLevel = winningsToDistribute * PLAYER_SHARE;
@@ -205,39 +236,44 @@ const useSimulationStore = create<SimulationStore>()((set, get) => ({
       dailyGovernmentEarnings += governmentAtLevel;
       dailyPlayerWinnings += playerWinningsAtLevel;
   
-      if (level === 512) {
-        dailyJackpotWinners += cashOutPlayers;
-      }
-  
-      levelData[`$${level}`] = gamesAtLevel;
-  
-      console.log(`Level $${level}:`, {
-        playersAtLevel,
-        gamesAtLevel,
-        cashOutProbability,
+      currentDayLevelData.push({
+        level,
+        gamesAtLevel: gamesAtCurrentLevel,
+        cashOutProbability: level === 512 ? 1 : getCashOutProbability(level, cashOutStrategy),
         cashOutPlayers,
         losingPlayers,
         platformEarnings: platformEarningsAtLevel,
         charityContribution: charityAtLevel,
         governmentEarnings: governmentAtLevel,
         playerWinnings: playerWinningsAtLevel,
+        dailyJackpotWinners: level === 512 ? gamesAtCurrentLevel : 0
       });
-  
-      // Players progressing to the next level
-      playersAtLevel = playersAtLevel - cashOutPlayers - losingPlayers;
+    
+      // Calculate games for the next level (will be 0 for level 512)
+      gamesAtCurrentLevel = level === 512 ? 0 : Math.floor(gamesAtCurrentLevel / 2) - cashOutPlayers;
     });
-
-    const totalMoneyInSystem = totalBet + dailyPlatformEarnings;
+  
+    const totalMoneyInSystem = initialGames + dailyPlatformEarnings; // Each initial game is $1
     const totalDistributed = dailyCharity + dailyGovernmentEarnings + dailyPlayerWinnings;
-
-
-
+  
+    console.log('Daily Totals:', {
+      initialGames,
+      totalGamesPlayed,
+      totalMoneyInSystem,
+      platformEarnings: dailyPlatformEarnings,
+      charity: dailyCharity,
+      governmentEarnings: dailyGovernmentEarnings,
+      playerWinnings: dailyPlayerWinnings,
+      totalDistributed,
+      outreachPot: dailyOutreachPot,
+    });
+  
     const newChartDataPoint: ChartDataPoint = {
       day: newDay,
       charityContributions: dailyCharity,
       platformEarnings: dailyPlatformEarnings,
       jackpotWinners: dailyJackpotWinners,
-      gamesPlayed: totalDailyGames,
+      gamesPlayed: totalGamesPlayed,
       totalPlayers: prevState.totalPlayers,
       activePlayers: newActivePlayers,
       governmentEarnings: dailyGovernmentEarnings,
@@ -245,38 +281,24 @@ const useSimulationStore = create<SimulationStore>()((set, get) => ({
       playerWinnings: dailyPlayerWinnings,
       ...levelData
     };
-
-    // console.log(`Day ${newDay} Simulation Results:`, {
-    //   activePlayers: newActivePlayers,
-    //   totalGames: totalDailyGames,
-    //   totalBet,
-    //   totalMoneyInSystem,
-    //   platformEarnings: dailyPlatformEarnings,
-    //   charity: dailyCharity,
-    //   governmentEarnings: dailyGovernmentEarnings,
-    //   playerWinnings: dailyPlayerWinnings,
-    //   jackpotWinners: dailyJackpotWinners,
-    //   remainingInPot: remainingBets,
-    //   totalDistributed,
-    //   outreachPot: dailyOutreachPot,
-    // });
-
+  
     const newChartData = [...prevState.chartData, newChartDataPoint];
     const newWeeklyStats = get().calculateWeeklyStats(newChartData);
-
+  
     return {
       ...prevState,
       day: newDay,
       totalCharity: prevState.totalCharity + dailyCharity,
       chartData: newChartData,
       jackpotWinners: prevState.jackpotWinners + dailyJackpotWinners,
-      totalGamesPlayed: prevState.totalGamesPlayed + totalDailyGames,
+      totalGamesPlayed: prevState.totalGamesPlayed + totalGamesPlayed,
       platformEarnings: prevState.platformEarnings + dailyPlatformEarnings,
       governmentEarnings: prevState.governmentEarnings + dailyGovernmentEarnings,
       outreachPot: prevState.outreachPot + dailyOutreachPot,
-      totalWinnings: prevState.totalWinnings + totalDistributed, // Changed to total distributed
+      totalWinnings: prevState.totalWinnings + totalDistributed,
       activePlayers: newActivePlayers,
       weeklyStats: newWeeklyStats,
+      currentDayLevelData,
     };
   },
 }));

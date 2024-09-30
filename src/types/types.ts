@@ -37,6 +37,7 @@ export interface GameState {
   totalPlayers: number;
   activePlayers: number;
   weeklyStats: WeeklyStats[];
+  currentDayLevelData: LevelData[]
 }
 
 export interface SimulationProps {
@@ -44,3 +45,20 @@ export interface SimulationProps {
   adoptionRate: number;
 }
 
+export interface LevelData {
+  level: number;
+  gamesAtLevel: number;
+  cashOutProbability: number;
+  cashOutPlayers: number;
+  losingPlayers: number;
+  platformEarnings: number;
+  charityContribution: number;
+  governmentEarnings: number;
+  playerWinnings: number;
+  dailyJackpotWinners: number;
+}
+
+export interface BillsPerDayRange {
+  min: number;
+  max: number;
+}
