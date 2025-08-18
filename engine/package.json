@@ -1,0 +1,35 @@
+{
+  "name": "dollarzing-engine",
+  "version": "1.0.0",
+  "description": "Data generation engine for DollarZing financial gaming simulation",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch & node --loader ts-node/esm --watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@types/node": "^22.0.0",
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3",
+    "ts-node": "^10.9.2",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "ts-jest": "^29.2.4"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src", "<rootDir>/tests"],
+    "testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"]
+  }
+}

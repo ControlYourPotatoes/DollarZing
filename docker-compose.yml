@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  engine:
+    build:
+      context: ./engine
+      target: development
+    container_name: dollarzing-engine-dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./engine:/app
+      - /app/node_modules
+      - dollarzing-data:/data/datasets
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+    networks:
+      - dollarzing-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    build:
+      context: .
+      target: development
+    container_name: dollarzing-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./data:/app/data
+      - /app/node_modules
+      - dollarzing-data:/data/datasets
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3001
+    depends_on:
+      engine:
+        condition: service_healthy
+    networks:
+      - dollarzing-network
+    restart: unless-stopped
+
+networks:
+  dollarzing-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  dollarzing-data:
+    driver: local

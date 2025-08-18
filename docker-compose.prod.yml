@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  engine:
+    build:
+      context: ./engine
+      target: production
+    container_name: dollarzing-engine-prod
+    ports:
+      - "3001:3001"
+    volumes:
+      - dollarzing-data:/data/datasets
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    networks:
+      - dollarzing-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3001, path: '/health', timeout: 5000 }; const req = http.request(options, (res) => process.exit(res.statusCode === 200 ? 0 : 1)); req.on('error', () => process.exit(1)); req.on('timeout', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    build:
+      context: .
+      target: production
+    container_name: dollarzing-frontend-prod
+    ports:
+      - "80:80"
+    volumes:
+      - dollarzing-data:/data/datasets
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      engine:
+        condition: service_healthy
+    networks:
+      - dollarzing-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  dollarzing-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+volumes:
+  dollarzing-data:
+    driver: local
