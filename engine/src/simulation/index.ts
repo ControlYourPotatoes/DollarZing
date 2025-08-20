@@ -1,9 +1,9 @@
 // Core Simulation Engine for DollarZing
 // Generates yearly datasets with enhanced data structures and performance optimizations
 
-import { 
-  SimulationDataset, 
-  SimulationParameters, 
+import {
+  SimulationDataset,
+  SimulationParameters,
   DailySnapshot,
   PlayerMetrics,
   FinancialMetrics,
@@ -11,13 +11,13 @@ import {
   PlayerJourney,
   RevenueBreakdown,
   FlowType,
-  CashOutStrategy
-} from '../../../data/src/types/index';
-import { validateSimulationParameters } from '../../../data/src/types/validation';
+  CashOutStrategy,
+} from "../../../data/src/types/index";
+import { validateSimulationParameters } from "../../../data/src/types/validation";
 
 // Constants from legacy system
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
-const PLATFORM_FEE = 0.20;
+const PLATFORM_FEE = 0.2;
 const PANAMA_LOTTERY_USERS = 1000000;
 
 // Seeded random number generator for consistent results
@@ -39,17 +39,17 @@ export class PlayerBehaviorModel {
   private billsPerDayRanges = {
     low: { min: 1, max: 4 },
     average: { min: 5, max: 7 },
-    high: { min: 8, max: 12 }
+    high: { min: 8, max: 12 },
   };
 
   getCashOutProbability(level: number, strategy: CashOutStrategy): number {
     switch (strategy) {
-      case 'low':
-        return Math.max(0.9 - (level / 100), 0.1);
-      case 'average':
+      case "low":
+        return Math.max(0.9 - level / 100, 0.1);
+      case "average":
         return 0.3;
-      case 'high':
-        return Math.min(0.1 + (level / 100), 0.9);
+      case "high":
+        return Math.min(0.1 + level / 100, 0.9);
       default:
         return 0.3;
     }
@@ -60,11 +60,17 @@ export class PlayerBehaviorModel {
     return Math.floor(randomValue * (range.max - range.min + 1)) + range.min;
   }
 
-  simulatePlayerJourney(playerId: string, strategy: CashOutStrategy, daysActive: number): PlayerJourney {
+  simulatePlayerJourney(
+    playerId: string,
+    strategy: CashOutStrategy,
+    daysActive: number
+  ): PlayerJourney {
     const startDate = new Date();
-    const endDate = new Date(startDate.getTime() + (daysActive * 24 * 60 * 60 * 1000));
+    const endDate = new Date(
+      startDate.getTime() + daysActive * 24 * 60 * 60 * 1000
+    );
     const rng = new SeededRandom(playerId.charCodeAt(0) * 1000 + daysActive);
-    
+
     let totalGamesPlayed = 0;
     let maxLevelReached = 1;
     let totalWinnings = 0;
@@ -76,20 +82,24 @@ export class PlayerBehaviorModel {
     for (let day = 0; day < daysActive; day++) {
       const dailyBills = this.getBillsPerDay(strategy, rng.next());
       let currentGames = dailyBills;
-      
+
       // Progress through levels
-      for (let levelIndex = 0; levelIndex < LEVELS.length && currentGames > 0; levelIndex++) {
+      for (
+        let levelIndex = 0;
+        levelIndex < LEVELS.length && currentGames > 0;
+        levelIndex++
+      ) {
         const level = levelIndex + 1;
         const gamesAtLevel = currentGames;
         const winnersAtLevel = Math.floor(gamesAtLevel / 2);
         const cashOutProbability = this.getCashOutProbability(level, strategy);
         const cashOutPlayers = Math.floor(winnersAtLevel * cashOutProbability);
-        
+
         totalGamesPlayed += gamesAtLevel;
         maxLevelReached = Math.max(maxLevelReached, level);
-        
+
         // Record level progression
-        const existingLevel = levelProgression.find(l => l.level === level);
+        const existingLevel = levelProgression.find((l) => l.level === level);
         if (existingLevel) {
           existingLevel.gamesAtLevel += gamesAtLevel;
           existingLevel.timeSpentMinutes += gamesAtLevel * 2; // 2 mins per game
@@ -97,7 +107,7 @@ export class PlayerBehaviorModel {
           levelProgression.push({
             level,
             gamesAtLevel,
-            timeSpentMinutes: gamesAtLevel * 2
+            timeSpentMinutes: gamesAtLevel * 2,
           });
         }
 
@@ -109,7 +119,7 @@ export class PlayerBehaviorModel {
             day: day + 1,
             level: 10,
             amount: 1024,
-            strategy
+            strategy,
           });
         } else if (cashOutPlayers > 0) {
           const winAmount = cashOutPlayers * LEVELS[levelIndex] * 2;
@@ -118,13 +128,13 @@ export class PlayerBehaviorModel {
             day: day + 1,
             level,
             amount: winAmount,
-            strategy
+            strategy,
           });
         }
 
         // Calculate losses (unsuccessful games)
         totalLosses += (gamesAtLevel - winnersAtLevel) * LEVELS[levelIndex];
-        
+
         // Calculate next level games
         currentGames = level === 10 ? 0 : winnersAtLevel - cashOutPlayers;
       }
@@ -140,40 +150,54 @@ export class PlayerBehaviorModel {
       totalLosses,
       netGain: totalWinnings - totalLosses,
       cashOutEvents,
-      levelProgression
+      levelProgression,
     };
   }
 }
 
 // Growth Calculator
 export class GrowthCalculator {
-  calculateOrganicGrowth(day: number, currentPlayers: number, growthMultiplier: number, randomSeed: number): number {
+  calculateOrganicGrowth(
+    day: number,
+    currentPlayers: number,
+    growthMultiplier: number,
+    randomSeed: number
+  ): number {
     const rng = new SeededRandom(day * 1000 + Math.floor(randomSeed * 10000));
     const baseGrowthRate = 0.01;
     const randomFactor = (rng.next() + 0.5) * 0.05;
     const timeFactor = Math.log(day + 1) / 10;
-    const effectiveGrowthRate = (baseGrowthRate + randomFactor) * (1 + timeFactor) * growthMultiplier;
-    
+    const effectiveGrowthRate =
+      (baseGrowthRate + randomFactor) * (1 + timeFactor) * growthMultiplier;
+
     return Math.floor(currentPlayers * (1 + effectiveGrowthRate));
   }
-
 }
 
 // Level Progression Calculator
 export class LevelProgressionCalculator {
   private behaviorModel = new PlayerBehaviorModel();
 
-  calculateLevelStatistics(level: number, gamesAtLevel: number, strategy: CashOutStrategy, randomSeed: number): LevelStatistics {
+  calculateLevelStatistics(
+    level: number,
+    gamesAtLevel: number,
+    strategy: CashOutStrategy,
+    randomSeed: number
+  ): LevelStatistics {
     const rng = new SeededRandom(level * 1000 + Math.floor(randomSeed * 10000));
-    
-    const successRate = level === 10 ? 1.0 : this.behaviorModel.getCashOutProbability(level, strategy);
-    const avgTimeAtLevel = 5 + (level * 2) + (rng.next() * 3); // Base time + level factor + random
-    
+
+    const successRate =
+      level === 10
+        ? 1.0
+        : this.behaviorModel.getCashOutProbability(level, strategy);
+    const avgTimeAtLevel = 5 + level * 2 + rng.next() * 3; // Base time + level factor + random
+
     // Calculate bottleneck score (higher at difficult transition points)
     let bottleneckScore = 0;
     if (level < 10) {
       const difficultyFactor = level / 10;
-      const strategyFactor = strategy === 'high' ? 0.8 : strategy === 'low' ? 0.2 : 0.5;
+      const strategyFactor =
+        strategy === "high" ? 0.8 : strategy === "low" ? 0.2 : 0.5;
       bottleneckScore = difficultyFactor * (1 - strategyFactor);
     }
 
@@ -182,25 +206,28 @@ export class LevelProgressionCalculator {
       gamesAtLevel,
       successRate,
       avgTimeAtLevel,
-      bottleneckScore: Math.min(1, Math.max(0, bottleneckScore))
+      bottleneckScore: Math.min(1, Math.max(0, bottleneckScore)),
     };
   }
 }
 
 // Revenue Distribution Calculator
 export class RevenueDistributionCalculator {
-  calculateRevenueBreakdown(amount: number, flowType: FlowType): RevenueBreakdown {
+  calculateRevenueBreakdown(
+    amount: number,
+    flowType: FlowType
+  ): RevenueBreakdown {
     let platformPerc = 0.2;
     let charityPerc = 0.2;
     let governmentPerc = 0.4;
     let playerPerc = 0.4;
 
     // Adjust distribution based on flow type
-    if (flowType === 'loss') {
+    if (flowType === "loss") {
       // For losses, reduce player share
       playerPerc = 0.2;
       governmentPerc = 0.4;
-    } else if (flowType === 'jackpot') {
+    } else if (flowType === "jackpot") {
       // For jackpots, players get more
       playerPerc = 0.6;
       governmentPerc = 0.2;
@@ -209,7 +236,7 @@ export class RevenueDistributionCalculator {
     return {
       platform: { amount: amount * platformPerc, percentage: platformPerc },
       charity: { amount: amount * charityPerc, percentage: charityPerc },
-      players: { amount: amount * playerPerc, percentage: playerPerc }
+      players: { amount: amount * playerPerc, percentage: playerPerc },
     };
   }
 }
@@ -226,18 +253,20 @@ export class SimulationEngine {
     // Validate parameters
     const validation = validateSimulationParameters(parameters);
     if (!validation.isValid) {
-      throw new Error(`Invalid parameters: ${validation.errors.join(', ')}`);
+      throw new Error(`Invalid parameters: ${validation.errors.join(", ")}`);
     }
 
     // Additional validation for engine-specific constraints
     if (parameters.adoptionRate < 0 || parameters.adoptionRate > 1) {
-      throw new Error('Invalid adoption rate: must be between 0 and 1');
+      throw new Error("Invalid adoption rate: must be between 0 and 1");
     }
     if (parameters.growthMultiplier < 0) {
-      throw new Error('Invalid growth multiplier: must be positive');
+      throw new Error("Invalid growth multiplier: must be positive");
     }
-    if (!['low', 'average', 'high'].includes(parameters.cashOutStrategy)) {
-      throw new Error('Invalid cash-out strategy: must be low, average, or high');
+    if (!["low", "average", "high"].includes(parameters.cashOutStrategy)) {
+      throw new Error(
+        "Invalid cash-out strategy: must be low, average, or high"
+      );
     }
 
     this.parameters = { ...parameters };
@@ -254,7 +283,7 @@ export class SimulationEngine {
   updateParameters(newParameters: SimulationParameters): void {
     const validation = validateSimulationParameters(newParameters);
     if (!validation.isValid) {
-      throw new Error(`Invalid parameters: ${validation.errors.join(', ')}`);
+      throw new Error(`Invalid parameters: ${validation.errors.join(", ")}`);
     }
     this.parameters = { ...newParameters };
   }
@@ -265,7 +294,7 @@ export class SimulationEngine {
 
     const dataset: SimulationDataset = {
       id: `simulation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      version: '1.0.0',
+      version: "1.0.0",
       createdAt: new Date(),
       updatedAt: new Date(),
       parameters: this.parameters,
@@ -273,14 +302,14 @@ export class SimulationEngine {
         generationDurationMs: 0, // Will be updated at end
         dataPoints: 365,
         memoryUsageMB: 0, // Will be updated at end
-        accuracy: 0.98 // Base accuracy score
+        accuracy: 0.98, // Base accuracy score
       },
       dailySnapshots: [],
       aggregations: {
         weekly: [],
         monthly: [],
-        yearly: null
-      }
+        yearly: null,
+      },
     };
 
     // Initialize state
@@ -289,9 +318,13 @@ export class SimulationEngine {
 
     // Generate daily snapshots
     for (let day = 1; day <= 365; day++) {
-      const dailySnapshot = await this.simulateDay(day, currentPlayers, activePlayers);
+      const dailySnapshot = await this.simulateDay(
+        day,
+        currentPlayers,
+        activePlayers
+      );
       dataset.dailySnapshots.push(dailySnapshot);
-      
+
       // Update player counts for next day
       currentPlayers = dailySnapshot.playerMetrics.totalPlayers;
       activePlayers = dailySnapshot.playerMetrics.activePlayers;
@@ -299,38 +332,52 @@ export class SimulationEngine {
       // Progress callback for potential UI updates
       if (day % 30 === 0) {
         // Allow other operations to run
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
 
     // Calculate final metrics
     const endTime = performance.now();
     const finalMemory = process.memoryUsage().heapUsed;
-    
+
     dataset.metadata.generationDurationMs = endTime - startTime;
-    dataset.metadata.memoryUsageMB = (finalMemory - initialMemory) / (1024 * 1024);
+    dataset.metadata.memoryUsageMB =
+      (finalMemory - initialMemory) / (1024 * 1024);
     dataset.updatedAt = new Date();
 
     // Generate aggregations (simplified for now)
-    dataset.aggregations.yearly = this.generateYearlyAggregation(dataset.dailySnapshots);
+    dataset.aggregations.yearly = this.generateYearlyAggregation(
+      dataset.dailySnapshots
+    );
 
     return dataset;
   }
 
-  private async simulateDay(day: number, totalPlayers: number, activePlayers: number): Promise<DailySnapshot> {
+  private async simulateDay(
+    day: number,
+    totalPlayers: number,
+    activePlayers: number
+  ): Promise<DailySnapshot> {
     const rng = new SeededRandom(day);
-    
+
     // Calculate new player metrics
     let newTotalPlayers = totalPlayers;
     let newActivePlayers = activePlayers;
 
     if (this.parameters.panamaAdoption) {
       newActivePlayers = this.growthCalculator.calculatePanamaAdoption(
-        day, activePlayers, this.parameters.adoptionRate, PANAMA_LOTTERY_USERS, rng.next()
+        day,
+        activePlayers,
+        this.parameters.adoptionRate,
+        PANAMA_LOTTERY_USERS,
+        rng.next()
       );
     } else {
       newActivePlayers = this.growthCalculator.calculateOrganicGrowth(
-        day, activePlayers, this.parameters.growthMultiplier, rng.next()
+        day,
+        activePlayers,
+        this.parameters.growthMultiplier,
+        rng.next()
       );
     }
 
@@ -341,13 +388,16 @@ export class SimulationEngine {
       activePlayers: newActivePlayers,
       newPlayers: Math.max(0, newActivePlayers - activePlayers),
       churnedPlayers: Math.max(0, activePlayers - newActivePlayers),
-      retentionRate: activePlayers > 0 ? newActivePlayers / activePlayers : 1
+      retentionRate: activePlayers > 0 ? newActivePlayers / activePlayers : 1,
     };
 
     // Calculate initial games for the day
     let initialGames = 0;
     for (let i = 0; i < newActivePlayers; i++) {
-      initialGames += this.behaviorModel.getBillsPerDay(this.parameters.cashOutStrategy, rng.next());
+      initialGames += this.behaviorModel.getBillsPerDay(
+        this.parameters.cashOutStrategy,
+        rng.next()
+      );
     }
 
     // Simulate level progression and calculate financials
@@ -368,7 +418,7 @@ export class SimulationEngine {
 
       const level = levelIndex + 1;
       const levelValue = LEVELS[levelIndex];
-      
+
       totalGamesPlayed += gamesAtCurrentLevel;
 
       // Platform earnings
@@ -386,15 +436,18 @@ export class SimulationEngine {
         jackpotWinners += gamesAtCurrentLevel;
       } else {
         const winnersAtLevel = Math.floor(gamesAtCurrentLevel / 2);
-        const cashOutProbability = this.behaviorModel.getCashOutProbability(level, this.parameters.cashOutStrategy);
+        const cashOutProbability = this.behaviorModel.getCashOutProbability(
+          level,
+          this.parameters.cashOutStrategy
+        );
         cashOutPlayers = Math.floor(winnersAtLevel * cashOutProbability);
         winningsToDistribute = cashOutPlayers * levelValue * 2;
       }
 
       // Distribute revenue
       const breakdown = this.revenueCalculator.calculateRevenueBreakdown(
-        winningsToDistribute, 
-        level === 10 ? 'jackpot' : 'cashout'
+        winningsToDistribute,
+        level === 10 ? "jackpot" : "cashout"
       );
 
       charityContributions += breakdown.charity.amount;
@@ -404,12 +457,16 @@ export class SimulationEngine {
 
       // Calculate level statistics
       const levelStats = this.progressionCalculator.calculateLevelStatistics(
-        level, gamesAtCurrentLevel, this.parameters.cashOutStrategy, rng.next()
+        level,
+        gamesAtCurrentLevel,
+        this.parameters.cashOutStrategy,
+        rng.next()
       );
       levelProgression.push(levelStats);
 
       // Calculate next level games
-      gamesAtCurrentLevel = level === 10 ? 0 : Math.floor(gamesAtCurrentLevel / 2) - cashOutPlayers;
+      gamesAtCurrentLevel =
+        level === 10 ? 0 : Math.floor(gamesAtCurrentLevel / 2) - cashOutPlayers;
     }
 
     const financialMetrics: FinancialMetrics = {
@@ -418,7 +475,7 @@ export class SimulationEngine {
       charityContributions,
       governmentEarnings,
       playerWinnings,
-      gamesPlayed: totalGamesPlayed
+      gamesPlayed: totalGamesPlayed,
     };
 
     return {
@@ -427,55 +484,91 @@ export class SimulationEngine {
       playerMetrics,
       financialMetrics,
       levelProgression,
-      playerJourneys: [] // Will be populated by separate process if needed
+      playerJourneys: [], // Will be populated by separate process if needed
     };
   }
 
   private generateYearlyAggregation(dailySnapshots: DailySnapshot[]) {
-    const totals = dailySnapshots.reduce((acc, snapshot) => ({
-      totalPlayers: Math.max(acc.totalPlayers, snapshot.playerMetrics.totalPlayers),
-      totalRevenue: acc.totalRevenue + snapshot.financialMetrics.totalRevenue,
-      totalGames: acc.totalGames + snapshot.financialMetrics.gamesPlayed
-    }), { totalPlayers: 0, totalRevenue: 0, totalGames: 0 });
+    const totals = dailySnapshots.reduce(
+      (acc, snapshot) => ({
+        totalPlayers: Math.max(
+          acc.totalPlayers,
+          snapshot.playerMetrics.totalPlayers
+        ),
+        totalRevenue: acc.totalRevenue + snapshot.financialMetrics.totalRevenue,
+        totalGames: acc.totalGames + snapshot.financialMetrics.gamesPlayed,
+      }),
+      { totalPlayers: 0, totalRevenue: 0, totalGames: 0 }
+    );
 
     const avgDaily = {
       players: totals.totalPlayers / dailySnapshots.length,
       revenue: totals.totalRevenue / dailySnapshots.length,
-      games: totals.totalGames / dailySnapshots.length
+      games: totals.totalGames / dailySnapshots.length,
     };
 
     // Find peak day
-    const peakDay = dailySnapshots.reduce((peak, snapshot) => 
-      snapshot.financialMetrics.totalRevenue > peak.financialMetrics.totalRevenue ? snapshot : peak
+    const peakDay = dailySnapshots.reduce((peak, snapshot) =>
+      snapshot.financialMetrics.totalRevenue >
+      peak.financialMetrics.totalRevenue
+        ? snapshot
+        : peak
     );
 
     return {
       year: 2025,
       aggregatedPlayerMetrics: {
         totalPlayers: totals.totalPlayers,
-        activePlayers: dailySnapshots[dailySnapshots.length - 1].playerMetrics.activePlayers,
-        newPlayers: dailySnapshots.reduce((sum, s) => sum + s.playerMetrics.newPlayers, 0),
-        churnedPlayers: dailySnapshots.reduce((sum, s) => sum + s.playerMetrics.churnedPlayers, 0),
-        retentionRate: dailySnapshots.reduce((sum, s) => sum + s.playerMetrics.retentionRate, 0) / dailySnapshots.length
+        activePlayers:
+          dailySnapshots[dailySnapshots.length - 1].playerMetrics.activePlayers,
+        newPlayers: dailySnapshots.reduce(
+          (sum, s) => sum + s.playerMetrics.newPlayers,
+          0
+        ),
+        churnedPlayers: dailySnapshots.reduce(
+          (sum, s) => sum + s.playerMetrics.churnedPlayers,
+          0
+        ),
+        retentionRate:
+          dailySnapshots.reduce(
+            (sum, s) => sum + s.playerMetrics.retentionRate,
+            0
+          ) / dailySnapshots.length,
       },
       aggregatedFinancialMetrics: {
         totalRevenue: totals.totalRevenue,
-        platformEarnings: dailySnapshots.reduce((sum, s) => sum + s.financialMetrics.platformEarnings, 0),
-        charityContributions: dailySnapshots.reduce((sum, s) => sum + s.financialMetrics.charityContributions, 0),
-        governmentEarnings: dailySnapshots.reduce((sum, s) => sum + s.financialMetrics.governmentEarnings, 0),
-        playerWinnings: dailySnapshots.reduce((sum, s) => sum + s.financialMetrics.playerWinnings, 0),
-        gamesPlayed: totals.totalGames
+        platformEarnings: dailySnapshots.reduce(
+          (sum, s) => sum + s.financialMetrics.platformEarnings,
+          0
+        ),
+        charityContributions: dailySnapshots.reduce(
+          (sum, s) => sum + s.financialMetrics.charityContributions,
+          0
+        ),
+        governmentEarnings: dailySnapshots.reduce(
+          (sum, s) => sum + s.financialMetrics.governmentEarnings,
+          0
+        ),
+        playerWinnings: dailySnapshots.reduce(
+          (sum, s) => sum + s.financialMetrics.playerWinnings,
+          0
+        ),
+        gamesPlayed: totals.totalGames,
       },
-      annualGrowthRate: dailySnapshots.length > 1 ? 
-        (dailySnapshots[dailySnapshots.length - 1].playerMetrics.activePlayers - dailySnapshots[0].playerMetrics.activePlayers) / 
-        dailySnapshots[0].playerMetrics.activePlayers : 0,
+      annualGrowthRate:
+        dailySnapshots.length > 1
+          ? (dailySnapshots[dailySnapshots.length - 1].playerMetrics
+              .activePlayers -
+              dailySnapshots[0].playerMetrics.activePlayers) /
+            dailySnapshots[0].playerMetrics.activePlayers
+          : 0,
       totalDataPoints: dailySnapshots.length,
       performanceMetrics: {
         peakDay: peakDay.day,
         peakPlayers: peakDay.playerMetrics.activePlayers,
         peakRevenue: peakDay.financialMetrics.totalRevenue,
-        averageDaily: avgDaily
-      }
+        averageDaily: avgDaily,
+      },
     };
   }
 }
