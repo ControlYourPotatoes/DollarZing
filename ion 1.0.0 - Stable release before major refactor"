@@ -1,5 +1,0 @@
-[33m3a9f2df[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update README.md to standardize quotes and improve ESLint configuration formatting
-[33m5a05a49[m Add DollarZing refactor plan for transitioning to pre-generated datasets and enhanced visualizations
-[33m773a7d6[m Update .gitignore to exclude .agent-os and .claude directories
-[33meb3b4ab[m Refactor BaseChart and SimulationPage components
-[33mc403cfd[m fix the growth indicators, was comparing to wrong value in gamestate
