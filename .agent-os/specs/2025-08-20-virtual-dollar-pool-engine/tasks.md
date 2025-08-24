@@ -9,35 +9,39 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 - [x] 1. Core Data Structures & Type Definitions
   - [x] 1.1 Write tests for VirtualDollar interface and state management
-  - [x] 1.2 Implement VirtualDollar interface with lifecycle states
+  - [x] 1.2 Implement VirtualDollar interface with lifecycle states  
   - [x] 1.3 Write tests for GameSession data structure
   - [x] 1.4 Implement GameSession interface with comprehensive game data
   - [x] 1.5 Write tests for RevenueStream and BettingLevel types
   - [x] 1.6 Implement RevenueStream and BettingLevel type definitions
   - [x] 1.7 Create shared enums for DollarState, GameState, and CashOutStrategy
   - [x] 1.8 Verify all data structures compile and pass type checking
+  - [x] 1.9 UPDATE: Fix VirtualDollar interface for independent runs (runId, currentRunWinnings, gamesInThisRun)
+  - [x] 1.10 UPDATE: Implement exponential betting level functions (getBettingLevelValue, getBettingLevelWinnings)
 
-- [ ] 2. VirtualDollarManager Implementation
-  - [ ] 2.1 Write tests for serial number generation (letter+8digits+letter pattern)
-  - [ ] 2.2 Implement realistic serial number generation algorithm
-  - [ ] 2.3 Write tests for dollar lifecycle state transitions
-  - [ ] 2.4 Implement dollar state management (created→pooled→in-game→won/lost→cashed-out)
-  - [ ] 2.5 Write tests for unique ID generation and collision prevention
-  - [ ] 2.6 Implement dollar tracking and history maintenance
-  - [ ] 2.7 Write tests for batch dollar creation and management
-  - [ ] 2.8 Implement efficient dollar pool management with Maps/Sets
-  - [ ] 2.9 Verify all VirtualDollarManager tests pass
+- [x] 2. VirtualDollarManager Implementation
+  - [x] 2.1 Write tests for serial number generation (letter+8digits+letter pattern)
+  - [x] 2.2 Implement realistic serial number generation algorithm
+  - [x] 2.3 Write tests for dollar lifecycle state transitions
+  - [x] 2.4 Implement dollar state management (created→pooled→in-game→won/lost→cashed-out)
+  - [x] 2.5 Write tests for unique ID generation and collision prevention
+  - [x] 2.6 Implement dollar tracking and history maintenance
+  - [x] 2.7 Write tests for batch dollar creation and management
+  - [x] 2.8 Implement efficient dollar pool management with Maps/Sets
+  - [x] 2.9 Verify all VirtualDollarManager tests pass
+  - [x] 2.10 UPDATE: Implement independent run ID generation and tracking
+  - [x] 2.11 UPDATE: Add support for multiple runs per player with unique run identifiers
 
-- [ ] 3. ScoringEngine Implementation  
-  - [ ] 3.1 Write tests for deterministic scoring with serial number + daily seed
-  - [ ] 3.2 Implement daily seeded scoring algorithm for consistent results
-  - [ ] 3.3 Write tests for score consistency across multiple calculations
-  - [ ] 3.4 Implement score caching and memoization for performance
-  - [ ] 3.5 Write tests for score comparison functionality
-  - [ ] 3.6 Implement score comparison logic for game resolution
-  - [ ] 3.7 Write tests for edge cases (invalid serials, extreme scores)
-  - [ ] 3.8 Implement input validation and error handling
-  - [ ] 3.9 Verify all ScoringEngine tests pass
+- [x] 3. ScoringEngine Implementation  
+  - [x] 3.1 Write tests for deterministic scoring with serial number + daily seed
+  - [x] 3.2 Implement daily seeded scoring algorithm for consistent results
+  - [x] 3.3 Write tests for score consistency across multiple calculations
+  - [x] 3.4 Implement score caching and memoization for performance
+  - [x] 3.5 Write tests for score comparison functionality
+  - [x] 3.6 Implement score comparison logic for game resolution
+  - [x] 3.7 Write tests for edge cases (invalid serials, extreme scores)
+  - [x] 3.8 Implement input validation and error handling
+  - [x] 3.9 Verify all ScoringEngine tests pass
 
 - [ ] 4. GameMatchingEngine Implementation
   - [ ] 4.1 Write tests for virtual dollar pool management (add/remove)
@@ -50,57 +54,70 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [ ] 4.8 Implement thread-safe game processing and event emission
   - [ ] 4.9 Write tests for game session creation and data integrity
   - [ ] 4.10 Implement comprehensive game tracking and audit trail
-  - [ ] 4.11 Verify all GameMatchingEngine tests pass
+  - [ ] 4.11 Write tests for PlayerBalanceManager integration with game matching
+  - [ ] 4.12 Implement balance validation before allowing games (canPlayerPlay check)
+  - [ ] 4.13 Verify all GameMatchingEngine tests pass
 
-- [ ] 5. ProgressionManager Implementation
-  - [ ] 5.1 Write tests for 11-level betting progression ($1 to $1024)
-  - [ ] 5.2 Implement betting level advancement and validation
-  - [ ] 5.3 Write tests for cash-out decision logic with multiple strategies
-  - [ ] 5.4 Implement configurable cash-out strategies (conservative, balanced, aggressive)
-  - [ ] 5.5 Write tests for level progression tracking and history
-  - [ ] 5.6 Implement player progression path analytics
-  - [ ] 5.7 Write tests for edge cases at maximum level ($1024)
-  - [ ] 5.8 Implement proper handling of max-level scenarios and forced cash-outs
-  - [ ] 5.9 Verify all ProgressionManager tests pass
+- [ ] 5. ProgressionManager Implementation (Independent Run Logic)
+  - [ ] 5.1 Write tests for exponential betting progression ($1→$2→$4→$8→...→$512 bets, $2→$4→$8→...→$1024 wins)
+  - [ ] 5.2 Implement independent run management (each VirtualDollar = one jackpot attempt)
+  - [ ] 5.3 Write tests for new dollar creation after run completion (win/loss/cash-out)
+  - [ ] 5.4 Implement run completion logic and new run initiation for continuing players
+  - [ ] 5.5 Write tests for cash-out decision logic with multiple strategies per run
+  - [ ] 5.6 Implement configurable cash-out strategies (conservative, balanced, aggressive)
+  - [ ] 5.7 Write tests for PlayerBalanceManager integration (multiple independent runs per player)
+  - [ ] 5.8 Implement proper handling of run completion and player fund validation for new runs
+  - [ ] 5.9 Write tests for maximum level (Level 10: $512 bet, $1024 win) with forced cash-out
+  - [ ] 5.10 Implement jackpot handling and automatic run completion at Level 10
+  - [ ] 5.11 Verify all ProgressionManager tests pass with independent run logic
 
-- [ ] 6. RevenueCalculator Implementation
-  - [ ] 6.1 Write tests for platform fee calculation (20c per game)
+- [ ] 6. RevenueCalculator & PlayerBalanceManager Implementation
+  - [ ] 6.1 Write tests for platform fee calculation (10c per player, 20c total per game)
   - [ ] 6.2 Implement accurate platform revenue tracking per game
-  - [ ] 6.3 Write tests for charity contribution calculations (10-100% configurable)
+  - [ ] 6.3 Write tests for 3-part balance charity calculations (from currentProgression only)
   - [ ] 6.4 Implement flexible charity percentage system with validation
-  - [ ] 6.5 Write tests for player winnings and loss tracking
-  - [ ] 6.6 Implement comprehensive player payout calculations
-  - [ ] 6.7 Write tests for revenue stream separation and categorization
-  - [ ] 6.8 Implement detailed revenue reporting and analytics
-  - [ ] 6.9 Write tests for mathematical accuracy and edge cases
-  - [ ] 6.10 Implement validation for zero values and maximum amounts
-  - [ ] 6.11 Verify all RevenueCalculator tests pass
+  - [ ] 6.5 Write tests for PlayerBalanceManager transaction processing
+  - [ ] 6.6 Implement PlayerBalanceManager with game fees, progression, and cash-outs
+  - [ ] 6.7 Write tests for player winnings and loss tracking across all balance types
+  - [ ] 6.8 Implement comprehensive player payout calculations with balance separation
+  - [ ] 6.9 Write tests for revenue stream separation and categorization
+  - [ ] 6.10 Implement detailed revenue reporting and analytics
+  - [ ] 6.11 Write tests for transaction audit trail and balance consistency
+  - [ ] 6.12 Implement validation for zero values and maximum amounts
+  - [ ] 6.13 Write tests for player retirement scenarios (insufficient donation balance)
+  - [ ] 6.14 Verify all RevenueCalculator and PlayerBalanceManager tests pass
 
 - [ ] 7. SimulationController Implementation
-  - [ ] 7.1 Write tests for simulation orchestration with all components
+  - [ ] 7.1 Write tests for simulation orchestration with all components including PlayerBalanceManager
   - [ ] 7.2 Implement master controller that coordinates all engine components
-  - [ ] 7.3 Write tests for simulation parameter validation and handling
-  - [ ] 7.4 Implement comprehensive parameter validation and sanitization
-  - [ ] 7.5 Write tests for simulation progress tracking and reporting
-  - [ ] 7.6 Implement real-time progress updates and completion estimation
-  - [ ] 7.7 Write tests for simulation cancellation and cleanup
-  - [ ] 7.8 Implement graceful simulation termination and resource cleanup
-  - [ ] 7.9 Write tests for final dataset generation and export
-  - [ ] 7.10 Implement comprehensive data export and formatting
-  - [ ] 7.11 Verify all SimulationController tests pass
+  - [ ] 7.3 Write tests for player initialization with starting donation balance ($20)
+  - [ ] 7.4 Implement player lifecycle management (creation, activation, retirement)
+  - [ ] 7.5 Write tests for simulation parameter validation and handling
+  - [ ] 7.6 Implement comprehensive parameter validation and sanitization
+  - [ ] 7.7 Write tests for simulation progress tracking and reporting
+  - [ ] 7.8 Implement real-time progress updates and completion estimation
+  - [ ] 7.9 Write tests for simulation cancellation and cleanup
+  - [ ] 7.10 Implement graceful simulation termination and resource cleanup
+  - [ ] 7.11 Write tests for final dataset generation and export with player balance data
+  - [ ] 7.12 Implement comprehensive data export and formatting
+  - [ ] 7.13 Verify all SimulationController tests pass
 
-- [ ] 8. Integration & End-to-End Testing
-  - [ ] 8.1 Write integration tests for complete game flow (dollar creation to cash-out)
-  - [ ] 8.2 Test data consistency across all system components
-  - [ ] 8.3 Write tests for multiple simultaneous games without interference
-  - [ ] 8.4 Validate system behavior with various player count scenarios
-  - [ ] 8.5 Write tests for 30-day simulation with realistic parameters
-  - [ ] 8.6 Test deterministic behavior with identical seed values
-  - [ ] 8.7 Write performance tests for large datasets (10,000+ dollars)
-  - [ ] 8.8 Validate memory usage remains stable during long simulations
-  - [ ] 8.9 Write tests for audit trail completeness and regulatory compliance
-  - [ ] 8.10 Test system recovery after simulated failures
-  - [ ] 8.11 Verify all integration tests pass
+- [ ] 8. Integration & End-to-End Testing (Independent Run System)
+  - [ ] 8.1 Write integration tests for complete independent run flow (Level 1 → jackpot or cash-out)
+  - [ ] 8.2 Test multiple independent runs per player with separate run tracking
+  - [ ] 8.3 Write tests for player lifecycle with multiple jackpot attempts (run completion → new run creation)
+  - [ ] 8.4 Validate run isolation (one run's outcome doesn't affect another run)
+  - [ ] 8.5 Test exponential progression accuracy ($1→$2→$4...→$512 bets, $2→$4→$8...→$1024 wins)
+  - [ ] 8.6 Write tests for jackpot scenario (Level 10: $512 bet, $1024 win, forced completion)
+  - [ ] 8.7 Test various player investment scenarios ($5 = 4 jackpot attempts, $20 = 18 jackpot attempts)
+  - [ ] 8.8 Validate PlayerBalanceManager with multiple concurrent independent runs
+  - [ ] 8.9 Test 30-day simulation with realistic run completion rates and new run creation
+  - [ ] 8.10 Test deterministic behavior with identical seed values across independent runs
+  - [ ] 8.11 Write performance tests for large datasets (10,000+ players × multiple runs each)
+  - [ ] 8.12 Validate memory usage with run history and transaction tracking
+  - [ ] 8.13 Test audit trail completeness for regulatory compliance (all runs tracked)
+  - [ ] 8.14 Test system recovery with run integrity preservation
+  - [ ] 8.15 Verify all integration tests pass with independent run architecture
 
 - [ ] 9. Performance Optimization & Validation
   - [ ] 9.1 Implement object pooling for GameSession and VirtualDollar objects

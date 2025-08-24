@@ -32,21 +32,22 @@ export enum CashOutStrategy {
 // ===== CORE INTERFACES =====
 
 /**
- * Virtual Dollar - Represents an individual dollar bill in the game
- * Each dollar has a unique serial number and tracks its complete lifecycle
+ * Virtual Dollar - Represents one independent jackpot run from Level 1 to completion
+ * Each dollar represents a single attempt at the jackpot, not persistent progression
  */
 export interface VirtualDollar {
-  id: string;                           // Unique identifier for this virtual dollar
+  id: string;                           // Unique identifier for this virtual dollar run
   serialNumber: string;                 // Format: letter + 8 digits + letter (e.g., "L12345678A")
   currentScore: number;                 // Current algorithmic score (0-1)
-  currentLevel: BettingLevel;           // Current betting level (1-11)
-  state: DollarState;                   // Current lifecycle state
+  currentLevel: BettingLevel;           // Current betting level in THIS run (1-11)
+  state: DollarState;                   // Current lifecycle state of THIS run
   ownerId: string;                      // ID of the player who owns this dollar
-  createdAt: Date;                      // When this virtual dollar was created
-  gameHistory: GameSession[];           // Complete history of games played
-  totalGamesPlayed: number;             // Total number of games participated in
-  totalWinnings: number;                // Total amount won across all games
-  totalLosses: number;                  // Total amount lost across all games
+  runId: string;                        // Unique run identifier (multiple runs per player)
+  createdAt: Date;                      // When this virtual dollar run was created
+  gameHistory: GameSession[];           // Complete history of games in THIS run only
+  gamesInThisRun: number;               // Number of games played in THIS run
+  currentRunWinnings: number;           // Amount that could be won if cashed out NOW
+  isIndependentRun: boolean;            // Flag indicating this is an independent jackpot attempt
 }
 
 /**
@@ -86,7 +87,7 @@ export interface RevenueStream {
 
 // ===== TYPE ALIASES =====
 
-export type BettingLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+export type BettingLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export type SerialNumberPattern = string; // Format: /^[A-Z]\d{8}[A-Z]$/
 
@@ -206,8 +207,8 @@ export function validateVirtualDollar(dollar: VirtualDollar): ValidationResult {
   }
 
   // Validate level range
-  if (dollar.currentLevel < 1 || dollar.currentLevel > 11) {
-    errors.push('Current level must be between 1 and 11');
+  if (dollar.currentLevel < 1 || dollar.currentLevel > 10) {
+    errors.push('Current level must be between 1 and 10');
   }
 
   // Validate state
@@ -215,17 +216,17 @@ export function validateVirtualDollar(dollar: VirtualDollar): ValidationResult {
     errors.push('Invalid dollar state');
   }
 
-  // Validate financial consistency
-  if (dollar.totalGamesPlayed < 0) {
-    errors.push('Total games played cannot be negative');
+  // Validate run consistency
+  if (dollar.gamesInThisRun < 0) {
+    errors.push('Games in this run cannot be negative');
   }
 
-  if (dollar.totalWinnings < 0) {
-    errors.push('Total winnings cannot be negative');
+  if (dollar.currentRunWinnings < 0) {
+    errors.push('Current run winnings cannot be negative');
   }
 
-  if (dollar.totalLosses < 0) {
-    errors.push('Total losses cannot be negative');
+  if (!dollar.runId || dollar.runId.trim() === '') {
+    errors.push('Run ID is required for independent runs');
   }
 
   return {
@@ -324,18 +325,24 @@ export function generateSerialNumber(): string {
 }
 
 /**
- * Calculate betting level value in dollars
+ * Calculate betting level value in dollars (exponential: 2^(level-1))
  */
 export function getBettingLevelValue(level: BettingLevel): number {
-  const values = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
-  return values[level - 1];
+  return Math.pow(2, level - 1);
+}
+
+/**
+ * Calculate winning amount for a betting level (double the bet)
+ */
+export function getBettingLevelWinnings(level: BettingLevel): number {
+  return getBettingLevelValue(level) * 2;
 }
 
 /**
  * Check if a betting level is valid
  */
 export function isValidBettingLevel(level: number): level is BettingLevel {
-  return level >= 1 && level <= 11 && Number.isInteger(level);
+  return level >= 1 && level <= 10 && Number.isInteger(level);
 }
 
 /**
@@ -373,4 +380,69 @@ export function createDefaultSimulationParameters(): SimulationParameters {
     randomSeed: Math.floor(Math.random() * 1000000),
     playerGrowthRate: 0.02
   };
+}
+
+// ===== PLAYER BALANCE MANAGEMENT =====
+
+/**
+ * Player - Represents a player with 3-part balance system for realistic fund management
+ * Separates donation balance, winnings balance, and at-risk progression
+ */
+export interface Player {
+  id: string;                           // Player identifier
+  donationBalance: number;              // Original money for game fees (e.g., $20 start)
+  winningsBalance: number;              // Cashed-out winnings (post-charity %)
+  currentProgression: number;           // Uncommitted winnings (at-risk)
+  gamesPlayed: number;                  // Total games played
+  virtualDollars: VirtualDollar[];      // All dollars owned by this player
+  cashOutStrategy: CashOutStrategy;     // Player's cash-out behavior
+  isActive: boolean;                    // Whether player can still play games
+  createdAt: Date;                      // When player joined
+}
+
+/**
+ * Game Transaction - Records all financial transactions for audit trail
+ */
+export interface GameTransaction {
+  id: string;                           // Transaction identifier
+  playerId: string;                     // Player who made the transaction
+  type: 'GAME_FEE' | 'WIN' | 'CASH_OUT' | 'LOSS'; // Transaction type
+  amount: number;                       // Transaction amount
+  level?: BettingLevel;                 // Betting level (if applicable)
+  virtualDollarId?: string;             // Associated virtual dollar (if applicable)
+  timestamp: Date;                      // When transaction occurred
+  balanceAfter: {                       // Player balance after transaction
+    donationBalance: number;
+    winningsBalance: number;
+    currentProgression: number;
+  };
+}
+
+/**
+ * Player Balance Manager - Manages 3-part balance system without tight coupling
+ * Handles game fees, progression tracking, and cash-out processing
+ */
+export interface PlayerBalanceManager {
+  // Player management
+  createPlayer(id: string, initialDonation: number, strategy: CashOutStrategy): Player;
+  getPlayer(playerId: string): Player | undefined;
+  getAllPlayers(): Player[];
+  getActivePlayers(): Player[];
+  
+  // Game eligibility
+  canPlayerPlay(playerId: string): boolean;
+  getPlayerGameCredits(playerId: string): number; // How many games they can afford
+  
+  // Game transactions
+  processGameFee(playerId: string): boolean; // Deduct $1.10 from donation balance
+  addWinProgression(playerId: string, amount: number): void; // Add to at-risk progression
+  loseProgression(playerId: string): number; // Clear progression, return lost amount
+  processCashOut(playerId: string, charityPercentage: number): { playerAmount: number; charityAmount: number };
+  
+  // Reporting
+  getTransactionHistory(playerId: string): GameTransaction[];
+  getTotalDonations(): number;
+  getTotalWinnings(): number;
+  getTotalCharityContributions(): number;
+  getPlayerStatistics(playerId: string): PlayerStatistics;
 }

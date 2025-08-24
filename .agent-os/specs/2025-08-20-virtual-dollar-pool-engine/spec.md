@@ -14,7 +14,7 @@ Build a completely new game simulation engine that models the actual dollar bill
 
 As an investment analyst, I want to simulate the actual dollar scanning game mechanics so that I can validate the economic model with realistic player behavior and revenue generation patterns.
 
-The simulation must model individual virtual dollars with generated serial numbers (like "L12345678A") that receive algorithmic scores based on daily seeds. These dollars enter a pool where they're matched 1v1 with higher scores winning. Winners progress through betting levels ($1→$2→$4→...→$1024) and decide whether to cash out or continue, directly impacting platform revenue through 20c per game click fees and charity percentages.
+The simulation must model individual virtual dollars as independent jackpot runs, each with generated serial numbers (like "L12345678A") that receive algorithmic scores based on daily seeds. These dollars enter a pool where they're matched 1v1 with higher scores winning. Winners progress through exponential betting levels ($1→$2→$4→$8→...→$512 bets, winning $2→$4→$8→$16→...→$1024) and decide whether to cash out or continue. Each virtual dollar represents one complete attempt at the jackpot, with players creating new dollars for additional attempts.
 
 ### Business Development Team Revenue Modeling
 
@@ -33,8 +33,9 @@ The system must maintain detailed records of each virtual dollar's journey throu
 1. **Virtual Dollar Management System** - Generate virtual dollars with realistic serial numbers and manage their lifecycle through scanning, scoring, pooling, and game participation
 2. **Daily Seeded Scoring Algorithm** - Implement deterministic scoring system that assigns scores to each serial number + daily seed combination for consistent gameplay
 3. **1v1 Game Matching Engine** - Create automated matching system that pairs virtual dollars from the pool and executes games based on algorithmic scores
-4. **Progressive Betting Level System** - Manage 11-level progression ($1→$2→$4→$8→$16→$32→$64→$128→$256→$512→$1024) with cash-out decision points
-5. **Revenue Calculation Engine** - Track platform click revenue (20c per game), charity contributions (adjustable percentage of cash-outs), and player winnings separately
+4. **Independent Run Betting System** - Manage exponential betting progression ($1→$2→$4→$8→$16→$32→$64→$128→$256→$512 bet, winning double each level) where each virtual dollar represents one complete jackpot attempt from Level 1 to completion
+5. **Player Balance Management System** - Implement 3-part balance system (donation balance, winnings balance, at-risk progression) for realistic fund tracking and game eligibility
+6. **Revenue Calculation Engine** - Track platform click revenue (10c per player per game), charity contributions (adjustable percentage of cash-outs), and player winnings separately
 
 ## Out of Scope
 
@@ -49,4 +50,8 @@ The system must maintain detailed records of each virtual dollar's journey throu
 
 1. **Functional Game Engine** - Complete simulation engine that can process 1 month of game activity with realistic player counts and generate comprehensive revenue reports
 2. **Performance Optimized Architecture** - Modular TypeScript system that can simulate thousands of virtual dollars and games while maintaining 60fps UI performance
-3. **Comprehensive Data Output** - Rich dataset including individual game sessions, dollar lifecycles, revenue streams, and player behavior patterns suitable for financial analysis and visualization
+3. **Comprehensive Data Output** - Rich dataset including individual game sessions, independent run tracking, multiple jackpot attempts per player, revenue streams, and player behavior patterns suitable for financial analysis and visualization
+
+## Critical Implementation Note
+
+**Independent Run Architecture**: Each `VirtualDollar` represents ONE complete jackpot attempt (Level 1 → Level 10 or earlier completion). Players with multiple game credits can make multiple independent jackpot attempts, each tracked as a separate `VirtualDollar` with unique `runId`. This ensures accurate modeling of the exponential betting system where a $5 player gets 4 separate chances at the $1024 jackpot.
