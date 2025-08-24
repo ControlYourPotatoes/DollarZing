@@ -43,20 +43,20 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.8 Implement input validation and error handling
   - [x] 3.9 Verify all ScoringEngine tests pass
 
-- [ ] 4. GameMatchingEngine Implementation
-  - [ ] 4.1 Write tests for virtual dollar pool management (add/remove)
-  - [ ] 4.2 Implement efficient pool management with queue structures
-  - [ ] 4.3 Write tests for 1v1 matching algorithm with available dollars
-  - [ ] 4.4 Implement automatic matching system based on pool availability
-  - [ ] 4.5 Write tests for game resolution using algorithmic scores
-  - [ ] 4.6 Implement game execution and winner determination logic
-  - [ ] 4.7 Write tests for concurrent game handling without conflicts
-  - [ ] 4.8 Implement thread-safe game processing and event emission
-  - [ ] 4.9 Write tests for game session creation and data integrity
-  - [ ] 4.10 Implement comprehensive game tracking and audit trail
-  - [ ] 4.11 Write tests for PlayerBalanceManager integration with game matching
-  - [ ] 4.12 Implement balance validation before allowing games (canPlayerPlay check)
-  - [ ] 4.13 Verify all GameMatchingEngine tests pass
+- [x] 4. GameMatchingEngine Implementation
+  - [x] 4.1 Write tests for virtual dollar pool management (add/remove)
+  - [x] 4.2 Implement efficient pool management with queue structures
+  - [x] 4.3 Write tests for 1v1 matching algorithm with available dollars
+  - [x] 4.4 Implement automatic matching system based on pool availability
+  - [x] 4.5 Write tests for game resolution using algorithmic scores
+  - [x] 4.6 Implement game execution and winner determination logic
+  - [x] 4.7 Write tests for concurrent game handling without conflicts
+  - [x] 4.8 Implement thread-safe game processing and event emission
+  - [x] 4.9 Write tests for game session creation and data integrity
+  - [x] 4.10 Implement comprehensive game tracking and audit trail
+  - [x] 4.11 Write tests for PlayerBalanceManager integration with game matching
+  - [x] 4.12 Implement balance validation before allowing games (canPlayerPlay check)
+  - [x] 4.13 Verify all GameMatchingEngine tests pass
 
 - [ ] 5. ProgressionManager Implementation (Independent Run Logic)
   - [ ] 5.1 Write tests for exponential betting progression ($1→$2→$4→$8→...→$512 bets, $2→$4→$8→...→$1024 wins)

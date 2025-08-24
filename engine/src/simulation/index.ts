@@ -18,7 +18,6 @@ import { validateSimulationParameters } from "../../../data/src/types/validation
 // Constants from legacy system
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
 const PLATFORM_FEE = 0.2;
-const PANAMA_LOTTERY_USERS = 1000000;
 
 // Seeded random number generator for consistent results
 class SeededRandom {
@@ -171,6 +170,33 @@ export class GrowthCalculator {
       (baseGrowthRate + randomFactor) * (1 + timeFactor) * growthMultiplier;
 
     return Math.floor(currentPlayers * (1 + effectiveGrowthRate));
+  }
+
+  calculatePanamaAdoption(
+    day: number,
+    currentPlayers: number,
+    adoptionRate: number,
+    totalPanamaUsers: number,
+    randomSeed: number
+  ): number {
+    const rng = new SeededRandom(day * 1000 + Math.floor(randomSeed * 10000));
+    
+    // S-curve adoption model for Panama market penetration
+    const maxAdoption = totalPanamaUsers * adoptionRate;
+    const growthRate = 0.05; // 5% daily growth rate during adoption phase
+    const midpoint = 90; // Day when adoption reaches 50%
+    
+    // Calculate adoption progress using logistic function
+    const x = (day - midpoint) / 20; // Scale factor for curve steepness
+    const adoptionProgress = 1 / (1 + Math.exp(-x));
+    
+    // Add randomness to adoption
+    const randomFactor = 0.9 + (rng.next() * 0.2); // ±10% variation
+    
+    const targetPlayers = Math.floor(maxAdoption * adoptionProgress * randomFactor);
+    
+    // Ensure monotonic growth (no player loss)
+    return Math.max(currentPlayers, targetPlayers);
   }
 }
 

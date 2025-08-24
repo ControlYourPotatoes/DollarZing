@@ -215,7 +215,7 @@ export class VirtualDollarManager {
    * Get dollar by serial number
    */
   getDollarBySerial(serialNumber: string): VirtualDollar | null {
-    for (const dollar of this.dollars.values()) {
+    for (const dollar of Array.from(this.dollars.values())) {
       if (dollar.serialNumber === serialNumber) {
         return dollar;
       }
@@ -230,7 +230,7 @@ export class VirtualDollarManager {
     const playerDollarIds = this.dollarsByPlayer.get(playerId) || new Set();
     const dollars: VirtualDollar[] = [];
     
-    for (const dollarId of playerDollarIds) {
+    for (const dollarId of Array.from(playerDollarIds)) {
       const dollar = this.dollars.get(dollarId);
       if (dollar) {
         dollars.push(dollar);
@@ -246,7 +246,7 @@ export class VirtualDollarManager {
   getPooledDollars(): VirtualDollar[] {
     const pooled: VirtualDollar[] = [];
     
-    for (const dollarId of this.pooledDollars) {
+    for (const dollarId of Array.from(this.pooledDollars)) {
       const dollar = this.dollars.get(dollarId);
       if (dollar && dollar.state === DollarState.POOLED) {
         pooled.push(dollar);
@@ -290,7 +290,7 @@ export class VirtualDollarManager {
     let inGameDollars = 0;
     let completedDollars = 0;
 
-    for (const dollar of this.dollars.values()) {
+    for (const dollar of Array.from(this.dollars.values())) {
       switch (dollar.state) {
         case DollarState.POOLED:
           pooledDollars++;
@@ -344,7 +344,7 @@ export class VirtualDollarManager {
    * Get dollar by run ID
    */
   getDollarByRunId(runId: string): VirtualDollar | null {
-    for (const dollar of this.dollars.values()) {
+    for (const dollar of Array.from(this.dollars.values())) {
       if (dollar.runId === runId) {
         return dollar;
       }

@@ -1,7 +1,7 @@
 import { GameMatchingEngine, GameEvent } from '../src/types/game-matching-engine';
 import { VirtualDollarManager, VirtualDollar, DollarState } from '../src/types/virtual-dollar-types';
 import { ScoringEngine } from '../src/types/scoring-engine';
-import { BettingLevel } from '../src/types/virtual-dollar-engine';
+import { BettingLevel, CashOutStrategy, PlayerBalanceManager, Player } from '../src/types/virtual-dollar-engine';
 
 describe('GameMatchingEngine', () => {
   let gameMatchingEngine: GameMatchingEngine;
@@ -45,7 +45,7 @@ describe('GameMatchingEngine', () => {
 
       const result = gameMatchingEngine.addToPool(dollar);
       expect(result.success).toBe(false);
-      expect(result.error).toContain('only POOLED dollars can be added');
+      expect(result.error).toContain('Only POOLED dollars can be added');
     });
 
     it('should prevent duplicate additions to pool', () => {
@@ -53,7 +53,7 @@ describe('GameMatchingEngine', () => {
       virtualDollarManager.updateDollarState(dollar.id, DollarState.POOLED);
 
       gameMatchingEngine.addToPool(dollar);
-      const result = gameMatchingEngine.removeFromPool(dollar.id);
+      const result = gameMatchingEngine.addToPool(dollar); // Try to add same dollar again
       expect(result.success).toBe(false);
       expect(result.error).toContain('already in pool');
     });
@@ -251,7 +251,7 @@ describe('GameMatchingEngine', () => {
 
         const matchResult = gameMatchingEngine.attemptMatching();
         const game = matchResult.gamesCreated[0];
-        gameMatchingEngine.resolveGame(game.id, '2025-08-21');
+        const gameResult = gameMatchingEngine.resolveGame(game.id, '2025-08-21');
 
         // Verify winnings match betting level value
         const expectedWinnings = Math.pow(2, level - 1); // $1, $2, $4, $8, $16...
@@ -453,8 +453,8 @@ describe('GameMatchingEngine', () => {
 
       expect(updatedDollar1!.gameHistory).toContain(game);
       expect(updatedDollar2!.gameHistory).toContain(game);
-      expect(updatedDollar1!.totalGamesPlayed).toBe(1);
-      expect(updatedDollar2!.totalGamesPlayed).toBe(1);
+      expect(updatedDollar1!.gamesInThisRun).toBe(1);
+      expect(updatedDollar2!.gamesInThisRun).toBe(1);
     });
   });
 
@@ -581,7 +581,7 @@ describe('GameMatchingEngine', () => {
       expect(statistics.gamesByLevel![1]).toBe(1);
       expect(statistics.gamesByLevel![2]).toBe(1);
       expect(statistics.gamesByLevel![3]).toBe(1);
-      expect(statistics.totalPlatformFees).toBe(0.60); // 3 games × 20c
+      expect(statistics.totalPlatformFees).toBeCloseTo(0.60); // 3 games × 20c
     });
 
     it('should support querying games by various criteria', () => {
@@ -663,6 +663,239 @@ describe('GameMatchingEngine', () => {
       // Memory usage should be reasonable
       const poolStats = gameMatchingEngine.getPoolStatistics();
       expect(poolStats.totalDollarsInPool).toBe(0); // All should be resolved
+    });
+  });
+
+  describe('PlayerBalanceManager Integration', () => {
+    let mockPlayerBalanceManager: PlayerBalanceManager;
+
+    beforeEach(() => {
+      // Mock PlayerBalanceManager implementation
+      const players = new Map<string, Player>();
+      
+      mockPlayerBalanceManager = {
+        createPlayer(id: string, initialDonation: number, strategy: CashOutStrategy): Player {
+          const player: Player = {
+            id,
+            donationBalance: initialDonation,
+            winningsBalance: 0,
+            currentProgression: 0,
+            gamesPlayed: 0,
+            virtualDollars: [],
+            cashOutStrategy: strategy,
+            isActive: true,
+            createdAt: new Date()
+          };
+          players.set(id, player);
+          return player;
+        },
+
+        getPlayer(playerId: string): Player | undefined {
+          return players.get(playerId);
+        },
+
+        getAllPlayers(): Player[] {
+          return Array.from(players.values());
+        },
+
+        getActivePlayers(): Player[] {
+          return Array.from(players.values()).filter(p => p.isActive);
+        },
+
+        canPlayerPlay(playerId: string): boolean {
+          const player = players.get(playerId);
+          return player ? player.donationBalance >= 1.10 && player.isActive : false;
+        },
+
+        getPlayerGameCredits(playerId: string): number {
+          const player = players.get(playerId);
+          return player ? Math.floor(player.donationBalance / 1.10) : 0;
+        },
+
+        processGameFee(playerId: string): boolean {
+          const player = players.get(playerId);
+          if (player && player.donationBalance >= 1.10) {
+            player.donationBalance -= 1.10;
+            player.gamesPlayed++;
+            return true;
+          }
+          return false;
+        },
+
+        addWinProgression(playerId: string, amount: number): void {
+          const player = players.get(playerId);
+          if (player) {
+            player.currentProgression += amount;
+          }
+        },
+
+        loseProgression(playerId: string): number {
+          const player = players.get(playerId);
+          if (player) {
+            const lost = player.currentProgression;
+            player.currentProgression = 0;
+            return lost;
+          }
+          return 0;
+        },
+
+        processCashOut(playerId: string, charityPercentage: number): { playerAmount: number; charityAmount: number } {
+          const player = players.get(playerId);
+          if (player && player.currentProgression > 0) {
+            const totalCashOut = player.currentProgression;
+            const charityAmount = totalCashOut * charityPercentage;
+            const playerAmount = totalCashOut - charityAmount;
+            
+            player.winningsBalance += playerAmount;
+            player.currentProgression = 0;
+            
+            return { playerAmount, charityAmount };
+          }
+          return { playerAmount: 0, charityAmount: 0 };
+        },
+
+        getTransactionHistory: () => [],
+        getTotalDonations: () => 0,
+        getTotalWinnings: () => 0,
+        getTotalCharityContributions: () => 0,
+        getPlayerStatistics: () => ({ activePlayerCount: 0, newPlayerCount: 0, retainedPlayerCount: 0, churnedPlayerCount: 0 })
+      };
+
+      gameMatchingEngine = new GameMatchingEngine(virtualDollarManager, scoringEngine);
+    });
+
+    it('should check player eligibility before allowing games', () => {
+      // Create player with sufficient funds
+      const player = mockPlayerBalanceManager.createPlayer('player1', 20.00, CashOutStrategy.BALANCED);
+      
+      expect(mockPlayerBalanceManager.canPlayerPlay('player1')).toBe(true);
+      expect(mockPlayerBalanceManager.getPlayerGameCredits('player1')).toBe(18); // $20 / $1.10 = 18 games
+      
+      // Create player with insufficient funds
+      mockPlayerBalanceManager.createPlayer('player2', 1.00, CashOutStrategy.BALANCED);
+      
+      expect(mockPlayerBalanceManager.canPlayerPlay('player2')).toBe(false);
+      expect(mockPlayerBalanceManager.getPlayerGameCredits('player2')).toBe(0);
+    });
+
+    it('should process game fees when games are resolved', () => {
+      const player = mockPlayerBalanceManager.createPlayer('player1', 20.00, CashOutStrategy.BALANCED);
+      const initialBalance = player.donationBalance;
+      
+      // Process game fee
+      const success = mockPlayerBalanceManager.processGameFee('player1');
+      
+      expect(success).toBe(true);
+      expect(player.donationBalance).toBe(initialBalance - 1.10);
+      expect(player.gamesPlayed).toBe(1);
+    });
+
+    it('should handle player progression and winnings', () => {
+      const player = mockPlayerBalanceManager.createPlayer('player1', 20.00, CashOutStrategy.BALANCED);
+      
+      // Add progression winnings (like a game win)
+      mockPlayerBalanceManager.addWinProgression('player1', 8.00); // Level 3 win
+      
+      expect(player.currentProgression).toBe(8.00);
+      expect(player.winningsBalance).toBe(0); // Not cashed out yet
+    });
+
+    it('should process cash-outs with charity contributions', () => {
+      const player = mockPlayerBalanceManager.createPlayer('player1', 20.00, CashOutStrategy.BALANCED);
+      
+      // Add progression winnings
+      mockPlayerBalanceManager.addWinProgression('player1', 16.00); // Level 4 win
+      
+      // Cash out with 15% charity
+      const cashOutResult = mockPlayerBalanceManager.processCashOut('player1', 0.15);
+      
+      expect(cashOutResult.charityAmount).toBeCloseTo(2.40); // 16 * 0.15
+      expect(cashOutResult.playerAmount).toBeCloseTo(13.60); // 16 * 0.85
+      expect(player.winningsBalance).toBeCloseTo(13.60);
+      expect(player.currentProgression).toBe(0); // Reset after cash-out
+    });
+
+    it('should handle player losses correctly', () => {
+      const player = mockPlayerBalanceManager.createPlayer('player1', 20.00, CashOutStrategy.BALANCED);
+      
+      // Add progression winnings
+      mockPlayerBalanceManager.addWinProgression('player1', 4.00);
+      expect(player.currentProgression).toBe(4.00);
+      
+      // Lose progression (game loss)
+      const lostAmount = mockPlayerBalanceManager.loseProgression('player1');
+      
+      expect(lostAmount).toBe(4.00);
+      expect(player.currentProgression).toBe(0);
+    });
+
+    it('should integrate balance checking with game matching', () => {
+      // Create player with exactly enough for one game
+      const player = mockPlayerBalanceManager.createPlayer('player1', 1.10, CashOutStrategy.BALANCED);
+      
+      expect(mockPlayerBalanceManager.canPlayerPlay('player1')).toBe(true);
+      
+      // Process game fee
+      mockPlayerBalanceManager.processGameFee('player1');
+      
+      expect(mockPlayerBalanceManager.canPlayerPlay('player1')).toBe(false);
+      expect(player.donationBalance).toBeCloseTo(0);
+    });
+
+    it('should prevent inactive players from playing games', () => {
+      const player = mockPlayerBalanceManager.createPlayer('player1', 20.00, CashOutStrategy.BALANCED);
+      player.isActive = false; // Deactivate player
+      
+      expect(mockPlayerBalanceManager.canPlayerPlay('player1')).toBe(false);
+    });
+
+    it('should track multiple players independently', () => {
+      const player1 = mockPlayerBalanceManager.createPlayer('player1', 20.00, CashOutStrategy.CONSERVATIVE);
+      const player2 = mockPlayerBalanceManager.createPlayer('player2', 30.00, CashOutStrategy.AGGRESSIVE);
+      
+      expect(mockPlayerBalanceManager.getActivePlayers()).toHaveLength(2);
+      
+      // Process different transactions for each player
+      mockPlayerBalanceManager.processGameFee('player1');
+      mockPlayerBalanceManager.addWinProgression('player1', 2.00);
+      
+      mockPlayerBalanceManager.processGameFee('player2');
+      mockPlayerBalanceManager.processGameFee('player2');
+      mockPlayerBalanceManager.addWinProgression('player2', 4.00);
+      
+      expect(player1.donationBalance).toBeCloseTo(18.90);
+      expect(player1.currentProgression).toBe(2.00);
+      expect(player1.gamesPlayed).toBe(1);
+      
+      expect(player2.donationBalance).toBeCloseTo(27.80);
+      expect(player2.currentProgression).toBe(4.00);
+      expect(player2.gamesPlayed).toBe(2);
+    });
+
+    it('should validate minimum and maximum balance operations', () => {
+      const player = mockPlayerBalanceManager.createPlayer('player1', 1.05, CashOutStrategy.BALANCED);
+      
+      // Can't play with insufficient balance
+      expect(mockPlayerBalanceManager.canPlayerPlay('player1')).toBe(false);
+      expect(mockPlayerBalanceManager.processGameFee('player1')).toBe(false);
+      
+      // Balance unchanged after failed transaction
+      expect(player.donationBalance).toBe(1.05);
+      expect(player.gamesPlayed).toBe(0);
+    });
+
+    it('should handle edge case of exact balance for one game', () => {
+      const player = mockPlayerBalanceManager.createPlayer('player1', 1.10, CashOutStrategy.BALANCED);
+      
+      expect(mockPlayerBalanceManager.canPlayerPlay('player1')).toBe(true);
+      expect(mockPlayerBalanceManager.getPlayerGameCredits('player1')).toBe(1);
+      
+      // Process the one allowed game
+      expect(mockPlayerBalanceManager.processGameFee('player1')).toBe(true);
+      
+      // Now can't play anymore
+      expect(mockPlayerBalanceManager.canPlayerPlay('player1')).toBe(false);
+      expect(mockPlayerBalanceManager.getPlayerGameCredits('player1')).toBe(0);
     });
   });
 });

@@ -4,7 +4,7 @@
 
 import { VirtualDollar, DollarState, VirtualDollarManager } from './virtual-dollar-types';
 import { ScoringEngine, ScoreResult } from './scoring-engine';
-import { GameSession, BettingLevel, getBettingLevelValue } from './virtual-dollar-engine';
+import { GameSession, BettingLevel, getBettingLevelValue, PlayerBalanceManager } from './virtual-dollar-engine';
 
 // Game event types for pub/sub system
 export type GameEventType = 'gameCreated' | 'gameResolved' | 'poolUpdated' | 'matchingAttempted';
@@ -80,6 +80,7 @@ type EventListener = (event: GameEvent) => void;
 export class GameMatchingEngine {
   private dollarManager: VirtualDollarManager;
   private scoringEngine: ScoringEngine;
+  private playerBalanceManager?: PlayerBalanceManager;
   
   // Pool management
   private pooledDollars: Map<string, VirtualDollar> = new Map();
@@ -130,6 +131,14 @@ export class GameMatchingEngine {
       return {
         success: false,
         error: 'Dollar already in pool'
+      };
+    }
+
+    // Validate player balance if balance manager is available
+    if (this.playerBalanceManager && !this.playerBalanceManager.canPlayerPlay(dollar.ownerId)) {
+      return {
+        success: false,
+        error: 'Player does not have sufficient balance to play games'
       };
     }
 
@@ -345,6 +354,19 @@ export class GameMatchingEngine {
       game.winner = winner;
       game.loser = loser;
 
+      // Process player balance transactions if balance manager is available
+      if (this.playerBalanceManager) {
+        // Process game fees for both players
+        this.playerBalanceManager.processGameFee(winner.ownerId);
+        this.playerBalanceManager.processGameFee(loser.ownerId);
+
+        // Add winnings to winner's progression
+        this.playerBalanceManager.addWinProgression(winner.ownerId, game.winnings);
+
+        // Clear loser's progression
+        this.playerBalanceManager.loseProgression(loser.ownerId);
+      }
+
       // Update dollar states
       this.dollarManager.updateDollarState(winner.id, DollarState.WON);
       this.dollarManager.updateDollarState(loser.id, DollarState.LOST);
@@ -352,10 +374,10 @@ export class GameMatchingEngine {
       // Update dollar game history and statistics
       winner.gameHistory.push(game);
       loser.gameHistory.push(game);
-      winner.totalGamesPlayed++;
-      loser.totalGamesPlayed++;
-      winner.totalWinnings += game.winnings;
-      loser.totalLosses += getBettingLevelValue(game.level);
+      winner.gamesInThisRun++;
+      loser.gamesInThisRun++;
+      winner.currentRunWinnings = game.winnings;
+      // Note: loser loses their currentRunWinnings (already implied by LOST state)
 
       // Move game from active to completed
       this.activeGames.delete(gameId);
@@ -435,7 +457,7 @@ export class GameMatchingEngine {
     }
 
     // Calculate statistics from completed games
-    for (const game of this.completedGames.values()) {
+    for (const game of Array.from(this.completedGames.values())) {
       gamesByLevel[game.level]++;
       totalPlatformFees += game.platformFee;
       totalWinnings += game.winnings;
@@ -486,6 +508,13 @@ export class GameMatchingEngine {
       throw new Error('Maximum concurrent games must be at least 1');
     }
     this.maxConcurrentGames = max;
+  }
+
+  /**
+   * Set PlayerBalanceManager for balance validation
+   */
+  setPlayerBalanceManager(balanceManager: PlayerBalanceManager): void {
+    this.playerBalanceManager = balanceManager;
   }
 
   /**
