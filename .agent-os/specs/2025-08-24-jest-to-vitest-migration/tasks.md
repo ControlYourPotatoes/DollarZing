@@ -1,4 +1,4 @@
-# Spec Tasks
+  /# Spec Tasks
 
 These are the tasks to be completed for the spec detailed in @.agent-os/specs/2025-08-24-jest-to-vitest-migration/spec.md
 
@@ -21,12 +21,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.4 Configure coverage collection to match existing Jest coverage paths
   - [x] 2.5 Verify configuration works with existing TypeScript and ESM setup
 
-- [ ] 3. Existing Test Migration Validation
-  - [ ] 3.1 Run all existing engine tests with Vitest to identify any compatibility issues
-  - [ ] 3.2 Fix any TypeScript global definition issues (describe, test, expect)
-  - [ ] 3.3 Validate that all test mocks and assertions work with Vitest
-  - [ ] 3.4 Verify test file pattern matching works correctly
-  - [ ] 3.5 Ensure all existing tests pass without modification
+- [x] 3. Existing Test Migration Validation
+  - [x] 3.1 Run all existing engine tests with Vitest to identify any compatibility issues
+  - [x] 3.2 Fix any TypeScript global definition issues (describe, test, expect)
+  - [x] 3.3 Validate that all test mocks and assertions work with Vitest
+  - [x] 3.4 Verify test file pattern matching works correctly
+  - [x] 3.5 Ensure all existing tests pass without modification
 
 - [ ] 4. Complete Task 8 Integration Tests - Independent Run Flow
   - [ ] 4.1 Write integration tests for complete independent run flow (Level 1 → jackpot or cash-out)

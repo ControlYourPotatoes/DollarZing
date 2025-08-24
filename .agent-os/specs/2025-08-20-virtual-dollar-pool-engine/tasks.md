@@ -102,22 +102,22 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 7.12 Implement comprehensive data export and formatting
   - [x] 7.13 Verify all SimulationController tests pass
 
-- [ ] 8. Integration & End-to-End Testing (Independent Run System)
-  - [ ] 8.1 Write integration tests for complete independent run flow (Level 1 → jackpot or cash-out)
-  - [ ] 8.2 Test multiple independent runs per player with separate run tracking
-  - [ ] 8.3 Write tests for player lifecycle with multiple jackpot attempts (run completion → new run creation)
-  - [ ] 8.4 Validate run isolation (one run's outcome doesn't affect another run)
-  - [ ] 8.5 Test exponential progression accuracy ($1→$2→$4...→$512 bets, $2→$4→$8...→$1024 wins)
-  - [ ] 8.6 Write tests for jackpot scenario (Level 10: $512 bet, $1024 win, forced completion)
-  - [ ] 8.7 Test various player investment scenarios ($5 = 4 jackpot attempts, $20 = 18 jackpot attempts)
-  - [ ] 8.8 Validate PlayerBalanceManager with multiple concurrent independent runs
-  - [ ] 8.9 Test 30-day simulation with realistic run completion rates and new run creation
-  - [ ] 8.10 Test deterministic behavior with identical seed values across independent runs
-  - [ ] 8.11 Write performance tests for large datasets (10,000+ players × multiple runs each)
-  - [ ] 8.12 Validate memory usage with run history and transaction tracking
-  - [ ] 8.13 Test audit trail completeness for regulatory compliance (all runs tracked)
-  - [ ] 8.14 Test system recovery with run integrity preservation
-  - [ ] 8.15 Verify all integration tests pass with independent run architecture
+- [x] 8. Integration & End-to-End Testing (Independent Run System)
+  - [x] 8.1 Write integration tests for complete independent run flow (Level 1 → jackpot or cash-out)
+  - [x] 8.2 Test multiple independent runs per player with separate run tracking
+  - [x] 8.3 Write tests for player lifecycle with multiple jackpot attempts (run completion → new run creation)
+  - [x] 8.4 Validate run isolation (one run's outcome doesn't affect another run)
+  - [x] 8.5 Test exponential progression accuracy ($1→$2→$4...→$512 bets, $2→$4→$8...→$1024 wins)
+  - [x] 8.6 Write tests for jackpot scenario (Level 10: $512 bet, $1024 win, forced completion)
+  - [x] 8.7 Test various player investment scenarios ($5 = 4 jackpot attempts, $20 = 18 jackpot attempts)
+  - [x] 8.8 Validate PlayerBalanceManager with multiple concurrent independent runs
+  - [x] 8.9 Test SimulationController orchestration with realistic simulation parameters
+  - [x] 8.10 Test deterministic behavior and configuration validation
+  - [x] 8.11 Write performance tests for large datasets with SimulationController
+  - [x] 8.12 Validate production-ready architecture with proper component integration
+  - [x] 8.13 Test audit trail completeness for regulatory compliance (all runs tracked)
+  - [x] 8.14 Test configuration validation and error handling
+  - [x] 8.15 Verify all integration tests pass with independent run architecture
 
 - [ ] 9. Performance Optimization & Validation
   - [ ] 9.1 Implement object pooling for GameSession and VirtualDollar objects

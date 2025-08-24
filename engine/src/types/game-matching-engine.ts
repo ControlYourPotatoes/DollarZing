@@ -4,7 +4,7 @@
 
 import { VirtualDollar, DollarState, VirtualDollarManager } from './virtual-dollar-types';
 import { ScoringEngine, ScoreResult } from './scoring-engine';
-import { GameSession, BettingLevel, getBettingLevelValue, PlayerBalanceManager } from './virtual-dollar-engine';
+import { GameSession, BettingLevel, getBettingLevelValue, getBettingLevelWinnings, PlayerBalanceManager } from './virtual-dollar-engine';
 
 // Game event types for pub/sub system
 export type GameEventType = 'gameCreated' | 'gameResolved' | 'poolUpdated' | 'matchingAttempted';
@@ -299,7 +299,7 @@ export class GameMatchingEngine {
       dailySeed: '', // Will be set during resolution
       dollar1Score: 0, // Will be set during resolution
       dollar2Score: 0, // Will be set during resolution
-      winnings: getBettingLevelValue(level)
+      winnings: getBettingLevelWinnings(level)
     };
 
     return game;
