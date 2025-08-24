@@ -46,8 +46,8 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 - [x] 4. GameMatchingEngine Implementation
   - [x] 4.1 Write tests for virtual dollar pool management (add/remove)
   - [x] 4.2 Implement efficient pool management with queue structures
-  - [x] 4.3 Write tests for 1v1 matching algorithm with available dollars
-  - [x] 4.4 Implement automatic matching system based on pool availability
+  - [x] 4.3 Write tests for 1v1 matching algorithm with level-based matching (same betting levels)
+  - [x] 4.4 Implement automatic matching system with level-based matching (same betting level only)
   - [x] 4.5 Write tests for game resolution using algorithmic scores
   - [x] 4.6 Implement game execution and winner determination logic
   - [x] 4.7 Write tests for concurrent game handling without conflicts
@@ -58,34 +58,34 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 4.12 Implement balance validation before allowing games (canPlayerPlay check)
   - [x] 4.13 Verify all GameMatchingEngine tests pass
 
-- [ ] 5. ProgressionManager Implementation (Independent Run Logic)
-  - [ ] 5.1 Write tests for exponential betting progression ($1→$2→$4→$8→...→$512 bets, $2→$4→$8→...→$1024 wins)
-  - [ ] 5.2 Implement independent run management (each VirtualDollar = one jackpot attempt)
-  - [ ] 5.3 Write tests for new dollar creation after run completion (win/loss/cash-out)
-  - [ ] 5.4 Implement run completion logic and new run initiation for continuing players
-  - [ ] 5.5 Write tests for cash-out decision logic with multiple strategies per run
-  - [ ] 5.6 Implement configurable cash-out strategies (conservative, balanced, aggressive)
+- [x] 5. ProgressionManager Implementation (Independent Run Logic)
+  - [x] 5.1 Write tests for exponential betting progression ($1→$2→$4→$8→...→$512 bets, $2→$4→$8→...→$1024 wins)
+  - [x] 5.2 Implement independent run management (each VirtualDollar = one jackpot attempt)
+  - [x] 5.3 Write tests for new dollar creation after run completion (win/loss/cash-out)
+  - [x] 5.4 Implement run completion logic and new run initiation for continuing players
+  - [x] 5.5 Write tests for cash-out decision logic with multiple strategies per run
+  - [x] 5.6 Implement configurable cash-out strategies (conservative, balanced, aggressive)
   - [ ] 5.7 Write tests for PlayerBalanceManager integration (multiple independent runs per player)
-  - [ ] 5.8 Implement proper handling of run completion and player fund validation for new runs
-  - [ ] 5.9 Write tests for maximum level (Level 10: $512 bet, $1024 win) with forced cash-out
-  - [ ] 5.10 Implement jackpot handling and automatic run completion at Level 10
-  - [ ] 5.11 Verify all ProgressionManager tests pass with independent run logic
+  - [x] 5.8 Implement proper handling of run completion and player fund validation for new runs
+  - [x] 5.9 Write tests for maximum level (Level 10: $512 bet, $1024 win) with forced cash-out
+  - [x] 5.10 Implement jackpot handling and automatic run completion at Level 10
+  - [x] 5.11 Verify all ProgressionManager tests pass with independent run logic
 
-- [ ] 6. RevenueCalculator & PlayerBalanceManager Implementation
-  - [ ] 6.1 Write tests for platform fee calculation (10c per player, 20c total per game)
-  - [ ] 6.2 Implement accurate platform revenue tracking per game
-  - [ ] 6.3 Write tests for 3-part balance charity calculations (from currentProgression only)
-  - [ ] 6.4 Implement flexible charity percentage system with validation
-  - [ ] 6.5 Write tests for PlayerBalanceManager transaction processing
-  - [ ] 6.6 Implement PlayerBalanceManager with game fees, progression, and cash-outs
-  - [ ] 6.7 Write tests for player winnings and loss tracking across all balance types
-  - [ ] 6.8 Implement comprehensive player payout calculations with balance separation
-  - [ ] 6.9 Write tests for revenue stream separation and categorization
-  - [ ] 6.10 Implement detailed revenue reporting and analytics
-  - [ ] 6.11 Write tests for transaction audit trail and balance consistency
-  - [ ] 6.12 Implement validation for zero values and maximum amounts
-  - [ ] 6.13 Write tests for player retirement scenarios (insufficient donation balance)
-  - [ ] 6.14 Verify all RevenueCalculator and PlayerBalanceManager tests pass
+- [x] 6. RevenueCalculator & PlayerBalanceManager Implementation
+  - [x] 6.1 Write tests for platform fee calculation (10c per player, 20c total per game)
+  - [x] 6.2 Implement accurate platform revenue tracking per game
+  - [x] 6.3 Write tests for 3-part balance charity calculations (from currentProgression only)
+  - [x] 6.4 Implement flexible charity percentage system with validation
+  - [x] 6.5 Write tests for PlayerBalanceManager transaction processing
+  - [x] 6.6 Implement PlayerBalanceManager with game fees, progression, and cash-outs
+  - [x] 6.7 Write tests for player winnings and loss tracking across all balance types
+  - [x] 6.8 Implement comprehensive player payout calculations with balance separation
+  - [x] 6.9 Write tests for revenue stream separation and categorization
+  - [x] 6.10 Implement detailed revenue reporting and analytics
+  - [x] 6.11 Write tests for transaction audit trail and balance consistency
+  - [x] 6.12 Implement validation for zero values and maximum amounts
+  - [x] 6.13 Write tests for player retirement scenarios (insufficient donation balance)
+  - [x] 6.14 Verify all RevenueCalculator and PlayerBalanceManager tests pass
 
 - [ ] 7. SimulationController Implementation
   - [ ] 7.1 Write tests for simulation orchestration with all components including PlayerBalanceManager

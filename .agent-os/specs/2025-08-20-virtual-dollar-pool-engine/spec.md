@@ -14,7 +14,7 @@ Build a completely new game simulation engine that models the actual dollar bill
 
 As an investment analyst, I want to simulate the actual dollar scanning game mechanics so that I can validate the economic model with realistic player behavior and revenue generation patterns.
 
-The simulation must model individual virtual dollars as independent jackpot runs, each with generated serial numbers (like "L12345678A") that receive algorithmic scores based on daily seeds. These dollars enter a pool where they're matched 1v1 with higher scores winning. Winners progress through exponential betting levels ($1→$2→$4→$8→...→$512 bets, winning $2→$4→$8→$16→...→$1024) and decide whether to cash out or continue. Each virtual dollar represents one complete attempt at the jackpot, with players creating new dollars for additional attempts.
+The simulation must model individual virtual dollars as independent jackpot runs, each with generated serial numbers (like "L12345678A") that receive algorithmic scores based on daily seeds. These dollars enter a pool where they're matched 1v1 based on betting level (Level 1 vs Level 1, Level 5 vs Level 5, etc.) with higher algorithmic scores winning. Winners progress through exponential betting levels ($1→$2→$4→$8→...→$512 bets, winning $2→$4→$8→$16→...→$1024) and decide whether to cash out or continue. Each virtual dollar represents one complete attempt at the jackpot, with players creating new dollars for additional attempts.
 
 ### Business Development Team Revenue Modeling
 
@@ -32,7 +32,7 @@ The system must maintain detailed records of each virtual dollar's journey throu
 
 1. **Virtual Dollar Management System** - Generate virtual dollars with realistic serial numbers and manage their lifecycle through scanning, scoring, pooling, and game participation
 2. **Daily Seeded Scoring Algorithm** - Implement deterministic scoring system that assigns scores to each serial number + daily seed combination for consistent gameplay
-3. **1v1 Game Matching Engine** - Create automated matching system that pairs virtual dollars from the pool and executes games based on algorithmic scores
+3. **1v1 Game Matching Engine** - Create automated matching system that pairs virtual dollars from the pool based on betting level (same-level matching only) and executes games based on algorithmic scores
 4. **Independent Run Betting System** - Manage exponential betting progression ($1→$2→$4→$8→$16→$32→$64→$128→$256→$512 bet, winning double each level) where each virtual dollar represents one complete jackpot attempt from Level 1 to completion
 5. **Player Balance Management System** - Implement 3-part balance system (donation balance, winnings balance, at-risk progression) for realistic fund tracking and game eligibility
 6. **Revenue Calculation Engine** - Track platform click revenue (10c per player per game), charity contributions (adjustable percentage of cash-outs), and player winnings separately
