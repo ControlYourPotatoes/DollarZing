@@ -87,20 +87,20 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 6.13 Write tests for player retirement scenarios (insufficient donation balance)
   - [x] 6.14 Verify all RevenueCalculator and PlayerBalanceManager tests pass
 
-- [ ] 7. SimulationController Implementation
-  - [ ] 7.1 Write tests for simulation orchestration with all components including PlayerBalanceManager
-  - [ ] 7.2 Implement master controller that coordinates all engine components
-  - [ ] 7.3 Write tests for player initialization with starting donation balance ($20)
-  - [ ] 7.4 Implement player lifecycle management (creation, activation, retirement)
-  - [ ] 7.5 Write tests for simulation parameter validation and handling
-  - [ ] 7.6 Implement comprehensive parameter validation and sanitization
-  - [ ] 7.7 Write tests for simulation progress tracking and reporting
-  - [ ] 7.8 Implement real-time progress updates and completion estimation
-  - [ ] 7.9 Write tests for simulation cancellation and cleanup
-  - [ ] 7.10 Implement graceful simulation termination and resource cleanup
-  - [ ] 7.11 Write tests for final dataset generation and export with player balance data
-  - [ ] 7.12 Implement comprehensive data export and formatting
-  - [ ] 7.13 Verify all SimulationController tests pass
+- [x] 7. SimulationController Implementation
+  - [x] 7.1 Write tests for simulation orchestration with all components including PlayerBalanceManager
+  - [x] 7.2 Implement master controller that coordinates all engine components
+  - [x] 7.3 Write tests for player initialization with starting donation balance ($20)
+  - [x] 7.4 Implement player lifecycle management (creation, activation, retirement)
+  - [x] 7.5 Write tests for simulation parameter validation and handling
+  - [x] 7.6 Implement comprehensive parameter validation and sanitization
+  - [x] 7.7 Write tests for simulation progress tracking and reporting
+  - [x] 7.8 Implement real-time progress updates and completion estimation
+  - [x] 7.9 Write tests for simulation cancellation and cleanup
+  - [x] 7.10 Implement graceful simulation termination and resource cleanup
+  - [x] 7.11 Write tests for final dataset generation and export with player balance data
+  - [x] 7.12 Implement comprehensive data export and formatting
+  - [x] 7.13 Verify all SimulationController tests pass
 
 - [ ] 8. Integration & End-to-End Testing (Independent Run System)
   - [ ] 8.1 Write integration tests for complete independent run flow (Level 1 → jackpot or cash-out)

@@ -66,14 +66,28 @@
     "ts-jest": "^29.2.4"
   },
   "jest": {
+    "preset": "ts-jest",
     "testEnvironment": "node",
-    "roots": ["<rootDir>/tests"],
-    "testMatch": ["**/__tests__/**/*.js", "**/?(*.)+(spec|test).js"],
+    "roots": ["<rootDir>/tests", "<rootDir>/engine/tests", "<rootDir>/data/tests"],
+    "testMatch": ["**/__tests__/**/*.{js,ts}", "**/?(*.)+(spec|test).{js,ts}"],
     "collectCoverageFrom": [
       "engine/src/**/*.{js,ts}",
       "data/src/**/*.{js,ts}",
       "src/**/*.{js,ts,tsx}",
       "!**/*.d.ts"
-    ]
+    ],
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "setupFilesAfterEnv": [],
+    "globals": {
+      "ts-jest": {
+        "useESM": false
+      }
+    }
   }
 }
