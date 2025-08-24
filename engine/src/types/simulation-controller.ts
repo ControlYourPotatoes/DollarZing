@@ -322,7 +322,7 @@ export class SimulationController {
   /**
    * Process one day of simulation activity
    */
-  private async processSimulationDay(day: number): Promise<void> {
+  private async processSimulationDay(_day: number): Promise<void> {
     // Auto-create new runs for eligible players
     const newRuns = this.components.runOrchestrator.autoCreateRuns(2); // Max 2 concurrent runs per player
 
@@ -435,7 +435,7 @@ export class SimulationController {
   /**
    * Generate revenue statistics for final results - Task 7.11
    */
-  private generateRevenueStatistics(simulationDurationMs: number): RevenueStatistics {
+  private generateRevenueStatistics(_simulationDurationMs: number): RevenueStatistics {
     const revenueCalc = this.components.revenueCalculator;
     const totalRevenue = revenueCalc.getPlatformRevenue();
     const totalCharity = revenueCalc.getCharityContributions();

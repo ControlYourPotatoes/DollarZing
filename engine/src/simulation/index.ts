@@ -12,8 +12,8 @@ import {
   RevenueBreakdown,
   FlowType,
   CashOutStrategy,
-} from "../../../data/src/types/index";
-import { validateSimulationParameters } from "../../../data/src/types/validation";
+} from "../types/simulation-types";
+import { validateSimulationParameters } from "../types/validation";
 
 // Constants from legacy system
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
@@ -172,18 +172,17 @@ export class GrowthCalculator {
     return Math.floor(currentPlayers * (1 + effectiveGrowthRate));
   }
 
-  calculatePanamaAdoption(
+  calculateAdoptionGrowth(
     day: number,
     currentPlayers: number,
     adoptionRate: number,
-    totalPanamaUsers: number,
     randomSeed: number
   ): number {
     const rng = new SeededRandom(day * 1000 + Math.floor(randomSeed * 10000));
     
-    // S-curve adoption model for Panama market penetration
-    const maxAdoption = totalPanamaUsers * adoptionRate;
-    const growthRate = 0.05; // 5% daily growth rate during adoption phase
+    // S-curve adoption model for market penetration
+    const baseMarket = 1000000; // Base addressable market
+    const maxAdoption = baseMarket * adoptionRate;
     const midpoint = 90; // Day when adoption reaches 50%
     
     // Calculate adoption progress using logistic function
@@ -245,18 +244,17 @@ export class RevenueDistributionCalculator {
   ): RevenueBreakdown {
     let platformPerc = 0.2;
     let charityPerc = 0.2;
-    let governmentPerc = 0.4;
-    let playerPerc = 0.4;
+    let playerPerc = 0.6; // Simplified: 60% to players
 
     // Adjust distribution based on flow type
     if (flowType === "loss") {
       // For losses, reduce player share
-      playerPerc = 0.2;
-      governmentPerc = 0.4;
+      playerPerc = 0.4;
+      charityPerc = 0.4;
     } else if (flowType === "jackpot") {
       // For jackpots, players get more
-      playerPerc = 0.6;
-      governmentPerc = 0.2;
+      playerPerc = 0.8;
+      charityPerc = 0.0;
     }
 
     return {
@@ -390,12 +388,11 @@ export class SimulationEngine {
     let newTotalPlayers = totalPlayers;
     let newActivePlayers = activePlayers;
 
-    if (this.parameters.panamaAdoption) {
-      newActivePlayers = this.growthCalculator.calculatePanamaAdoption(
+    if (this.parameters.adoptionRate > 0) {
+      newActivePlayers = this.growthCalculator.calculateAdoptionGrowth(
         day,
         activePlayers,
         this.parameters.adoptionRate,
-        PANAMA_LOTTERY_USERS,
         rng.next()
       );
     } else {
@@ -430,7 +427,6 @@ export class SimulationEngine {
     let totalRevenue = 0;
     let platformEarnings = 0;
     let charityContributions = 0;
-    let governmentEarnings = 0;
     let playerWinnings = 0;
     let totalGamesPlayed = 0;
     let jackpotWinners = 0;
@@ -477,7 +473,6 @@ export class SimulationEngine {
       );
 
       charityContributions += breakdown.charity.amount;
-      governmentEarnings += breakdown.government.amount;
       playerWinnings += breakdown.players.amount;
       totalRevenue += winningsToDistribute;
 
@@ -499,7 +494,6 @@ export class SimulationEngine {
       totalRevenue: totalRevenue + platformEarnings,
       platformEarnings,
       charityContributions,
-      governmentEarnings,
       playerWinnings,
       gamesPlayed: totalGamesPlayed,
     };
@@ -569,10 +563,6 @@ export class SimulationEngine {
         ),
         charityContributions: dailySnapshots.reduce(
           (sum, s) => sum + s.financialMetrics.charityContributions,
-          0
-        ),
-        governmentEarnings: dailySnapshots.reduce(
-          (sum, s) => sum + s.financialMetrics.governmentEarnings,
           0
         ),
         playerWinnings: dailySnapshots.reduce(
