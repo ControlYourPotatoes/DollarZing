@@ -13,6 +13,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
+      - LOG_LEVEL=info
     networks:
       - dollarzing-network
     restart: unless-stopped
@@ -30,6 +31,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    security_opt:
+      - no-new-privileges:true
 
   frontend:
     build:
@@ -62,6 +70,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
 
 networks:
   dollarzing-network:

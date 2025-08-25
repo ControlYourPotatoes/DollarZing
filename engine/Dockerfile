@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --only=production && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -28,7 +28,7 @@ WORKDIR /app
 
 # Install dependencies including devDependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm ci && npm cache clean --force
 
 # Copy source code and build
 COPY . .
@@ -37,11 +37,14 @@ RUN npm run build
 # Production stage
 FROM node:22-alpine AS production
 
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
 WORKDIR /app
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodeuser -u 1001
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodeuser -u 1001 -G nodejs
 
 # Copy built application
 COPY --from=builder /app/dist ./dist
@@ -49,10 +52,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
 
 # Create data directory with proper permissions
-RUN mkdir -p /data/datasets && chown -R nodeuser:nodejs /data
-
-# Set proper permissions
-RUN chown -R nodeuser:nodejs /app
+RUN mkdir -p /data/datasets && \
+    chown -R nodeuser:nodejs /data && \
+    chown -R nodeuser:nodejs /app
 
 # Switch to non-root user
 USER nodeuser
@@ -71,5 +73,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 # Expose port
 EXPOSE 3001
 
-# Production command
+# Production command with proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/index.js"]

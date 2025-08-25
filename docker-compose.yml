@@ -15,6 +15,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
+      - LOG_LEVEL=debug
     networks:
       - dollarzing-network
     restart: unless-stopped
@@ -24,6 +25,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
@@ -41,12 +47,18 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:3001
+      - VITE_DEV_MODE=true
     depends_on:
       engine:
         condition: service_healthy
     networks:
       - dollarzing-network
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   dollarzing-network:
