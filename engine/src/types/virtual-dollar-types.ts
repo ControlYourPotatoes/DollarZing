@@ -8,6 +8,7 @@ import {
   BettingLevel,
   ValidationResult
 } from './virtual-dollar-engine';
+import { getObjectPoolManager, isObjectPoolingEnabled } from './object-pool';
 
 // State transition history tracking
 interface StateTransition {
@@ -65,7 +66,7 @@ export class VirtualDollarManager {
   }
 
   /**
-   * Create a new virtual dollar with validation
+   * Create a new virtual dollar with validation - Conditionally uses object pooling
    */
   createVirtualDollar(playerId: string): VirtualDollar {
     // Validate player ID
@@ -86,20 +87,37 @@ export class VirtualDollarManager {
       }
     } while (this.serialNumbers.has(serialNumber));
 
-    const dollar: VirtualDollar = {
-      id: this.generateUniqueId(),
-      serialNumber,
-      currentScore: 0,
-      currentLevel: 1, // Start at betting level 1
-      state: DollarState.CREATED,
-      ownerId: playerId,
-      runId: this.generateRunId(),
-      createdAt: new Date(),
-      gameHistory: [],
-      gamesInThisRun: 0,
-      currentRunWinnings: 0,
-      isIndependentRun: true
-    };
+    let dollar: VirtualDollar;
+
+    if (isObjectPoolingEnabled()) {
+      // Get object from pool and initialize it
+      const poolManager = getObjectPoolManager();
+      dollar = poolManager.virtualDollarPool.acquire();
+      
+      poolManager.virtualDollarPool.initializeDollar(
+        dollar,
+        this.generateUniqueId(),
+        serialNumber,
+        playerId,
+        this.generateRunId()
+      );
+    } else {
+      // Create directly without pooling
+      dollar = {
+        id: this.generateUniqueId(),
+        serialNumber,
+        currentScore: 0,
+        currentLevel: 1, // Start at betting level 1
+        state: DollarState.CREATED,
+        ownerId: playerId,
+        runId: this.generateRunId(),
+        createdAt: new Date(),
+        gameHistory: [],
+        gamesInThisRun: 0,
+        currentRunWinnings: 0,
+        isIndependentRun: true
+      };
+    }
 
     // Store dollar and track serial number
     this.dollars.set(dollar.id, dollar);
@@ -372,6 +390,61 @@ export class VirtualDollarManager {
       dollar.state === DollarState.CASHED_OUT || 
       dollar.state === DollarState.LOST
     );
+  }
+
+  /**
+   * Release a virtual dollar back to the object pool when no longer needed
+   * Should be called when a dollar reaches a final state and won't be accessed again
+   */
+  releaseDollar(dollarId: string): void {
+    const dollar = this.dollars.get(dollarId);
+    if (!dollar) {
+      return;
+    }
+
+    // Only release dollars in final states
+    if (dollar.state === DollarState.CASHED_OUT || dollar.state === DollarState.LOST) {
+      // Remove from tracking structures
+      this.dollars.delete(dollarId);
+      this.serialNumbers.delete(dollar.serialNumber);
+      this.pooledDollars.delete(dollarId);
+      this.stateHistory.delete(dollarId);
+      
+      // Remove from player tracking
+      const playerDollars = this.dollarsByPlayer.get(dollar.ownerId);
+      if (playerDollars) {
+        playerDollars.delete(dollarId);
+        if (playerDollars.size === 0) {
+          this.dollarsByPlayer.delete(dollar.ownerId);
+        }
+      }
+
+      // Return to object pool only if pooling is enabled
+      if (isObjectPoolingEnabled()) {
+        const poolManager = getObjectPoolManager();
+        poolManager.virtualDollarPool.release(dollar);
+      }
+    }
+  }
+
+  /**
+   * Cleanup completed dollars to free memory - batch release to pool
+   * This should be called periodically during long simulations
+   */
+  cleanupCompletedDollars(): number {
+    const completedDollars: string[] = [];
+    
+    // Find all dollars in final states
+    for (const [dollarId, dollar] of this.dollars) {
+      if (dollar.state === DollarState.CASHED_OUT || dollar.state === DollarState.LOST) {
+        completedDollars.push(dollarId);
+      }
+    }
+
+    // Release them to the pool
+    completedDollars.forEach(dollarId => this.releaseDollar(dollarId));
+    
+    return completedDollars.length;
   }
 }
 

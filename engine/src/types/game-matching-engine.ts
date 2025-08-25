@@ -5,6 +5,7 @@
 import { VirtualDollar, DollarState, VirtualDollarManager } from './virtual-dollar-types';
 import { ScoringEngine, ScoreResult } from './scoring-engine';
 import { GameSession, BettingLevel, getBettingLevelValue, getBettingLevelWinnings, PlayerBalanceManager } from './virtual-dollar-engine';
+import { getObjectPoolManager, isObjectPoolingEnabled } from './object-pool';
 
 // Game event types for pub/sub system
 export type GameEventType = 'gameCreated' | 'gameResolved' | 'poolUpdated' | 'matchingAttempted';
@@ -281,26 +282,48 @@ export class GameMatchingEngine {
   }
 
   /**
-   * Create a new game session
+   * Create a new game session - Conditionally uses object pooling
    */
   private createGameSession(dollar1: VirtualDollar, dollar2: VirtualDollar, level: BettingLevel): GameSession {
     this.gameCounter++;
     
-    const game: GameSession = {
-      id: `game_${this.gameCounter}_${Date.now()}`,
-      dollar1,
-      dollar2,
-      winner: dollar1, // Will be updated during resolution
-      loser: dollar2, // Will be updated during resolution
-      level,
-      platformFee: 0.20, // 20c per game
-      timestamp: new Date(),
-      gameNumber: this.gameCounter,
-      dailySeed: '', // Will be set during resolution
-      dollar1Score: 0, // Will be set during resolution
-      dollar2Score: 0, // Will be set during resolution
-      winnings: getBettingLevelWinnings(level)
-    };
+    let game: GameSession;
+
+    if (isObjectPoolingEnabled()) {
+      // Get game session from pool and initialize it
+      const poolManager = getObjectPoolManager();
+      game = poolManager.gameSessionPool.acquire();
+      
+      poolManager.gameSessionPool.initializeSession(
+        game,
+        `game_${this.gameCounter}_${Date.now()}`,
+        dollar1,
+        dollar2,
+        level,
+        this.gameCounter,
+        '' // dailySeed will be set during resolution
+      );
+    } else {
+      // Create directly without pooling
+      game = {
+        id: `game_${this.gameCounter}_${Date.now()}`,
+        dollar1,
+        dollar2,
+        winner: dollar1, // Will be updated during resolution
+        loser: dollar2, // Will be updated during resolution
+        level,
+        platformFee: 0.20, // 20c per game
+        timestamp: new Date(),
+        gameNumber: this.gameCounter,
+        dailySeed: '', // Will be set during resolution
+        dollar1Score: 0, // Will be set during resolution
+        dollar2Score: 0, // Will be set during resolution
+        winnings: getBettingLevelWinnings(level)
+      };
+    }
+
+    // Set the winnings amount
+    game.winnings = getBettingLevelWinnings(level);
 
     return game;
   }
