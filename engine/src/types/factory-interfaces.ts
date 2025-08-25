@@ -1,0 +1,174 @@
+// Factory Pattern Interfaces for Virtual Dollar and Game Session Creation
+// Provides abstraction layer for object creation with dependency injection support
+// Enables performance optimization through object pooling while maintaining clean code
+
+import { VirtualDollar, GameSession, BettingLevel } from './virtual-dollar-engine';
+
+/**
+ * Statistics interface for factory performance monitoring
+ * Tracks object creation, pooling efficiency, and performance metrics
+ */
+export interface FactoryStatistics {
+  objectsCreated: number;          // Total objects created since initialization
+  objectsReleased: number;         // Total objects released back to factory
+  objectsInUse: number;            // Currently active objects not yet released
+  poolSize: number;                // Current size of object pool (0 for direct factories)
+  poolHitRate: number;             // Percentage of creates satisfied from pool (0-1)
+  averageCreationTime: number;     // Average time to create object in milliseconds
+  averageReleaseTime: number;      // Average time to release object in milliseconds
+  memoryUsageMB: number;           // Estimated memory usage in megabytes
+}
+
+/**
+ * Abstract factory interface for VirtualDollar creation and lifecycle management
+ * Provides dependency injection point for different creation strategies
+ */
+export interface VirtualDollarFactory {
+  /**
+   * Create a new VirtualDollar instance for the specified player
+   * @param playerId - Unique identifier for the player
+   * @returns Fully initialized VirtualDollar ready for use
+   * @throws Error if playerId is invalid (empty or whitespace)
+   */
+  create(playerId: string): VirtualDollar;
+
+  /**
+   * Release a VirtualDollar instance back to the factory
+   * Should be called when the dollar is no longer needed
+   * @param dollar - VirtualDollar instance to release
+   */
+  release(dollar: VirtualDollar): void;
+
+  /**
+   * Create multiple VirtualDollar instances in a batch for efficiency
+   * @param playerIds - Array of player IDs to create dollars for
+   * @returns Array of VirtualDollar instances in same order as input
+   */
+  createBatch(playerIds: string[]): VirtualDollar[];
+
+  /**
+   * Get performance and usage statistics for this factory
+   * @returns Current factory statistics including performance metrics
+   */
+  getStatistics(): FactoryStatistics;
+}
+
+/**
+ * Game pair interface for batch game session creation
+ * Represents the required parameters for creating a GameSession
+ */
+export interface GamePair {
+  dollar1: VirtualDollar;
+  dollar2: VirtualDollar;
+  level: BettingLevel;
+}
+
+/**
+ * Abstract factory interface for GameSession creation and lifecycle management
+ * Provides dependency injection point for different creation strategies
+ */
+export interface GameSessionFactory {
+  /**
+   * Create a new GameSession instance for the specified game parameters
+   * @param dollar1 - First virtual dollar participant
+   * @param dollar2 - Second virtual dollar participant  
+   * @param level - Betting level for this game
+   * @returns Fully initialized GameSession ready for scoring
+   * @throws Error if parameters are invalid
+   */
+  create(dollar1: VirtualDollar, dollar2: VirtualDollar, level: BettingLevel): GameSession;
+
+  /**
+   * Release a GameSession instance back to the factory
+   * Should be called when the session is completed and no longer needed
+   * @param session - GameSession instance to release
+   */
+  release(session: GameSession): void;
+
+  /**
+   * Create multiple GameSession instances in a batch for efficiency
+   * @param pairs - Array of game pairs to create sessions for
+   * @returns Array of GameSession instances in same order as input
+   */
+  createBatch(pairs: GamePair[]): GameSession[];
+
+  /**
+   * Get performance and usage statistics for this factory
+   * @returns Current factory statistics including performance metrics
+   */
+  getStatistics(): FactoryStatistics;
+}
+
+/**
+ * Configuration interface for performance optimization settings
+ * Controls factory behavior and object pooling parameters
+ */
+export interface PerformanceConfig {
+  enableObjectPooling: boolean;     // Whether to use object pooling for performance
+  poolSizes: {
+    virtualDollar: number;          // Maximum size of VirtualDollar pool
+    gameSession: number;            // Maximum size of GameSession pool
+  };
+  prewarmCounts: {
+    virtualDollar: number;          // Number of VirtualDollars to create on initialization
+    gameSession: number;            // Number of GameSessions to create on initialization
+  };
+  enableBatchOptimizations: boolean; // Whether to optimize batch operations
+  enablePerformanceMetrics: boolean; // Whether to track detailed performance metrics
+}
+
+/**
+ * Factory selection utility interface
+ * Enables runtime selection of factory implementations based on configuration
+ */
+export interface FactorySelector {
+  /**
+   * Select appropriate VirtualDollarFactory based on configuration
+   * @param config - Performance configuration settings
+   * @returns Configured VirtualDollarFactory instance
+   */
+  selectVirtualDollarFactory(config: PerformanceConfig): VirtualDollarFactory;
+
+  /**
+   * Select appropriate GameSessionFactory based on configuration  
+   * @param config - Performance configuration settings
+   * @returns Configured GameSessionFactory instance
+   */
+  selectGameSessionFactory(config: PerformanceConfig): GameSessionFactory;
+}
+
+/**
+ * Default configuration for development and testing environments
+ * Provides reasonable defaults for factory configuration
+ */
+export const DEFAULT_PERFORMANCE_CONFIG: PerformanceConfig = {
+  enableObjectPooling: false,       // Disabled for development/testing by default
+  poolSizes: {
+    virtualDollar: 1000,
+    gameSession: 1000
+  },
+  prewarmCounts: {
+    virtualDollar: 10,
+    gameSession: 10
+  },
+  enableBatchOptimizations: true,
+  enablePerformanceMetrics: true
+};
+
+/**
+ * Production configuration optimized for performance
+ * Enables all optimizations for production workloads
+ */
+export const PRODUCTION_PERFORMANCE_CONFIG: PerformanceConfig = {
+  enableObjectPooling: true,        // Enabled for production performance
+  poolSizes: {
+    virtualDollar: 10000,
+    gameSession: 10000
+  },
+  prewarmCounts: {
+    virtualDollar: 100,
+    gameSession: 100
+  },
+  enableBatchOptimizations: true,
+  enablePerformanceMetrics: true
+};

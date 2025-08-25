@@ -7,25 +7,25 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [ ] 1. Factory Interface Design and Implementation
-  - [ ] 1.1 Write tests for VirtualDollarFactory interface contract
-  - [ ] 1.2 Implement VirtualDollarFactory interface with create, release, and batch methods
-  - [ ] 1.3 Write tests for GameSessionFactory interface contract  
-  - [ ] 1.4 Implement GameSessionFactory interface with create, release, and batch methods
-  - [ ] 1.5 Write tests for FactoryStatistics interface and data structures
-  - [ ] 1.6 Implement factory statistics tracking and reporting functionality
-  - [ ] 1.7 Verify all factory interfaces compile and pass type checking
+- [x] 1. Factory Interface Design and Implementation
+  - [x] 1.1 Write tests for VirtualDollarFactory interface contract
+  - [x] 1.2 Implement VirtualDollarFactory interface with create, release, and batch methods
+  - [x] 1.3 Write tests for GameSessionFactory interface contract  
+  - [x] 1.4 Implement GameSessionFactory interface with create, release, and batch methods
+  - [x] 1.5 Write tests for FactoryStatistics interface and data structures
+  - [x] 1.6 Implement factory statistics tracking and reporting functionality
+  - [x] 1.7 Verify all factory interfaces compile and pass type checking
 
-- [ ] 2. Pooled Factory Implementation
-  - [ ] 2.1 Write tests for PooledVirtualDollarFactory object pooling behavior
-  - [ ] 2.2 Implement PooledVirtualDollarFactory using existing object pool infrastructure
-  - [ ] 2.3 Write tests for PooledGameSessionFactory object pooling behavior
-  - [ ] 2.4 Implement PooledGameSessionFactory using existing object pool infrastructure  
-  - [ ] 2.5 Write tests for pool prewarming and size management
-  - [ ] 2.6 Implement pool initialization and configuration management
-  - [ ] 2.7 Write tests for batch creation optimization in pooled factories
-  - [ ] 2.8 Implement batch processing methods for improved throughput
-  - [ ] 2.9 Verify all pooled factory implementations pass unit tests
+- [x] 2. Pooled Factory Implementation
+  - [x] 2.1 Write tests for PooledVirtualDollarFactory object pooling behavior
+  - [x] 2.2 Implement PooledVirtualDollarFactory using existing object pool infrastructure
+  - [x] 2.3 Write tests for PooledGameSessionFactory object pooling behavior
+  - [x] 2.4 Implement PooledGameSessionFactory using existing object pool infrastructure  
+  - [x] 2.5 Write tests for pool prewarming and size management
+  - [x] 2.6 Implement pool initialization and configuration management
+  - [x] 2.7 Write tests for batch creation optimization in pooled factories
+  - [x] 2.8 Implement batch processing methods for improved throughput
+  - [x] 2.9 Verify all pooled factory implementations pass unit tests
 
 - [ ] 3. Direct Factory Implementation  
   - [ ] 3.1 Write tests for DirectVirtualDollarFactory non-pooled behavior
