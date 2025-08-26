@@ -5,6 +5,7 @@
 import { VirtualDollar, DollarState, VirtualDollarManager } from './virtual-dollar-types';
 import { ScoringEngine, ScoreResult } from './scoring-engine';
 import { GameSession, BettingLevel, getBettingLevelValue, getBettingLevelWinnings, PlayerBalanceManager } from './virtual-dollar-engine';
+import { GameSessionFactory } from './factory-interfaces';
 import { getObjectPoolManager, isObjectPoolingEnabled } from './object-pool';
 
 // Game event types for pub/sub system
@@ -81,6 +82,7 @@ type EventListener = (event: GameEvent) => void;
 export class GameMatchingEngine {
   private dollarManager: VirtualDollarManager;
   private scoringEngine: ScoringEngine;
+  private gameSessionFactory: GameSessionFactory;
   private playerBalanceManager?: PlayerBalanceManager;
   
   // Pool management
@@ -99,9 +101,10 @@ export class GameMatchingEngine {
   // Configuration
   private maxConcurrentGames: number = 1000;
   
-  constructor(dollarManager: VirtualDollarManager, scoringEngine: ScoringEngine) {
+  constructor(dollarManager: VirtualDollarManager, scoringEngine: ScoringEngine, gameSessionFactory: GameSessionFactory) {
     this.dollarManager = dollarManager;
     this.scoringEngine = scoringEngine;
+    this.gameSessionFactory = gameSessionFactory;
     
     // Initialize level pools
     for (let level = 1; level <= 11; level++) {
@@ -282,50 +285,14 @@ export class GameMatchingEngine {
   }
 
   /**
-   * Create a new game session - Conditionally uses object pooling
+   * Create a new game session using injected factory
    */
   private createGameSession(dollar1: VirtualDollar, dollar2: VirtualDollar, level: BettingLevel): GameSession {
-    this.gameCounter++;
-    
-    let game: GameSession;
-
-    if (isObjectPoolingEnabled()) {
-      // Get game session from pool and initialize it
-      const poolManager = getObjectPoolManager();
-      game = poolManager.gameSessionPool.acquire();
-      
-      poolManager.gameSessionPool.initializeSession(
-        game,
-        `game_${this.gameCounter}_${Date.now()}`,
-        dollar1,
-        dollar2,
-        level,
-        this.gameCounter,
-        '' // dailySeed will be set during resolution
-      );
-    } else {
-      // Create directly without pooling
-      game = {
-        id: `game_${this.gameCounter}_${Date.now()}`,
-        dollar1,
-        dollar2,
-        winner: dollar1, // Will be updated during resolution
-        loser: dollar2, // Will be updated during resolution
-        level,
-        platformFee: 0.20, // 20c per game
-        timestamp: new Date(),
-        gameNumber: this.gameCounter,
-        dailySeed: '', // Will be set during resolution
-        dollar1Score: 0, // Will be set during resolution
-        dollar2Score: 0, // Will be set during resolution
-        winnings: getBettingLevelWinnings(level)
-      };
+    try {
+      return this.gameSessionFactory.create(dollar1, dollar2, level);
+    } catch (error) {
+      throw new Error(`Failed to create game session through factory: ${error}`);
     }
-
-    // Set the winnings amount
-    game.winnings = getBettingLevelWinnings(level);
-
-    return game;
   }
 
   /**
@@ -405,6 +372,14 @@ export class GameMatchingEngine {
       // Move game from active to completed
       this.activeGames.delete(gameId);
       this.completedGames.set(gameId, game);
+      
+      // Release game session back to factory
+      try {
+        this.gameSessionFactory.release(game);
+      } catch (error) {
+        console.warn(`Warning: Failed to release game session to factory: ${error}`);
+        // Don't throw - release operations should be non-critical
+      }
       
       // Remove from in-game tracking
       this.dollarsInGame.delete(winner.id);
@@ -583,6 +558,14 @@ export class GameMatchingEngine {
    * Clear all completed games (for memory management)
    */
   clearCompletedGames(): void {
+    // Release all game sessions before clearing
+    for (const game of this.completedGames.values()) {
+      try {
+        this.gameSessionFactory.release(game);
+      } catch (error) {
+        console.warn(`Warning: Failed to release game session during cleanup: ${error}`);
+      }
+    }
     this.completedGames.clear();
   }
 
@@ -591,5 +574,12 @@ export class GameMatchingEngine {
    */
   getActiveGameCount(): number {
     return this.activeGames.size;
+  }
+
+  /**
+   * Get factory statistics for performance monitoring
+   */
+  getFactoryStatistics() {
+    return this.gameSessionFactory.getStatistics();
   }
 }

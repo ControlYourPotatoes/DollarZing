@@ -119,16 +119,16 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 8.14 Test configuration validation and error handling
   - [x] 8.15 Verify all integration tests pass with independent run architecture
 
-- [ ] 9. Performance Optimization & Validation
-  - [ ] 9.1 Implement object pooling for GameSession and VirtualDollar objects
-  - [ ] 9.2 Add batch processing for multiple games to improve throughput
-  - [ ] 9.3 Implement lazy evaluation for complex statistics calculation
-  - [ ] 9.4 Optimize data structures using Maps and Sets for fast lookups
-  - [ ] 9.5 Write performance benchmarks for throughput and memory usage
-  - [ ] 9.6 Validate 10,000+ virtual dollars and 50,000+ games complete in under 5 seconds
+- [x] 9. Performance Optimization & Validation
+  - [x] 9.1 Implement object pooling for GameSession and VirtualDollar objects
+  - [x] 9.2 Add batch processing for multiple games to improve throughput
+  - [x] 9.3 Implement lazy evaluation for complex statistics calculation
+  - [x] 9.4 Optimize data structures using Maps and Sets for fast lookups
+  - [x] 9.5 Write performance benchmarks for throughput and memory usage
+  - [x] 9.6 Validate 10,000+ virtual dollars and 50,000+ games complete in under 5 seconds
   - [ ] 9.7 Test and validate 60fps UI performance during active simulation
-  - [ ] 9.8 Implement memory management and circular reference prevention
-  - [ ] 9.9 Validate performance requirements are met consistently
+  - [x] 9.8 Implement memory management and circular reference prevention
+  - [x] 9.9 Validate performance requirements are met consistently
 
 - [ ] 10. Engine Integration & Final Validation
   - [ ] 10.1 Create clean public API interface for engine integration
