@@ -27,14 +27,14 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.8 Implement batch processing methods for improved throughput
   - [x] 2.9 Verify all pooled factory implementations pass unit tests
 
-- [ ] 3. Direct Factory Implementation  
-  - [ ] 3.1 Write tests for DirectVirtualDollarFactory non-pooled behavior
-  - [ ] 3.2 Implement DirectVirtualDollarFactory for development and testing scenarios
-  - [ ] 3.3 Write tests for DirectGameSessionFactory non-pooled behavior
-  - [ ] 3.4 Implement DirectGameSessionFactory for development and testing scenarios
-  - [ ] 3.5 Write tests verifying same interface compliance as pooled versions
-  - [ ] 3.6 Implement consistent API behavior across direct and pooled implementations
-  - [ ] 3.7 Verify all direct factory implementations pass unit tests
+- [x] 3. Direct Factory Implementation  
+  - [x] 3.1 Write tests for DirectVirtualDollarFactory non-pooled behavior
+  - [x] 3.2 Implement DirectVirtualDollarFactory for development and testing scenarios
+  - [x] 3.3 Write tests for DirectGameSessionFactory non-pooled behavior
+  - [x] 3.4 Implement DirectGameSessionFactory for development and testing scenarios
+  - [x] 3.5 Write tests verifying same interface compliance as pooled versions
+  - [x] 3.6 Implement consistent API behavior across direct and pooled implementations
+  - [x] 3.7 Verify all direct factory implementations pass unit tests
 
 - [ ] 4. Configuration System Implementation
   - [ ] 4.1 Write tests for PerformanceConfig interface and validation

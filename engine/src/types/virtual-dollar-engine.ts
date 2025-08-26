@@ -68,6 +68,9 @@ export interface GameSession {
   dollar1Score: number;                 // Algorithmic score for dollar1
   dollar2Score: number;                 // Algorithmic score for dollar2
   winnings: number;                     // Total winnings amount for this level
+  isCompleted: boolean;                 // Whether the game session has been completed
+  duration: number;                     // Duration of the game in milliseconds
+  randomSeed: number;                   // Random seed for deterministic game outcomes (0-1)
 }
 
 /**
