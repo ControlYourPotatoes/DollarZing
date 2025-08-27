@@ -24,16 +24,21 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ### Data Architecture Requirements
 
 - Leverage existing data structures from data/ project
+- 27-dataset anchor system (3 Growth × 3 Risk × 3 Charity parameter matrix)
+- Parameter interpolation algorithms for smooth transitions between anchor points
 - Dataset metadata for versioning and parameter tracking
 - Efficient serialization/deserialization for local storage
+- Mathematical interpolation accuracy validation
 - Size-optimized data formats for GitHub Pages compatibility
 
-### Visualization Requirements
+### Data Engine Requirements
 
-- Chart components that consume curated datasets seamlessly
-- Dataset comparison tools for side-by-side analysis
-- Time scale navigation (day/week/month) with curated data
-- Export capabilities for stakeholder presentations
+- Parameter interpolation engine for smooth transitions between anchor datasets
+- Mathematical algorithms for accurate intermediate value calculation
+- Efficient anchor dataset loading and caching system
+- Parameter validation and boundary management
+- Interpolation performance optimization (sub-100ms parameter changes)
+- Time scale interpolation for smooth daily/weekly/monthly navigation
 
 ## Approach Options
 
@@ -59,13 +64,14 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 
 ### Enhanced Existing Dependencies
 
-- **data/ project structures** - Leverage existing serialization and validation
-- **Zustand state management** - Enhanced for curated dataset consumption
-- **Recharts visualization** - Extended for dataset comparison capabilities
+- **data/ project structures** - Leverage existing serialization and validation, enhanced for 27-dataset management
+- **Mathematical interpolation libraries** - Consider lightweight interpolation utilities for parameter transitions
+- **Zustand state management** - Enhanced for parameter state and interpolation caching
 
 ### New Development Dependencies
 
-- **None initially** - Using existing tech stack and data structures
+- **Interpolation utilities** - Lightweight mathematical interpolation functions (linear, cubic, spline)
+- **Performance optimization libraries** - Consider memoization utilities for interpolation caching
 - **Future**: Supabase client libraries when migration is needed
 
 ## Project Structure Design
@@ -87,10 +93,11 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 │   ├── store/               # Enhanced Zustand store for curated data
 │   ├── hooks/               # Dataset consumption and comparison hooks
 │   └── utils/               # Dataset loading and validation utilities
-├── datasets/                 # Curated dataset storage (Git-tracked)
-│   ├── baseline/             # Standard scenario datasets
-│   ├── variations/           # Different parameter combinations
-│   ├── metadata/             # Dataset information and versioning
+├── datasets/                 # 27 Anchor dataset storage (Git-tracked)
+│   ├── growth-base/          # Base growth scenarios (3 risk × 3 charity combinations)
+│   ├── growth-mid/           # Mid growth scenarios (3 risk × 3 charity combinations) 
+│   ├── growth-high/          # High growth scenarios (3 risk × 3 charity combinations)
+│   ├── metadata/             # Dataset parameter definitions and interpolation rules
 │   └── .gitattributes       # Git LFS configuration if needed
 └── package.json             # Enhanced scripts for dataset management
 ```
@@ -98,12 +105,21 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ### Storage Abstraction Layer
 
 ```typescript
-// Abstract storage interface for future flexibility
+// Abstract storage interface for parameter interpolation
 interface DatasetStorage {
-  loadDataset(id: string): Promise<SimulationDataset>;
+  loadAnchorDataset(parameters: ParameterCombination): Promise<SimulationDataset>;
+  loadAllAnchorDatasets(): Promise<AnchorDatasetMatrix>;
   listDatasets(): Promise<DatasetMetadata[]>;
   validateDataset(dataset: SimulationDataset): ValidationResult;
   getDatasetSize(dataset: SimulationDataset): number;
+}
+
+// Parameter interpolation engine
+interface ParameterInterpolator {
+  interpolateParameters(target: Parameters, current: Parameters): InterpolatedDataset;
+  findNearestAnchors(parameters: Parameters): AnchorDataset[];
+  calculateTransitionSteps(from: Parameters, to: Parameters, duration: number): Parameters[];
+  validateInterpolation(result: InterpolatedDataset): boolean;
 }
 
 // Local implementation (initial)
@@ -146,3 +162,4 @@ class SupabaseDatasetStorage implements DatasetStorage {
 2. Implement comprehensive testing for dataset consumption and validation
 3. Add performance benchmarking and optimization
 4. Document migration path to Supabase for future implementation
+
