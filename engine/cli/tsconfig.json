@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": [
+    "src/index.ts",
+    "src/commands/simple-test.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/orchestrator"
+  ]
+}

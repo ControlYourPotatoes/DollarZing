@@ -41,6 +41,28 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 
 ## Implementation Architecture
 
+### Project Structure (Updated)
+```
+engine/
+├── src/                    # Pure simulation engine library
+│   ├── types/             # Core simulation types and interfaces
+│   ├── simulation/        # Core simulation logic
+│   └── index.ts           # Clean library exports
+├── cli/                   # CLI tools and commands
+│   ├── src/
+│   │   ├── commands/      # Individual CLI commands
+│   │   │   ├── test-game.ts    # Single game testing
+│   │   │   ├── simulate.ts     # Short simulations  
+│   │   │   └── generate.ts     # Dataset generation
+│   │   ├── orchestrator/  # Dataset orchestrator
+│   │   └── index.ts       # Main CLI entry
+│   └── tsconfig.json      # CLI-specific TypeScript config
+├── bin/                   # Executable entry points
+│   └── dollarzing        # Main CLI executable
+├── generated-datasets/    # Output directory
+└── package.json          # Updated with CLI scripts
+```
+
 ### Parameter Configuration System
 ```typescript
 interface ParameterMatrix {
@@ -49,6 +71,12 @@ interface ParameterMatrix {
   charityPercentages: [10, 20, 30];  // Low, Mid, High percentages
 }
 ```
+
+### CLI Command Structure
+- `dollarzing test-game` - Run single game for debugging
+- `dollarzing simulate` - Run short simulation tests
+- `dollarzing generate` - Generate anchor datasets
+- `dollarzing generate --dry-run` - Preview generation
 
 ### Batch Processing Engine
 - Sequential execution to avoid resource conflicts
@@ -68,7 +96,8 @@ engine/generated-datasets/
 ```
 
 ### Integration Points
-- Game engine simulation controller access
+- Clean separation: library (src/) vs tools (cli/)
+- Game engine simulation controller access through library exports
 - Factory pattern configuration for parameter injection
 - Existing TypeScript type definitions for simulation parameters
 - Output format compatibility with planned data interpolation engine

@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+// Executable entry point for DollarZing CLI
+// Simple proxy to the compiled CLI
+
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const cliPath = join(__dirname, '../cli/dist/index.js');
+const args = process.argv.slice(2);
+
+const child = spawn('node', [cliPath, ...args], {
+  stdio: 'inherit'
+});
+
+child.on('exit', (code) => {
+  process.exit(code || 0);
+});

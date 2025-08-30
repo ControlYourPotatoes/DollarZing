@@ -1,32 +1,55 @@
-import express from 'express';
-import cors from 'cors';
+// DollarZing Simulation Engine - Library Exports
+// Clean library interface for simulation engine components
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+// Core simulation types
+export type {
+  SimulationConfig,
+  SimulationResults,
+  SimulationProgress,
+  SimulationComponents,
+  PlayerStatistics,
+  RevenueStatistics,
+  GameStatistics
+} from './types/simulation-controller.js';
 
-app.use(cors());
-app.use(express.json());
+export type {
+  VirtualDollar,
+  GameSession,
+  BettingLevel,
+  CashOutStrategy,
+  GameResult
+} from './types/virtual-dollar-engine.js';
 
-// Health check endpoint for Docker health checks
-app.get('/health', (_req, res) => {
-  res.json({ status: 'healthy' });
-});
+export type {
+  FactoryStatistics,
+  VirtualDollarFactory,
+  GameSessionFactory,
+  PerformanceConfig
+} from './types/factory-interfaces.js';
 
-// Placeholder endpoints for data generation
-app.post('/generate', (_req, res) => {
-  res.json({ message: 'Data generation endpoint - coming soon' });
-});
+// Main simulation controller
+export { SimulationController } from './types/simulation-controller.js';
 
-app.get('/status/:jobId', (req, res) => {
-  res.json({ jobId: req.params.jobId, status: 'pending' });
-});
+// Factory implementations
+export { PooledVirtualDollarFactory, PooledGameSessionFactory } from './types/pooled-factories.js';
+export { DirectVirtualDollarFactory, DirectGameSessionFactory } from './types/direct-factories.js';
 
-app.get('/dataset/:datasetId', (req, res) => {
-  res.json({ datasetId: req.params.datasetId, data: null });
-});
+// Game engine components
+export { GameMatchingEngine } from './types/game-matching-engine.js';
+export { EnhancedGameMatchingEngine } from './types/enhanced-game-matching-engine.js';
+export { RunOrchestrator } from './types/run-orchestrator.js';
+export { ScoringEngine } from './types/scoring-engine.js';
+export { PlayerBalanceManager } from './types/player-balance-manager.js';
+export { RevenueCalculator } from './types/revenue-calculator.js';
 
-app.listen(PORT, () => {
-  console.log(`DollarZing Engine running on port ${PORT}`);
-});
+// Utility functions
+export {
+  getBettingLevelValue,
+  getBettingLevelWinnings
+} from './types/virtual-dollar-engine.js';
 
-export default app;
+// Performance configurations
+export {
+  DEFAULT_PERFORMANCE_CONFIG,
+  PRODUCTION_PERFORMANCE_CONFIG
+} from './types/factory-interfaces.js';

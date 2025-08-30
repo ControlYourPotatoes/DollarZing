@@ -1,36 +1,40 @@
 {
   "name": "dollarzing-engine",
   "version": "1.0.0",
-  "description": "Data generation engine for DollarZing financial gaming simulation",
+  "description": "Simulation engine and CLI tools for DollarZing financial gaming platform",
   "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "dollarzing": "./bin/dollarzing"
+  },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch & node --loader ts-node/esm --watch src/index.ts",
-    "start": "node dist/index.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "clean": "rm -rf dist"
+    "build": "tsc && tsc -p cli/tsconfig.json",
+    "build:lib": "tsc",
+    "build:cli": "tsc -p cli/tsconfig.json", 
+    "dev": "tsc --watch",
+    "dev:cli": "tsc -p cli/tsconfig.json --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "clean": "rm -rf dist cli/dist",
+    "cli": "node bin/dollarzing",
+    "test-game": "npm run cli test-game"
   },
   "dependencies": {
     "@types/node": "^22.0.0",
-    "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "commander": "^12.0.0"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/jsdom": "^21.1.7",
-    "@types/web": "^0.0.263",
     "jest": "^29.7.0",
     "jsdom": "^26.1.0",
     "ts-jest": "^29.2.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.0"
   },
   "jest": {
-    "preset": "ts-jest",
+    "preset": "ts-jest", 
     "testEnvironment": "node",
     "roots": [
       "<rootDir>/src",
