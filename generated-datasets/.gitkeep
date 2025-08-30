@@ -1,0 +1,3 @@
+# Generated datasets directory
+# Small test datasets may be committed to git for validation
+# Large production datasets should be gitignored

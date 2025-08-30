@@ -21,12 +21,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.4 Add CLI argument parsing with Commander.js integration
   - [x] 2.5 Verify all tests pass
 
-- [ ] 3. Build Game Engine Integration Layer
-  - [ ] 3.1 Write integration tests for real game engine parameter injection
-  - [ ] 3.2 Create game engine adapter for orchestrator parameter configuration
-  - [ ] 3.3 Implement factory pattern integration for parameter isolation
-  - [ ] 3.4 Add game engine invocation with configurable parameters
-  - [ ] 3.5 Verify all tests pass including real game engine execution
+- [x] 3. Build Game Engine Integration Layer
+  - [x] 3.1 Write integration tests for real game engine parameter injection
+  - [x] 3.2 Create game engine adapter for orchestrator parameter configuration
+  - [x] 3.3 Implement factory pattern integration for parameter isolation
+  - [x] 3.4 Add game engine invocation with configurable parameters
+  - [x] 3.5 Verify all tests pass including real game engine execution
 
 - [ ] 4. Implement Batch Processing Engine
   - [ ] 4.1 Write tests for batch processing logic and progress tracking
@@ -40,11 +40,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [ ] 5.2 Implement structured output directory creation and file naming
   - [ ] 5.3 Create dataset completeness validation and quality checks
   - [ ] 5.4 Add metadata generation for each anchor dataset
-  - [ ] 5.5 Verify all tests pass including real file system operations
+  -- [ ] 5.5 Verify all tests pass including real file system operations
 
 - [ ] 6. Create CLI Interface and Integration
   - [ ] 6.1 Write end-to-end CLI tests with real orchestrator workflow
   - [ ] 6.2 Implement main CLI entry point with command structure
   - [ ] 6.3 Add help text, usage information, and error reporting
   - [ ] 6.4 Create package.json script for easy orchestrator execution
+  ..
   - [ ] 6.5 Verify all tests pass including complete CLI end-to-end workflow
