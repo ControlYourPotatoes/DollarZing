@@ -4,9 +4,8 @@
 
 import { VirtualDollar, DollarState, VirtualDollarManager } from './virtual-dollar-types';
 import { ScoringEngine, ScoreResult } from './scoring-engine';
-import { GameSession, BettingLevel, getBettingLevelValue, getBettingLevelWinnings, PlayerBalanceManager } from './virtual-dollar-engine';
+import { GameSession, BettingLevel, PlayerBalanceManager } from './virtual-dollar-engine';
 import { GameSessionFactory } from './factory-interfaces';
-import { getObjectPoolManager, isObjectPoolingEnabled } from './object-pool';
 
 // Game event types for pub/sub system
 export type GameEventType = 'gameCreated' | 'gameResolved' | 'poolUpdated' | 'matchingAttempted';
@@ -93,7 +92,6 @@ export class GameMatchingEngine {
   // Game management
   private activeGames: Map<string, GameSession> = new Map();
   private completedGames: Map<string, GameSession> = new Map();
-  private gameCounter: number = 0;
   
   // Event system
   private eventListeners: Map<GameEventType, EventListener[]> = new Map();

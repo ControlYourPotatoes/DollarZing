@@ -7,7 +7,6 @@ export { PooledVirtualDollarFactory, PooledGameSessionFactory } from './types/po
 export { DirectVirtualDollarFactory, DirectGameSessionFactory } from './types/direct-factories.js';
 // Game engine components
 export { GameMatchingEngine } from './types/game-matching-engine.js';
-export { EnhancedGameMatchingEngine } from './types/enhanced-game-matching-engine.js';
 export { RunOrchestrator } from './types/run-orchestrator.js';
 export { ScoringEngine } from './types/scoring-engine.js';
 export { PlayerBalanceManager } from './types/player-balance-manager.js';

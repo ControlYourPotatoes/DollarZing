@@ -217,7 +217,7 @@ export class DirectGameSessionFactory {
         try {
             this.gameCounter++;
             const id = `game_${this.gameCounter}_${Date.now()}`;
-            const dailySeed = ''; // Will be set during game resolution
+            const _dailySeed = ''; // Will be set during game resolution
             // Create new GameSession directly - matching initializeSession pattern
             const session = {
                 id,

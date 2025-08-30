@@ -4,8 +4,9 @@
 import { Command } from 'commander';
 import { 
   SimulationController, 
-  SimulationConfig 
-} from '@engine/index.js';
+  SimulationConfig,
+  SimulationProgress
+} from '../../src/index.js';
 
 /**
  * Create the test-game command
@@ -93,7 +94,7 @@ async function executeTestGame(options: any): Promise<void> {
 
   // Run simulation with optional progress reporting
   const results = await controller.runSimulation(
-    verbose ? (progress) => {
+    verbose ? (progress: SimulationProgress) => {
       console.log(`📊 Day ${progress.currentDay}: ${progress.playersActive} active players, ${progress.gamesCompleted} games completed`);
     } : undefined
   );

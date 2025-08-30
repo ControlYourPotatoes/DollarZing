@@ -288,7 +288,7 @@ export class LazyStatisticsManager {
       
       // Determine if player is active (has recent activity)
       const hasRecentActivity = dollars.some(dollar => 
-        dollar.state !== 'CASHED_OUT' && dollar.state !== 'LOST'
+        dollar.state !== DollarState.CASHED_OUT && dollar.state !== DollarState.LOST
       );
       
       if (hasRecentActivity) {

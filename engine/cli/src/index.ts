@@ -4,6 +4,7 @@
 
 import { Command } from 'commander';
 import { createSimpleTestCommand } from './commands/simple-test.js';
+import { createTestGameCommand } from './commands/test-game.js';
 
 /**
  * Main CLI program
@@ -18,6 +19,7 @@ function createMainProgram(): Command {
 
   // Add commands
   program.addCommand(createSimpleTestCommand());
+  program.addCommand(createTestGameCommand());
 
   // Global error handling
   program.configureOutput({

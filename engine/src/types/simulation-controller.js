@@ -64,8 +64,10 @@ export class SimulationController {
         const progressionManager = new ProgressionManager(this.config.charityPercentage);
         const playerBalanceManager = new PlayerBalanceManager();
         const revenueCalculator = new RevenueCalculator(this.config.charityPercentage);
+        // Create game session factory
+        const gameSessionFactory = new DirectGameSessionFactory();
         // Create game matching engine with required dependencies
-        const gameMatchingEngine = new GameMatchingEngine(dollarManager, scoringEngine);
+        const gameMatchingEngine = new GameMatchingEngine(dollarManager, scoringEngine, gameSessionFactory);
         // Create run orchestrator with required dependencies  
         const runOrchestrator = new RunOrchestrator(progressionManager, dollarManager, this.config.charityPercentage);
         return {

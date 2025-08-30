@@ -2,15 +2,14 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "../"
   },
   "include": [
-    "src/index.ts",
-    "src/commands/simple-test.ts"
+    "src/**/*",
+    "../src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "src/orchestrator"
+    "dist"
   ]
 }

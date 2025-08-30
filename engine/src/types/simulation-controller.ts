@@ -172,10 +172,14 @@ export class SimulationController {
     const playerBalanceManager = new PlayerBalanceManager();
     const revenueCalculator = new RevenueCalculator(this.config.charityPercentage);
     
+    // Create game session factory
+    const gameSessionFactory = new DirectGameSessionFactory();
+    
     // Create game matching engine with required dependencies
     const gameMatchingEngine = new GameMatchingEngine(
       dollarManager,
-      scoringEngine
+      scoringEngine,
+      gameSessionFactory
     );
 
     // Create run orchestrator with required dependencies  

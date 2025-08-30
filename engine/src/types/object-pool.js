@@ -130,7 +130,10 @@ export class GameSessionPool extends BaseObjectPool {
             dailySeed: '',
             dollar1Score: 0,
             dollar2Score: 0,
-            winnings: 0
+            winnings: 0,
+            isCompleted: false,
+            duration: 0,
+            randomSeed: ''
         });
         const resetFn = (session) => {
             session.id = '';
