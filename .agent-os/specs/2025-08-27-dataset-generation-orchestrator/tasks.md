@@ -7,19 +7,19 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [ ] 1. Create Orchestrator Directory Structure and Core Types
-  - [ ] 1.1 Write tests for parameter matrix validation and type definitions
-  - [ ] 1.2 Create `engine/src/orchestrator/` directory with TypeScript configuration
-  - [ ] 1.3 Define ParameterMatrix interface and 3×3×3 parameter combinations
-  - [ ] 1.4 Create OrchestratorConfig interface for CLI and batch processing options
-  - [ ] 1.5 Verify all tests pass
+- [x] 1. Create Orchestrator Directory Structure and Core Types
+  - [x] 1.1 Write tests for parameter matrix validation and type definitions
+  - [x] 1.2 Create `engine/src/orchestrator/` directory with TypeScript configuration
+  - [x] 1.3 Define ParameterMatrix interface and 3×3×3 parameter combinations
+  - [x] 1.4 Create OrchestratorConfig interface for CLI and batch processing options
+  - [x] 1.5 Verify all tests pass
 
-- [ ] 2. Implement Parameter Matrix and Configuration System
-  - [ ] 2.1 Write tests for parameter combination generation and validation
-  - [ ] 2.2 Implement parameter matrix generation (27 combinations)
-  - [ ] 2.3 Create configuration validation with error handling
-  - [ ] 2.4 Add CLI argument parsing with Commander.js integration
-  - [ ] 2.5 Verify all tests pass
+- [x] 2. Implement Parameter Matrix and Configuration System
+  - [x] 2.1 Write tests for parameter combination generation and validation
+  - [x] 2.2 Implement parameter matrix generation (27 combinations)
+  - [x] 2.3 Create configuration validation with error handling
+  - [x] 2.4 Add CLI argument parsing with Commander.js integration
+  - [x] 2.5 Verify all tests pass
 
 - [ ] 3. Build Game Engine Integration Layer
   - [ ] 3.1 Write integration tests for real game engine parameter injection

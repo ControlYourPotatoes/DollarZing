@@ -28,3 +28,15 @@ export {
   generateFilePaths,
   parseDirectoryName
 } from './parameter-matrix';
+
+// CLI functions
+export {
+  createCliProgram,
+  parseCliArguments,
+  parseCliArgumentsWithErrorHandling,
+  validateCliConfiguration,
+  showHelp,
+  displayConfiguration,
+  validateSystemRequirements,
+  createCliDefaultConfig
+} from './cli';
