@@ -6,7 +6,7 @@ import {
   SimulationController, 
   SimulationConfig,
   SimulationProgress
-} from '../../src/index.js';
+} from '../../../index.js';
 
 /**
  * Create the test-game command

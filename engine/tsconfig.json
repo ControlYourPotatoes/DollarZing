@@ -4,11 +4,12 @@
     "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "Node",
+    "allowImportingTsExtensions": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "allowJs": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -27,12 +28,16 @@
     "types": ["node", "jest"]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "cli/src/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "tests/**/*"
+    "tests/**/*",
+    "generated-datasets/**/*",
+    "bin/**/*",
+    "cli/src/orchestrator/**/*"
   ],
   "ts-node": {
     "esm": true,

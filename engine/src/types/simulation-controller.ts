@@ -10,6 +10,7 @@ import { ProgressionManager } from "./progression-manager";
 import { RevenueCalculator } from "./revenue-calculator";
 import { CashOutStrategy, GameResult } from "./virtual-dollar-engine";
 import { DirectGameSessionFactory } from "./direct-factories";
+import { DEFAULT_PERFORMANCE_CONFIG } from "./factory-interfaces";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -181,7 +182,9 @@ export class SimulationController {
     );
 
     // Create game session factory
-    const gameSessionFactory = new DirectGameSessionFactory();
+    const gameSessionFactory = new DirectGameSessionFactory(
+      DEFAULT_PERFORMANCE_CONFIG
+    );
 
     // Create game matching engine with required dependencies
     const gameMatchingEngine = new GameMatchingEngine(
