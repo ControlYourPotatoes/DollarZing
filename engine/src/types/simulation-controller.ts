@@ -1,14 +1,15 @@
 // SimulationController Implementation - Task 7.2
 // Master controller that coordinates all engine components
 
-import { PlayerBalanceManager } from './player-balance-manager';
-import { GameMatchingEngine } from './game-matching-engine';
-import { RunOrchestrator } from './run-orchestrator';
-import { VirtualDollarManager } from './virtual-dollar-types';
-import { ScoringEngine } from './scoring-engine';
-import { ProgressionManager } from './progression-manager';
-import { RevenueCalculator } from './revenue-calculator';
-import { CashOutStrategy, GameResult } from './virtual-dollar-engine';
+import { PlayerBalanceManager } from "./player-balance-manager";
+import { GameMatchingEngine } from "./game-matching-engine";
+import { RunOrchestrator } from "./run-orchestrator";
+import { VirtualDollarManager } from "./virtual-dollar-types";
+import { ScoringEngine } from "./scoring-engine";
+import { ProgressionManager } from "./progression-manager";
+import { RevenueCalculator } from "./revenue-calculator";
+import { CashOutStrategy, GameResult } from "./virtual-dollar-engine";
+import { DirectGameSessionFactory } from "./direct-factories";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -129,35 +130,38 @@ export class SimulationController {
    */
   private validateConfiguration(config: SimulationConfig): void {
     if (config.durationDays < 1) {
-      throw new Error('Duration must be at least 1 day');
+      throw new Error("Duration must be at least 1 day");
     }
 
     if (config.initialPlayerCount < 1) {
-      throw new Error('Initial player count must be positive');
+      throw new Error("Initial player count must be positive");
     }
 
     if (config.charityPercentage < 0 || config.charityPercentage > 1) {
-      throw new Error('Charity percentage must be between 0 and 1');
+      throw new Error("Charity percentage must be between 0 and 1");
     }
 
     if (config.initialDonationAmount < 0) {
-      throw new Error('Initial donation amount cannot be negative');
+      throw new Error("Initial donation amount cannot be negative");
     }
 
     if (config.maxSimulationTimeMs < 1000) {
-      throw new Error('Maximum simulation time must be at least 1 second');
+      throw new Error("Maximum simulation time must be at least 1 second");
     }
 
     // Validate strategy distribution sums to 1.0
-    const strategySum = Object.values(config.playerStrategies).reduce((sum, pct) => sum + pct, 0);
+    const strategySum = Object.values(config.playerStrategies).reduce(
+      (sum, pct) => sum + pct,
+      0
+    );
     if (Math.abs(strategySum - 1.0) > 0.001) {
-      throw new Error('Player strategy percentages must sum to 1.0');
+      throw new Error("Player strategy percentages must sum to 1.0");
     }
 
     // Validate strategy percentages are positive
-    Object.values(config.playerStrategies).forEach(pct => {
+    Object.values(config.playerStrategies).forEach((pct) => {
       if (pct < 0) {
-        throw new Error('Player strategy percentages must be non-negative');
+        throw new Error("Player strategy percentages must be non-negative");
       }
     });
   }
@@ -168,13 +172,17 @@ export class SimulationController {
   private initializeComponents(): SimulationComponents {
     const dollarManager = new VirtualDollarManager();
     const scoringEngine = new ScoringEngine();
-    const progressionManager = new ProgressionManager(this.config.charityPercentage);
+    const progressionManager = new ProgressionManager(
+      this.config.charityPercentage
+    );
     const playerBalanceManager = new PlayerBalanceManager();
-    const revenueCalculator = new RevenueCalculator(this.config.charityPercentage);
-    
+    const revenueCalculator = new RevenueCalculator(
+      this.config.charityPercentage
+    );
+
     // Create game session factory
     const gameSessionFactory = new DirectGameSessionFactory();
-    
+
     // Create game matching engine with required dependencies
     const gameMatchingEngine = new GameMatchingEngine(
       dollarManager,
@@ -182,7 +190,7 @@ export class SimulationController {
       gameSessionFactory
     );
 
-    // Create run orchestrator with required dependencies  
+    // Create run orchestrator with required dependencies
     const runOrchestrator = new RunOrchestrator(
       progressionManager,
       dollarManager,
@@ -196,7 +204,7 @@ export class SimulationController {
       dollarManager,
       scoringEngine,
       progressionManager,
-      revenueCalculator
+      revenueCalculator,
     };
   }
 
@@ -204,8 +212,9 @@ export class SimulationController {
    * Initialize players with starting donation balance - Task 7.3
    */
   initializePlayers(): number {
-    const { initialPlayerCount, initialDonationAmount, playerStrategies } = this.config;
-    
+    const { initialPlayerCount, initialDonationAmount, playerStrategies } =
+      this.config;
+
     // Calculate strategy counts
     const strategyCounts = new Map<CashOutStrategy, number>();
     Object.entries(playerStrategies).forEach(([strategy, percentage]) => {
@@ -214,13 +223,20 @@ export class SimulationController {
     });
 
     // Ensure we have exactly the right number of players
-    let totalAssigned = Array.from(strategyCounts.values()).reduce((sum, count) => sum + count, 0);
+    let totalAssigned = Array.from(strategyCounts.values()).reduce(
+      (sum, count) => sum + count,
+      0
+    );
     if (totalAssigned !== initialPlayerCount) {
       // Adjust the largest group to match exact count
-      const largestStrategy = Array.from(strategyCounts.entries())
-        .sort(([,a], [,b]) => b - a)[0][0];
+      const largestStrategy = Array.from(strategyCounts.entries()).sort(
+        ([, a], [, b]) => b - a
+      )[0][0];
       const adjustment = initialPlayerCount - totalAssigned;
-      strategyCounts.set(largestStrategy, strategyCounts.get(largestStrategy)! + adjustment);
+      strategyCounts.set(
+        largestStrategy,
+        strategyCounts.get(largestStrategy)! + adjustment
+      );
     }
 
     // Create players with assigned strategies
@@ -233,14 +249,14 @@ export class SimulationController {
           initialDonationAmount,
           strategy
         );
-        
+
         // Initialize player in run orchestrator
         this.components.runOrchestrator.initializePlayer(
           playerId,
           initialDonationAmount,
           strategy
         );
-        
+
         playerIndex++;
       }
     });
@@ -251,9 +267,11 @@ export class SimulationController {
   /**
    * Run complete simulation with progress tracking - Task 7.7
    */
-  async runSimulation(progressCallback?: (progress: SimulationProgress) => void): Promise<SimulationResults> {
+  async runSimulation(
+    progressCallback?: (progress: SimulationProgress) => void
+  ): Promise<SimulationResults> {
     if (this.isRunning) {
-      throw new Error('Simulation is already running');
+      throw new Error("Simulation is already running");
     }
 
     this.isRunning = true;
@@ -265,13 +283,13 @@ export class SimulationController {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         simulationDurationMs: performance.now() - this.startTime,
         config: this.config,
         playerStats: this.getEmptyPlayerStats(),
         revenueStats: this.getEmptyRevenueStats(),
         gameStats: this.getEmptyGameStats(),
-        completedAt: new Date()
+        completedAt: new Date(),
       };
     } finally {
       this.isRunning = false;
@@ -281,18 +299,23 @@ export class SimulationController {
   /**
    * Execute the main simulation loop
    */
-  private async executeSimulation(progressCallback?: (progress: SimulationProgress) => void): Promise<SimulationResults> {
-    const { durationDays, enableProgressReporting, maxSimulationTimeMs } = this.config;
-    
+  private async executeSimulation(
+    progressCallback?: (progress: SimulationProgress) => void
+  ): Promise<SimulationResults> {
+    const { durationDays, enableProgressReporting, maxSimulationTimeMs } =
+      this.config;
+
     for (let day = 0; day < durationDays; day++) {
       // Check for timeout
       const elapsed = performance.now() - this.startTime;
       if (elapsed > maxSimulationTimeMs) {
-        throw new Error(`Simulation timeout after ${elapsed}ms (max: ${maxSimulationTimeMs}ms)`);
+        throw new Error(
+          `Simulation timeout after ${elapsed}ms (max: ${maxSimulationTimeMs}ms)`
+        );
       }
 
       if (this.simulationAborted) {
-        throw new Error('Simulation was cancelled');
+        throw new Error("Simulation was cancelled");
       }
 
       // Process one day of simulation
@@ -306,7 +329,7 @@ export class SimulationController {
 
       // Yield control to prevent UI blocking
       if (day % 5 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 1));
+        await new Promise((resolve) => setTimeout(resolve, 1));
       }
     }
 
@@ -319,7 +342,7 @@ export class SimulationController {
       playerStats: this.generatePlayerStatistics(),
       revenueStats: this.generateRevenueStatistics(simulationDurationMs),
       gameStats: this.generateGameStatistics(),
-      completedAt: new Date()
+      completedAt: new Date(),
     };
   }
 
@@ -331,39 +354,48 @@ export class SimulationController {
     const newRuns = this.components.runOrchestrator.autoCreateRuns(2); // Max 2 concurrent runs per player
 
     // Add new virtual dollars to the pool
-    newRuns.forEach(virtualDollar => {
+    newRuns.forEach((virtualDollar) => {
       this.components.gameMatchingEngine.addToPool(virtualDollar);
     });
 
     // Process available games for the day
     const maxGamesPerDay = Math.max(10, this.config.initialPlayerCount * 2);
-    
+
     for (let gameAttempt = 0; gameAttempt < maxGamesPerDay; gameAttempt++) {
       const matchResult = this.components.gameMatchingEngine.attemptMatching();
-      
+
       if (matchResult.gamesCreated.length === 0) {
         break; // No more matches possible
       }
 
       // Process game results through run orchestrator
-      matchResult.gamesCreated.forEach(gameSession => {
+      matchResult.gamesCreated.forEach((gameSession) => {
         const winner = gameSession.winner;
         const loser = gameSession.loser;
 
         // Process winner progression
-        const winnerResult = this.components.runOrchestrator.processGameResult(winner, GameResult.WIN);
+        const winnerResult = this.components.runOrchestrator.processGameResult(
+          winner,
+          GameResult.WIN
+        );
 
         // Process loser result
-        const loserResult = this.components.runOrchestrator.processGameResult(loser, GameResult.LOSS);
+        const loserResult = this.components.runOrchestrator.processGameResult(
+          loser,
+          GameResult.LOSS
+        );
 
         // Handle run completions and create new runs
-        [winnerResult, loserResult].forEach(result => {
+        [winnerResult, loserResult].forEach((result) => {
           if (result && result.shouldCreateNewRun) {
-            const playerStrategy = this.components.runOrchestrator.getPlayerStrategy(result.playerId);
+            const playerStrategy =
+              this.components.runOrchestrator.getPlayerStrategy(
+                result.playerId
+              );
             const newRun = this.components.runOrchestrator.createNewRun({
               playerId: result.playerId,
               cashOutStrategy: playerStrategy,
-              fundingSource: 'DONATION'
+              fundingSource: "DONATION",
             });
 
             if (newRun) {
@@ -375,7 +407,7 @@ export class SimulationController {
 
       // Small delay to prevent blocking
       if (gameAttempt % 50 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
   }
@@ -383,13 +415,22 @@ export class SimulationController {
   /**
    * Calculate simulation progress for reporting - Task 7.7
    */
-  private calculateProgress(currentDay: number, totalDays: number, elapsedTimeMs: number): SimulationProgress {
+  private calculateProgress(
+    currentDay: number,
+    totalDays: number,
+    elapsedTimeMs: number
+  ): SimulationProgress {
     const completionPercentage = Math.min(currentDay / totalDays, 1.0);
-    const estimatedTotalTime = completionPercentage > 0 ? elapsedTimeMs / completionPercentage : 0;
-    const estimatedRemainingMs = Math.max(0, estimatedTotalTime - elapsedTimeMs);
+    const estimatedTotalTime =
+      completionPercentage > 0 ? elapsedTimeMs / completionPercentage : 0;
+    const estimatedRemainingMs = Math.max(
+      0,
+      estimatedTotalTime - elapsedTimeMs
+    );
 
     const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
-    const activePlayerCount = this.components.runOrchestrator.getActivePlayerCount();
+    const activePlayerCount =
+      this.components.runOrchestrator.getActivePlayerCount();
 
     return {
       currentDay,
@@ -398,7 +439,7 @@ export class SimulationController {
       playersActive: activePlayerCount,
       gamesCompleted: this.components.revenueCalculator.getTotalGames(),
       dollarsInPool: poolStats.totalDollarsInPool,
-      elapsedTimeMs
+      elapsedTimeMs,
     };
   }
 
@@ -409,11 +450,12 @@ export class SimulationController {
     const balanceManager = this.components.playerBalanceManager;
     const totalDonationFunds = balanceManager.getTotalDonations();
     const totalWinningsFunds = balanceManager.getTotalWinnings();
-    
-    const activePlayers = this.components.runOrchestrator.getActivePlayerCount();
+
+    const activePlayers =
+      this.components.runOrchestrator.getActivePlayerCount();
     const totalPlayers = this.config.initialPlayerCount;
     const retiredPlayers = totalPlayers - activePlayers;
-    
+
     const totalGames = this.components.revenueCalculator.getTotalGames();
     const averageGamesPerPlayer = totalGames / Math.max(totalPlayers, 1);
     const playerRetirementRate = retiredPlayers / totalPlayers;
@@ -432,23 +474,26 @@ export class SimulationController {
       totalWinningsFunds: totalWinningsFunds,
       totalProgressionFunds: totalProgressionFunds,
       averageGamesPerPlayer,
-      playerRetirementRate
+      playerRetirementRate,
     };
   }
 
   /**
    * Generate revenue statistics for final results - Task 7.11
    */
-  private generateRevenueStatistics(_simulationDurationMs: number): RevenueStatistics {
+  private generateRevenueStatistics(
+    _simulationDurationMs: number
+  ): RevenueStatistics {
     const revenueCalc = this.components.revenueCalculator;
     const totalRevenue = revenueCalc.getPlatformRevenue();
     const totalCharity = revenueCalc.getCharityContributions();
     const totalPayouts = revenueCalc.getPlayerWinnings();
     const totalGames = revenueCalc.getTotalGames();
-    
+
     const revenuePerGame = totalGames > 0 ? totalRevenue / totalGames : 0;
     const simulationDays = this.config.durationDays;
-    const averageRevenuePerDay = simulationDays > 0 ? totalRevenue / simulationDays : 0;
+    const averageRevenuePerDay =
+      simulationDays > 0 ? totalRevenue / simulationDays : 0;
 
     return {
       totalPlatformRevenue: totalRevenue,
@@ -456,7 +501,7 @@ export class SimulationController {
       totalPlayerPayouts: totalPayouts,
       revenuePerGame,
       charityPercentage: this.config.charityPercentage,
-      averageRevenuePerDay
+      averageRevenuePerDay,
     };
   }
 
@@ -465,28 +510,32 @@ export class SimulationController {
    */
   private generateGameStatistics(): GameStatistics {
     const totalGames = this.components.revenueCalculator.getTotalGames();
-    const averageGamesPerDay = totalGames / Math.max(this.config.durationDays, 1);
-    
+    const averageGamesPerDay =
+      totalGames / Math.max(this.config.durationDays, 1);
+
     const dollarManager = this.components.dollarManager;
     const poolStats = dollarManager.getPoolStatistics();
     const totalVirtualDollars = poolStats.totalDollars;
-    
+
     const runOrchestrator = this.components.runOrchestrator;
     const activeRuns = runOrchestrator.getAllActiveRuns().length;
-    
+
     const progressionManager = this.components.progressionManager;
     const completedRuns = progressionManager.getCompletedRuns().length;
     const allCompletedRuns = progressionManager.getCompletedRuns();
-    
+
     // Count jackpots (level 10 completions)
-    const jackpotsWon = allCompletedRuns.filter(run => 
-      run.wasJackpot || run.finalLevel === 10
+    const jackpotsWon = allCompletedRuns.filter(
+      (run) => run.wasJackpot || run.finalLevel === 10
     ).length;
-    
+
     // Calculate average run length
-    const totalRunLength = allCompletedRuns.reduce((sum, run) => 
-      sum + run.gamesPlayedInRun, 0);
-    const averageRunLength = completedRuns > 0 ? totalRunLength / completedRuns : 0;
+    const totalRunLength = allCompletedRuns.reduce(
+      (sum, run) => sum + run.gamesPlayedInRun,
+      0
+    );
+    const averageRunLength =
+      completedRuns > 0 ? totalRunLength / completedRuns : 0;
 
     return {
       totalGames,
@@ -495,7 +544,7 @@ export class SimulationController {
       completedRuns,
       activeRuns,
       jackpotsWon,
-      averageRunLength
+      averageRunLength,
     };
   }
 
@@ -539,7 +588,7 @@ export class SimulationController {
       totalWinningsFunds: 0,
       totalProgressionFunds: 0,
       averageGamesPerPlayer: 0,
-      playerRetirementRate: 0
+      playerRetirementRate: 0,
     };
   }
 
@@ -550,7 +599,7 @@ export class SimulationController {
       totalPlayerPayouts: 0,
       revenuePerGame: 0,
       charityPercentage: this.config?.charityPercentage || 0,
-      averageRevenuePerDay: 0
+      averageRevenuePerDay: 0,
     };
   }
 
@@ -562,7 +611,7 @@ export class SimulationController {
       completedRuns: 0,
       activeRuns: 0,
       jackpotsWon: 0,
-      averageRunLength: 0
+      averageRunLength: 0,
     };
   }
 }

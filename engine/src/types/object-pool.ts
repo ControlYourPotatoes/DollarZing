@@ -1,7 +1,12 @@
 // Object Pool Implementation for Performance Optimization
 // Task 9.1: Implement object pooling for GameSession and VirtualDollar objects
 
-import { VirtualDollar, GameSession, DollarState, BettingLevel } from './virtual-dollar-engine';
+import {
+  VirtualDollar,
+  GameSession,
+  DollarState,
+  BettingLevel,
+} from "./virtual-dollar-engine";
 
 /**
  * Generic object pool interface
@@ -22,7 +27,11 @@ class BaseObjectPool<T> implements ObjectPool<T> {
   private resetFn: (obj: T) => void;
   private maxSize: number;
 
-  constructor(createFn: () => T, resetFn: (obj: T) => void, maxSize: number = 1000) {
+  constructor(
+    createFn: () => T,
+    resetFn: (obj: T) => void,
+    maxSize: number = 1000
+  ) {
     this.createFn = createFn;
     this.resetFn = resetFn;
     this.maxSize = maxSize;
@@ -67,28 +76,28 @@ class BaseObjectPool<T> implements ObjectPool<T> {
 export class VirtualDollarPool extends BaseObjectPool<VirtualDollar> {
   constructor(maxSize: number = 10000) {
     const createFn = (): VirtualDollar => ({
-      id: '',
-      serialNumber: '',
+      id: "",
+      serialNumber: "",
       currentScore: 0,
       currentLevel: 1 as BettingLevel,
       state: DollarState.CREATED,
-      ownerId: '',
-      runId: '',
+      ownerId: "",
+      runId: "",
       createdAt: new Date(),
       gameHistory: [],
       gamesInThisRun: 0,
       currentRunWinnings: 0,
-      isIndependentRun: true
+      isIndependentRun: true,
     });
 
     const resetFn = (dollar: VirtualDollar): void => {
-      dollar.id = '';
-      dollar.serialNumber = '';
+      dollar.id = "";
+      dollar.serialNumber = "";
       dollar.currentScore = 0;
       dollar.currentLevel = 1 as BettingLevel;
       dollar.state = DollarState.CREATED;
-      dollar.ownerId = '';
-      dollar.runId = '';
+      dollar.ownerId = "";
+      dollar.runId = "";
       dollar.createdAt = new Date();
       dollar.gameHistory.length = 0; // Clear array without creating new one
       dollar.gamesInThisRun = 0;
@@ -121,7 +130,7 @@ export class VirtualDollarPool extends BaseObjectPool<VirtualDollar> {
     dollar.gamesInThisRun = 0;
     dollar.currentRunWinnings = 0;
     dollar.isIndependentRun = true;
-    
+
     return dollar;
   }
 }
@@ -135,22 +144,22 @@ export class GameSessionPool extends BaseObjectPool<GameSession> {
   constructor(maxSize: number = 10000) {
     // Create a reusable empty dollar reference
     const emptyDollar: VirtualDollar = {
-      id: '',
-      serialNumber: '',
+      id: "",
+      serialNumber: "",
       currentScore: 0,
       currentLevel: 1 as BettingLevel,
       state: DollarState.CREATED,
-      ownerId: '',
-      runId: '',
+      ownerId: "",
+      runId: "",
       createdAt: new Date(),
       gameHistory: [],
       gamesInThisRun: 0,
       currentRunWinnings: 0,
-      isIndependentRun: true
+      isIndependentRun: true,
     };
 
     const createFn = (): GameSession => ({
-      id: '',
+      id: "",
       dollar1: emptyDollar,
       dollar2: emptyDollar,
       winner: emptyDollar,
@@ -159,17 +168,17 @@ export class GameSessionPool extends BaseObjectPool<GameSession> {
       platformFee: 0,
       timestamp: new Date(),
       gameNumber: 0,
-      dailySeed: '',
+      dailySeed: "",
       dollar1Score: 0,
       dollar2Score: 0,
       winnings: 0,
       isCompleted: false,
       duration: 0,
-      randomSeed: ''
+      randomSeed: 0,
     });
 
     const resetFn = (session: GameSession): void => {
-      session.id = '';
+      session.id = "";
       session.dollar1 = emptyDollar;
       session.dollar2 = emptyDollar;
       session.winner = emptyDollar;
@@ -178,7 +187,7 @@ export class GameSessionPool extends BaseObjectPool<GameSession> {
       session.platformFee = 0;
       session.timestamp = new Date();
       session.gameNumber = 0;
-      session.dailySeed = '';
+      session.dailySeed = "";
       session.dollar1Score = 0;
       session.dollar2Score = 0;
       session.winnings = 0;
@@ -206,14 +215,14 @@ export class GameSessionPool extends BaseObjectPool<GameSession> {
     session.winner = this.emptyDollar; // Will be set after scoring
     session.loser = this.emptyDollar; // Will be set after scoring
     session.level = level;
-    session.platformFee = 0.20; // 20c platform fee
+    session.platformFee = 0.2; // 20c platform fee
     session.timestamp = new Date();
     session.gameNumber = gameNumber;
     session.dailySeed = dailySeed;
     session.dollar1Score = 0; // Will be calculated
     session.dollar2Score = 0; // Will be calculated
     session.winnings = 0; // Will be calculated
-    
+
     return session;
   }
 
@@ -233,7 +242,7 @@ export class GameSessionPool extends BaseObjectPool<GameSession> {
     session.dollar1Score = dollar1Score;
     session.dollar2Score = dollar2Score;
     session.winnings = winnings;
-    
+
     return session;
   }
 }
@@ -243,14 +252,14 @@ export class GameSessionPool extends BaseObjectPool<GameSession> {
  */
 export class ObjectPoolManager {
   private static instance: ObjectPoolManager;
-  
+
   public readonly virtualDollarPool: VirtualDollarPool;
   public readonly gameSessionPool: GameSessionPool;
-  
+
   private constructor() {
     this.virtualDollarPool = new VirtualDollarPool(10000);
     this.gameSessionPool = new GameSessionPool(10000);
-    
+
     // Pre-warm pools for better initial performance
     this.virtualDollarPool.prewarm(100);
     this.gameSessionPool.prewarm(100);
@@ -270,12 +279,12 @@ export class ObjectPoolManager {
     return {
       virtualDollarPool: {
         size: this.virtualDollarPool.size(),
-        available: this.virtualDollarPool.size()
+        available: this.virtualDollarPool.size(),
       },
       gameSessionPool: {
         size: this.gameSessionPool.size(),
-        available: this.gameSessionPool.size()
-      }
+        available: this.gameSessionPool.size(),
+      },
     };
   }
 
@@ -299,8 +308,9 @@ export class ObjectPoolManager {
 /**
  * Configuration for object pooling
  */
-const ENABLE_OBJECT_POOLING = process.env.NODE_ENV === 'production' || 
-                              process.env.ENABLE_POOLING === 'true';
+const ENABLE_OBJECT_POOLING =
+  process.env.NODE_ENV === "production" ||
+  process.env.ENABLE_POOLING === "true";
 
 /**
  * Utility function to get the singleton object pool manager
