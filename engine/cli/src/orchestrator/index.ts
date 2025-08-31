@@ -15,19 +15,26 @@ export type {
   ValidationResult,
   DatasetMetadata,
   FileNamingConfig
-} from './types';
+} from './core/types';
+
+// Configuration functions
+export { createDefaultOrchestratorConfig } from './core/config';
 
 // Parameter matrix functions
 export {
   createParameterMatrix,
   generateAllCombinations,
-  validateParameterCombination,
-  validateParameterCombinationDetailed,
-  createDefaultOrchestratorConfig,
   generateDirectoryName,
   generateFilePaths,
   parseDirectoryName
-} from './parameter-matrix';
+} from './parameters/matrix';
+
+// Validation functions
+export {
+  validateParameterCombination,
+  validateParameterCombinationDetailed,
+  validateOrchestratorConfig
+} from './parameters/validation';
 
 // CLI functions
 export {
@@ -39,4 +46,23 @@ export {
   displayConfiguration,
   validateSystemRequirements,
   createCliDefaultConfig
-} from './cli';
+} from './cli/cli';
+
+// Execution components
+export {
+  GameEngineAdapter,
+  type ParameterMappingConfig,
+  type AdapterGenerationResult,
+  type DatasetProgressCallback
+} from './execution/game-engine-adapter';
+
+export {
+  GameEngineExecutor,
+  type ExecutorConfig
+} from './execution/game-engine-executor';
+
+export {
+  OrchestratorFactoryManager,
+  createOrchestratorFactoryManager,
+  type OrchestratorFactoryConfig
+} from './execution/factory-integration';
