@@ -1,0 +1,36 @@
+{
+  "name": "DollarZing Engine Dev",
+  "image": "node:22",
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localWorkspaceFolder}/engine,target=/workspace,type=bind,consistency=cached",
+    "source=dollarzing-data,target=/data/datasets,type=volume"
+  ],
+  "ports": ["3001:3001"],
+  "environment": {
+    "NODE_ENV": "development",
+    "PORT": "3001",
+    "LOG_LEVEL": "debug"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json"
+      ],
+      "settings": {
+        "typescript.preferences.includePackageJsonAutoImports": "on",
+        "typescript.suggest.autoImports": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  },
+  "postCreateCommand": "cd /workspace && npm ci",
+  "remoteUser": "node",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  }
+}
