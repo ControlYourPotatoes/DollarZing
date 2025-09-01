@@ -15,9 +15,6 @@ COPY . .
 # Create data directory for volume mount
 RUN mkdir -p /data/datasets
 
-# Expose port
-EXPOSE 3001
-
 # Development command with CLI access
 CMD ["npm", "run", "dev"]
 
@@ -49,6 +46,7 @@ RUN addgroup -g 1001 -S nodejs && \
 # Copy built application
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/bin ./bin
 COPY package*.json ./
 
 # Create data directory with proper permissions
@@ -59,13 +57,6 @@ RUN mkdir -p /data/datasets && \
 # Switch to non-root user
 USER nodeuser
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
-
-# Expose port
-EXPOSE 3001
-
-# Production command with proper signal handling
+# Production command with proper signal handling - Run CLI for orchestrator access
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/cli/src/index.js"]

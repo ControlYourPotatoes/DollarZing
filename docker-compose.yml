@@ -4,15 +4,12 @@ services:
       context: ./engine
       target: development
     container_name: dollarzing-engine-dev
-    ports:
-      - "3001:3001"
     volumes:
       - ./engine:/app
       - /app/node_modules
       - dollarzing-data:/data/datasets
     environment:
       - NODE_ENV=development
-      - PORT=3001
       - LOG_LEVEL=debug
     networks:
       - dollarzing-network
@@ -41,8 +38,7 @@ services:
       - VITE_API_URL=http://localhost:3001
       - VITE_DEV_MODE=true
     depends_on:
-      engine:
-        condition: service_healthy
+      - engine
     networks:
       - dollarzing-network
     restart: no

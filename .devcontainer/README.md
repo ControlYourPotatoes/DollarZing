@@ -11,19 +11,27 @@ This directory contains configurations for developing inside Docker containers u
 
 ## Available Configurations
 
-### 1. `devcontainer.json` - Simple Node.js Environment
+### 1. `devcontainer-full.json` - Complete DollarZing Environment ⭐ **RECOMMENDED**
+
+- Uses custom development Dockerfile
+- **Includes Claude Code CLI pre-installed**
+- Mounts entire DollarZing project (not just engine)
+- Full development tools and VS Code extensions
+- **Best for working with Claude Code**
+
+### 2. `devcontainer.json` - Simple Node.js Environment
 
 - Uses `node:22` base image
-- Includes Git support
-- Good for basic development
-- **Use this if the Dockerfile version doesn't work**
+- Engine-only workspace
+- Good for basic engine development
+- **Use this if you only need engine work**
 
-### 2. `devcontainer-dockerfile.json` - Full Engine Environment
+### 3. `devcontainer-dockerfile.json` - Engine-Only Environment
 
 - Uses your existing engine Dockerfile
-- Includes all your project dependencies
-- Matches your production environment exactly
-- **Recommended for full development**
+- Engine-focused development
+- Matches your production environment
+- **For engine-specific work only**
 
 ## Alternative: Development Shell Scripts
 
@@ -43,9 +51,28 @@ scripts\dev-shell.bat
 
 ## Development Workflow
 
-Once inside the container:
+### Using the Full Environment (devcontainer-full.json):
 
-1. **Your code is mounted live** - changes are immediate
+1. **Your entire project is mounted live** - changes are immediate
+2. **Claude Code is pre-installed** - start chatting immediately:
+   ```bash
+   claude
+   ```
+3. **Work on engine:**
+   ```bash
+   cd engine
+   npm run build
+   npm run cli simple-test
+   ```
+4. **Work on frontend:**
+   ```bash
+   npm run dev  # React dev server
+   ```
+5. **Access both ports:** Engine (3001) and Frontend (3000)
+
+### Using Engine-Only Environments:
+
+1. **Your engine code is mounted live** - changes are immediate
 2. **Build after changes:**
    ```bash
    npm run build

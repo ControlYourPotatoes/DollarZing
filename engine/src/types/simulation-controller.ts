@@ -419,9 +419,24 @@ export class SimulationController {
       });
 
       // Process game results through run orchestrator
-      matchResult.gamesCreated.forEach((gameSession) => {
+      matchResult.gamesCreated.forEach((originalGameSession) => {
+        // CRITICAL FIX: Fetch the updated game session from completedGames
+        const gameSession = this.components.gameMatchingEngine.getGameSession(
+          originalGameSession.id
+        );
+        if (!gameSession || !gameSession.winner || !gameSession.loser) {
+          console.warn(
+            `DEBUG: Skipping game ${originalGameSession.id} - missing winner/loser data`
+          );
+          return;
+        }
+
         const winner = gameSession.winner;
         const loser = gameSession.loser;
+
+        console.log(
+          `DEBUG: Processing game ${gameSession.id} with winner ${winner.ownerId} (Level ${winner.currentLevel}) and loser ${loser.ownerId} (Level ${loser.currentLevel})`
+        );
 
         // Process winner progression
         const winnerResult = this.components.runOrchestrator.processGameResult(
@@ -429,11 +444,21 @@ export class SimulationController {
           GameResult.WIN
         );
 
+        if (winnerResult) {
+          console.log(
+            `DEBUG: Winner result: ${winnerResult.completionType}, Level: ${winner.currentLevel}, Winnings: $${winnerResult.totalWinnings}`
+          );
+        }
+
         // Process loser result
         const loserResult = this.components.runOrchestrator.processGameResult(
           loser,
           GameResult.LOSS
         );
+
+        if (loserResult) {
+          console.log(`DEBUG: Loser result: ${loserResult.completionType}`);
+        }
 
         // Process cash-outs for revenue tracking
         [winnerResult, loserResult].forEach((result) => {

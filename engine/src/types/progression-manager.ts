@@ -122,7 +122,13 @@ export class ProgressionManager {
     }
 
     // Advance to next level
-    progression.currentLevel = (progression.currentLevel + 1) as BettingLevel;
+    const nextLevel = (progression.currentLevel + 1) as BettingLevel;
+    progression.currentLevel = nextLevel;
+    
+    // CRITICAL FIX: Update the virtual dollar's currentLevel to match progression
+    virtualDollar.currentLevel = nextLevel;
+    
+    console.log(`DEBUG: Player ${virtualDollar.ownerId} advanced to level ${nextLevel}, winnings: $${levelWinnings}`);
 
     return progression;
   }
@@ -150,7 +156,10 @@ export class ProgressionManager {
       gamesWonInRun: progression.gamesWonInRun
     };
 
-    return this.calculateCashOutDecision(context);
+    const decision = this.calculateCashOutDecision(context);
+    console.log(`DEBUG: Cash-out decision for player ${virtualDollar.ownerId} at level ${context.currentLevel} with $${context.currentWinnings} winnings: ${decision} (strategy: ${strategy})`);
+    
+    return decision;
   }
 
   /**
@@ -277,7 +286,8 @@ export class ProgressionManager {
    */
   private conservativeCashOutLogic(context: CashOutDecisionContext): CashOutDecision {
     // Conservative players cash out early to secure winnings
-    if (context.currentLevel >= 3 && context.currentWinnings >= 8) {
+    // With level × 1.8 formula: Level 3 = $10.80 cumulative, Level 4 = $18.00 cumulative
+    if (context.currentLevel >= 3 && context.currentWinnings >= 5.4) {
       return CashOutDecision.CASH_OUT;
     }
     if (context.currentLevel >= 5) {
@@ -291,7 +301,8 @@ export class ProgressionManager {
    */
   private balancedCashOutLogic(context: CashOutDecisionContext): CashOutDecision {
     // Balanced players aim for mid-range levels
-    if (context.currentLevel >= 6 && context.currentWinnings >= 64) {
+    // With level × 1.8 formula: Level 6 = $37.80 cumulative, Level 7 = $48.60 cumulative
+    if (context.currentLevel >= 6 && context.currentWinnings >= 37.8) {
       return CashOutDecision.CASH_OUT;
     }
     if (context.currentLevel >= 8) {

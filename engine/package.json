@@ -15,7 +15,7 @@
     "dev": "npm run build && npm run test-game",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist && rm -rf tests/*.js tests/*.js.map tests/*.d.ts tests/*.d.ts.map tests/node_modules",
     "cli": "node bin/dollarzing",
     "test-game": "npm run cli test-game"
   },

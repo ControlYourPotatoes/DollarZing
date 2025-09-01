@@ -1,0 +1,48 @@
+# Full DollarZing Development Environment
+FROM node:22-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    git \
+    curl \
+    wget \
+    bash \
+    build-base \
+    python3 \
+    make \
+    g++ \
+    sudo
+
+# Create a developer user with sudo privileges
+RUN addgroup -g 1001 -S developer && \
+    adduser -S developer -u 1001 -G developer -s /bin/bash && \
+    echo "developer ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Set up workspace
+WORKDIR /workspace
+
+# Install Claude Code CLI
+RUN curl -fsSL https://claude.ai/cli/install.sh | sh
+
+# Make Claude CLI available system-wide
+RUN ln -s /root/.local/bin/claude /usr/local/bin/claude || echo "Claude CLI will be installed per user"
+
+# Create data directory for datasets
+RUN mkdir -p /data/datasets && \
+    chown -R developer:developer /data
+
+# Switch to developer user
+USER developer
+
+# Install Claude CLI for the developer user
+RUN curl -fsSL https://claude.ai/cli/install.sh | sh && \
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+
+# Set up Git safe directory (for when workspace is mounted)
+RUN git config --global --add safe.directory /workspace
+
+# Default shell
+SHELL ["/bin/bash", "-c"]
+
+# Keep container running
+CMD ["sleep", "infinity"]

@@ -29,11 +29,11 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.5 Verify player balance remains stable during virtual dollar gameplay
 
 - [ ] 4. Implement Smart Game Matching and Multiple Virtual Dollar Support  
-  - [ ] 4.1 Write tests for smart matching (prefer different owners, fallback to same owner)
-  - [ ] 4.2 Update GameMatchingEngine to prefer different-owner virtual dollar pairings
+  - [ ] 4.1 Write tests for smart matching (only different owners)
+  - [ ] 4.2 Update GameMatchingEngine to only different-owner virtual dollar pairings
   - [ ] 4.3 Enable multiple concurrent virtual dollars per player with unique runId tracking
   - [ ] 4.4 Write tests for multiple virtual dollars from same player running simultaneously
-  - [ ] 4.5 Verify same-owner matching works as fallback to prevent pool stagnation
+  - [ ] 4.5 Verify same-owner matching fails, no available player. 
 
 - [ ] 5. Integration Testing and Virtual Dollar Pool Engine Validation
   - [ ] 5.1 Write comprehensive tests for virtual dollar lifecycle (creation → pool entry → battles → pot accumulation → cash-out)

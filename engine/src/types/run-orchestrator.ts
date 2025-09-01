@@ -109,6 +109,8 @@ export class RunOrchestrator {
   processGameResult(virtualDollar: VirtualDollar, result: GameResult): RunCompletionEvent | null {
     const playerId = virtualDollar.ownerId;
     
+    console.log(`DEBUG: Processing ${result} for player ${playerId} at level ${virtualDollar.currentLevel}`);
+    
     // Handle fund changes based on game result
     if (result === GameResult.WIN) {
       // Winner gets winnings (level × 1.8) and advances to next level
