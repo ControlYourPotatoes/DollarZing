@@ -26,7 +26,7 @@ export interface SimulationConfig {
   initialPlayerCount: number;
   dailySeed: string;
   charityPercentage: number; // 0.0 to 1.0
-  playerStrategies: Record<CashOutStrategy, number>; // Distribution percentages
+  playerStrategies: Partial<Record<CashOutStrategy, number>>; // Distribution percentages
   initialDonationAmount: number;
   maxSimulationTimeMs: number;
   enableProgressReporting: boolean;
@@ -650,7 +650,7 @@ export class SimulationController {
         const strategyWeights = Object.values(this.config.playerStrategies);
         const randomValue = Math.random();
         let cumulativeWeight = 0;
-        let selectedStrategy: CashOutStrategy = "average";
+        let selectedStrategy: CashOutStrategy = CashOutStrategy.BALANCED;
 
         for (let j = 0; j < strategies.length; j++) {
           cumulativeWeight += strategyWeights[j];

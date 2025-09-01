@@ -2,14 +2,19 @@
 // Creates objects directly without pooling for development and testing scenarios
 // Implements factory interfaces with direct object creation for clean testing
 
-import { VirtualDollar, GameSession, BettingLevel, DollarState } from './virtual-dollar-engine';
-import { 
-  VirtualDollarFactory, 
-  GameSessionFactory, 
-  GamePair, 
-  FactoryStatistics, 
-  PerformanceConfig 
-} from './factory-interfaces';
+import {
+  VirtualDollar,
+  GameSession,
+  BettingLevel,
+  DollarState,
+} from "./virtual-dollar-engine";
+import {
+  VirtualDollarFactory,
+  GameSessionFactory,
+  GamePair,
+  FactoryStatistics,
+  PerformanceConfig,
+} from "./factory-interfaces";
 
 /**
  * Performance tracking utility for timing operations
@@ -37,12 +42,18 @@ class PerformanceTracker {
 
   getAverageCreationTime(): number {
     if (this.creationTimes.length === 0) return 0;
-    return this.creationTimes.reduce((sum, time) => sum + time, 0) / this.creationTimes.length;
+    return (
+      this.creationTimes.reduce((sum, time) => sum + time, 0) /
+      this.creationTimes.length
+    );
   }
 
   getAverageReleaseTime(): number {
     if (this.releaseTimes.length === 0) return 0;
-    return this.releaseTimes.reduce((sum, time) => sum + time, 0) / this.releaseTimes.length;
+    return (
+      this.releaseTimes.reduce((sum, time) => sum + time, 0) /
+      this.releaseTimes.length
+    );
   }
 
   reset(): void {
@@ -67,11 +78,13 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   create(playerId: string): VirtualDollar {
-    const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
 
     // Validate player ID
-    if (!playerId || playerId.trim() === '') {
-      throw new Error('Invalid player ID: cannot be empty or whitespace');
+    if (!playerId || playerId.trim() === "") {
+      throw new Error("Invalid player ID: cannot be empty or whitespace");
     }
 
     try {
@@ -93,7 +106,8 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
         gameHistory: [],
         gamesInThisRun: 0,
         currentRunWinnings: 0,
-        isIndependentRun: true
+        isIndependentRun: true,
+        potValue: 1.0, // Starting pot value ($1.00)
       };
 
       this.objectsCreated++;
@@ -110,7 +124,9 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   release(dollar: VirtualDollar): void {
-    const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
 
     if (!dollar) {
       return; // Handle null/undefined gracefully
@@ -135,7 +151,9 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
 
     if (this.config.enableBatchOptimizations) {
       // Batch-optimized creation with timing
-      const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+      const startTime = this.config.enablePerformanceMetrics
+        ? performance.now()
+        : 0;
 
       for (const playerId of playerIds) {
         try {
@@ -143,7 +161,9 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
           dollars.push(dollar);
         } catch (error) {
           // Continue with other players if one fails
-          console.warn(`Failed to create virtual dollar for player ${playerId}: ${error}`);
+          console.warn(
+            `Failed to create virtual dollar for player ${playerId}: ${error}`
+          );
         }
       }
 
@@ -160,7 +180,9 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
           dollars.push(dollar);
         } catch (error) {
           // Continue with other players if one fails
-          console.warn(`Failed to create virtual dollar for player ${playerId}: ${error}`);
+          console.warn(
+            `Failed to create virtual dollar for player ${playerId}: ${error}`
+          );
         }
       }
     }
@@ -169,8 +191,11 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   getStatistics(): FactoryStatistics {
-    const objectsInUse = Math.max(0, this.objectsCreated - this.objectsReleased);
-    
+    const objectsInUse = Math.max(
+      0,
+      this.objectsCreated - this.objectsReleased
+    );
+
     return {
       objectsCreated: this.objectsCreated,
       objectsReleased: this.objectsReleased,
@@ -179,7 +204,7 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
       poolHitRate: 0, // No pool means no hits
       averageCreationTime: this.performanceTracker.getAverageCreationTime(),
       averageReleaseTime: this.performanceTracker.getAverageReleaseTime(),
-      memoryUsageMB: objectsInUse * 0.001 // Rough estimate: 1KB per object
+      memoryUsageMB: objectsInUse * 0.001, // Rough estimate: 1KB per object
     };
   }
 
@@ -201,10 +226,12 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   private generateSerialNumber(): string {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const firstLetter = letters[Math.floor(Math.random() * letters.length)];
     const lastLetter = letters[Math.floor(Math.random() * letters.length)];
-    const digits = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+    const digits = Math.floor(Math.random() * 100000000)
+      .toString()
+      .padStart(8, "0");
     return `${firstLetter}${digits}${lastLetter}`;
   }
 }
@@ -224,33 +251,42 @@ export class DirectGameSessionFactory implements GameSessionFactory {
   constructor(config: PerformanceConfig) {
     this.config = config;
     this.performanceTracker = new PerformanceTracker();
-    
+
     // Create empty dollar reference for uninitialized winner/loser
     this.emptyDollar = {
-      id: '',
-      serialNumber: '',
+      id: "",
+      serialNumber: "",
       currentScore: 0,
       currentLevel: 1 as BettingLevel,
       state: DollarState.CREATED,
-      ownerId: '',
-      runId: '',
+      ownerId: "",
+      runId: "",
       createdAt: new Date(),
       gameHistory: [],
       gamesInThisRun: 0,
       currentRunWinnings: 0,
-      isIndependentRun: true
+      isIndependentRun: true,
+      potValue: 0, // Empty dollar has no pot value
     };
   }
 
-  create(dollar1: VirtualDollar, dollar2: VirtualDollar, level: BettingLevel): GameSession {
-    const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+  create(
+    dollar1: VirtualDollar,
+    dollar2: VirtualDollar,
+    level: BettingLevel
+  ): GameSession {
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
 
     // Validate parameters
     if (!dollar1 || !dollar2) {
-      throw new Error('Invalid virtual dollar parameters: both dollars must be provided');
+      throw new Error(
+        "Invalid virtual dollar parameters: both dollars must be provided"
+      );
     }
     if (level < 1 || level > 10) {
-      throw new Error('Invalid betting level: must be between 1 and 10');
+      throw new Error("Invalid betting level: must be between 1 and 10");
     }
 
     try {
@@ -266,7 +302,7 @@ export class DirectGameSessionFactory implements GameSessionFactory {
         winner: this.emptyDollar, // Will be set during game resolution
         loser: this.emptyDollar, // Will be set during game resolution
         level,
-        platformFee: 0.20, // Standard 20c platform fee
+        platformFee: 0.2, // Standard 20c platform fee
         timestamp: new Date(),
         gameNumber: this.gameCounter,
         dailySeed: this.getCurrentDailySeed(),
@@ -275,7 +311,7 @@ export class DirectGameSessionFactory implements GameSessionFactory {
         winnings: this.calculateWinnings(level),
         isCompleted: false, // New games start as incomplete
         duration: 0, // No duration until game is completed
-        randomSeed: this.generateDeterministicSeed(id)
+        randomSeed: this.generateDeterministicSeed(id),
       };
 
       this.objectsCreated++;
@@ -292,7 +328,9 @@ export class DirectGameSessionFactory implements GameSessionFactory {
   }
 
   release(session: GameSession): void {
-    const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
 
     if (!session) {
       return; // Handle null/undefined gracefully
@@ -317,7 +355,9 @@ export class DirectGameSessionFactory implements GameSessionFactory {
 
     if (this.config.enableBatchOptimizations) {
       // Batch-optimized creation with timing
-      const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+      const startTime = this.config.enablePerformanceMetrics
+        ? performance.now()
+        : 0;
 
       for (const pair of pairs) {
         try {
@@ -351,8 +391,11 @@ export class DirectGameSessionFactory implements GameSessionFactory {
   }
 
   getStatistics(): FactoryStatistics {
-    const objectsInUse = Math.max(0, this.objectsCreated - this.objectsReleased);
-    
+    const objectsInUse = Math.max(
+      0,
+      this.objectsCreated - this.objectsReleased
+    );
+
     return {
       objectsCreated: this.objectsCreated,
       objectsReleased: this.objectsReleased,
@@ -361,7 +404,7 @@ export class DirectGameSessionFactory implements GameSessionFactory {
       poolHitRate: 0, // No pool means no hits
       averageCreationTime: this.performanceTracker.getAverageCreationTime(),
       averageReleaseTime: this.performanceTracker.getAverageReleaseTime(),
-      memoryUsageMB: objectsInUse * 0.002 // Rough estimate: 2KB per session
+      memoryUsageMB: objectsInUse * 0.002, // Rough estimate: 2KB per session
     };
   }
 
@@ -386,8 +429,8 @@ export class DirectGameSessionFactory implements GameSessionFactory {
   private getCurrentDailySeed(): string {
     const now = new Date();
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
 
@@ -399,7 +442,7 @@ export class DirectGameSessionFactory implements GameSessionFactory {
     let hash = 0;
     for (let i = 0; i < gameId.length; i++) {
       const char = gameId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     // Normalize to 0-1 range

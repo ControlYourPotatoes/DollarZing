@@ -6,6 +6,7 @@ import {
   SimulationController,
   type SimulationConfig,
   type SimulationProgress,
+  CashOutStrategy,
 } from "@/index";
 
 /**
@@ -84,9 +85,9 @@ async function executeTestGame(options: any): Promise<void> {
     dailySeed: seed,
     charityPercentage: charityPercentage / 100, // Convert to decimal
     playerStrategies: {
-      conservative: 0.4, // 40% conservative players
-      balanced: 0.4, // 40% balanced players
-      aggressive: 0.2, // 20% aggressive players
+      [CashOutStrategy.CONSERVATIVE]: 0.4, // 40% conservative players
+      [CashOutStrategy.BALANCED]: 0.4, // 40% balanced players
+      [CashOutStrategy.AGGRESSIVE]: 0.2, // 20% aggressive players
     },
     initialDonationAmount: 25, // $25 starting amount
     maxSimulationTimeMs: 30000, // 30 seconds max

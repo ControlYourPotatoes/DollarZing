@@ -24,6 +24,7 @@
         "typescript.preferences.includePackageJsonAutoImports": "on",
         "typescript.suggest.autoImports": true,
         "editor.formatOnSave": true,
+        "editor.formatOnSaveTimeout": 5000,
         "editor.defaultFormatter": "esbenp.prettier-vscode"
       }
     }

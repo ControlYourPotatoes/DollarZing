@@ -433,8 +433,8 @@ export class GameMatchingEngine {
     }
 
     return {
-      totalDollarsInPool: this.pooledDollars.size,
-      availableForMatching: this.pooledDollars.size - this.dollarsInGame.size,
+      totalDollarsInPool: this.pooledDollars.size + this.dollarsInGame.size,
+      availableForMatching: this.pooledDollars.size,
       dollarsInGame: this.dollarsInGame.size,
       dollarsByLevel,
       totalGamesCompleted: this.completedGames.size
