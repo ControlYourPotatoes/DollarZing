@@ -1,6 +1,5 @@
 // Simple Test Command - Basic CLI functionality test
 // Minimal command to verify CLI structure works
-
 import { Command } from 'commander';
 
 export function createSimpleTestCommand(): Command {

@@ -8,7 +8,7 @@ import { VirtualDollarManager } from "./virtual-dollar-types";
 import { ScoringEngine } from "./scoring-engine";
 import { ProgressionManager } from "./progression-manager";
 import { RevenueCalculator } from "./revenue-calculator";
-import { CashOutStrategy, GameResult } from "./virtual-dollar-engine";
+import { CashOutStrategy, GameResult, DollarState } from "./virtual-dollar-engine";
 import { DirectGameSessionFactory } from "./direct-factories";
 import { DEFAULT_PERFORMANCE_CONFIG } from "./factory-interfaces";
 
@@ -358,6 +358,8 @@ export class SimulationController {
 
     // Add new virtual dollars to the pool
     newRuns.forEach((virtualDollar) => {
+      // Update state from CREATED to POOLED before adding to matching engine
+      this.components.dollarManager.updateDollarState(virtualDollar.id, DollarState.POOLED);
       this.components.gameMatchingEngine.addToPool(virtualDollar);
     });
 
@@ -370,6 +372,18 @@ export class SimulationController {
       if (matchResult.gamesCreated.length === 0) {
         break; // No more matches possible
       }
+
+      // Resolve games to determine winners and losers
+      matchResult.gamesCreated.forEach((gameSession) => {
+        // Generate proper daily seed format (YYYY-MM-DD) from config or current date
+        const dailySeed = this.config.dailySeed.match(/^\d{4}-\d{2}-\d{2}$/) 
+          ? this.config.dailySeed 
+          : new Date().toISOString().split('T')[0];
+        const resolutionResult = this.components.gameMatchingEngine.resolveGame(gameSession.id, dailySeed);
+        if (!resolutionResult.success) {
+          console.warn(`Failed to resolve game ${gameSession.id}: ${resolutionResult.error}`);
+        }
+      });
 
       // Process game results through run orchestrator
       matchResult.gamesCreated.forEach((gameSession) => {
@@ -402,6 +416,8 @@ export class SimulationController {
             });
 
             if (newRun) {
+              // Update state from CREATED to POOLED before adding to matching engine
+              this.components.dollarManager.updateDollarState(newRun.id, DollarState.POOLED);
               this.components.gameMatchingEngine.addToPool(newRun);
             }
           }
