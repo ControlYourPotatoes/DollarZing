@@ -1,32 +1,30 @@
 // Factory Pattern Integration for Dataset Orchestrator
 // Provides parameter isolation and configurable factory selection for orchestrator runs
 
-import { 
-  VirtualDollarFactory, 
-  GameSessionFactory, 
+import {
+  VirtualDollarFactory,
+  GameSessionFactory,
   PerformanceConfig,
   FactorySelector,
   DEFAULT_PERFORMANCE_CONFIG,
-  PRODUCTION_PERFORMANCE_CONFIG
-} from '../../../types/factory-interfaces';
-import { PooledVirtualDollarFactory, PooledGameSessionFactory } from '../../../types/pooled-factories';
-import type { 
-  ParameterCombination, 
-  OrchestratorConfig 
-} from '../core/types';
+  PRODUCTION_PERFORMANCE_CONFIG,
+  PooledVirtualDollarFactory,
+  PooledGameSessionFactory
+} from "@/index";
+import type { ParameterCombination } from "../core/types";
 
 /**
  * Factory configuration specific to orchestrator requirements
  */
 export interface OrchestratorFactoryConfig extends PerformanceConfig {
   // Orchestrator-specific settings
-  isolateParameterRuns: boolean;      // Whether to reset factories between parameter combinations
-  enableCrossRunPooling: boolean;     // Whether to share pools across different parameter runs
-  maxConcurrentRuns: number;          // Maximum concurrent simulation runs (affects pool sizing)
-  
+  isolateParameterRuns: boolean; // Whether to reset factories between parameter combinations
+  enableCrossRunPooling: boolean; // Whether to share pools across different parameter runs
+  maxConcurrentRuns: number; // Maximum concurrent simulation runs (affects pool sizing)
+
   // Memory management
-  forceCleanupBetweenRuns: boolean;   // Force garbage collection between runs
-  poolResetThreshold: number;         // Reset pools after N runs to prevent memory leaks
+  forceCleanupBetweenRuns: boolean; // Force garbage collection between runs
+  poolResetThreshold: number; // Reset pools after N runs to prevent memory leaks
 }
 
 /**
@@ -55,8 +53,8 @@ export const ORCHESTRATOR_CONFIGS = {
     poolResetThreshold: Infinity,
     poolSizes: {
       virtualDollar: 100,
-      gameSession: 100
-    }
+      gameSession: 100,
+    },
   } as OrchestratorFactoryConfig,
 
   // Development configuration - balanced performance with debugging capabilities
@@ -70,8 +68,8 @@ export const ORCHESTRATOR_CONFIGS = {
     poolResetThreshold: 5,
     poolSizes: {
       virtualDollar: 1000,
-      gameSession: 1000
-    }
+      gameSession: 1000,
+    },
   } as OrchestratorFactoryConfig,
 
   // Production configuration - maximum performance for dataset generation
@@ -85,9 +83,9 @@ export const ORCHESTRATOR_CONFIGS = {
     poolResetThreshold: 10,
     poolSizes: {
       virtualDollar: 50000, // Large pools for 1-year simulations
-      gameSession: 50000
-    }
-  } as OrchestratorFactoryConfig
+      gameSession: 50000,
+    },
+  } as OrchestratorFactoryConfig,
 };
 
 /**
@@ -97,9 +95,10 @@ export const ORCHESTRATOR_CONFIGS = {
 export class OrchestratorFactoryManager {
   private config: OrchestratorFactoryConfig;
   private factoryInstances = new Map<string, FactoryInstance>();
-  private runCounter = 0;
 
-  constructor(config: OrchestratorFactoryConfig = ORCHESTRATOR_CONFIGS.development) {
+  constructor(
+    config: OrchestratorFactoryConfig = ORCHESTRATOR_CONFIGS.development
+  ) {
     this.config = config;
   }
 
@@ -112,17 +111,17 @@ export class OrchestratorFactoryManager {
     gameSessionFactory: GameSessionFactory;
   } {
     const key = this.createParameterKey(combination);
-    
+
     if (this.config.isolateParameterRuns) {
       // Get or create isolated factory instance for this parameter combination
       let instance = this.factoryInstances.get(key);
-      
+
       if (!instance) {
         instance = this.createFactoryInstance(combination);
         this.factoryInstances.set(key, instance);
       } else {
         instance.runCount++;
-        
+
         // Check if we should reset factories due to run threshold
         if (instance.runCount >= this.config.poolResetThreshold) {
           this.resetFactoryInstance(key);
@@ -133,21 +132,21 @@ export class OrchestratorFactoryManager {
 
       return {
         virtualDollarFactory: instance.virtualDollarFactory,
-        gameSessionFactory: instance.gameSessionFactory
+        gameSessionFactory: instance.gameSessionFactory,
       };
     } else {
       // Use shared factory instances across all parameter combinations
-      if (!this.factoryInstances.has('shared')) {
+      if (!this.factoryInstances.has("shared")) {
         const sharedInstance = this.createFactoryInstance(combination);
-        this.factoryInstances.set('shared', sharedInstance);
+        this.factoryInstances.set("shared", sharedInstance);
       }
-      
-      const sharedInstance = this.factoryInstances.get('shared')!;
+
+      const sharedInstance = this.factoryInstances.get("shared")!;
       sharedInstance.runCount++;
-      
+
       return {
         virtualDollarFactory: sharedInstance.virtualDollarFactory,
-        gameSessionFactory: sharedInstance.gameSessionFactory
+        gameSessionFactory: sharedInstance.gameSessionFactory,
       };
     }
   }
@@ -155,10 +154,12 @@ export class OrchestratorFactoryManager {
   /**
    * Create a new factory instance for the given parameter combination
    */
-  private createFactoryInstance(combination: ParameterCombination): FactoryInstance {
+  private createFactoryInstance(
+    combination: ParameterCombination
+  ): FactoryInstance {
     // Adjust config based on parameter combination if needed
     const adjustedConfig = this.adjustConfigForParameters(combination);
-    
+
     const virtualDollarFactory = new PooledVirtualDollarFactory(adjustedConfig);
     const gameSessionFactory = new PooledGameSessionFactory(adjustedConfig);
 
@@ -167,7 +168,7 @@ export class OrchestratorFactoryManager {
       virtualDollarFactory,
       gameSessionFactory,
       creationTime: new Date(),
-      runCount: 1
+      runCount: 1,
     };
   }
 
@@ -175,22 +176,26 @@ export class OrchestratorFactoryManager {
    * Adjust factory configuration based on parameter combination
    * Different parameters might require different optimization strategies
    */
-  private adjustConfigForParameters(combination: ParameterCombination): PerformanceConfig {
+  private adjustConfigForParameters(
+    combination: ParameterCombination
+  ): PerformanceConfig {
     const baseConfig = { ...this.config };
-    
+
     // High growth rate simulations might need larger pools
     if (combination.growthRate === 60) {
       baseConfig.poolSizes = {
         virtualDollar: Math.round(baseConfig.poolSizes.virtualDollar * 1.5),
-        gameSession: Math.round(baseConfig.poolSizes.gameSession * 1.5)
+        gameSession: Math.round(baseConfig.poolSizes.gameSession * 1.5),
       };
     }
-    
+
     // High-risk simulations might create more game sessions
-    if (combination.riskLevel === 'high') {
-      baseConfig.poolSizes.gameSession = Math.round(baseConfig.poolSizes.gameSession * 1.2);
+    if (combination.riskLevel === "high") {
+      baseConfig.poolSizes.gameSession = Math.round(
+        baseConfig.poolSizes.gameSession * 1.2
+      );
     }
-    
+
     return baseConfig;
   }
 
@@ -209,10 +214,10 @@ export class OrchestratorFactoryManager {
     if (!instance) return;
 
     // Reset factory statistics if available
-    if ('resetStatistics' in instance.virtualDollarFactory) {
+    if ("resetStatistics" in instance.virtualDollarFactory) {
       (instance.virtualDollarFactory as any).resetStatistics();
     }
-    if ('resetStatistics' in instance.gameSessionFactory) {
+    if ("resetStatistics" in instance.gameSessionFactory) {
       (instance.gameSessionFactory as any).resetStatistics();
     }
 
@@ -229,34 +234,36 @@ export class OrchestratorFactoryManager {
    */
   resetAllFactories(): void {
     const keys = Array.from(this.factoryInstances.keys());
-    keys.forEach(key => this.resetFactoryInstance(key));
-    this.runCounter = 0;
+    keys.forEach((key) => this.resetFactoryInstance(key));
   }
 
   /**
    * Get statistics for all active factory instances
    */
-  getAllFactoryStatistics(): Record<string, {
-    combination: ParameterCombination;
-    virtualDollarStats: any;
-    gameSessionStats: any;
-    runCount: number;
-    age: number;
-  }> {
+  getAllFactoryStatistics(): Record<
+    string,
+    {
+      combination: ParameterCombination;
+      virtualDollarStats: any;
+      gameSessionStats: any;
+      runCount: number;
+      age: number;
+    }
+  > {
     const stats: Record<string, any> = {};
-    
+
     this.factoryInstances.forEach((instance, key) => {
       const age = Date.now() - instance.creationTime.getTime();
-      
+
       stats[key] = {
         combination: instance.combination,
         virtualDollarStats: instance.virtualDollarFactory.getStatistics(),
         gameSessionStats: instance.gameSessionFactory.getStatistics(),
         runCount: instance.runCount,
-        age
+        age,
       };
     });
-    
+
     return stats;
   }
 
@@ -270,20 +277,20 @@ export class OrchestratorFactoryManager {
   } {
     let totalMemory = 0;
     const breakdown: Record<string, number> = {};
-    
+
     this.factoryInstances.forEach((instance, key) => {
       const vdStats = instance.virtualDollarFactory.getStatistics();
       const gsStats = instance.gameSessionFactory.getStatistics();
       const instanceMemory = vdStats.memoryUsageMB + gsStats.memoryUsageMB;
-      
+
       breakdown[key] = instanceMemory;
       totalMemory += instanceMemory;
     });
-    
+
     return {
       totalMemoryMB: totalMemory,
       factoryCount: this.factoryInstances.size,
-      breakdown
+      breakdown,
     };
   }
 
@@ -306,7 +313,7 @@ export class OrchestratorFactoryManager {
    * Force garbage collection if available (Node.js environment)
    */
   private forceGarbageCollection(): void {
-    if (typeof global !== 'undefined' && global.gc) {
+    if (typeof global !== "undefined" && global.gc) {
       global.gc();
     }
   }
@@ -323,10 +330,10 @@ export class OrchestratorFactoryManager {
  * Factory selector implementation for orchestrator use
  */
 export class OrchestratorFactorySelector implements FactorySelector {
-  private config: OrchestratorFactoryConfig;
-
-  constructor(config: OrchestratorFactoryConfig = ORCHESTRATOR_CONFIGS.development) {
-    this.config = config;
+  constructor(
+    _config: OrchestratorFactoryConfig = ORCHESTRATOR_CONFIGS.development
+  ) {
+    // Config stored for potential future use
   }
 
   selectVirtualDollarFactory(config: PerformanceConfig): VirtualDollarFactory {
@@ -342,7 +349,7 @@ export class OrchestratorFactorySelector implements FactorySelector {
  * Utility function to create factory manager with preset configurations
  */
 export function createOrchestratorFactoryManager(
-  preset: 'testing' | 'development' | 'production' = 'development'
+  preset: "testing" | "development" | "production" = "development"
 ): OrchestratorFactoryManager {
   return new OrchestratorFactoryManager(ORCHESTRATOR_CONFIGS[preset]);
 }
@@ -350,32 +357,35 @@ export function createOrchestratorFactoryManager(
 /**
  * Utility function to validate factory configuration
  */
-export function validateFactoryConfig(config: OrchestratorFactoryConfig): { isValid: boolean; errors: string[] } {
+export function validateFactoryConfig(config: OrchestratorFactoryConfig): {
+  isValid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   if (config.maxConcurrentRuns < 1) {
-    errors.push('maxConcurrentRuns must be at least 1');
+    errors.push("maxConcurrentRuns must be at least 1");
   }
 
   if (config.poolResetThreshold < 1) {
-    errors.push('poolResetThreshold must be at least 1');
+    errors.push("poolResetThreshold must be at least 1");
   }
 
   if (config.poolSizes.virtualDollar < 10) {
-    errors.push('virtualDollar pool size must be at least 10');
+    errors.push("virtualDollar pool size must be at least 10");
   }
 
   if (config.poolSizes.gameSession < 10) {
-    errors.push('gameSession pool size must be at least 10');
+    errors.push("gameSession pool size must be at least 10");
   }
 
   // Check for conflicting settings
   if (!config.enableObjectPooling && config.isolateParameterRuns) {
-    errors.push('isolateParameterRuns requires enableObjectPooling to be true');
+    errors.push("isolateParameterRuns requires enableObjectPooling to be true");
   }
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }

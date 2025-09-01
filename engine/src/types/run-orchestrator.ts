@@ -232,7 +232,7 @@ export class RunOrchestrator {
    */
   getTotalPlayerFunds(): number {
     let total = 0;
-    for (const funds of this.playerFunds.values()) {
+    for (const funds of Array.from(this.playerFunds.values())) {
       total += funds;
     }
     return total;
@@ -258,7 +258,7 @@ export class RunOrchestrator {
   autoCreateRuns(maxRunsPerPlayer: number = 1): VirtualDollar[] {
     const newRuns: VirtualDollar[] = [];
     
-    for (const [playerId, funds] of this.playerFunds.entries()) {
+    for (const [playerId, funds] of Array.from(this.playerFunds.entries())) {
       const gameFeeCost = 1.10;
       if (funds < gameFeeCost) continue;
 

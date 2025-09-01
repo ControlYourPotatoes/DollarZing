@@ -10,7 +10,7 @@ export type {
   PlayerStatistics,
   RevenueStatistics,
   GameStatistics
-} from './types/simulation-controller.js';
+} from './types/simulation-controller';
 
 export type {
   VirtualDollar,
@@ -18,37 +18,38 @@ export type {
   BettingLevel,
   CashOutStrategy,
   GameResult
-} from './types/virtual-dollar-engine.js';
+} from './types/virtual-dollar-engine';
 
 export type {
   FactoryStatistics,
   VirtualDollarFactory,
   GameSessionFactory,
-  PerformanceConfig
-} from './types/factory-interfaces.js';
+  PerformanceConfig,
+  FactorySelector
+} from './types/factory-interfaces';
 
 // Main simulation controller
-export { SimulationController } from './types/simulation-controller.js';
+export { SimulationController } from './types/simulation-controller';
 
 // Factory implementations
-export { PooledVirtualDollarFactory, PooledGameSessionFactory } from './types/pooled-factories.js';
-export { DirectVirtualDollarFactory, DirectGameSessionFactory } from './types/direct-factories.js';
+export { PooledVirtualDollarFactory, PooledGameSessionFactory } from './types/pooled-factories';
+export { DirectVirtualDollarFactory, DirectGameSessionFactory } from './types/direct-factories';
 
 // Game engine components
-export { GameMatchingEngine } from './types/game-matching-engine.js';
-export { RunOrchestrator } from './types/run-orchestrator.js';
-export { ScoringEngine } from './types/scoring-engine.js';
-export { PlayerBalanceManager } from './types/player-balance-manager.js';
-export { RevenueCalculator } from './types/revenue-calculator.js';
+export { GameMatchingEngine } from './types/game-matching-engine';
+export { RunOrchestrator } from './types/run-orchestrator';
+export { ScoringEngine } from './types/scoring-engine';
+export { PlayerBalanceManager } from './types/player-balance-manager';
+export { RevenueCalculator } from './types/revenue-calculator';
 
 // Utility functions
 export {
   getBettingLevelValue,
   getBettingLevelWinnings
-} from './types/virtual-dollar-engine.js';
+} from './types/virtual-dollar-engine';
 
 // Performance configurations
 export {
   DEFAULT_PERFORMANCE_CONFIG,
   PRODUCTION_PERFORMANCE_CONFIG
-} from './types/factory-interfaces.js';
+} from './types/factory-interfaces';

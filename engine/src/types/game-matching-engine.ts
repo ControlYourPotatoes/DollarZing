@@ -557,7 +557,7 @@ export class GameMatchingEngine {
    */
   clearCompletedGames(): void {
     // Release all game sessions before clearing
-    for (const game of this.completedGames.values()) {
+    for (const game of Array.from(this.completedGames.values())) {
       try {
         this.gameSessionFactory.release(game);
       } catch (error) {

@@ -261,7 +261,7 @@ export class PlayerBalanceManager {
    */
   getTotalDonations(): number {
     let total = 0;
-    for (const player of this.players.values()) {
+    for (const player of Array.from(this.players.values())) {
       // Include both remaining and spent donation balance
       total += player.donationBalance + (player.gamesPlayed * this.gameFee);
     }
@@ -273,7 +273,7 @@ export class PlayerBalanceManager {
    */
   getTotalWinnings(): number {
     let total = 0;
-    for (const player of this.players.values()) {
+    for (const player of Array.from(this.players.values())) {
       total += player.winningsBalance + player.currentProgression;
     }
     return this.roundToTwoCents(total);
@@ -284,7 +284,7 @@ export class PlayerBalanceManager {
    */
   getTotalCharityContributions(): number {
     let total = 0;
-    for (const transactions of this.transactionHistory.values()) {
+    for (const transactions of Array.from(this.transactionHistory.values())) {
       for (const transaction of transactions) {
         if (transaction.type === 'CASH_OUT') {
           // Calculate charity from historical cash-outs
@@ -440,7 +440,7 @@ export class PlayerBalanceManager {
     this.gameFee = newFee;
     
     // Update player activity status based on new fee
-    for (const player of this.players.values()) {
+    for (const player of Array.from(this.players.values())) {
       player.isActive = player.donationBalance >= this.gameFee;
       
       // Note: We don't record transactions for automatic activity status changes

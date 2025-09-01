@@ -435,7 +435,7 @@ export class VirtualDollarManager {
     const completedDollars: string[] = [];
     
     // Find all dollars in final states
-    for (const [dollarId, dollar] of this.dollars) {
+    for (const [dollarId, dollar] of Array.from(this.dollars.entries())) {
       if (dollar.state === DollarState.CASHED_OUT || dollar.state === DollarState.LOST) {
         completedDollars.push(dollarId);
       }
