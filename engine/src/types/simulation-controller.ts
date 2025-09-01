@@ -8,7 +8,11 @@ import { VirtualDollarManager } from "./virtual-dollar-types";
 import { ScoringEngine } from "./scoring-engine";
 import { ProgressionManager } from "./progression-manager";
 import { RevenueCalculator } from "./revenue-calculator";
-import { CashOutStrategy, GameResult, DollarState } from "./virtual-dollar-engine";
+import {
+  CashOutStrategy,
+  GameResult,
+  DollarState,
+} from "./virtual-dollar-engine";
 import { DirectGameSessionFactory } from "./direct-factories";
 import { DEFAULT_PERFORMANCE_CONFIG } from "./factory-interfaces";
 
@@ -353,21 +357,42 @@ export class SimulationController {
    * Process one day of simulation activity
    */
   private async processSimulationDay(_day: number): Promise<void> {
+    // Add new players based on growth model
+    this.addNewPlayersForDay(_day);
+
     // Auto-create new runs for eligible players
     const newRuns = this.components.runOrchestrator.autoCreateRuns(2); // Max 2 concurrent runs per player
 
     // Add new virtual dollars to the pool
+    console.log(`DEBUG: Day ${_day}, Created ${newRuns.length} new runs`);
     newRuns.forEach((virtualDollar) => {
       // Update state from CREATED to POOLED before adding to matching engine
-      this.components.dollarManager.updateDollarState(virtualDollar.id, DollarState.POOLED);
-      this.components.gameMatchingEngine.addToPool(virtualDollar);
+      this.components.dollarManager.updateDollarState(
+        virtualDollar.id,
+        DollarState.POOLED
+      );
+      const addResult =
+        this.components.gameMatchingEngine.addToPool(virtualDollar);
+      console.log(
+        `DEBUG: Added dollar ${virtualDollar.id} to pool - Success: ${addResult.success}, Level: ${virtualDollar.currentLevel}`
+      );
     });
 
     // Process available games for the day
     const maxGamesPerDay = Math.max(10, this.config.initialPlayerCount * 2);
 
+    const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
+    console.log(
+      `DEBUG: Pool stats - Total: ${poolStats.totalDollarsInPool}, Available: ${poolStats.availableForMatching}`
+    );
+
     for (let gameAttempt = 0; gameAttempt < maxGamesPerDay; gameAttempt++) {
       const matchResult = this.components.gameMatchingEngine.attemptMatching();
+      console.log(
+        `DEBUG: Matching attempt ${gameAttempt + 1} - Games created: ${
+          matchResult.gamesCreated.length
+        }`
+      );
 
       if (matchResult.gamesCreated.length === 0) {
         break; // No more matches possible
@@ -376,13 +401,21 @@ export class SimulationController {
       // Resolve games to determine winners and losers
       matchResult.gamesCreated.forEach((gameSession) => {
         // Generate proper daily seed format (YYYY-MM-DD) from config or current date
-        const dailySeed = this.config.dailySeed.match(/^\d{4}-\d{2}-\d{2}$/) 
-          ? this.config.dailySeed 
-          : new Date().toISOString().split('T')[0];
-        const resolutionResult = this.components.gameMatchingEngine.resolveGame(gameSession.id, dailySeed);
+        const dailySeed = this.config.dailySeed.match(/^\d{4}-\d{2}-\d{2}$/)
+          ? this.config.dailySeed
+          : new Date().toISOString().split("T")[0];
+        const resolutionResult = this.components.gameMatchingEngine.resolveGame(
+          gameSession.id,
+          dailySeed
+        );
         if (!resolutionResult.success) {
-          console.warn(`Failed to resolve game ${gameSession.id}: ${resolutionResult.error}`);
+          console.warn(
+            `Failed to resolve game ${gameSession.id}: ${resolutionResult.error}`
+          );
         }
+
+        // Process game revenue after resolution
+        this.components.revenueCalculator.processGameRevenue(gameSession);
       });
 
       // Process game results through run orchestrator
@@ -402,6 +435,15 @@ export class SimulationController {
           GameResult.LOSS
         );
 
+        // Process cash-outs for revenue tracking
+        [winnerResult, loserResult].forEach((result) => {
+          if (result && result.completionType === "CASH_OUT") {
+            this.components.revenueCalculator.processCashOut(
+              result.totalWinnings
+            );
+          }
+        });
+
         // Handle run completions and create new runs
         [winnerResult, loserResult].forEach((result) => {
           if (result && result.shouldCreateNewRun) {
@@ -417,7 +459,10 @@ export class SimulationController {
 
             if (newRun) {
               // Update state from CREATED to POOLED before adding to matching engine
-              this.components.dollarManager.updateDollarState(newRun.id, DollarState.POOLED);
+              this.components.dollarManager.updateDollarState(
+                newRun.id,
+                DollarState.POOLED
+              );
               this.components.gameMatchingEngine.addToPool(newRun);
             }
           }
@@ -565,6 +610,71 @@ export class SimulationController {
       jackpotsWon,
       averageRunLength,
     };
+  }
+
+  /**
+   * Add new players based on growth model from game-rules.md
+   */
+  private addNewPlayersForDay(day: number): void {
+    // Growth model parameters (simplified version - could be configurable)
+    const baseMarket = 1000; // 1000 potential users (scaled for testing)
+    const adoptionRate = 0.1; // 10% adoption rate (aggressive growth for testing)
+    const maxAdoption = baseMarket * adoptionRate; // Max 100 players
+
+    // S-curve model: logistic function for market penetration
+    const x = (day - 10) / 5; // Scale factor for curve steepness (midpoint at day 10)
+    const adoptionProgress = 1 / (1 + Math.exp(-x));
+    const targetPlayers = Math.floor(maxAdoption * adoptionProgress);
+
+    // Calculate current player count (simplified)
+    const currentPlayerCount =
+      this.components.runOrchestrator.getActivePlayerCount();
+
+    // Add new players if we're below target
+    const playersToAdd = Math.max(0, targetPlayers - currentPlayerCount);
+    const dailyNewPlayers = Math.min(
+      playersToAdd,
+      Math.max(1, Math.ceil(playersToAdd * 0.2))
+    ); // Up to 20% of gap per day
+
+    if (dailyNewPlayers > 0) {
+      console.log(`DEBUG: Day ${day}, Adding ${dailyNewPlayers} new players`);
+
+      for (let i = 0; i < dailyNewPlayers; i++) {
+        const playerId = `player-new-${day}-${i}`;
+
+        // Assign random strategy based on distribution
+        const strategies = Object.keys(
+          this.config.playerStrategies
+        ) as CashOutStrategy[];
+        const strategyWeights = Object.values(this.config.playerStrategies);
+        const randomValue = Math.random();
+        let cumulativeWeight = 0;
+        let selectedStrategy: CashOutStrategy = "average";
+
+        for (let j = 0; j < strategies.length; j++) {
+          cumulativeWeight += strategyWeights[j];
+          if (randomValue <= cumulativeWeight) {
+            selectedStrategy = strategies[j];
+            break;
+          }
+        }
+
+        // Initialize new player
+        this.components.playerBalanceManager.createPlayer(
+          playerId,
+          this.config.initialDonationAmount,
+          selectedStrategy
+        );
+
+        // Initialize player in run orchestrator
+        this.components.runOrchestrator.initializePlayer(
+          playerId,
+          this.config.initialDonationAmount,
+          selectedStrategy
+        );
+      }
+    }
   }
 
   /**

@@ -78,12 +78,13 @@ export class RunOrchestrator {
 
   /**
    * Create a new run for a player if they have sufficient funds
+   * Virtual Dollar Pool Engine: Player balance only used for creating virtual dollars ($1.00 each)
    */
   createNewRun(request: NewRunRequest): VirtualDollar | null {
     const availableFunds = this.playerFunds.get(request.playerId) || 0;
-    const gameFeeCost = 1.10; // $1.10 per game (covers betting and fees)
+    const virtualDollarCost = 1.00; // Only cost of creating virtual dollar - no game fees
 
-    if (availableFunds < gameFeeCost) {
+    if (availableFunds < virtualDollarCost) {
       return null; // Insufficient funds
     }
 
@@ -93,8 +94,8 @@ export class RunOrchestrator {
     // Initialize progression
     this.progressionManager.initializeRun(virtualDollar);
 
-    // Deduct funds
-    this.playerFunds.set(request.playerId, availableFunds - gameFeeCost);
+    // Deduct only virtual dollar creation cost - all game fees handled by pot system
+    this.playerFunds.set(request.playerId, availableFunds - virtualDollarCost);
 
     // Store strategy
     this.playerStrategies.set(request.playerId, request.cashOutStrategy);
@@ -106,6 +107,32 @@ export class RunOrchestrator {
    * Process a game result and handle run completion/continuation
    */
   processGameResult(virtualDollar: VirtualDollar, result: GameResult): RunCompletionEvent | null {
+    const playerId = virtualDollar.ownerId;
+    
+    // Handle fund changes based on game result
+    if (result === GameResult.WIN) {
+      // Winner gets winnings (level × 1.8) and advances to next level
+      const currentLevel = virtualDollar.currentLevel;
+      const winnings = currentLevel * 1.8;
+      
+      // Add winnings to player funds
+      const currentFunds = this.playerFunds.get(playerId) || 0;
+      this.playerFunds.set(playerId, currentFunds + winnings);
+      
+      // Check if player can afford next level
+      const nextLevel = currentLevel * 2;
+      const nextLevelCost = nextLevel + 0.20; // Next bet + platform fee
+      
+      if (currentFunds + winnings < nextLevelCost && nextLevel <= 512) {
+        // Player can't afford next level - force cash out
+        const completionResult = this.progressionManager.processCashOut(virtualDollar.runId);
+        return this.handleRunCompletion(virtualDollar, 'CASH_OUT', completionResult);
+      } else if (nextLevel <= 512) {
+        // Deduct cost for next level
+        this.playerFunds.set(playerId, currentFunds + winnings - nextLevelCost);
+      }
+    }
+
     const progression = this.progressionManager.processGameResult(virtualDollar, result);
 
     if (progression.isComplete) {
@@ -144,9 +171,9 @@ export class RunOrchestrator {
     this.dollarManager.updateDollarState(virtualDollar.id, newState);
 
     // Determine if player should create a new run
-    const gameFeeCost = 1.10;
+    const level1Cost = 1.20; // $1.00 bet + $0.20 platform fee for level 1
     const availableFunds = this.playerFunds.get(playerId) || 0;
-    const shouldCreateNewRun = availableFunds >= gameFeeCost;
+    const shouldCreateNewRun = availableFunds >= level1Cost;
 
     return {
       runId: virtualDollar.runId,
@@ -176,7 +203,7 @@ export class RunOrchestrator {
 
     const totalEarnings = completedRuns.reduce((sum, run) => sum + run.playerPayout, 0);
     const availableFunds = this.playerFunds.get(playerId) || 0;
-    const gameFeeCost = 1.10;
+    const level1Cost = 1.20; // $1.00 bet + $0.20 platform fee for level 1
 
     return {
       playerId,
@@ -184,7 +211,7 @@ export class RunOrchestrator {
       completedRuns,
       totalEarnings,
       availableFunds,
-      canCreateNewRun: availableFunds >= gameFeeCost
+      canCreateNewRun: availableFunds >= level1Cost
     };
   }
 
@@ -259,8 +286,8 @@ export class RunOrchestrator {
     const newRuns: VirtualDollar[] = [];
     
     for (const [playerId, funds] of Array.from(this.playerFunds.entries())) {
-      const gameFeeCost = 1.10;
-      if (funds < gameFeeCost) continue;
+      const level1Cost = 1.20; // $1.00 bet + $0.20 platform fee for level 1
+      if (funds < level1Cost) continue;
 
       const context = this.getPlayerRunContext(playerId);
       if (context.activeRuns.length >= maxRunsPerPlayer) continue;

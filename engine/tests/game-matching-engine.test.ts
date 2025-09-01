@@ -1,7 +1,10 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { GameMatchingEngine, GameEvent } from '../src/types/game-matching-engine';
 import { VirtualDollarManager, VirtualDollar, DollarState } from '../src/types/virtual-dollar-types';
 import { ScoringEngine } from '../src/types/scoring-engine';
 import { BettingLevel, CashOutStrategy, PlayerBalanceManager, Player } from '../src/types/virtual-dollar-engine';
+import { DirectGameSessionFactory } from '../src/types/direct-factories';
+import { DEFAULT_PERFORMANCE_CONFIG } from '../src/types/factory-interfaces';
 
 describe('GameMatchingEngine', () => {
   let gameMatchingEngine: GameMatchingEngine;
@@ -11,7 +14,8 @@ describe('GameMatchingEngine', () => {
   beforeEach(() => {
     virtualDollarManager = new VirtualDollarManager();
     scoringEngine = new ScoringEngine();
-    gameMatchingEngine = new GameMatchingEngine(virtualDollarManager, scoringEngine);
+    const gameSessionFactory = new DirectGameSessionFactory(DEFAULT_PERFORMANCE_CONFIG);
+    gameMatchingEngine = new GameMatchingEngine(virtualDollarManager, scoringEngine, gameSessionFactory);
   });
 
   describe('Virtual Dollar Pool Management', () => {

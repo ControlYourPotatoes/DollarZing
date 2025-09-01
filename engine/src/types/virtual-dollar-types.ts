@@ -115,7 +115,8 @@ export class VirtualDollarManager {
         gameHistory: [],
         gamesInThisRun: 0,
         currentRunWinnings: 0,
-        isIndependentRun: true
+        isIndependentRun: true,
+        potValue: 1.0, // Initialize with $1.00 pot value
       };
     }
 
@@ -160,6 +161,12 @@ export class VirtualDollarManager {
 
     // Update state
     dollar.state = newState;
+    
+    // Apply platform fee when entering pool for the first time (Task 2.2)
+    // Only deduct fee from fresh virtual dollars (potValue exactly $1.00)
+    if (newState === DollarState.POOLED && dollar.potValue === 1.0) {
+      dollar.potValue -= 0.1; // Deduct 10¢ platform fee ($1.00 → $0.90)
+    }
     
     // Track state history
     const history = this.stateHistory.get(dollarId) || [];

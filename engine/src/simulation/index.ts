@@ -179,21 +179,23 @@ export class GrowthCalculator {
     randomSeed: number
   ): number {
     const rng = new SeededRandom(day * 1000 + Math.floor(randomSeed * 10000));
-    
+
     // S-curve adoption model for market penetration
     const baseMarket = 1000000; // Base addressable market
     const maxAdoption = baseMarket * adoptionRate;
     const midpoint = 90; // Day when adoption reaches 50%
-    
+
     // Calculate adoption progress using logistic function
     const x = (day - midpoint) / 20; // Scale factor for curve steepness
     const adoptionProgress = 1 / (1 + Math.exp(-x));
-    
+
     // Add randomness to adoption
-    const randomFactor = 0.9 + (rng.next() * 0.2); // ±10% variation
-    
-    const targetPlayers = Math.floor(maxAdoption * adoptionProgress * randomFactor);
-    
+    const randomFactor = 0.9 + rng.next() * 0.2; // ±10% variation
+
+    const targetPlayers = Math.floor(
+      maxAdoption * adoptionProgress * randomFactor
+    );
+
     // Ensure monotonic growth (no player loss)
     return Math.max(currentPlayers, targetPlayers);
   }
@@ -463,7 +465,7 @@ export class SimulationEngine {
           this.parameters.cashOutStrategy
         );
         cashOutPlayers = Math.floor(winnersAtLevel * cashOutProbability);
-        winningsToDistribute = cashOutPlayers * levelValue * 2;
+        winningsToDistribute = cashOutPlayers * levelValue * 1.8; // Match CryptoZing's winnings structure
       }
 
       // Distribute revenue

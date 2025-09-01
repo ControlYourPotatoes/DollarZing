@@ -88,6 +88,7 @@ export class VirtualDollarPool extends BaseObjectPool<VirtualDollar> {
       gamesInThisRun: 0,
       currentRunWinnings: 0,
       isIndependentRun: true,
+      potValue: 1.0, // Initial pot value of $1.00
     });
 
     const resetFn = (dollar: VirtualDollar): void => {
@@ -103,6 +104,7 @@ export class VirtualDollarPool extends BaseObjectPool<VirtualDollar> {
       dollar.gamesInThisRun = 0;
       dollar.currentRunWinnings = 0;
       dollar.isIndependentRun = true;
+      dollar.potValue = 1.0; // Reset to initial pot value of $1.00
     };
 
     super(createFn, resetFn, maxSize);
@@ -130,6 +132,7 @@ export class VirtualDollarPool extends BaseObjectPool<VirtualDollar> {
     dollar.gamesInThisRun = 0;
     dollar.currentRunWinnings = 0;
     dollar.isIndependentRun = true;
+    dollar.potValue = 1.0; // Initialize with $1.00 pot value
 
     return dollar;
   }
@@ -156,6 +159,7 @@ export class GameSessionPool extends BaseObjectPool<GameSession> {
       gamesInThisRun: 0,
       currentRunWinnings: 0,
       isIndependentRun: true,
+      potValue: 0, // Empty dollar has no pot value
     };
 
     const createFn = (): GameSession => ({

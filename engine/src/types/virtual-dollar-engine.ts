@@ -48,6 +48,7 @@ export interface VirtualDollar {
   gamesInThisRun: number;               // Number of games played in THIS run
   currentRunWinnings: number;           // Amount that could be won if cashed out NOW
   isIndependentRun: boolean;            // Flag indicating this is an independent jackpot attempt
+  potValue: number;                     // Current pot value ($1.00 start, grows by absorbing opponent pots)
 }
 
 /**
@@ -232,6 +233,15 @@ export function validateVirtualDollar(dollar: VirtualDollar): ValidationResult {
     errors.push('Run ID is required for independent runs');
   }
 
+  // Validate pot value
+  if (dollar.potValue <= 0) {
+    errors.push('Pot value must be positive');
+  }
+
+  if (dollar.potValue < 0.90) {
+    warnings.push('Pot value below $0.90 may indicate missing platform fee logic');
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -335,10 +345,10 @@ export function getBettingLevelValue(level: BettingLevel): number {
 }
 
 /**
- * Calculate winning amount for a betting level (double the bet)
+ * Calculate winning amount for a betting level (level × 1.8)
  */
 export function getBettingLevelWinnings(level: BettingLevel): number {
-  return getBettingLevelValue(level) * 2;
+  return level * 1.8;
 }
 
 /**

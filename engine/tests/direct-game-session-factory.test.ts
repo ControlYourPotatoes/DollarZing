@@ -87,7 +87,7 @@ describe('DirectGameSessionFactory', () => {
       expect(session.dollar2).toBe(testDollar2);
       expect(session.level).toBe(level);
       expect(session.gameNumber).toBeGreaterThan(0);
-      expect(session.winnings).toBe(Math.pow(2, level - 1));
+      expect(session.winnings).toBe(level * 1.8); // level × 1.8
       expect(session.winner).toBeDefined(); // Winner is set to emptyDollar
       expect(session.loser).toBeDefined(); // Loser is set to emptyDollar
     });
@@ -114,11 +114,11 @@ describe('DirectGameSessionFactory', () => {
 
     it('should calculate winnings correctly for different levels', () => {
       const testCases: Array<{ level: BettingLevel; expectedWinnings: number }> = [
-        { level: 1, expectedWinnings: 1 },
-        { level: 2, expectedWinnings: 2 },
-        { level: 3, expectedWinnings: 4 },
-        { level: 4, expectedWinnings: 8 },
-        { level: 10, expectedWinnings: 512 }
+        { level: 1, expectedWinnings: 1.8 },  // 1 × 1.8
+        { level: 2, expectedWinnings: 3.6 },  // 2 × 1.8
+        { level: 3, expectedWinnings: 5.4 },  // 3 × 1.8
+        { level: 4, expectedWinnings: 7.2 },  // 4 × 1.8
+        { level: 10, expectedWinnings: 18.0 } // 10 × 1.8
       ];
 
       testCases.forEach(({ level, expectedWinnings }) => {
@@ -413,7 +413,7 @@ describe('DirectGameSessionFactory', () => {
       const session = factory.create(testDollar1, testDollar2, level);
       expect(session).toBeDefined();
       expect(session.level).toBe(level);
-      expect(session.winnings).toBe(512); // 2^(10-1)
+      expect(session.winnings).toBe(18.0); // 10 × 1.8
     });
 
     it('should maintain consistent state after errors', () => {

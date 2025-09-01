@@ -342,12 +342,14 @@ export class GameMatchingEngine {
       game.winner = winner;
       game.loser = loser;
 
+      // Implement winner-takes-all pot absorption logic (Task 2.3)
+      winner.potValue += loser.potValue; // Winner absorbs loser's pot value
+      loser.potValue = 0; // Loser loses all pot value
+
       // Process player balance transactions if balance manager is available
       if (this.playerBalanceManager) {
-        // Process game fees for both players
-        this.playerBalanceManager.processGameFee(winner.ownerId);
-        this.playerBalanceManager.processGameFee(loser.ownerId);
-
+        // No game fees charged - Virtual Dollar Pool Engine handles all fees via pot system
+        
         // Add winnings to winner's progression
         this.playerBalanceManager.addWinProgression(winner.ownerId, game.winnings);
 

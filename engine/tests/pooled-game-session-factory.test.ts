@@ -285,7 +285,7 @@ describe('PooledGameSessionFactory Object Pooling Behavior', () => {
   describe('winnings calculation', () => {
     it('should calculate correct winnings for different levels', () => {
       const levels: BettingLevel[] = [1, 2, 3, 5, 8, 10];
-      const expectedWinnings = [1, 2, 4, 16, 128, 512]; // 2^(level-1)
+      const expectedWinnings = [1.8, 3.6, 5.4, 9.0, 14.4, 18.0]; // level × 1.8
       
       levels.forEach((level, index) => {
         const session = factory.create(mockDollar1, mockDollar2, level);

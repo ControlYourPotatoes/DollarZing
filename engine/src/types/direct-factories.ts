@@ -376,8 +376,8 @@ export class DirectGameSessionFactory implements GameSessionFactory {
   }
 
   private calculateWinnings(level: BettingLevel): number {
-    // Simple exponential calculation: 2^(level-1)
-    return Math.pow(2, level - 1);
+    // Winner receives level × 1.8 in winnings (per game rules)
+    return level * 1.8;
   }
 
   /**
