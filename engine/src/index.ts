@@ -30,7 +30,7 @@ export type {
 } from "./types/factory-interfaces";
 
 // Main simulation controller (legacy - use GameEngineSimulator)
-export { SimulationController } from "./types/simulation-controller";
+// export { SimulationController } from "./types/simulation-controller"; // REMOVED - migrated to GameEngineSimulator
 
 // New component-integration simulator
 export { GameEngineSimulator } from "./simulation/game-engine-simulator";
@@ -50,6 +50,7 @@ export { GameMatchingEngine } from "./types/game-matching-engine";
 export { RunOrchestrator } from "./types/run-orchestrator";
 export { ScoringEngine } from "./types/scoring-engine";
 export { PlayerBalanceManager } from "./types/player-balance-manager";
+export { VirtualDollarManager } from "./types/virtual-dollar-types";
 export { RevenueCalculator } from "./types/revenue-calculator";
 
 // Utility functions
