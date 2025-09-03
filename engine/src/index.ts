@@ -47,7 +47,7 @@ export {
 
 // Game engine components
 export { GameMatchingEngine } from "./types/game-matching-engine";
-export { RunOrchestrator } from "./types/run-orchestrator";
+export { PlayerRunManager } from "./types/player-run-manager";
 export { ScoringEngine } from "./types/scoring-engine";
 export { PlayerBalanceManager } from "./types/player-balance-manager";
 export { VirtualDollarManager } from "./types/virtual-dollar-types";
