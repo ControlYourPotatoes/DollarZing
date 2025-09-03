@@ -4,7 +4,7 @@ import { GameResult, DollarState } from "../types/virtual-dollar-engine";
 
 // Mock the external dependencies
 vi.mock("../types/game-matching-engine");
-vi.mock("../types/run-orchestrator");
+vi.mock("../types/player-run-manager");
 vi.mock("../types/revenue-calculator");
 vi.mock("../types/virtual-dollar-types");
 

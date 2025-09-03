@@ -1,5 +1,5 @@
 import { GameMatchingEngine } from "../types/game-matching-engine";
-import { RunOrchestrator } from "../types/run-orchestrator";
+import { PlayerRunManager } from "../types/player-run-manager";
 import { VirtualDollarManager } from "../types/virtual-dollar-types";
 import { RevenueCalculator } from "../types/revenue-calculator";
 import { DollarState, GameResult } from "../types/virtual-dollar-engine";
@@ -20,7 +20,7 @@ export interface DayProcessingConfig {
 export class DayProcessor {
   constructor(
     private gameMatchingEngine: GameMatchingEngine,
-    private runOrchestrator: RunOrchestrator,
+    private runOrchestrator: PlayerRunManager,
     private dollarManager: VirtualDollarManager,
     private revenueCalculator: RevenueCalculator
   ) {}

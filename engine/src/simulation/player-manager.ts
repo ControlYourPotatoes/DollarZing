@@ -1,5 +1,5 @@
 import { PlayerBalanceManager } from "../types/player-balance-manager";
-import { RunOrchestrator } from "../types/run-orchestrator";
+import { PlayerRunManager } from "../types/player-run-manager";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
 
 /**
@@ -32,7 +32,7 @@ export interface PlayerStatistics {
 export class PlayerManager {
   constructor(
     private playerBalanceManager: PlayerBalanceManager,
-    private runOrchestrator: RunOrchestrator
+    private runOrchestrator: PlayerRunManager
   ) {}
 
   /**

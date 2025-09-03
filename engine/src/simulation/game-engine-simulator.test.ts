@@ -3,7 +3,7 @@ import { GameEngineSimulator } from "./game-engine-simulator";
 
 import { PlayerBalanceManager } from "../types/player-balance-manager";
 import { GameMatchingEngine } from "../types/game-matching-engine";
-import { RunOrchestrator } from "../types/run-orchestrator";
+import { PlayerRunManager } from "../types/player-run-manager";
 import { VirtualDollarManager } from "../types/virtual-dollar-types";
 import { RevenueCalculator } from "../types/revenue-calculator";
 import { ScoringEngine } from "../types/scoring-engine";
@@ -26,7 +26,7 @@ describe("GameEngineSimulator", () => {
   let gameEngineSimulator: GameEngineSimulator;
   let mockPlayerBalanceManager: PlayerBalanceManager;
   let mockGameMatchingEngine: GameMatchingEngine;
-  let mockRunOrchestrator: RunOrchestrator;
+  let mockRunOrchestrator: PlayerRunManager;
   let mockVirtualDollarManager: VirtualDollarManager;
   let mockRevenueCalculator: RevenueCalculator;
   let mockScoringEngine: ScoringEngine;
@@ -50,7 +50,7 @@ describe("GameEngineSimulator", () => {
       mockScoringEngine,
       gameSessionFactory
     );
-    mockRunOrchestrator = new RunOrchestrator(
+    mockRunOrchestrator = new PlayerRunManager(
       undefined, // ProgressionManager will be created internally
       mockVirtualDollarManager,
       0.1 // charity percentage

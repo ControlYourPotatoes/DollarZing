@@ -3,7 +3,7 @@
 
 import { PlayerBalanceManager } from "../types/player-balance-manager";
 import { GameMatchingEngine } from "../types/game-matching-engine";
-import { RunOrchestrator } from "../types/run-orchestrator";
+import { PlayerRunManager } from "../types/player-run-manager";
 import { VirtualDollarManager } from "../types/virtual-dollar-types";
 import { ScoringEngine } from "../types/scoring-engine";
 import { ProgressionManager } from "../types/progression-manager";
@@ -118,7 +118,7 @@ export interface SimulationResults {
 export interface SimulationComponents {
   playerBalanceManager: PlayerBalanceManager;
   gameMatchingEngine: GameMatchingEngine;
-  runOrchestrator: RunOrchestrator;
+  runOrchestrator: PlayerRunManager;
   dollarManager: VirtualDollarManager;
   scoringEngine: ScoringEngine;
   progressionManager: ProgressionManager;
@@ -148,7 +148,7 @@ export class GameEngineSimulator {
     playerBalanceManager: PlayerBalanceManager,
     virtualDollarManager: VirtualDollarManager,
     gameMatchingEngine: GameMatchingEngine,
-    runOrchestrator: RunOrchestrator,
+    runOrchestrator: PlayerRunManager,
     revenueCalculator: RevenueCalculator,
     scoringEngine: ScoringEngine
   ) {

@@ -1,5 +1,5 @@
 import { GameMatchingEngine } from "../types/game-matching-engine";
-import { RunOrchestrator } from "../types/run-orchestrator";
+import { PlayerRunManager } from "../types/player-run-manager";
 import { RevenueCalculator } from "../types/revenue-calculator";
 import { VirtualDollarManager } from "../types/virtual-dollar-types";
 import { GameResult, DollarState } from "../types/virtual-dollar-engine";
@@ -11,7 +11,7 @@ import { GameResult, DollarState } from "../types/virtual-dollar-engine";
 export class GameProcessor {
   constructor(
     private gameMatchingEngine: GameMatchingEngine,
-    private runOrchestrator: RunOrchestrator,
+    private runOrchestrator: PlayerRunManager,
     private revenueCalculator: RevenueCalculator,
     private dollarManager: VirtualDollarManager
   ) {}

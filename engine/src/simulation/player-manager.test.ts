@@ -4,7 +4,7 @@ import { CashOutStrategy } from "../types/virtual-dollar-engine";
 
 // Mock the external dependencies
 vi.mock("../types/player-balance-manager");
-vi.mock("../types/run-orchestrator");
+vi.mock("../types/player-run-manager");
 
 describe("PlayerManager", () => {
   let playerManager: PlayerManager;
