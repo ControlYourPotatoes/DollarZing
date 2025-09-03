@@ -1,7 +1,7 @@
 // DollarZing Simulation Engine - Library Exports
 // Clean library interface for simulation engine components
 
-// Core simulation types
+// Core simulation types (from GameEngineSimulator)
 export type {
   SimulationConfig,
   SimulationResults,
@@ -10,7 +10,7 @@ export type {
   PlayerStatistics,
   RevenueStatistics,
   GameStatistics,
-} from "./types/simulation-controller";
+} from "./simulation/game-engine-simulator";
 
 export type {
   VirtualDollar,
@@ -29,8 +29,11 @@ export type {
   FactorySelector,
 } from "./types/factory-interfaces";
 
-// Main simulation controller
+// Main simulation controller (legacy - use GameEngineSimulator)
 export { SimulationController } from "./types/simulation-controller";
+
+// New component-integration simulator
+export { GameEngineSimulator } from "./simulation/game-engine-simulator";
 
 // Factory implementations
 export {

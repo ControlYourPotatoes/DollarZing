@@ -44,11 +44,11 @@ export class PlayerBehaviorModel {
   getCashOutProbability(level: number, strategy: CashOutStrategy): number {
     switch (strategy) {
       case "low":
-        return Math.max(0.9 - level / 100, 0.1);
+        return Math.max(0.9 - level / 20, 0.1); // More aggressive decrease
       case "average":
         return 0.3;
       case "high":
-        return Math.min(0.1 + level / 100, 0.9);
+        return Math.min(0.1 + level / 20, 0.9); // More aggressive increase
       default:
         return 0.3;
     }
@@ -164,7 +164,7 @@ export class GrowthCalculator {
   ): number {
     const rng = new SeededRandom(day * 1000 + Math.floor(randomSeed * 10000));
     const baseGrowthRate = 0.01;
-    const randomFactor = (rng.next() + 0.5) * 0.05;
+    const randomFactor = (rng.next() + 0.5) * 0.02; // Reduced randomness
     const timeFactor = Math.log(day + 1) / 10;
     const effectiveGrowthRate =
       (baseGrowthRate + randomFactor) * (1 + timeFactor) * growthMultiplier;
@@ -284,15 +284,13 @@ export class SimulationEngine {
 
     // Additional validation for engine-specific constraints
     if (parameters.adoptionRate < 0 || parameters.adoptionRate > 1) {
-      throw new Error("Invalid adoption rate: must be between 0 and 1");
+      throw new Error("Invalid adoption rate");
     }
     if (parameters.growthMultiplier < 0) {
-      throw new Error("Invalid growth multiplier: must be positive");
+      throw new Error("Invalid growth multiplier");
     }
     if (!["low", "average", "high"].includes(parameters.cashOutStrategy)) {
-      throw new Error(
-        "Invalid cash-out strategy: must be low, average, or high"
-      );
+      throw new Error("Invalid cash-out strategy");
     }
 
     this.parameters = { ...parameters };
@@ -493,7 +491,7 @@ export class SimulationEngine {
     }
 
     const financialMetrics: FinancialMetrics = {
-      totalRevenue: totalRevenue + platformEarnings,
+      totalRevenue: platformEarnings + charityContributions + playerWinnings,
       platformEarnings,
       charityContributions,
       playerWinnings,

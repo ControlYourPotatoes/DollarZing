@@ -34,17 +34,5 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3",
     "vitest": "^2.0.0"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/src",
-      "<rootDir>/tests"
-    ],
-    "testMatch": [
-      "**/__tests__/**/*.ts",
-      "**/?(*.)+(spec|test).ts"
-    ]
   }
 }

@@ -30,16 +30,10 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node", "jest"]
+    "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*", "cli/src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests/**/*",
-    "generated-datasets/**/*",
-    "bin/**/*"
-  ],
+  "include": ["src/**/*", "cli/src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist", "generated-datasets/**/*", "bin/**/*"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
