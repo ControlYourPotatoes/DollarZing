@@ -9,7 +9,7 @@ import {
   CashOutStrategy,
   PlayerBalanceManager,
   GameMatchingEngine,
-  RunOrchestrator,
+  PlayerRunManager,
   VirtualDollarManager,
   RevenueCalculator,
   ScoringEngine,
@@ -41,7 +41,7 @@ function createGameEngineSimulator(
   );
 
   // Create run orchestrator
-  const runOrchestrator = new RunOrchestrator(
+  const runOrchestrator = new PlayerRunManager(
     undefined, // ProgressionManager will be created internally
     virtualDollarManager,
     config.charityPercentage

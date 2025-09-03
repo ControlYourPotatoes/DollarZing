@@ -2,10 +2,10 @@
 // High-level orchestration system that integrates the game engine adapter with factory management
 
 import {
-  GameEngineAdapter,
+  DatasetOrchestrator,
   AdapterGenerationResult,
   DatasetProgressCallback,
-} from "./game-engine-adapter";
+} from "./dataset-orchestrator";
 import {
   OrchestratorFactoryManager,
   createOrchestratorFactoryManager,
@@ -42,7 +42,7 @@ interface ExecutionContext {
   combination: ParameterCombination;
   attemptNumber: number;
   startTime: number;
-  adapter: GameEngineAdapter;
+  adapter: DatasetOrchestrator;
   factoryManager: OrchestratorFactoryManager;
 }
 
@@ -110,14 +110,14 @@ class ProgressTracker {
  */
 export class GameEngineExecutor {
   private config: ExecutorConfig;
-  private adapter: GameEngineAdapter;
+  private adapter: DatasetOrchestrator;
   private factoryManager: OrchestratorFactoryManager;
   private isExecuting: boolean = false;
   private aborted: boolean = false;
 
   constructor(config: ExecutorConfig) {
     this.config = config;
-    this.adapter = new GameEngineAdapter(config.orchestratorConfig);
+    this.adapter = new DatasetOrchestrator(config.orchestratorConfig);
     this.factoryManager = createOrchestratorFactoryManager(
       config.factoryPreset
     );
@@ -430,7 +430,9 @@ export class GameEngineExecutor {
       mappedResult.metadataPath = result.outputPaths.metadataFile;
     }
     if (result.simulationResults !== undefined) {
-      mappedResult.datasetSizeBytes = this.estimateDatasetSize(result.simulationResults);
+      mappedResult.datasetSizeBytes = this.estimateDatasetSize(
+        result.simulationResults
+      );
     }
 
     return mappedResult;
@@ -492,7 +494,7 @@ export class GameEngineExecutor {
 
     // Recreate adapter if orchestrator config changed
     if (updates.orchestratorConfig) {
-      this.adapter = new GameEngineAdapter(this.config.orchestratorConfig);
+      this.adapter = new DatasetOrchestrator(this.config.orchestratorConfig);
     }
 
     // Recreate factory manager if preset changed
@@ -537,3 +539,4 @@ export function createGameEngineExecutor(
 
   return new GameEngineExecutor(config);
 }
+

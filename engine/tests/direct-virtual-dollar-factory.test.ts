@@ -1,7 +1,7 @@
 // DirectVirtualDollarFactory Tests
 // Tests for non-pooled virtual dollar factory implementation
 // Validates direct object creation without pooling for development/testing scenarios
-
+import { describe, it, expect, beforeEach } from "vitest";
 import { DirectVirtualDollarFactory } from '../src/types/direct-factories';
 import { VirtualDollarFactory, DEFAULT_PERFORMANCE_CONFIG, PerformanceConfig } from '../src/types/factory-interfaces';
 

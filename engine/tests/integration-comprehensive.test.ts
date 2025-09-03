@@ -408,7 +408,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
         "VirtualDollarManager (dollarManager)",
         "PlayerBalanceManager",
         "GameMatchingEngine",
-        "RunOrchestrator",
+        "PlayerRunManager",
         "ProgressionManager",
         "ScoringEngine",
       ];
