@@ -9,8 +9,6 @@ import { ScoringEngine } from "../types/scoring-engine";
 import { ProgressionManager } from "../types/progression-manager";
 import { RevenueCalculator } from "../types/revenue-calculator";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
-import { DirectGameSessionFactory } from "../types/direct-factories";
-import { DEFAULT_PERFORMANCE_CONFIG } from "../types/factory-interfaces";
 import { DayProcessor } from "./day-processor";
 import { PlayerManager } from "./player-manager";
 import { GameProcessor } from "./game-processor";
@@ -135,7 +133,7 @@ export interface SimulationComponents {
  * This class focuses on component integration rather than statistical modeling
  */
 export class GameEngineSimulator {
-  private config: SimulationConfig;
+  private config!: SimulationConfig;
   private components: SimulationComponents;
   private isRunning: boolean = false;
   private startTime: number = 0;

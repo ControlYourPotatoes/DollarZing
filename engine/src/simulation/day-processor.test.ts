@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DayProcessor } from "./day-processor";
-import { GameMatchingEngine } from "../types/game-matching-engine";
-import { RunOrchestrator } from "../types/run-orchestrator";
-import { VirtualDollarManager } from "../types/virtual-dollar-types";
-import { RevenueCalculator } from "../types/revenue-calculator";
 import { DollarState } from "../types/virtual-dollar-engine";
 
 // Mock the external dependencies
@@ -200,36 +196,5 @@ describe("DayProcessor", () => {
     });
   });
 
-  describe("processGameResults", () => {
-    it("should process game results through run orchestrator", async () => {
-      const mockGame = {
-        id: "game-1",
-        winner: { ownerId: "player-1", currentLevel: 2 },
-        loser: { ownerId: "player-2", currentLevel: 1 },
-      };
-
-      mockGameMatchingEngine.getGameSession.mockReturnValue(mockGame);
-
-      await dayProcessor.processGameResults([mockGame]);
-
-      // Verify game session was retrieved
-      expect(mockGameMatchingEngine.getGameSession).toHaveBeenCalledWith(
-        "game-1"
-      );
-    });
-
-    it("should skip games with missing winner/loser data", async () => {
-      const mockGame = { id: "game-1" };
-      const incompleteGame = { id: "game-1", winner: null, loser: null };
-
-      mockGameMatchingEngine.getGameSession.mockReturnValue(incompleteGame);
-
-      await dayProcessor.processGameResults([mockGame]);
-
-      // Should not process incomplete games
-      expect(mockGameMatchingEngine.getGameSession).toHaveBeenCalledWith(
-        "game-1"
-      );
-    });
-  });
+  // processGameResults tests removed - method is private and tested through processDay()
 });

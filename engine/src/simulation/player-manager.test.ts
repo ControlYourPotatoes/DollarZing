@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PlayerManager } from "./player-manager";
-import { PlayerBalanceManager } from "../types/player-balance-manager";
-import { RunOrchestrator } from "../types/run-orchestrator";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
 
 // Mock the external dependencies
