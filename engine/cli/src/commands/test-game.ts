@@ -3,11 +3,63 @@
 
 import { Command } from "commander";
 import {
-  SimulationController,
+  GameEngineSimulator,
   type SimulationConfig,
   type SimulationProgress,
   CashOutStrategy,
+  PlayerBalanceManager,
+  GameMatchingEngine,
+  RunOrchestrator,
+  VirtualDollarManager,
+  RevenueCalculator,
+  ScoringEngine,
+  DirectGameSessionFactory,
+  DEFAULT_PERFORMANCE_CONFIG,
 } from "@/index";
+
+/**
+ * Create GameEngineSimulator with default components
+ */
+function createGameEngineSimulator(
+  config: SimulationConfig
+): GameEngineSimulator {
+  // Create core components
+  const playerBalanceManager = new PlayerBalanceManager();
+  const virtualDollarManager = new VirtualDollarManager();
+  const scoringEngine = new ScoringEngine();
+
+  // Create game session factory
+  const gameSessionFactory = new DirectGameSessionFactory(
+    DEFAULT_PERFORMANCE_CONFIG
+  );
+
+  // Create game matching engine
+  const gameMatchingEngine = new GameMatchingEngine(
+    virtualDollarManager,
+    scoringEngine,
+    gameSessionFactory
+  );
+
+  // Create run orchestrator
+  const runOrchestrator = new RunOrchestrator(
+    undefined, // ProgressionManager will be created internally
+    virtualDollarManager,
+    config.charityPercentage
+  );
+
+  // Create revenue calculator
+  const revenueCalculator = new RevenueCalculator();
+
+  // Create GameEngineSimulator
+  return new GameEngineSimulator(
+    playerBalanceManager,
+    virtualDollarManager,
+    gameMatchingEngine,
+    runOrchestrator,
+    revenueCalculator,
+    scoringEngine
+  );
+}
 
 /**
  * Create the test-game command
@@ -97,17 +149,12 @@ async function executeTestGame(options: any): Promise<void> {
   console.log("🚀 Starting simulation...");
   const startTime = performance.now();
 
-  // Create and run simulation
-  const controller = new SimulationController(config);
-
-  // Initialize players
-  const playersCreated = controller.initializePlayers();
-  if (verbose) {
-    console.log(`✅ Initialized ${playersCreated} players`);
-  }
+  // Create GameEngineSimulator with components
+  const simulator = createGameEngineSimulator(config);
 
   // Run simulation with optional progress reporting
-  const results = await controller.runSimulation(
+  const results = await simulator.executeSimulation(
+    config,
     verbose
       ? (progress: SimulationProgress) => {
           console.log(
