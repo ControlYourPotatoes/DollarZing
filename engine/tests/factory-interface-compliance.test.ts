@@ -2,25 +2,35 @@
 // Verifies that Direct and Pooled factories implement identical interfaces
 // Ensures consistent API behavior across different factory implementations
 
-import { DirectVirtualDollarFactory, DirectGameSessionFactory } from '../src/types/direct-factories';
-import { PooledVirtualDollarFactory, PooledGameSessionFactory } from '../src/types/pooled-factories';
-import { 
-  VirtualDollarFactory, 
-  GameSessionFactory, 
-  FactoryStatistics, 
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  DirectVirtualDollarFactory,
+  DirectGameSessionFactory,
+} from "../src/types/direct-factories";
+import {
+  PooledVirtualDollarFactory,
+  PooledGameSessionFactory,
+} from "../src/types/pooled-factories";
+import {
+  VirtualDollarFactory,
+  GameSessionFactory,
+  FactoryStatistics,
   DEFAULT_PERFORMANCE_CONFIG,
   PRODUCTION_PERFORMANCE_CONFIG,
   PerformanceConfig,
-  GamePair 
-} from '../src/types/factory-interfaces';
-import { VirtualDollar, BettingLevel } from '../src/types/virtual-dollar-engine';
+  GamePair,
+} from "../src/types/factory-interfaces";
+import {
+  VirtualDollar,
+  BettingLevel,
+} from "../src/types/virtual-dollar-engine";
 
-describe('Factory Interface Compliance', () => {
+describe("Factory Interface Compliance", () => {
   let directVirtualFactory: DirectVirtualDollarFactory;
   let pooledVirtualFactory: PooledVirtualDollarFactory;
   let directGameFactory: DirectGameSessionFactory;
   let pooledGameFactory: PooledGameSessionFactory;
-  
+
   let testDollar1: VirtualDollar;
   let testDollar2: VirtualDollar;
 
@@ -29,7 +39,7 @@ describe('Factory Interface Compliance', () => {
     const directConfig: PerformanceConfig = {
       ...DEFAULT_PERFORMANCE_CONFIG,
       enableObjectPooling: false,
-      enablePerformanceMetrics: true
+      enablePerformanceMetrics: true,
     };
 
     // Configure for pooled factories (with pooling)
@@ -38,7 +48,7 @@ describe('Factory Interface Compliance', () => {
       enableObjectPooling: true,
       enablePerformanceMetrics: true,
       poolSizes: { virtualDollar: 10, gameSession: 10 }, // Small pool for testing
-      prewarmCounts: { virtualDollar: 2, gameSession: 2 }
+      prewarmCounts: { virtualDollar: 2, gameSession: 2 },
     };
 
     directVirtualFactory = new DirectVirtualDollarFactory(directConfig);
@@ -48,46 +58,40 @@ describe('Factory Interface Compliance', () => {
 
     // Create test virtual dollars
     testDollar1 = {
-      id: 'test_dollar_1',
-      serialNumber: 'A12345678B',
-      playerId: 'player1',
-      runId: 'test_run_1',
-      created: new Date(),
-      isActive: true,
+      id: "test_dollar_1",
+      serialNumber: "A12345678B",
+      currentScore: 0.5,
       currentLevel: 1,
-      gamesWon: 0,
-      gamesLost: 0,
-      totalWinnings: 0,
-      cashOutStrategy: 'average',
-      hasBeenPaired: false,
-      lastGameTime: null,
-      consecutiveWins: 0,
-      consecutiveLosses: 0,
-      levelProgression: []
+      state: "CREATED" as any,
+      ownerId: "player1",
+      runId: "test_run_1",
+      createdAt: new Date(),
+      gameHistory: [],
+      gamesInThisRun: 0,
+      currentRunWinnings: 0,
+      isIndependentRun: true,
+      potValue: 1.0,
     };
 
     testDollar2 = {
-      id: 'test_dollar_2',
-      serialNumber: 'C87654321D',
-      playerId: 'player2',
-      runId: 'test_run_2',
-      created: new Date(),
-      isActive: true,
+      id: "test_dollar_2",
+      serialNumber: "C87654321D",
+      currentScore: 0.7,
       currentLevel: 1,
-      gamesWon: 0,
-      gamesLost: 0,
-      totalWinnings: 0,
-      cashOutStrategy: 'high',
-      hasBeenPaired: false,
-      lastGameTime: null,
-      consecutiveWins: 0,
-      consecutiveLosses: 0,
-      levelProgression: []
+      state: "CREATED" as any,
+      ownerId: "player2",
+      runId: "test_run_2",
+      createdAt: new Date(),
+      gameHistory: [],
+      gamesInThisRun: 0,
+      currentRunWinnings: 0,
+      isIndependentRun: true,
+      potValue: 1.0,
     };
   });
 
-  describe('VirtualDollarFactory Interface Compliance', () => {
-    it('should implement identical interfaces', () => {
+  describe("VirtualDollarFactory Interface Compliance", () => {
+    it("should implement identical interfaces", () => {
       // Both should implement VirtualDollarFactory interface
       const directInterface: VirtualDollarFactory = directVirtualFactory;
       const pooledInterface: VirtualDollarFactory = pooledVirtualFactory;
@@ -96,30 +100,30 @@ describe('Factory Interface Compliance', () => {
       expect(pooledInterface).toBeDefined();
 
       // Both should have identical method signatures
-      expect(typeof directInterface.create).toBe('function');
-      expect(typeof pooledInterface.create).toBe('function');
-      expect(typeof directInterface.release).toBe('function');
-      expect(typeof pooledInterface.release).toBe('function');
-      expect(typeof directInterface.createBatch).toBe('function');
-      expect(typeof pooledInterface.createBatch).toBe('function');
-      expect(typeof directInterface.getStatistics).toBe('function');
-      expect(typeof pooledInterface.getStatistics).toBe('function');
+      expect(typeof directInterface.create).toBe("function");
+      expect(typeof pooledInterface.create).toBe("function");
+      expect(typeof directInterface.release).toBe("function");
+      expect(typeof pooledInterface.release).toBe("function");
+      expect(typeof directInterface.createBatch).toBe("function");
+      expect(typeof pooledInterface.createBatch).toBe("function");
+      expect(typeof directInterface.getStatistics).toBe("function");
+      expect(typeof pooledInterface.getStatistics).toBe("function");
     });
 
-    it('should accept same create method parameters', () => {
-      const playerId = 'test_player';
+    it("should accept same create method parameters", () => {
+      const playerId = "test_player";
 
       // Both should accept same parameters without error
       expect(() => directVirtualFactory.create(playerId)).not.toThrow();
       expect(() => pooledVirtualFactory.create(playerId)).not.toThrow();
 
       // Both should reject invalid parameters identically
-      expect(() => directVirtualFactory.create('')).toThrow();
-      expect(() => pooledVirtualFactory.create('')).toThrow();
+      expect(() => directVirtualFactory.create("")).toThrow();
+      expect(() => pooledVirtualFactory.create("")).toThrow();
     });
 
-    it('should return compatible VirtualDollar objects', () => {
-      const playerId = 'test_player';
+    it("should return compatible VirtualDollar objects", () => {
+      const playerId = "test_player";
       const directDollar = directVirtualFactory.create(playerId);
       const pooledDollar = pooledVirtualFactory.create(playerId);
 
@@ -128,20 +132,22 @@ describe('Factory Interface Compliance', () => {
       expect(pooledDollar.id).toBeDefined();
       expect(directDollar.serialNumber).toBeDefined();
       expect(pooledDollar.serialNumber).toBeDefined();
-      expect(directDollar.playerId).toBe(playerId);
-      expect(pooledDollar.playerId).toBe(playerId);
+      expect(directDollar.ownerId).toBe(playerId);
+      expect(pooledDollar.ownerId).toBe(playerId);
       expect(directDollar.runId).toBeDefined();
       expect(pooledDollar.runId).toBeDefined();
 
       // Both should have same property types
       expect(typeof directDollar.id).toBe(typeof pooledDollar.id);
-      expect(typeof directDollar.serialNumber).toBe(typeof pooledDollar.serialNumber);
-      expect(typeof directDollar.playerId).toBe(typeof pooledDollar.playerId);
-      expect(typeof directDollar.created).toBe(typeof pooledDollar.created);
+      expect(typeof directDollar.serialNumber).toBe(
+        typeof pooledDollar.serialNumber
+      );
+      expect(typeof directDollar.ownerId).toBe(typeof pooledDollar.ownerId);
+      expect(typeof directDollar.createdAt).toBe(typeof pooledDollar.createdAt);
     });
 
-    it('should handle release method identically', () => {
-      const playerId = 'test_player';
+    it("should handle release method identically", () => {
+      const playerId = "test_player";
       const directDollar = directVirtualFactory.create(playerId);
       const pooledDollar = pooledVirtualFactory.create(playerId);
 
@@ -154,8 +160,8 @@ describe('Factory Interface Compliance', () => {
       expect(() => pooledVirtualFactory.release(null as any)).not.toThrow();
     });
 
-    it('should handle createBatch method identically', () => {
-      const playerIds = ['player1', 'player2', 'player3'];
+    it("should handle createBatch method identically", () => {
+      const playerIds = ["player1", "player2", "player3"];
 
       const directDollars = directVirtualFactory.createBatch(playerIds);
       const pooledDollars = pooledVirtualFactory.createBatch(playerIds);
@@ -169,31 +175,31 @@ describe('Factory Interface Compliance', () => {
       expect(pooledVirtualFactory.createBatch([])).toEqual([]);
     });
 
-    it('should return compatible FactoryStatistics', () => {
+    it("should return compatible FactoryStatistics", () => {
       // Create some objects to generate statistics
-      directVirtualFactory.create('player1');
-      pooledVirtualFactory.create('player1');
+      directVirtualFactory.create("player1");
+      pooledVirtualFactory.create("player1");
 
       const directStats = directVirtualFactory.getStatistics();
       const pooledStats = pooledVirtualFactory.getStatistics();
 
       // Both should return FactoryStatistics with same properties
-      expect(typeof directStats.objectsCreated).toBe('number');
-      expect(typeof pooledStats.objectsCreated).toBe('number');
-      expect(typeof directStats.objectsReleased).toBe('number');
-      expect(typeof pooledStats.objectsReleased).toBe('number');
-      expect(typeof directStats.objectsInUse).toBe('number');
-      expect(typeof pooledStats.objectsInUse).toBe('number');
-      expect(typeof directStats.poolSize).toBe('number');
-      expect(typeof pooledStats.poolSize).toBe('number');
-      expect(typeof directStats.poolHitRate).toBe('number');
-      expect(typeof pooledStats.poolHitRate).toBe('number');
-      expect(typeof directStats.averageCreationTime).toBe('number');
-      expect(typeof pooledStats.averageCreationTime).toBe('number');
-      expect(typeof directStats.averageReleaseTime).toBe('number');
-      expect(typeof pooledStats.averageReleaseTime).toBe('number');
-      expect(typeof directStats.memoryUsageMB).toBe('number');
-      expect(typeof pooledStats.memoryUsageMB).toBe('number');
+      expect(typeof directStats.objectsCreated).toBe("number");
+      expect(typeof pooledStats.objectsCreated).toBe("number");
+      expect(typeof directStats.objectsReleased).toBe("number");
+      expect(typeof pooledStats.objectsReleased).toBe("number");
+      expect(typeof directStats.objectsInUse).toBe("number");
+      expect(typeof pooledStats.objectsInUse).toBe("number");
+      expect(typeof directStats.poolSize).toBe("number");
+      expect(typeof pooledStats.poolSize).toBe("number");
+      expect(typeof directStats.poolHitRate).toBe("number");
+      expect(typeof pooledStats.poolHitRate).toBe("number");
+      expect(typeof directStats.averageCreationTime).toBe("number");
+      expect(typeof pooledStats.averageCreationTime).toBe("number");
+      expect(typeof directStats.averageReleaseTime).toBe("number");
+      expect(typeof pooledStats.averageReleaseTime).toBe("number");
+      expect(typeof directStats.memoryUsageMB).toBe("number");
+      expect(typeof pooledStats.memoryUsageMB).toBe("number");
 
       // Both should track created objects
       expect(directStats.objectsCreated).toBeGreaterThan(0);
@@ -201,8 +207,8 @@ describe('Factory Interface Compliance', () => {
     });
   });
 
-  describe('GameSessionFactory Interface Compliance', () => {
-    it('should implement identical interfaces', () => {
+  describe("GameSessionFactory Interface Compliance", () => {
+    it("should implement identical interfaces", () => {
       // Both should implement GameSessionFactory interface
       const directInterface: GameSessionFactory = directGameFactory;
       const pooledInterface: GameSessionFactory = pooledGameFactory;
@@ -211,34 +217,54 @@ describe('Factory Interface Compliance', () => {
       expect(pooledInterface).toBeDefined();
 
       // Both should have identical method signatures
-      expect(typeof directInterface.create).toBe('function');
-      expect(typeof pooledInterface.create).toBe('function');
-      expect(typeof directInterface.release).toBe('function');
-      expect(typeof pooledInterface.release).toBe('function');
-      expect(typeof directInterface.createBatch).toBe('function');
-      expect(typeof pooledInterface.createBatch).toBe('function');
-      expect(typeof directInterface.getStatistics).toBe('function');
-      expect(typeof pooledInterface.getStatistics).toBe('function');
+      expect(typeof directInterface.create).toBe("function");
+      expect(typeof pooledInterface.create).toBe("function");
+      expect(typeof directInterface.release).toBe("function");
+      expect(typeof pooledInterface.release).toBe("function");
+      expect(typeof directInterface.createBatch).toBe("function");
+      expect(typeof pooledInterface.createBatch).toBe("function");
+      expect(typeof directInterface.getStatistics).toBe("function");
+      expect(typeof pooledInterface.getStatistics).toBe("function");
     });
 
-    it('should accept same create method parameters', () => {
+    it("should accept same create method parameters", () => {
       const level: BettingLevel = 3;
 
       // Both should accept same parameters without error
-      expect(() => directGameFactory.create(testDollar1, testDollar2, level)).not.toThrow();
-      expect(() => pooledGameFactory.create(testDollar1, testDollar2, level)).not.toThrow();
+      expect(() =>
+        directGameFactory.create(testDollar1, testDollar2, level)
+      ).not.toThrow();
+      expect(() =>
+        pooledGameFactory.create(testDollar1, testDollar2, level)
+      ).not.toThrow();
 
       // Both should reject invalid parameters identically
-      expect(() => directGameFactory.create(null as any, testDollar2, level)).toThrow();
-      expect(() => pooledGameFactory.create(null as any, testDollar2, level)).toThrow();
-      expect(() => directGameFactory.create(testDollar1, testDollar2, 0 as BettingLevel)).toThrow();
-      expect(() => pooledGameFactory.create(testDollar1, testDollar2, 0 as BettingLevel)).toThrow();
+      expect(() =>
+        directGameFactory.create(null as any, testDollar2, level)
+      ).toThrow();
+      expect(() =>
+        pooledGameFactory.create(null as any, testDollar2, level)
+      ).toThrow();
+      expect(() =>
+        directGameFactory.create(testDollar1, testDollar2, 0 as BettingLevel)
+      ).toThrow();
+      expect(() =>
+        pooledGameFactory.create(testDollar1, testDollar2, 0 as BettingLevel)
+      ).toThrow();
     });
 
-    it('should return compatible GameSession objects', () => {
+    it("should return compatible GameSession objects", () => {
       const level: BettingLevel = 4;
-      const directSession = directGameFactory.create(testDollar1, testDollar2, level);
-      const pooledSession = pooledGameFactory.create(testDollar1, testDollar2, level);
+      const directSession = directGameFactory.create(
+        testDollar1,
+        testDollar2,
+        level
+      );
+      const pooledSession = pooledGameFactory.create(
+        testDollar1,
+        testDollar2,
+        level
+      );
 
       // Both should return objects with same properties
       expect(directSession.id).toBeDefined();
@@ -253,18 +279,26 @@ describe('Factory Interface Compliance', () => {
       expect(pooledSession.winnings).toBe(Math.pow(2, level - 1));
 
       // Both should have same property types and initial values
-      expect(typeof directSession.gameNumber).toBe('number');
-      expect(typeof pooledSession.gameNumber).toBe('number');
+      expect(typeof directSession.gameNumber).toBe("number");
+      expect(typeof pooledSession.gameNumber).toBe("number");
       expect(directSession.isCompleted).toBe(false);
       expect(pooledSession.isCompleted).toBe(false);
       expect(directSession.winner).toBeNull();
       expect(pooledSession.winner).toBeNull();
     });
 
-    it('should handle release method identically', () => {
+    it("should handle release method identically", () => {
       const level: BettingLevel = 2;
-      const directSession = directGameFactory.create(testDollar1, testDollar2, level);
-      const pooledSession = pooledGameFactory.create(testDollar1, testDollar2, level);
+      const directSession = directGameFactory.create(
+        testDollar1,
+        testDollar2,
+        level
+      );
+      const pooledSession = pooledGameFactory.create(
+        testDollar1,
+        testDollar2,
+        level
+      );
 
       // Both should handle release without error
       expect(() => directGameFactory.release(directSession)).not.toThrow();
@@ -275,11 +309,11 @@ describe('Factory Interface Compliance', () => {
       expect(() => pooledGameFactory.release(null as any)).not.toThrow();
     });
 
-    it('should handle createBatch method identically', () => {
+    it("should handle createBatch method identically", () => {
       const pairs: GamePair[] = [
         { dollar1: testDollar1, dollar2: testDollar2, level: 1 },
         { dollar1: testDollar1, dollar2: testDollar2, level: 2 },
-        { dollar1: testDollar1, dollar2: testDollar2, level: 3 }
+        { dollar1: testDollar1, dollar2: testDollar2, level: 3 },
       ];
 
       const directSessions = directGameFactory.createBatch(pairs);
@@ -294,7 +328,7 @@ describe('Factory Interface Compliance', () => {
       expect(pooledGameFactory.createBatch([])).toEqual([]);
     });
 
-    it('should return compatible FactoryStatistics', () => {
+    it("should return compatible FactoryStatistics", () => {
       const level: BettingLevel = 1;
       // Create some objects to generate statistics
       directGameFactory.create(testDollar1, testDollar2, level);
@@ -304,14 +338,28 @@ describe('Factory Interface Compliance', () => {
       const pooledStats = pooledGameFactory.getStatistics();
 
       // Both should return FactoryStatistics with same property types
-      expect(typeof directStats.objectsCreated).toBe(typeof pooledStats.objectsCreated);
-      expect(typeof directStats.objectsReleased).toBe(typeof pooledStats.objectsReleased);
-      expect(typeof directStats.objectsInUse).toBe(typeof pooledStats.objectsInUse);
+      expect(typeof directStats.objectsCreated).toBe(
+        typeof pooledStats.objectsCreated
+      );
+      expect(typeof directStats.objectsReleased).toBe(
+        typeof pooledStats.objectsReleased
+      );
+      expect(typeof directStats.objectsInUse).toBe(
+        typeof pooledStats.objectsInUse
+      );
       expect(typeof directStats.poolSize).toBe(typeof pooledStats.poolSize);
-      expect(typeof directStats.poolHitRate).toBe(typeof pooledStats.poolHitRate);
-      expect(typeof directStats.averageCreationTime).toBe(typeof pooledStats.averageCreationTime);
-      expect(typeof directStats.averageReleaseTime).toBe(typeof pooledStats.averageReleaseTime);
-      expect(typeof directStats.memoryUsageMB).toBe(typeof pooledStats.memoryUsageMB);
+      expect(typeof directStats.poolHitRate).toBe(
+        typeof pooledStats.poolHitRate
+      );
+      expect(typeof directStats.averageCreationTime).toBe(
+        typeof pooledStats.averageCreationTime
+      );
+      expect(typeof directStats.averageReleaseTime).toBe(
+        typeof pooledStats.averageReleaseTime
+      );
+      expect(typeof directStats.memoryUsageMB).toBe(
+        typeof pooledStats.memoryUsageMB
+      );
 
       // Both should track created objects
       expect(directStats.objectsCreated).toBeGreaterThan(0);
@@ -319,11 +367,11 @@ describe('Factory Interface Compliance', () => {
     });
   });
 
-  describe('Behavioral Differences While Maintaining Interface', () => {
-    it('should show different pool sizes but same interface', () => {
+  describe("Behavioral Differences While Maintaining Interface", () => {
+    it("should show different pool sizes but same interface", () => {
       // Create some objects
-      directVirtualFactory.create('player1');
-      pooledVirtualFactory.create('player1');
+      directVirtualFactory.create("player1");
+      pooledVirtualFactory.create("player1");
 
       const directStats = directVirtualFactory.getStatistics();
       const pooledStats = pooledVirtualFactory.getStatistics();
@@ -341,14 +389,14 @@ describe('Factory Interface Compliance', () => {
       expect(pooledStats.objectsCreated).toBe(1);
     });
 
-    it('should handle configuration consistently', () => {
+    it("should handle configuration consistently", () => {
       // Both factories should accept same configuration structure
       const testConfig: PerformanceConfig = {
         enableObjectPooling: false, // This will affect behavior but not interface
         poolSizes: { virtualDollar: 5, gameSession: 5 },
         prewarmCounts: { virtualDollar: 1, gameSession: 1 },
         enableBatchOptimizations: true,
-        enablePerformanceMetrics: true
+        enablePerformanceMetrics: true,
       };
 
       const newDirectVirtual = new DirectVirtualDollarFactory(testConfig);
@@ -370,58 +418,58 @@ describe('Factory Interface Compliance', () => {
     });
   });
 
-  describe('Polymorphic Usage', () => {
-    it('should be usable polymorphically through interfaces', () => {
+  describe("Polymorphic Usage", () => {
+    it("should be usable polymorphically through interfaces", () => {
       // Should be able to use both implementations through interface types
       const virtualFactories: VirtualDollarFactory[] = [
         directVirtualFactory,
-        pooledVirtualFactory
+        pooledVirtualFactory,
       ];
 
       const gameFactories: GameSessionFactory[] = [
         directGameFactory,
-        pooledGameFactory
+        pooledGameFactory,
       ];
 
       // All should work identically through interface
-      virtualFactories.forEach(factory => {
-        const dollar = factory.create('test_player');
+      virtualFactories.forEach((factory) => {
+        const dollar = factory.create("test_player");
         expect(dollar).toBeDefined();
-        expect(dollar.playerId).toBe('test_player');
-        
+        expect(dollar.ownerId).toBe("test_player");
+
         factory.release(dollar);
         const stats = factory.getStatistics();
         expect(stats).toBeDefined();
       });
 
-      gameFactories.forEach(factory => {
+      gameFactories.forEach((factory) => {
         const level: BettingLevel = 2;
         const session = factory.create(testDollar1, testDollar2, level);
         expect(session).toBeDefined();
         expect(session.level).toBe(level);
-        
+
         factory.release(session);
         const stats = factory.getStatistics();
         expect(stats).toBeDefined();
       });
     });
 
-    it('should support factory switching without code changes', () => {
+    it("should support factory switching without code changes", () => {
       // Simulate runtime factory selection
       const usePooling = Math.random() > 0.5; // Random selection for test
-      
-      const virtualFactory: VirtualDollarFactory = usePooling 
-        ? pooledVirtualFactory 
+
+      const virtualFactory: VirtualDollarFactory = usePooling
+        ? pooledVirtualFactory
         : directVirtualFactory;
-        
-      const gameFactory: GameSessionFactory = usePooling 
-        ? pooledGameFactory 
+
+      const gameFactory: GameSessionFactory = usePooling
+        ? pooledGameFactory
         : directGameFactory;
 
       // Should work regardless of which implementation is selected
-      const dollar = virtualFactory.create('runtime_player');
+      const dollar = virtualFactory.create("runtime_player");
       expect(dollar).toBeDefined();
-      expect(dollar.playerId).toBe('runtime_player');
+      expect(dollar.ownerId).toBe("runtime_player");
 
       const level: BettingLevel = 3;
       const session = gameFactory.create(testDollar1, testDollar2, level);

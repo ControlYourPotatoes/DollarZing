@@ -11,11 +11,10 @@ import type {
   ParameterCombination,
   DatasetGenerationResult,
   OrchestratorConfig,
-} from "../src/orchestrator/types";
-import {
-  generateAllCombinations,
-  validateParameterCombination,
-} from "../src/orchestrator/parameter-matrix";
+} from "../cli/src/orchestrator/core/types";
+import { validateParameterCombination } from "../cli/src/orchestrator/parameters/validation";
+
+import { generateAllCombinations } from "../cli/src/orchestrator/parameters/matrix";
 
 describe("Orchestrator Game Engine Integration", () => {
   let defaultSimulationConfig: SimulationConfig;
