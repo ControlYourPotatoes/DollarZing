@@ -81,28 +81,7 @@ describe("Import Resolution", () => {
     });
   });
 
-  describe("Legacy SimulationController", () => {
-    it("should still exist in types directory for backward compatibility", async () => {
-      const { SimulationController } = await import(
-        "../src/types/simulation-controller"
-      );
-      expect(SimulationController).toBeDefined();
-      expect(typeof SimulationController).toBe("function");
-    });
-
-    it("should have same interface as GameEngineSimulator", async () => {
-      const { SimulationController } = await import(
-        "../src/types/simulation-controller"
-      );
-      const { GameEngineSimulator } = await import(
-        "../src/simulation/game-engine-simulator"
-      );
-
-      // Both should have executeSimulation method
-      expect(SimulationController.prototype.executeSimulation).toBeDefined();
-      expect(GameEngineSimulator.prototype.executeSimulation).toBeDefined();
-    });
-  });
+  // Legacy SimulationController tests removed - migrated to GameEngineSimulator
 
   describe("Circular dependency check", () => {
     it("should not have circular dependencies in simulation directory", async () => {
@@ -113,7 +92,7 @@ describe("Import Resolution", () => {
 
     it("should not have circular dependencies between types and simulation", async () => {
       // Import both directories to check for circular deps
-      const typesModule = await import("../src/types/simulation-controller");
+      const typesModule = await import("../src/types/player-balance-manager");
       const simulationModule = await import(
         "../src/simulation/game-engine-simulator"
       );
