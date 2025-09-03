@@ -14,11 +14,11 @@ export type {
   OrchestrationResults,
   ValidationResult,
   DatasetMetadata,
-  FileNamingConfig
-} from './core/types';
+  FileNamingConfig,
+} from "./core/types";
 
 // Configuration functions
-export { createDefaultOrchestratorConfig } from './core/config';
+export { createDefaultOrchestratorConfig } from "./core/config";
 
 // Parameter matrix functions
 export {
@@ -26,15 +26,15 @@ export {
   generateAllCombinations,
   generateDirectoryName,
   generateFilePaths,
-  parseDirectoryName
-} from './parameters/matrix';
+  parseDirectoryName,
+} from "./parameters/matrix";
 
 // Validation functions
 export {
   validateParameterCombination,
   validateParameterCombinationDetailed,
-  validateOrchestratorConfig
-} from './parameters/validation';
+  validateOrchestratorConfig,
+} from "./parameters/validation";
 
 // CLI functions
 export {
@@ -45,24 +45,24 @@ export {
   showHelp,
   displayConfiguration,
   validateSystemRequirements,
-  createCliDefaultConfig
-} from './cli/cli';
+  createCliDefaultConfig,
+} from "./cli/cli";
 
 // Execution components
 export {
-  GameEngineAdapter,
+  DatasetOrchestrator,
   type ParameterMappingConfig,
   type AdapterGenerationResult,
-  type DatasetProgressCallback
-} from './execution/game-engine-adapter';
+  type DatasetProgressCallback,
+} from "./execution/dataset-orchestrator";
 
 export {
   GameEngineExecutor,
-  type ExecutorConfig
-} from './execution/game-engine-executor';
+  type ExecutorConfig,
+} from "./execution/game-engine-executor";
 
 export {
   OrchestratorFactoryManager,
   createOrchestratorFactoryManager,
-  type OrchestratorFactoryConfig
-} from './execution/factory-integration';
+  type OrchestratorFactoryConfig,
+} from "./execution/factory-integration";
