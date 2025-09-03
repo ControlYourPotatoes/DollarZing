@@ -2,11 +2,19 @@
 // Provides abstraction layer between orchestrator parameters and game engine configuration
 
 import {
-  SimulationController,
+  GameEngineSimulator,
   SimulationConfig,
   SimulationResults,
   SimulationProgress,
   CashOutStrategy,
+  PlayerBalanceManager,
+  GameMatchingEngine,
+  RunOrchestrator,
+  VirtualDollarManager,
+  RevenueCalculator,
+  ScoringEngine,
+  DirectGameSessionFactory,
+  DEFAULT_PERFORMANCE_CONFIG,
 } from "@/index";
 import type {
   ParameterCombination,
@@ -15,6 +23,50 @@ import type {
 } from "../core/types";
 import { validateParameterCombination } from "../parameters/validation";
 import { generateDirectoryName, generateFilePaths } from "../parameters/matrix";
+
+/**
+ * Create GameEngineSimulator with default components
+ */
+function createGameEngineSimulator(
+  config: SimulationConfig
+): GameEngineSimulator {
+  // Create core components
+  const playerBalanceManager = new PlayerBalanceManager();
+  const virtualDollarManager = new VirtualDollarManager();
+  const scoringEngine = new ScoringEngine();
+
+  // Create game session factory
+  const gameSessionFactory = new DirectGameSessionFactory(
+    DEFAULT_PERFORMANCE_CONFIG
+  );
+
+  // Create game matching engine
+  const gameMatchingEngine = new GameMatchingEngine(
+    virtualDollarManager,
+    scoringEngine,
+    gameSessionFactory
+  );
+
+  // Create run orchestrator
+  const runOrchestrator = new RunOrchestrator(
+    undefined, // ProgressionManager will be created internally
+    virtualDollarManager,
+    config.charityPercentage
+  );
+
+  // Create revenue calculator
+  const revenueCalculator = new RevenueCalculator();
+
+  // Create GameEngineSimulator
+  return new GameEngineSimulator(
+    playerBalanceManager,
+    virtualDollarManager,
+    gameMatchingEngine,
+    runOrchestrator,
+    revenueCalculator,
+    scoringEngine
+  );
+}
 
 /**
  * Configuration mapping between orchestrator parameters and simulation settings
@@ -105,14 +157,12 @@ export class GameEngineAdapter {
       // Create simulation configuration
       const simulationConfig = this.createSimulationConfig(combination);
 
-      // Initialize simulation controller
-      const controller = new SimulationController(simulationConfig);
+      // Create GameEngineSimulator with components
+      const simulator = createGameEngineSimulator(simulationConfig);
 
-      // Initialize players
-      const playersCreated = controller.initializePlayers();
       if (this.orchestratorConfig.verbose) {
         console.log(
-          `Initialized ${playersCreated} players for combination ${generateDirectoryName(
+          `Created GameEngineSimulator for combination ${generateDirectoryName(
             combination
           )}`
         );
@@ -125,7 +175,10 @@ export class GameEngineAdapter {
         : undefined;
 
       // Run simulation
-      const simulationResults = await controller.runSimulation(wrappedCallback);
+      const simulationResults = await simulator.executeSimulation(
+        simulationConfig,
+        wrappedCallback
+      );
 
       // Check for simulation success
       if (!simulationResults.success) {
@@ -419,6 +472,12 @@ export class GameEngineAdapter {
         jackpotsWon: 15,
         averageRunLength: 3.3,
       },
+      summary: {
+        totalDays: 365,
+        totalPlayers: 1000,
+        simulationCompleted: true,
+      },
+      dailyResults: [],
       completedAt: new Date(),
     };
 
