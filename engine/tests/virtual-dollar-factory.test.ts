@@ -258,6 +258,9 @@ describe("VirtualDollarFactory Interface Contract", () => {
       expect(stats.objectsCreated).toBe(2);
       expect(stats.objectsReleased).toBe(1);
       expect(stats.objectsInUse).toBe(1);
+
+      // Clean up the remaining object
+      factory.release(dollar2);
     });
 
     it("should update statistics after batch operations", () => {
@@ -267,6 +270,9 @@ describe("VirtualDollarFactory Interface Contract", () => {
       const stats = factory.getStatistics();
       expect(stats.objectsCreated).toBe(3);
       expect(stats.objectsInUse).toBe(3);
+
+      // Clean up the created objects
+      dollars.forEach((dollar) => factory.release(dollar));
     });
   });
 
