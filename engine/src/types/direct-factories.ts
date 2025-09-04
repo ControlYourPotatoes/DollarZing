@@ -7,6 +7,7 @@ import {
   GameSession,
   BettingLevel,
   DollarState,
+  getBettingLevelValue,
 } from "./virtual-dollar-engine";
 import {
   VirtualDollarFactory,
@@ -419,8 +420,8 @@ export class DirectGameSessionFactory implements GameSessionFactory {
   }
 
   private calculateWinnings(level: BettingLevel): number {
-    // Winner receives level × 1.8 in winnings (per game rules)
-    return level * 1.8;
+    // Winner receives bet amount × 1.8 in winnings (per game rules)
+    return getBettingLevelValue(level) * 1.8;
   }
 
   /**

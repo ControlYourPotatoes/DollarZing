@@ -2,15 +2,20 @@
 // Utilizes existing object pool infrastructure for performance optimization
 // Implements factory interfaces with object pooling for memory efficiency
 
-import { VirtualDollar, GameSession, BettingLevel } from './virtual-dollar-engine';
-import { 
-  VirtualDollarFactory, 
-  GameSessionFactory, 
-  GamePair, 
-  FactoryStatistics, 
-  PerformanceConfig 
-} from './factory-interfaces';
-import { getObjectPoolManager, isObjectPoolingEnabled } from './object-pool';
+import {
+  VirtualDollar,
+  GameSession,
+  BettingLevel,
+  getBettingLevelValue,
+} from "./virtual-dollar-engine";
+import {
+  VirtualDollarFactory,
+  GameSessionFactory,
+  GamePair,
+  FactoryStatistics,
+  PerformanceConfig,
+} from "./factory-interfaces";
+import { getObjectPoolManager, isObjectPoolingEnabled } from "./object-pool";
 
 /**
  * Performance tracking utility for timing operations
@@ -38,12 +43,18 @@ class PerformanceTracker {
 
   getAverageCreationTime(): number {
     if (this.creationTimes.length === 0) return 0;
-    return this.creationTimes.reduce((sum, time) => sum + time, 0) / this.creationTimes.length;
+    return (
+      this.creationTimes.reduce((sum, time) => sum + time, 0) /
+      this.creationTimes.length
+    );
   }
 
   getAverageReleaseTime(): number {
     if (this.releaseTimes.length === 0) return 0;
-    return this.releaseTimes.reduce((sum, time) => sum + time, 0) / this.releaseTimes.length;
+    return (
+      this.releaseTimes.reduce((sum, time) => sum + time, 0) /
+      this.releaseTimes.length
+    );
   }
 
   reset(): void {
@@ -74,28 +85,38 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   create(playerId: string): VirtualDollar {
-    const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
 
     // Validate player ID
-    if (!playerId || playerId.trim() === '') {
-      throw new Error('Invalid player ID: cannot be empty or whitespace');
+    if (!playerId || playerId.trim() === "") {
+      throw new Error("Invalid player ID: cannot be empty or whitespace");
     }
 
     if (!isObjectPoolingEnabled()) {
-      throw new Error('Object pooling is not enabled. Use DirectVirtualDollarFactory instead.');
+      throw new Error(
+        "Object pooling is not enabled. Use DirectVirtualDollarFactory instead."
+      );
     }
 
     try {
       const poolManager = getObjectPoolManager();
       const dollar = poolManager.virtualDollarPool.acquire();
-      
+
       // Generate unique identifiers
       const id = this.generateUniqueId();
       const serialNumber = this.generateSerialNumber();
       const runId = this.generateRunId();
 
       // Initialize the pooled object
-      poolManager.virtualDollarPool.initializeDollar(dollar, id, serialNumber, playerId, runId);
+      poolManager.virtualDollarPool.initializeDollar(
+        dollar,
+        id,
+        serialNumber,
+        playerId,
+        runId
+      );
 
       this.objectsCreated++;
 
@@ -111,7 +132,9 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   release(dollar: VirtualDollar): void {
-    const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
 
     if (!dollar) {
       return; // Handle null/undefined gracefully
@@ -132,7 +155,9 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
         this.performanceTracker.recordRelease(startTime, endTime);
       }
     } catch (error) {
-      console.warn(`Warning: Failed to release virtual dollar to pool: ${error}`);
+      console.warn(
+        `Warning: Failed to release virtual dollar to pool: ${error}`
+      );
       // Don't throw - release operations should be non-critical
     }
   }
@@ -146,7 +171,9 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
 
     if (this.config.enableBatchOptimizations) {
       // Batch-optimized creation
-      const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+      const startTime = this.config.enablePerformanceMetrics
+        ? performance.now()
+        : 0;
 
       try {
         for (const playerId of playerIds) {
@@ -161,7 +188,7 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
         }
       } catch (error) {
         // If batch fails, release any created objects
-        dollars.forEach(dollar => this.release(dollar));
+        dollars.forEach((dollar) => this.release(dollar));
         throw error;
       }
     } else {
@@ -172,7 +199,9 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
           dollars.push(dollar);
         } catch (error) {
           // Continue with other players if one fails
-          console.warn(`Failed to create virtual dollar for player ${playerId}: ${error}`);
+          console.warn(
+            `Failed to create virtual dollar for player ${playerId}: ${error}`
+          );
         }
       }
     }
@@ -181,14 +210,20 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   getStatistics(): FactoryStatistics {
-    const poolManager = isObjectPoolingEnabled() ? getObjectPoolManager() : null;
+    const poolManager = isObjectPoolingEnabled()
+      ? getObjectPoolManager()
+      : null;
     const poolSize = poolManager ? poolManager.virtualDollarPool.size() : 0;
-    const objectsInUse = Math.max(0, this.objectsCreated - this.objectsReleased);
-    
+    const objectsInUse = Math.max(
+      0,
+      this.objectsCreated - this.objectsReleased
+    );
+
     // Calculate pool hit rate
-    const poolHitRate = this.objectsCreated > 0 && poolSize > 0
-      ? Math.min(poolSize / this.objectsCreated, 1.0)
-      : 0;
+    const poolHitRate =
+      this.objectsCreated > 0 && poolSize > 0
+        ? Math.min(poolSize / this.objectsCreated, 1.0)
+        : 0;
 
     return {
       objectsCreated: this.objectsCreated,
@@ -198,7 +233,7 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
       poolHitRate,
       averageCreationTime: this.performanceTracker.getAverageCreationTime(),
       averageReleaseTime: this.performanceTracker.getAverageReleaseTime(),
-      memoryUsageMB: objectsInUse * 0.001 // Rough estimate: 1KB per object
+      memoryUsageMB: objectsInUse * 0.001, // Rough estimate: 1KB per object
     };
   }
 
@@ -220,10 +255,12 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   private generateSerialNumber(): string {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const firstLetter = letters[Math.floor(Math.random() * letters.length)];
     const lastLetter = letters[Math.floor(Math.random() * letters.length)];
-    const digits = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+    const digits = Math.floor(Math.random() * 100000000)
+      .toString()
+      .padStart(8, "0");
     return `${firstLetter}${digits}${lastLetter}`;
   }
 }
@@ -250,32 +287,48 @@ export class PooledGameSessionFactory implements GameSessionFactory {
     }
   }
 
-  create(dollar1: VirtualDollar, dollar2: VirtualDollar, level: BettingLevel): GameSession {
-    const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+  create(
+    dollar1: VirtualDollar,
+    dollar2: VirtualDollar,
+    level: BettingLevel
+  ): GameSession {
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
 
     // Validate parameters
     if (!dollar1 || !dollar2) {
-      throw new Error('Invalid virtual dollar parameters: both dollars must be provided');
+      throw new Error(
+        "Invalid virtual dollar parameters: both dollars must be provided"
+      );
     }
     if (level < 1 || level > 10) {
-      throw new Error('Invalid betting level: must be between 1 and 10');
+      throw new Error("Invalid betting level: must be between 1 and 10");
     }
 
     if (!isObjectPoolingEnabled()) {
-      throw new Error('Object pooling is not enabled. Use DirectGameSessionFactory instead.');
+      throw new Error(
+        "Object pooling is not enabled. Use DirectGameSessionFactory instead."
+      );
     }
 
     try {
       const poolManager = getObjectPoolManager();
       const session = poolManager.gameSessionPool.acquire();
-      
+
       this.gameCounter++;
       const id = `game_${this.gameCounter}_${Date.now()}`;
-      const dailySeed = ''; // Will be set during game resolution
+      const dailySeed = ""; // Will be set during game resolution
 
       // Initialize the pooled session
       poolManager.gameSessionPool.initializeSession(
-        session, id, dollar1, dollar2, level, this.gameCounter, dailySeed
+        session,
+        id,
+        dollar1,
+        dollar2,
+        level,
+        this.gameCounter,
+        dailySeed
       );
 
       // Set winnings based on level
@@ -295,7 +348,9 @@ export class PooledGameSessionFactory implements GameSessionFactory {
   }
 
   release(session: GameSession): void {
-    const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
 
     if (!session) {
       return; // Handle null/undefined gracefully
@@ -330,7 +385,9 @@ export class PooledGameSessionFactory implements GameSessionFactory {
 
     if (this.config.enableBatchOptimizations) {
       // Batch-optimized creation
-      const startTime = this.config.enablePerformanceMetrics ? performance.now() : 0;
+      const startTime = this.config.enablePerformanceMetrics
+        ? performance.now()
+        : 0;
 
       try {
         for (const pair of pairs) {
@@ -345,7 +402,7 @@ export class PooledGameSessionFactory implements GameSessionFactory {
         }
       } catch (error) {
         // If batch fails, release any created sessions
-        sessions.forEach(session => this.release(session));
+        sessions.forEach((session) => this.release(session));
         throw error;
       }
     } else {
@@ -365,14 +422,20 @@ export class PooledGameSessionFactory implements GameSessionFactory {
   }
 
   getStatistics(): FactoryStatistics {
-    const poolManager = isObjectPoolingEnabled() ? getObjectPoolManager() : null;
+    const poolManager = isObjectPoolingEnabled()
+      ? getObjectPoolManager()
+      : null;
     const poolSize = poolManager ? poolManager.gameSessionPool.size() : 0;
-    const objectsInUse = Math.max(0, this.objectsCreated - this.objectsReleased);
-    
+    const objectsInUse = Math.max(
+      0,
+      this.objectsCreated - this.objectsReleased
+    );
+
     // Calculate pool hit rate
-    const poolHitRate = this.objectsCreated > 0 && poolSize > 0
-      ? Math.min(poolSize / this.objectsCreated, 1.0)
-      : 0;
+    const poolHitRate =
+      this.objectsCreated > 0 && poolSize > 0
+        ? Math.min(poolSize / this.objectsCreated, 1.0)
+        : 0;
 
     return {
       objectsCreated: this.objectsCreated,
@@ -382,7 +445,7 @@ export class PooledGameSessionFactory implements GameSessionFactory {
       poolHitRate,
       averageCreationTime: this.performanceTracker.getAverageCreationTime(),
       averageReleaseTime: this.performanceTracker.getAverageReleaseTime(),
-      memoryUsageMB: objectsInUse * 0.002 // Rough estimate: 2KB per session
+      memoryUsageMB: objectsInUse * 0.002, // Rough estimate: 2KB per session
     };
   }
 
@@ -397,7 +460,7 @@ export class PooledGameSessionFactory implements GameSessionFactory {
   }
 
   private calculateWinnings(level: BettingLevel): number {
-    // Winner receives level × 1.8 in winnings (per game rules)
-    return level * 1.8;
+    // Winner receives bet amount × 1.8 in winnings (per game rules)
+    return getBettingLevelValue(level) * 1.8;
   }
 }
