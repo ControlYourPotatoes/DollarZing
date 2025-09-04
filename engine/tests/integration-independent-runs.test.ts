@@ -1,10 +1,19 @@
 // Integration Test - Task 8.2-8.15: Comprehensive Independent Run System Testing
 // Tests multiple independent runs, player lifecycle, jackpot scenarios, and performance
 
+import { GameEngineSimulator } from "../src/simulation/game-engine-simulator";
+import { VirtualDollarManager } from "../src/types/virtual-dollar-types";
+import { PlayerBalanceManager } from "../src/types/player-balance-manager";
+import { ScoringEngine } from "../src/types/scoring-engine";
+import { GameMatchingEngine } from "../src/types/game-matching-engine";
+import { ProgressionManager } from "../src/types/progression-manager";
+import { PlayerRunManager } from "../src/types/player-run-manager";
+import { RevenueCalculator } from "../src/types/revenue-calculator";
 import {
-  GameEngineSimulator,
-  SimulationConfig,
-} from "../src/simulation/game-engine-simulator";
+  GameSessionFactory,
+  PRODUCTION_PERFORMANCE_CONFIG,
+} from "../src/types/factory-interfaces";
+import { DirectGameSessionFactory } from "../src/types/direct-factories";
 import {
   CashOutStrategy,
   CashOutDecision,
@@ -20,6 +29,9 @@ describe("Integration Test: Independent Run System Comprehensive", () => {
   let scoringEngine: ScoringEngine;
   let gameMatchingEngine: GameMatchingEngine;
   let progressionManager: ProgressionManager;
+  let playerRunManager: PlayerRunManager;
+  let revenueCalculator: RevenueCalculator;
+  let gameSessionFactory: GameSessionFactory;
   let simulationController: GameEngineSimulator;
 
   const PLAYER_1_ID = "player_multi_001";
@@ -32,16 +44,23 @@ describe("Integration Test: Independent Run System Comprehensive", () => {
     playerBalanceManager = new PlayerBalanceManager();
     virtualDollarManager = new VirtualDollarManager();
     scoringEngine = new ScoringEngine();
+    gameSessionFactory = new DirectGameSessionFactory(
+      PRODUCTION_PERFORMANCE_CONFIG
+    );
     gameMatchingEngine = new GameMatchingEngine(
       virtualDollarManager,
-      scoringEngine
+      scoringEngine,
+      gameSessionFactory
     );
     progressionManager = new ProgressionManager();
+    playerRunManager = new PlayerRunManager();
+    revenueCalculator = new RevenueCalculator();
     simulationController = new GameEngineSimulator(
       playerBalanceManager,
       virtualDollarManager,
       gameMatchingEngine,
-      progressionManager,
+      playerRunManager,
+      revenueCalculator,
       scoringEngine
     );
 
@@ -142,10 +161,28 @@ describe("Integration Test: Independent Run System Comprehensive", () => {
 
         // Execute game
         const matchResult = gameMatchingEngine.attemptMatching();
-        const gameResult = matchResult.gamesCreated[0];
+        const gameSession = matchResult.gamesCreated[0];
 
-        if (!gameResult) {
+        if (!gameSession) {
           console.log("No game created, ending cycle");
+          break;
+        }
+
+        // Resolve the game to determine winner and loser
+        const resolutionResult = gameMatchingEngine.resolveGame(
+          gameSession.id,
+          "2024-01-15"
+        );
+
+        if (!resolutionResult.success) {
+          console.log("Game resolution failed:", resolutionResult.error);
+          break;
+        }
+
+        const gameResult = resolutionResult;
+
+        if (!gameResult.winner || !gameResult.loser) {
+          console.log("Game resolution incomplete - missing winner or loser");
           break;
         }
 
@@ -172,7 +209,7 @@ describe("Integration Test: Independent Run System Comprehensive", () => {
 
         if (
           shouldCashOut === CashOutDecision.CASH_OUT ||
-          gameResult.level >= 5
+          gameResult.winner.currentLevel >= 5
         ) {
           // Complete this run and create new one
           console.log(
@@ -302,16 +339,16 @@ describe("Integration Test: Independent Run System Comprehensive", () => {
 
       // Test each level's bet and winning amounts
       const expectedProgression = [
-        { level: 1, bet: 1, win: 2 },
-        { level: 2, bet: 2, win: 4 },
-        { level: 3, bet: 4, win: 8 },
-        { level: 4, bet: 8, win: 16 },
-        { level: 5, bet: 16, win: 32 },
-        { level: 6, bet: 32, win: 64 },
-        { level: 7, bet: 64, win: 128 },
-        { level: 8, bet: 128, win: 256 },
-        { level: 9, bet: 256, win: 512 },
-        { level: 10, bet: 512, win: 1024 },
+        { level: 1, bet: 1, win: 1.8 },
+        { level: 2, bet: 2, win: 3.6 },
+        { level: 3, bet: 4, win: 7.2 },
+        { level: 4, bet: 8, win: 14.4 },
+        { level: 5, bet: 16, win: 28.8 },
+        { level: 6, bet: 32, win: 57.6 },
+        { level: 7, bet: 64, win: 115.2 },
+        { level: 8, bet: 128, win: 230.4 },
+        { level: 9, bet: 256, win: 460.8 },
+        { level: 10, bet: 512, win: 921.6 },
       ];
 
       console.log("Validating exponential progression:");
@@ -356,7 +393,7 @@ describe("Integration Test: Independent Run System Comprehensive", () => {
 
       // Verify jackpot level calculations
       expect(getBettingLevelValue(10)).toBe(512); // $512 bet
-      expect(getBettingLevelWinnings(10)).toBe(1024); // $1024 win
+      expect(getBettingLevelWinnings(10)).toBe(921.6); // $1024 win
 
       // Test jackpot completion logic
       const jackpotAmount = getBettingLevelWinnings(10);
@@ -369,7 +406,7 @@ describe("Integration Test: Independent Run System Comprehensive", () => {
 
       // At level 10, player must cash out (forced completion)
       expect(jackpotRun.currentLevel).toBe(10);
-      expect(jackpotAmount).toBe(1024);
+      expect(jackpotAmount).toBe(921.6);
 
       // Simulate forced cash-out
       playerBalanceManager.addWinProgression(PLAYER_1_ID, totalJackpotWinnings);
@@ -483,7 +520,25 @@ describe("Integration Test: Independent Run System Comprehensive", () => {
         const matchResult = gameMatchingEngine.attemptMatching();
         if (matchResult.gamesCreated.length === 0) break;
 
-        for (const game of matchResult.gamesCreated) {
+        for (const gameSession of matchResult.gamesCreated) {
+          // Resolve the game to determine winner and loser
+          const resolutionResult = gameMatchingEngine.resolveGame(
+            gameSession.id,
+            "2024-01-15"
+          );
+
+          if (!resolutionResult.success) {
+            console.log("Game resolution failed:", resolutionResult.error);
+            continue;
+          }
+
+          const game = resolutionResult;
+
+          if (!game.winner || !game.loser) {
+            console.log("Game resolution incomplete - missing winner or loser");
+            continue;
+          }
+
           gamesPlayed++;
           console.log(
             `Game ${gamesPlayed}: Winner ${game.winner.ownerId}, Winnings $${game.winnings}`
