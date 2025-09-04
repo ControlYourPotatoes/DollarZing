@@ -6,7 +6,6 @@ import {
   createEmptyRevenueStream
 } from '../src/types/virtual-dollar-engine';
 
-import { RevenueCalculator } from '../src/types/revenue-calculator';
 
 describe('RevenueCalculator - Platform Fee Calculation', () => {
   describe('Platform Fee Structure', () => {
