@@ -3,20 +3,17 @@ import { describe, it, expect } from "vitest";
 
 // Import types that will be created
 import type {
-  ParameterMatrix,
   ParameterCombination,
-  OrchestratorConfig,
-  GrowthRateLevel,
   RiskLevel,
-  CharityPercentageLevel,
 } from "../cli/src/orchestrator/core/types";
 
 // Import functions that will be created
 import {
   createParameterMatrix,
   generateAllCombinations,
-  validateParameterCombination,
 } from "../cli/src/orchestrator/parameters/matrix";
+
+import { validateParameterCombination } from "../cli/src/orchestrator/parameters/validation";
 
 import { createDefaultOrchestratorConfig } from "../cli/src/orchestrator/core/config";
 
@@ -83,7 +80,7 @@ describe("Parameter Matrix Types", () => {
     // Invalid growth rate
     expect(
       validateParameterCombination({
-        growthRate: 25, // Invalid - not in [15, 35, 60]
+        growthRate: 25 as any, // Invalid - not in [15, 35, 60]
         riskLevel: "low",
         charityPercentage: 10,
       })
@@ -103,7 +100,7 @@ describe("Parameter Matrix Types", () => {
       validateParameterCombination({
         growthRate: 15,
         riskLevel: "low",
-        charityPercentage: 25, // Invalid - not in [10, 20, 30]
+        charityPercentage: 25 as any, // Invalid - not in [10, 20, 30]
       })
     ).toBe(false);
   });
