@@ -2,7 +2,7 @@
 // Tests coordination between progression management and player funding
 
 import {
-  RunOrchestrator,
+  PlayerRunManager,
   NewRunRequest,
   RunCompletionEvent,
 } from "../src/types/player-run-manager";
