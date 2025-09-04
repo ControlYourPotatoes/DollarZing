@@ -84,6 +84,12 @@ describe("Batch Processing Performance", () => {
       console.log(
         `Average time per game: ${(batchDuration / gamesCreated).toFixed(3)}ms`
       );
+
+      // Clean up the created dollars - first transition to final state
+      dollars.forEach((dollar) => {
+        dollarManager.updateDollarState(dollar.id, DollarState.LOST);
+        dollarManager.releaseDollar(dollar.id);
+      });
     });
 
     it("should maintain consistency between batch and individual operations", () => {
@@ -112,6 +118,12 @@ describe("Batch Processing Performance", () => {
         expect(game.level).toBeGreaterThan(0);
         expect(game.id).toBeDefined();
         expect(game.winnings).toBeGreaterThan(0);
+      });
+
+      // Clean up the created dollars - first transition to final state
+      [dollar1, dollar2, dollar3, dollar4].forEach((dollar) => {
+        dollarManager.updateDollarState(dollar.id, DollarState.LOST);
+        dollarManager.releaseDollar(dollar.id);
       });
     });
   });
@@ -152,9 +164,13 @@ describe("Batch Processing Performance", () => {
       const finalStats = gameSessionFactory.getStatistics();
 
       // Objects should be properly created and released
-      expect(finalStats.objectsCreated).toBe(expectedGames);
-      expect(finalStats.objectsReleased).toBe(expectedGames);
-      expect(finalStats.objectsInUse).toBe(0);
+      expect(finalStats.objectsCreated).toBe(
+        initialStats.objectsCreated + expectedGames
+      );
+      expect(finalStats.objectsReleased).toBe(
+        initialStats.objectsReleased + expectedGames
+      );
+      expect(finalStats.objectsInUse).toBe(initialStats.objectsInUse);
 
       // Memory should be managed properly
       expect(finalStats.memoryUsageMB).toBeLessThan(10); // Should be minimal after cleanup
@@ -466,6 +482,12 @@ describe("Batch Processing Performance", () => {
         console.log(
           `Pooling enabled - Hit rate: ${stats.poolHitRate.toFixed(2)}%`
         );
+
+        // Clean up the test dollars
+        testDollars.forEach((dollar) => {
+          dollarManager.updateDollarState(dollar.id, DollarState.LOST);
+          dollarManager.releaseDollar(dollar.id);
+        });
       } else {
         // Test with pooling disabled
         const directFactory = new DirectGameSessionFactory(
@@ -495,6 +517,12 @@ describe("Batch Processing Performance", () => {
         console.log(
           `Pooling disabled - Hit rate: ${stats.poolHitRate.toFixed(2)}%`
         );
+
+        // Clean up the test dollars
+        testDollars.forEach((dollar) => {
+          dollarManager.updateDollarState(dollar.id, DollarState.LOST);
+          dollarManager.releaseDollar(dollar.id);
+        });
       }
     });
 
