@@ -358,7 +358,8 @@ export class GameMatchingEngine {
       }
 
       // Update dollar states
-      this.dollarManager.updateDollarState(winner.id, DollarState.WON);
+      // Note: Winner state will be updated later by game processing logic based on cash-out decision
+      // For now, winners remain in their current state until processed
       this.dollarManager.updateDollarState(loser.id, DollarState.LOST);
 
       // Update dollar game history and statistics

@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DayProcessor } from "./day-processor";
-import { DollarState } from "../types/virtual-dollar-engine";
+import { DollarState, GameResult } from "../types/virtual-dollar-engine";
 
 // Mock the external dependencies
 vi.mock("../types/game-matching-engine");
-vi.mock("../types/player-run-manager");
+vi.mock("./player-manager");
 vi.mock("../types/virtual-dollar-types");
 vi.mock("../types/revenue-calculator");
 
 describe("DayProcessor", () => {
   let dayProcessor: DayProcessor;
   let mockGameMatchingEngine: any;
-  let mockRunOrchestrator: any;
+  let mockPlayerManager: any;
   let mockDollarManager: any;
   let mockRevenueCalculator: any;
 
@@ -31,13 +31,10 @@ describe("DayProcessor", () => {
       }),
     };
 
-    mockRunOrchestrator = {
+    mockPlayerManager = {
       autoCreateRuns: vi.fn().mockReturnValue([]),
-      getActivePlayerCount: vi.fn().mockReturnValue(10),
-      processGameResult: vi
-        .fn()
-        .mockReturnValue({ completionType: "CONTINUE", totalWinnings: 0 }),
-      getPlayerStrategy: vi.fn().mockReturnValue("AVERAGE"),
+      processGameResult: vi.fn().mockReturnValue(null), // null means run continues
+      getPlayerStrategy: vi.fn().mockReturnValue("BALANCED"),
       createNewRun: vi.fn().mockReturnValue({ id: "new-run-1" }),
     };
 
@@ -54,7 +51,7 @@ describe("DayProcessor", () => {
     // Create DayProcessor instance
     dayProcessor = new DayProcessor(
       mockGameMatchingEngine,
-      mockRunOrchestrator,
+      mockPlayerManager,
       mockDollarManager,
       mockRevenueCalculator
     );
@@ -78,7 +75,7 @@ describe("DayProcessor", () => {
       await dayProcessor.processDay(day, config);
 
       // Verify that autoCreateRuns was called
-      expect(mockRunOrchestrator.autoCreateRuns).toHaveBeenCalledWith(2);
+      expect(mockPlayerManager.autoCreateRuns).toHaveBeenCalledWith(2);
 
       // Verify that attemptMatching was called
       expect(mockGameMatchingEngine.attemptMatching).toHaveBeenCalled();
@@ -172,7 +169,7 @@ describe("DayProcessor", () => {
         currentLevel: 1,
       };
 
-      mockRunOrchestrator.autoCreateRuns.mockReturnValue([mockRun]);
+      mockPlayerManager.autoCreateRuns.mockReturnValue([mockRun]);
 
       await dayProcessor.addNewRunsToPool();
 
@@ -187,7 +184,7 @@ describe("DayProcessor", () => {
     });
 
     it("should handle empty run list", async () => {
-      mockRunOrchestrator.autoCreateRuns.mockReturnValue([]);
+      mockPlayerManager.autoCreateRuns.mockReturnValue([]);
 
       await dayProcessor.addNewRunsToPool();
 
@@ -196,5 +193,188 @@ describe("DayProcessor", () => {
     });
   });
 
-  // processGameResults tests removed - method is private and tested through processDay()
+  describe("game resolution and re-pooling", () => {
+    it("should re-pool winners who choose to continue playing", async () => {
+      const day = 1;
+      const config = {
+        initialPlayerCount: 10,
+        maxGamesPerDay: 20,
+        dailySeed: "2025-09-01",
+      };
+
+      // Mock a game session with winner and loser
+      const mockWinner = {
+        id: "winner-1",
+        ownerId: "player-1",
+        currentLevel: 2,
+      };
+      const mockLoser = {
+        id: "loser-1", 
+        ownerId: "player-2",
+        currentLevel: 1,
+      };
+      const mockGame = { id: "game-1" };
+
+      // Mock game creation
+      mockGameMatchingEngine.attemptMatching.mockReturnValue({
+        gamesCreated: [mockGame],
+      });
+
+      // Mock successful game resolution
+      mockGameMatchingEngine.resolveGame.mockReturnValue({
+        success: true,
+        winner: mockWinner,
+        loser: mockLoser,
+      });
+
+      // Mock PlayerManager returning null for winner (continues playing) and completion for loser
+      mockPlayerManager.processGameResult
+        .mockReturnValueOnce(null) // Winner continues
+        .mockReturnValueOnce({ completionType: "LOSS", totalWinnings: 0 }); // Loser eliminated
+
+      await dayProcessor.processDay(day, config);
+
+      // Verify that processGameResult was called for both winner and loser
+      expect(mockPlayerManager.processGameResult).toHaveBeenCalledWith(
+        mockWinner,
+        GameResult.WIN
+      );
+      expect(mockPlayerManager.processGameResult).toHaveBeenCalledWith(
+        mockLoser,
+        GameResult.LOSS
+      );
+
+      // Verify that winner was re-pooled (since processGameResult returned null)
+      expect(mockDollarManager.updateDollarState).toHaveBeenCalledWith(
+        "winner-1",
+        DollarState.POOLED
+      );
+      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith(mockWinner);
+    });
+
+    it("should not re-pool winners who choose to cash out", async () => {
+      const day = 1;
+      const config = {
+        initialPlayerCount: 10,
+        maxGamesPerDay: 20,
+        dailySeed: "2025-09-01",
+      };
+
+      const mockWinner = {
+        id: "winner-1",
+        ownerId: "player-1",
+        currentLevel: 2,
+      };
+      const mockLoser = {
+        id: "loser-1",
+        ownerId: "player-2",
+        currentLevel: 1,
+      };
+      const mockGame = { id: "game-1" };
+
+      mockGameMatchingEngine.attemptMatching.mockReturnValue({
+        gamesCreated: [mockGame],
+      });
+
+      mockGameMatchingEngine.resolveGame.mockReturnValue({
+        success: true,
+        winner: mockWinner,
+        loser: mockLoser,
+      });
+
+      // Mock PlayerManager returning cash-out result for winner
+      mockPlayerManager.processGameResult
+        .mockReturnValueOnce({ 
+          completionType: "CASH_OUT", 
+          totalWinnings: 100,
+          shouldCreateNewRun: true,
+          playerId: "player-1"
+        }) // Winner cashes out
+        .mockReturnValueOnce({ completionType: "LOSS", totalWinnings: 0 }); // Loser eliminated
+
+      // Mock new run creation
+      mockPlayerManager.createNewRun.mockReturnValue({
+        id: "new-run-1",
+        ownerId: "player-1",
+      });
+
+      await dayProcessor.processDay(day, config);
+
+      // Verify that winner was NOT re-pooled (since they cashed out)
+      // But the new run created should be pooled
+      expect(mockDollarManager.updateDollarState).toHaveBeenCalledWith(
+        "new-run-1",
+        DollarState.POOLED
+      );
+      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith({
+        id: "new-run-1",
+        ownerId: "player-1",
+      });
+
+      // Verify that cash-out was processed
+      expect(mockRevenueCalculator.processCashOut).toHaveBeenCalledWith(100);
+
+      // Verify that new run was created and added to pool
+      expect(mockPlayerManager.createNewRun).toHaveBeenCalledWith({
+        playerId: "player-1",
+        cashOutStrategy: "BALANCED",
+        fundingSource: "DONATION",
+      });
+    });
+
+    it("should handle failed game resolution gracefully", async () => {
+      const day = 1;
+      const config = {
+        initialPlayerCount: 10,
+        maxGamesPerDay: 20,
+        dailySeed: "2025-09-01",
+      };
+
+      const mockGame = { id: "game-1" };
+
+      mockGameMatchingEngine.attemptMatching.mockReturnValue({
+        gamesCreated: [mockGame],
+      });
+
+      // Mock failed game resolution
+      mockGameMatchingEngine.resolveGame.mockReturnValue({
+        success: false,
+        error: "Resolution failed",
+      });
+
+      await dayProcessor.processDay(day, config);
+
+      // Should not crash and should not call processGameResult
+      expect(mockPlayerManager.processGameResult).not.toHaveBeenCalled();
+      // Game revenue should NOT be processed if resolution fails (early return)
+      expect(mockRevenueCalculator.processGameRevenue).not.toHaveBeenCalled();
+    });
+
+    it("should handle missing winner/loser data gracefully", async () => {
+      const day = 1;
+      const config = {
+        initialPlayerCount: 10,
+        maxGamesPerDay: 20,
+        dailySeed: "2025-09-01",
+      };
+
+      const mockGame = { id: "game-1" };
+
+      mockGameMatchingEngine.attemptMatching.mockReturnValue({
+        gamesCreated: [mockGame],
+      });
+
+      // Mock resolution with missing winner/loser
+      mockGameMatchingEngine.resolveGame.mockReturnValue({
+        success: true,
+        winner: null,
+        loser: null,
+      });
+
+      await dayProcessor.processDay(day, config);
+
+      // Should not call processGameResult with null values
+      expect(mockPlayerManager.processGameResult).not.toHaveBeenCalled();
+    });
+  });
 });

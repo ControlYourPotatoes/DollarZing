@@ -1,5 +1,5 @@
 import { GameMatchingEngine } from "../types/game-matching-engine";
-import { PlayerRunManager } from "../types/player-run-manager";
+import { PlayerManager } from "./player-manager";
 import { RevenueCalculator } from "../types/revenue-calculator";
 import { VirtualDollarManager } from "../types/virtual-dollar-types";
 import { GameResult, DollarState } from "../types/virtual-dollar-engine";
@@ -11,7 +11,7 @@ import { GameResult, DollarState } from "../types/virtual-dollar-engine";
 export class GameProcessor {
   constructor(
     private gameMatchingEngine: GameMatchingEngine,
-    private runOrchestrator: PlayerRunManager,
+    private playerManager: PlayerManager,
     private revenueCalculator: RevenueCalculator,
     private dollarManager: VirtualDollarManager
   ) {}
@@ -63,11 +63,11 @@ export class GameProcessor {
       const loser = gameSession.loser;
 
       console.log(
-        `DEBUG: Processing game ${gameSession.id} with winner ${winner.ownerId} (Level ${winner.currentLevel}) and loser ${loser.ownerId} (Level ${loser.currentLevel})`
+        `DEBUG: [GameProcessor] Processing game ${gameSession.id} with winner ${winner.ownerId} (Level ${winner.currentLevel}) and loser ${loser.ownerId} (Level ${loser.currentLevel})`
       );
 
       // Process winner progression
-      const winnerResult = this.runOrchestrator.processGameResult(
+      const winnerResult = this.playerManager.processGameResult(
         winner,
         GameResult.WIN
       );
@@ -76,10 +76,20 @@ export class GameProcessor {
         console.log(
           `DEBUG: Winner result: ${winnerResult.completionType}, Level: ${winner.currentLevel}, Winnings: $${winnerResult.totalWinnings}`
         );
+      } else {
+        // Winner advanced to next level but run continues - re-add to pool
+        console.log(
+          `DEBUG: Winner ${winner.ownerId} advanced to level ${winner.currentLevel}, re-adding to pool`
+        );
+        this.dollarManager.updateDollarState(
+          winner.id,
+          DollarState.POOLED
+        );
+        this.gameMatchingEngine.addToPool(winner);
       }
 
       // Process loser result
-      const loserResult = this.runOrchestrator.processGameResult(
+      const loserResult = this.playerManager.processGameResult(
         loser,
         GameResult.LOSS
       );
@@ -98,10 +108,10 @@ export class GameProcessor {
       // Handle run completions and create new runs
       [winnerResult, loserResult].forEach((result) => {
         if (result && result.shouldCreateNewRun) {
-          const playerStrategy = this.runOrchestrator.getPlayerStrategy(
+          const playerStrategy = this.playerManager.getPlayerStrategy(
             result.playerId
           );
-          const newRun = this.runOrchestrator.createNewRun({
+          const newRun = this.playerManager.createNewRun({
             playerId: result.playerId,
             cashOutStrategy: playerStrategy,
             fundingSource: "DONATION",

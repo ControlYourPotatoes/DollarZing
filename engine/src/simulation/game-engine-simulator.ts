@@ -3,7 +3,6 @@
 
 import { PlayerBalanceManager } from "../types/player-balance-manager";
 import { GameMatchingEngine } from "../types/game-matching-engine";
-import { PlayerRunManager } from "../types/player-run-manager";
 import { VirtualDollarManager } from "../types/virtual-dollar-types";
 import { ScoringEngine } from "../types/scoring-engine";
 import { ProgressionManager } from "../types/progression-manager";
@@ -118,7 +117,7 @@ export interface SimulationResults {
 export interface SimulationComponents {
   playerBalanceManager: PlayerBalanceManager;
   gameMatchingEngine: GameMatchingEngine;
-  runOrchestrator: PlayerRunManager;
+  runOrchestrator: ProgressionManager;
   dollarManager: VirtualDollarManager;
   scoringEngine: ScoringEngine;
   progressionManager: ProgressionManager;
@@ -148,7 +147,7 @@ export class GameEngineSimulator {
     playerBalanceManager: PlayerBalanceManager,
     virtualDollarManager: VirtualDollarManager,
     gameMatchingEngine: GameMatchingEngine,
-    runOrchestrator: PlayerRunManager,
+    runOrchestrator: ProgressionManager,
     revenueCalculator: RevenueCalculator,
     scoringEngine: ScoringEngine
   ) {
@@ -166,21 +165,21 @@ export class GameEngineSimulator {
     };
 
     // Initialize focused component classes
-    this.dayProcessor = new DayProcessor(
-      gameMatchingEngine,
-      runOrchestrator,
-      virtualDollarManager,
-      revenueCalculator
-    );
-
     this.playerManager = new PlayerManager(
       playerBalanceManager,
       runOrchestrator
     );
 
+    this.dayProcessor = new DayProcessor(
+      gameMatchingEngine,
+      this.playerManager,
+      virtualDollarManager,
+      revenueCalculator
+    );
+
     this.gameProcessor = new GameProcessor(
       gameMatchingEngine,
-      runOrchestrator,
+      this.playerManager,
       revenueCalculator,
       virtualDollarManager
     );

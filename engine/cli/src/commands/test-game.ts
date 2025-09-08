@@ -15,7 +15,7 @@ import {
   ScoringEngine,
   DirectGameSessionFactory,
   DEFAULT_PERFORMANCE_CONFIG,
-} from "@/index";
+} from "../../../src/index";
 
 /**
  * Create GameEngineSimulator with default components
@@ -105,11 +105,11 @@ Examples:
 }
 
 /**
- * Execute a single test game
+ * Execute a single test game using GameEngineSimulator
  */
 async function executeTestGame(options: any): Promise<void> {
   console.log("🎮 DollarZing Test Game");
-  console.log("=====================");
+  console.log("======================");
 
   // Parse and validate options
   const days = Math.max(1, parseInt(options.days || "1", 10));
@@ -130,39 +130,43 @@ async function executeTestGame(options: any): Promise<void> {
     console.log("");
   }
 
-  // Create simple simulation configuration
+  console.log("🚀 Starting simulation...");
+  const startTime = performance.now();
+
+  // Create simulation configuration
   const config: SimulationConfig = {
     durationDays: days,
     initialPlayerCount: players,
     dailySeed: seed,
-    charityPercentage: charityPercentage / 100, // Convert to decimal
+    charityPercentage: charityPercentage / 100,
     playerStrategies: {
-      [CashOutStrategy.CONSERVATIVE]: 0.4, // 40% conservative players
-      [CashOutStrategy.BALANCED]: 0.4, // 40% balanced players
-      [CashOutStrategy.AGGRESSIVE]: 0.2, // 20% aggressive players
+      [CashOutStrategy.CONSERVATIVE]: 0.4,
+      [CashOutStrategy.BALANCED]: 0.4,
+      [CashOutStrategy.AGGRESSIVE]: 0.2,
     },
-    initialDonationAmount: 25, // $25 starting amount
-    maxSimulationTimeMs: 30000, // 30 seconds max
+    initialDonationAmount: 25,
+    maxSimulationTimeMs: 60000, // 1 minute timeout
     enableProgressReporting: verbose,
   };
 
-  console.log("🚀 Starting simulation...");
-  const startTime = performance.now();
-
-  // Create GameEngineSimulator with components
+  // Create GameEngineSimulator using the proper factory
   const simulator = createGameEngineSimulator(config);
 
-  // Run simulation with optional progress reporting
-  const results = await simulator.executeSimulation(
-    config,
-    verbose
-      ? (progress: SimulationProgress) => {
-          console.log(
-            `📊 Day ${progress.currentDay}: ${progress.playersActive} active players, ${progress.gamesCompleted} games completed`
-          );
-        }
-      : undefined
-  );
+  // Progress callback for verbose mode
+  const progressCallback = verbose
+    ? (progress: SimulationProgress) => {
+        console.log(
+          `Day ${progress.currentDay}/${progress.totalDays} (${(
+            progress.completionPercentage * 100
+          ).toFixed(1)}%) - Games: ${progress.gamesCompleted}, Pool: ${
+            progress.dollarsInPool
+          }`
+        );
+      }
+    : undefined;
+
+  // Execute simulation
+  const results = await simulator.executeSimulation(config, progressCallback);
 
   const endTime = performance.now();
   const duration = Math.round(endTime - startTime);

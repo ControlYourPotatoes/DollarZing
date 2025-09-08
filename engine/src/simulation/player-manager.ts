@@ -1,6 +1,11 @@
 import { PlayerBalanceManager } from "../types/player-balance-manager";
-import { PlayerRunManager } from "../types/player-run-manager";
-import { CashOutStrategy } from "../types/virtual-dollar-engine";
+import { ProgressionManager } from "../types/progression-manager";
+import { 
+  CashOutStrategy, 
+  VirtualDollar, 
+  GameResult,
+  CashOutDecision 
+} from "../types/virtual-dollar-engine";
 
 /**
  * Configuration for player management
@@ -32,7 +37,7 @@ export interface PlayerStatistics {
 export class PlayerManager {
   constructor(
     private playerBalanceManager: PlayerBalanceManager,
-    private runOrchestrator: PlayerRunManager
+    private runOrchestrator: ProgressionManager
   ) {}
 
   /**
@@ -182,5 +187,40 @@ export class PlayerManager {
       averageGamesPerPlayer: 0, // Will be calculated by caller with game data
       playerRetirementRate: retiredPlayers / totalPlayers,
     };
+  }
+
+  /**
+   * Process a game result with proper cash-out logic
+   */
+  processGameResult(virtualDollar: VirtualDollar, result: GameResult): any {
+    console.log(`DEBUG: [PlayerManager] Processing ${result} for player ${virtualDollar.ownerId} at level ${virtualDollar.currentLevel}`);
+    
+    // Delegate to the underlying PlayerRunManager, but intercept the cash-out decision
+    const runManagerResult = this.runOrchestrator.processGameResult(virtualDollar, result);
+    
+    console.log(`DEBUG: [PlayerManager] PlayerRunManager returned:`, runManagerResult ? `completionType: ${runManagerResult.completionType}` : 'null (run continues)');
+    
+    return runManagerResult;
+  }
+
+  /**
+   * Get player strategy
+   */
+  getPlayerStrategy(playerId: string): CashOutStrategy {
+    return this.runOrchestrator.getPlayerStrategy(playerId);
+  }
+
+  /**
+   * Create new run
+   */
+  createNewRun(request: any): VirtualDollar | null {
+    return this.runOrchestrator.createNewRun(request);
+  }
+
+  /**
+   * Auto-create runs
+   */
+  autoCreateRuns(maxRunsPerPlayer: number = 1): VirtualDollar[] {
+    return this.runOrchestrator.autoCreateRuns(maxRunsPerPlayer);
   }
 }
