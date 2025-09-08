@@ -449,9 +449,9 @@ describe('PlayerProgressionHandler', () => {
     it('should maintain proper event sequencing for level progression', async () => {
       const events: string[] = [];
       
-      const advancedSub = eventBus.on(EVENT_TYPES.PLAYER_ADVANCED, () => events.push('ADVANCED'));
-      const decisionSub = eventBus.on(EVENT_TYPES.CASH_OUT_DECISION, () => events.push('CASH_OUT_DECISION'));
-      const completedSub = eventBus.on(EVENT_TYPES.RUN_COMPLETED, () => events.push('RUN_COMPLETED'));
+      const advancedSub = eventBus.on(EVENT_TYPES.PLAYER_ADVANCED, () => { events.push('ADVANCED'); });
+      const decisionSub = eventBus.on(EVENT_TYPES.CASH_OUT_DECISION, () => { events.push('CASH_OUT_DECISION'); });
+      const completedSub = eventBus.on(EVENT_TYPES.RUN_COMPLETED, () => { events.push('RUN_COMPLETED'); });
 
       // First: Player advances
       mockProgressionManager.processGameResult.mockReturnValue({

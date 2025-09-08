@@ -6,18 +6,14 @@
 import { EventBus, EventSubscription } from '../event-bus';
 import {
   GameResolvedEvent,
-  PlayerProgressionEvent,
-  PlayerProgressionFailedEvent,
-  CashOutDecisionEvent,
-  CashOutCompletedEvent,
-  RunCompletedEvent,
   EVENT_TYPES
 } from '../event-types';
 import { 
   VirtualDollar, 
   CashOutStrategy, 
   CashOutDecision,
-  GameResult 
+  GameResult,
+  BettingLevel 
 } from '../../types/virtual-dollar-engine';
 import { ProgressionManager } from '../../types/progression-manager';
 
@@ -65,7 +61,7 @@ export class PlayerProgressionHandler {
     const winnerDollar: VirtualDollar = {
       id: event.winnerDollarId,
       ownerId: event.winnerId,
-      currentLevel: event.winnerLevel,
+      currentLevel: event.winnerLevel as BettingLevel,
       runId: `run-${event.winnerDollarId}`,
       serialNumber: `L${event.winnerLevel.toString().padStart(8, '0')}A`,
       currentScore: 0.75, // Winner score
@@ -74,7 +70,8 @@ export class PlayerProgressionHandler {
       gameHistory: [],
       gamesInThisRun: 0,
       currentRunWinnings: 0,
-      isIndependentRun: true
+      isIndependentRun: true,
+      potValue: event.winnerLevel // Add the missing potValue
     };
 
     try {
@@ -115,7 +112,7 @@ export class PlayerProgressionHandler {
     const loserDollar: VirtualDollar = {
       id: event.loserDollarId,
       ownerId: event.loserId,
-      currentLevel: event.loserLevel,
+      currentLevel: event.loserLevel as BettingLevel,
       runId: `run-${event.loserDollarId}`,
       serialNumber: `L${event.loserLevel.toString().padStart(8, '0')}B`,
       currentScore: 0.25, // Loser score
@@ -124,7 +121,8 @@ export class PlayerProgressionHandler {
       gameHistory: [],
       gamesInThisRun: 0,
       currentRunWinnings: 0,
-      isIndependentRun: true
+      isIndependentRun: true,
+      potValue: event.loserLevel // Add the missing potValue
     };
 
     try {
