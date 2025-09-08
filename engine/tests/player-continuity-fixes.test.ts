@@ -8,7 +8,6 @@ import { VirtualDollarManager } from "../src/types/virtual-dollar-types";
 import { ScoringEngine } from "../src/types/scoring-engine";
 import {
   VirtualDollar,
-  GameSession,
   BettingLevel,
   DollarState,
   CashOutStrategy,
@@ -125,7 +124,6 @@ describe("Player Continuity Fixes", () => {
     it("should properly distribute winnings to winner after game resolution", () => {
       const testDollar1 = createTestDollar("player1", 2);
       const testDollar2 = createTestDollar("player2", 2);
-      const level: BettingLevel = 2;
 
       // Add dollars to pool
       dollarManager.updateDollarState(testDollar1.id, DollarState.POOLED);
@@ -475,12 +473,16 @@ describe("Player Continuity Fixes", () => {
       const runOrchestrator = new PlayerRunManager();
 
       // Initialize player with $5.00
-      runOrchestrator.initializePlayer("test-player", 5.0, "BALANCED");
+      runOrchestrator.initializePlayer(
+        "test-player",
+        5.0,
+        CashOutStrategy.BALANCED
+      );
 
       // Create new run - should only cost $1.00 (not $1.20)
       const newRun = runOrchestrator.createNewRun({
         playerId: "test-player",
-        cashOutStrategy: "BALANCED",
+        cashOutStrategy: CashOutStrategy.BALANCED,
         fundingSource: "DONATION",
       });
 
@@ -501,13 +503,13 @@ describe("Player Continuity Fixes", () => {
       runOrchestrator.initializePlayer(
         "stable-player",
         initialFunds,
-        "BALANCED"
+        CashOutStrategy.BALANCED
       );
 
       // Create first virtual dollar
       const run1 = runOrchestrator.createNewRun({
         playerId: "stable-player",
-        cashOutStrategy: "BALANCED",
+        cashOutStrategy: CashOutStrategy.BALANCED,
         fundingSource: "DONATION",
       });
 
@@ -547,12 +549,16 @@ describe("Player Continuity Fixes", () => {
       const runOrchestrator = new PlayerRunManager();
 
       // Initialize player with insufficient funds
-      runOrchestrator.initializePlayer("poor-player", 0.5, "BALANCED");
+      runOrchestrator.initializePlayer(
+        "poor-player",
+        0.5,
+        CashOutStrategy.BALANCED
+      );
 
       // Try to create new run with insufficient funds
       const newRun = runOrchestrator.createNewRun({
         playerId: "poor-player",
-        cashOutStrategy: "BALANCED",
+        cashOutStrategy: CashOutStrategy.BALANCED,
         fundingSource: "DONATION",
       });
 

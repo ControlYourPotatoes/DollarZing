@@ -14,7 +14,6 @@ import {
 import {
   VirtualDollarFactory,
   GameSessionFactory,
-  FactoryStatistics,
   DEFAULT_PERFORMANCE_CONFIG,
   PRODUCTION_PERFORMANCE_CONFIG,
   PerformanceConfig,

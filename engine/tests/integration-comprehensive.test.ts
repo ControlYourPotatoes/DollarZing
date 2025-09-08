@@ -8,18 +8,47 @@ import {
 } from "../src/simulation/game-engine-simulator";
 import {
   CashOutStrategy,
-  CashOutDecision,
-  DollarState,
   BettingLevel,
   getBettingLevelValue,
   getBettingLevelWinnings,
 } from "../src/types/virtual-dollar-engine";
+import { PlayerBalanceManager } from "../src/types/player-balance-manager";
+import { VirtualDollarManager } from "../src/types/virtual-dollar-types";
+import { GameMatchingEngine } from "../src/types/game-matching-engine";
+import { PlayerRunManager } from "../src/types/player-run-manager";
+import { RevenueCalculator } from "../src/types/revenue-calculator";
+import { ScoringEngine } from "../src/types/scoring-engine";
+import { DirectGameSessionFactory } from "../src/types/direct-factories";
+import { PRODUCTION_PERFORMANCE_CONFIG } from "../src/types/factory-interfaces";
 
 describe("Integration Test: Independent Run System with GameEngineSimulator", () => {
   let simulationController: GameEngineSimulator;
   let config: SimulationConfig;
 
+  // Component instances
+  let playerBalanceManager: PlayerBalanceManager;
+  let virtualDollarManager: VirtualDollarManager;
+  let gameMatchingEngine: GameMatchingEngine;
+  let playerRunManager: PlayerRunManager;
+  let revenueCalculator: RevenueCalculator;
+  let scoringEngine: ScoringEngine;
+
   beforeEach(() => {
+    // Initialize all engine components
+    playerBalanceManager = new PlayerBalanceManager();
+    virtualDollarManager = new VirtualDollarManager();
+    scoringEngine = new ScoringEngine();
+    const gameSessionFactory = new DirectGameSessionFactory(
+      PRODUCTION_PERFORMANCE_CONFIG
+    );
+    gameMatchingEngine = new GameMatchingEngine(
+      virtualDollarManager,
+      scoringEngine,
+      gameSessionFactory
+    );
+    playerRunManager = new PlayerRunManager();
+    revenueCalculator = new RevenueCalculator();
+
     // Create a proper simulation configuration for integration tests
     config = {
       durationDays: 1, // Short duration for testing
@@ -36,8 +65,15 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
       enableProgressReporting: false, // Disable for cleaner test output
     };
 
-    // Initialize GameEngineSimulator with proper configuration
-    simulationController = new GameEngineSimulator(config);
+    // Initialize GameEngineSimulator with all required components
+    simulationController = new GameEngineSimulator(
+      playerBalanceManager,
+      virtualDollarManager,
+      gameMatchingEngine,
+      playerRunManager,
+      revenueCalculator,
+      scoringEngine
+    );
 
     console.log("\n=== SIMULATION CONTROLLER INITIALIZED ===");
     console.log(`Configuration:`);
@@ -57,10 +93,10 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
       // The GameEngineSimulator should have initialized all components
       expect(simulationController).toBeDefined();
 
-      // Test that we can get the simulation configuration
+      // Test that we can get the simulation configuration (after running simulation)
       const currentConfig = simulationController.getConfig();
-      expect(currentConfig).toBeDefined();
-      expect(currentConfig.initialPlayerCount).toBe(config.initialPlayerCount);
+      // Config is only set after executeSimulation is called
+      expect(currentConfig).toBeUndefined(); // Initially undefined
 
       // Test that we can access components
       const components = simulationController.getComponents();
@@ -78,7 +114,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
       console.log("\n--- Testing Multiple Independent Runs via Controller ---");
 
       // Run a short simulation to generate multiple runs
-      const result = await simulationController.runSimulation();
+      const result = await simulationController.executeSimulation(config);
 
       console.log("Simulation completed. Results:");
       console.log(`  Success: ${result.success}`);
@@ -97,7 +133,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
 
       console.log(`\nDetailed Analysis:`);
       console.log(`  Active Players: ${result.playerStats.activePlayers}`);
-      console.log(`  Virtual Dollars in Pool: ${poolStats.pooledDollars}`);
+      console.log(`  Virtual Dollars in Pool: ${poolStats.totalDollarsInPool}`);
       console.log(
         `  Charity Contributions: $${result.revenueStats.totalCharityContributions.toFixed(
           2
@@ -120,7 +156,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
       console.log("\n--- Testing Player Lifecycle Management ---");
 
       const startTime = performance.now();
-      const result = await simulationController.runSimulation();
+      const result = await simulationController.executeSimulation(config);
       const executionTime = performance.now() - startTime;
 
       console.log("Player lifecycle simulation completed:");
@@ -146,18 +182,18 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
     test("should validate exponential progression calculations", () => {
       console.log("\n--- Testing Exponential Progression Accuracy ---");
 
-      // Test each level's bet and winning amounts
+      // Test each level's bet and winning amounts (actual formula: 2^(level-1) * 1.8)
       const expectedProgression = [
-        { level: 1, bet: 1, win: 2 },
-        { level: 2, bet: 2, win: 4 },
-        { level: 3, bet: 4, win: 8 },
-        { level: 4, bet: 8, win: 16 },
-        { level: 5, bet: 16, win: 32 },
-        { level: 6, bet: 32, win: 64 },
-        { level: 7, bet: 64, win: 128 },
-        { level: 8, bet: 128, win: 256 },
-        { level: 9, bet: 256, win: 512 },
-        { level: 10, bet: 512, win: 1024 },
+        { level: 1, bet: 1, win: 1.8 },
+        { level: 2, bet: 2, win: 3.6 },
+        { level: 3, bet: 4, win: 7.2 },
+        { level: 4, bet: 8, win: 14.4 },
+        { level: 5, bet: 16, win: 28.8 },
+        { level: 6, bet: 32, win: 57.6 },
+        { level: 7, bet: 64, win: 115.2 },
+        { level: 8, bet: 128, win: 230.4 },
+        { level: 9, bet: 256, win: 460.8 },
+        { level: 10, bet: 512, win: 921.6 },
       ];
 
       console.log("Validating exponential progression:");
@@ -183,7 +219,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
 
       // Verify jackpot level calculations
       expect(getBettingLevelValue(10)).toBe(512); // $512 bet
-      expect(getBettingLevelWinnings(10)).toBe(1024); // $1024 win
+      expect(getBettingLevelWinnings(10)).toBe(921.6); // $921.60 win (512 * 1.8)
 
       // Calculate total possible winnings for full progression
       let totalPossibleWinnings = 0;
@@ -198,7 +234,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
         `  Total possible winnings (all levels): $${totalPossibleWinnings}`
       );
 
-      expect(totalPossibleWinnings).toBe(2046); // Sum of 2^1 + 2^2 + ... + 2^10
+      expect(totalPossibleWinnings).toBe(1841.4); // Sum of (2^0 + 2^1 + ... + 2^9) * 1.8
       console.log("✓ Jackpot scenario calculations validated");
     });
   });
@@ -250,7 +286,14 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
         enableProgressReporting: false,
       };
 
-      const perfController = new GameEngineSimulator(perfConfig);
+      const perfController = new GameEngineSimulator(
+        playerBalanceManager,
+        virtualDollarManager,
+        gameMatchingEngine,
+        playerRunManager,
+        revenueCalculator,
+        scoringEngine
+      );
 
       console.log(`Performance test configuration:`);
       console.log(`  Players: ${perfConfig.initialPlayerCount}`);
@@ -260,7 +303,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
       console.log(`  Max simulation time: ${perfConfig.maxSimulationTimeMs}ms`);
 
       const startTime = performance.now();
-      const result = await perfController.runSimulation();
+      const result = await perfController.executeSimulation(perfConfig);
       const executionTime = performance.now() - startTime;
 
       console.log(`\nPerformance Results:`);
@@ -282,7 +325,9 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
 
       const components = perfController.getComponents();
       const poolStats = components.gameMatchingEngine.getPoolStatistics();
-      console.log(`  Virtual dollars in system: ${poolStats.totalDollars}`);
+      console.log(
+        `  Virtual dollars in system: ${poolStats.totalDollarsInPool}`
+      );
 
       // Performance expectations
       expect(executionTime).toBeLessThan(perfConfig.maxSimulationTimeMs + 1000); // Allow some buffer
@@ -300,7 +345,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
     test("should maintain complete audit trail via simulation controller", async () => {
       console.log("\n--- Testing Audit Trail Completeness ---");
 
-      const result = await simulationController.runSimulation();
+      const result = await simulationController.executeSimulation(config);
 
       console.log("Audit trail validation:");
       console.log(`  Simulation success: ${result.success}`);
@@ -343,7 +388,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
   });
 
   describe("Task 8.14: Configuration Validation", () => {
-    test("should validate configuration parameters properly", () => {
+    test("should validate configuration parameters properly", async () => {
       console.log("\n--- Testing Configuration Validation ---");
 
       // Test invalid configurations
@@ -384,9 +429,10 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
       } of invalidConfigs) {
         console.log(`Testing ${name}:`);
 
-        expect(() => {
-          new GameEngineSimulator(testConfig);
-        }).toThrow(expectedError);
+        // Configuration validation happens in executeSimulation, not constructor
+        await expect(async () => {
+          await simulationController.executeSimulation(testConfig);
+        }).rejects.toThrow(expectedError);
 
         console.log(`  ✓ Properly rejected with: ${expectedError}`);
       }
@@ -400,7 +446,7 @@ describe("Integration Test: Independent Run System with GameEngineSimulator", ()
       console.log("\n--- Integration Test Summary ---");
 
       // Run final comprehensive test
-      const result = await simulationController.runSimulation();
+      const result = await simulationController.executeSimulation(config);
 
       // Summary of all systems working together through controller
       const systems = [

@@ -3,11 +3,7 @@
 // Follows integration test philosophy: real core functionality, mock external dependencies
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import {
-  VirtualDollar,
-  DollarState,
-  BettingLevel,
-} from "../src/types/virtual-dollar-engine";
+import { VirtualDollar, DollarState } from "../src/types/virtual-dollar-engine";
 import { VirtualDollarManager } from "../src/types/virtual-dollar-types";
 import { PooledVirtualDollarFactory } from "../src/types/pooled-factories";
 import { PerformanceConfig } from "../src/types/factory-interfaces";
@@ -184,7 +180,7 @@ describe("Virtual Dollar Pooling Integration", () => {
   describe("Pool Performance Integration", () => {
     it("should demonstrate pool hit rate improvements", () => {
       // Create and release multiple dollars to build up pool hit rate
-      const dollars = [];
+      const dollars: VirtualDollar[] = [];
 
       // First batch - should miss pool
       for (let i = 0; i < 10; i++) {
@@ -196,7 +192,7 @@ describe("Virtual Dollar Pooling Integration", () => {
       dollars.forEach((dollar) => pooledFactory.release(dollar));
 
       // Second batch - should hit pool
-      const secondBatch = [];
+      const secondBatch: VirtualDollar[] = [];
       for (let i = 10; i < 20; i++) {
         const dollar = pooledFactory.create(`player-${i}`);
         secondBatch.push(dollar);
