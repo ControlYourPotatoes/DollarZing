@@ -7,13 +7,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [ ] 1. Implement Core Event System Infrastructure
-  - [ ] 1.1 Write tests for EventBus class with registration, emission, and cleanup
-  - [ ] 1.2 Create EventBus implementation with TypeScript support and error handling
-  - [ ] 1.3 Define comprehensive event type interfaces for simulation events
-  - [ ] 1.4 Implement event subscription management with priority ordering
-  - [ ] 1.5 Add event tracing and debugging capabilities
-  - [ ] 1.6 Verify all EventBus tests pass
+- [x] 1. Implement Core Event System Infrastructure
+  - [x] 1.1 Write tests for EventBus class with registration, emission, and cleanup
+  - [x] 1.2 Create EventBus implementation with TypeScript support and error handling
+  - [x] 1.3 Define comprehensive event type interfaces for simulation events
+  - [x] 1.4 Implement event subscription management with priority ordering
+  - [x] 1.5 Add event tracing and debugging capabilities
+  - [x] 1.6 Verify all EventBus tests pass
 
 - [ ] 2. Create Game Event Handler
   - [ ] 2.1 Write tests for GameEventHandler with game resolution scenarios
