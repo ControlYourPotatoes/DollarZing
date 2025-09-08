@@ -59,9 +59,9 @@ describe('EventBus', () => {
     it('should execute handlers in priority order (higher numbers first)', async () => {
       const executionOrder: number[] = [];
       
-      const handler1 = vi.fn(() => executionOrder.push(1));
-      const handler2 = vi.fn(() => executionOrder.push(2));
-      const handler3 = vi.fn(() => executionOrder.push(3));
+      const handler1 = vi.fn(() => { executionOrder.push(1); });
+      const handler2 = vi.fn(() => { executionOrder.push(2); });
+      const handler3 = vi.fn(() => { executionOrder.push(3); });
 
       eventBus.on('TEST_EVENT', handler1, 1); // Low priority
       eventBus.on('TEST_EVENT', handler2, 10); // High priority
@@ -75,8 +75,8 @@ describe('EventBus', () => {
     it('should handle handlers with same priority in registration order', async () => {
       const executionOrder: string[] = [];
       
-      const handler1 = vi.fn(() => executionOrder.push('first'));
-      const handler2 = vi.fn(() => executionOrder.push('second'));
+      const handler1 = vi.fn(() => { executionOrder.push('first'); });
+      const handler2 = vi.fn(() => { executionOrder.push('second'); });
 
       eventBus.on('TEST_EVENT', handler1, 5);
       eventBus.on('TEST_EVENT', handler2, 5);

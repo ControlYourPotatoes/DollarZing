@@ -3,7 +3,7 @@
  * Comprehensive TypeScript interfaces for all simulation events
  */
 
-import { VirtualDollar, GameResult, CashOutStrategy } from "../types/virtual-dollar-engine";
+import { CashOutStrategy } from "../types/virtual-dollar-engine";
 
 // ===== BASE EVENT INTERFACES =====
 
@@ -14,7 +14,7 @@ export interface BaseEvent {
 }
 
 export interface ErrorEvent extends BaseEvent {
-  type: 'EVENT_ERROR';
+  type: "EVENT_ERROR";
   eventType: string;
   error: string;
   context?: any;
@@ -23,7 +23,7 @@ export interface ErrorEvent extends BaseEvent {
 // ===== GAME EVENTS =====
 
 export interface GameCreatedEvent extends BaseEvent {
-  type: 'GAME_CREATED';
+  type: "GAME_CREATED";
   gameId: string;
   player1Id: string;
   player2Id: string;
@@ -34,7 +34,7 @@ export interface GameCreatedEvent extends BaseEvent {
 }
 
 export interface GameResolvedEvent extends BaseEvent {
-  type: 'GAME_RESOLVED';
+  type: "GAME_RESOLVED";
   gameId: string;
   winnerId: string;
   loserId: string;
@@ -43,13 +43,13 @@ export interface GameResolvedEvent extends BaseEvent {
   winnerDollarId: string;
   loserDollarId: string;
   winnings: number;
-  gameResult: 'WIN' | 'LOSS';
+  gameResult: "WIN" | "LOSS";
 }
 
 // ===== PLAYER PROGRESSION EVENTS =====
 
 export interface PlayerProgressionEvent extends BaseEvent {
-  type: 'PLAYER_ADVANCED';
+  type: "PLAYER_ADVANCED";
   playerId: string;
   virtualDollarId: string;
   fromLevel: number;
@@ -59,7 +59,7 @@ export interface PlayerProgressionEvent extends BaseEvent {
 }
 
 export interface PlayerProgressionFailedEvent extends BaseEvent {
-  type: 'PLAYER_PROGRESSION_FAILED';
+  type: "PLAYER_PROGRESSION_FAILED";
   playerId: string;
   virtualDollarId: string;
   currentLevel: number;
@@ -70,10 +70,10 @@ export interface PlayerProgressionFailedEvent extends BaseEvent {
 // ===== CASH-OUT DECISION EVENTS =====
 
 export interface CashOutDecisionEvent extends BaseEvent {
-  type: 'CASH_OUT_DECISION';
+  type: "CASH_OUT_DECISION";
   playerId: string;
   virtualDollarId: string;
-  decision: 'CASH_OUT' | 'CONTINUE';
+  decision: "CASH_OUT" | "CONTINUE";
   currentLevel: number;
   totalWinnings: number;
   cashOutStrategy: CashOutStrategy;
@@ -82,7 +82,7 @@ export interface CashOutDecisionEvent extends BaseEvent {
 }
 
 export interface CashOutCompletedEvent extends BaseEvent {
-  type: 'CASH_OUT_COMPLETED';
+  type: "CASH_OUT_COMPLETED";
   playerId: string;
   virtualDollarId: string;
   finalLevel: number;
@@ -95,15 +95,15 @@ export interface CashOutCompletedEvent extends BaseEvent {
 // ===== POOL MANAGEMENT EVENTS =====
 
 export interface RePoolRequestEvent extends BaseEvent {
-  type: 'RE_POOL_REQUEST';
+  type: "RE_POOL_REQUEST";
   virtualDollarId: string;
   playerId: string;
   currentLevel: number;
-  reason: 'WINNER_CONTINUES' | 'NEW_RUN_CREATED';
+  reason: "WINNER_CONTINUES" | "NEW_RUN_CREATED";
 }
 
 export interface PoolAddedEvent extends BaseEvent {
-  type: 'POOL_ADDED';
+  type: "POOL_ADDED";
   virtualDollarId: string;
   playerId: string;
   currentLevel: number;
@@ -112,16 +112,16 @@ export interface PoolAddedEvent extends BaseEvent {
 }
 
 export interface PoolRemovedEvent extends BaseEvent {
-  type: 'POOL_REMOVED';
+  type: "POOL_REMOVED";
   virtualDollarId: string;
   playerId: string;
-  reason: 'MATCHED_FOR_GAME' | 'CASHED_OUT' | 'ERROR';
+  reason: "MATCHED_FOR_GAME" | "CASHED_OUT" | "ERROR";
   poolSize: number;
   availableForMatching: number;
 }
 
 export interface PoolUpdatedEvent extends BaseEvent {
-  type: 'POOL_UPDATED';
+  type: "POOL_UPDATED";
   totalDollarsInPool: number;
   availableForMatching: number;
   dollarsInPlay: number;
@@ -131,7 +131,7 @@ export interface PoolUpdatedEvent extends BaseEvent {
 // ===== REVENUE EVENTS =====
 
 export interface RevenueGameProcessedEvent extends BaseEvent {
-  type: 'REVENUE_GAME_PROCESSED';
+  type: "REVENUE_GAME_PROCESSED";
   gameId: string;
   gameRevenue: number;
   platformRevenue: number;
@@ -140,7 +140,7 @@ export interface RevenueGameProcessedEvent extends BaseEvent {
 }
 
 export interface RevenueCashOutProcessedEvent extends BaseEvent {
-  type: 'REVENUE_CASH_OUT_PROCESSED';
+  type: "REVENUE_CASH_OUT_PROCESSED";
   playerId: string;
   virtualDollarId: string;
   cashOutAmount: number;
@@ -149,7 +149,7 @@ export interface RevenueCashOutProcessedEvent extends BaseEvent {
 }
 
 export interface RevenueUpdateEvent extends BaseEvent {
-  type: 'REVENUE_UPDATE';
+  type: "REVENUE_UPDATE";
   totalPlatformRevenue: number;
   totalCharityContributions: number;
   totalPlayerPayouts: number;
@@ -160,7 +160,7 @@ export interface RevenueUpdateEvent extends BaseEvent {
 // ===== PLAYER MANAGEMENT EVENTS =====
 
 export interface PlayerCreatedEvent extends BaseEvent {
-  type: 'PLAYER_CREATED';
+  type: "PLAYER_CREATED";
   playerId: string;
   initialDonationAmount: number;
   cashOutStrategy: CashOutStrategy;
@@ -168,19 +168,19 @@ export interface PlayerCreatedEvent extends BaseEvent {
 }
 
 export interface PlayerRetiredEvent extends BaseEvent {
-  type: 'PLAYER_RETIRED';
+  type: "PLAYER_RETIRED";
   playerId: string;
   totalGamesPlayed: number;
   totalWinnings: number;
   finalBalance: number;
-  retirementReason: 'NO_FUNDS' | 'MAX_RUNS_REACHED' | 'OTHER';
+  retirementReason: "NO_FUNDS" | "MAX_RUNS_REACHED" | "OTHER";
 }
 
 export interface NewRunCreatedEvent extends BaseEvent {
-  type: 'NEW_RUN_CREATED';
+  type: "NEW_RUN_CREATED";
   playerId: string;
   virtualDollarId: string;
-  fundingSource: 'DONATION' | 'WINNINGS';
+  fundingSource: "DONATION" | "WINNINGS";
   cashOutStrategy: CashOutStrategy;
   runCount: number; // How many runs this player has had
 }
@@ -188,7 +188,7 @@ export interface NewRunCreatedEvent extends BaseEvent {
 // ===== SIMULATION CONTROL EVENTS =====
 
 export interface DayStartedEvent extends BaseEvent {
-  type: 'DAY_STARTED';
+  type: "DAY_STARTED";
   dayNumber: number;
   totalPlayers: number;
   activePlayers: number;
@@ -196,7 +196,7 @@ export interface DayStartedEvent extends BaseEvent {
 }
 
 export interface DayCompletedEvent extends BaseEvent {
-  type: 'DAY_COMPLETED';
+  type: "DAY_COMPLETED";
   dayNumber: number;
   gamesProcessed: number;
   newPlayers: number;
@@ -206,7 +206,7 @@ export interface DayCompletedEvent extends BaseEvent {
 }
 
 export interface SimulationStartedEvent extends BaseEvent {
-  type: 'SIMULATION_STARTED';
+  type: "SIMULATION_STARTED";
   config: {
     durationDays: number;
     initialPlayerCount: number;
@@ -215,7 +215,7 @@ export interface SimulationStartedEvent extends BaseEvent {
 }
 
 export interface SimulationCompletedEvent extends BaseEvent {
-  type: 'SIMULATION_COMPLETED';
+  type: "SIMULATION_COMPLETED";
   totalDays: number;
   totalGames: number;
   totalPlayers: number;
@@ -226,7 +226,7 @@ export interface SimulationCompletedEvent extends BaseEvent {
 // ===== RUN MANAGEMENT EVENTS =====
 
 export interface RunStartedEvent extends BaseEvent {
-  type: 'RUN_STARTED';
+  type: "RUN_STARTED";
   playerId: string;
   virtualDollarId: string;
   startingLevel: number;
@@ -235,10 +235,10 @@ export interface RunStartedEvent extends BaseEvent {
 }
 
 export interface RunCompletedEvent extends BaseEvent {
-  type: 'RUN_COMPLETED';
+  type: "RUN_COMPLETED";
   playerId: string;
   virtualDollarId: string;
-  completionType: 'CASH_OUT' | 'JACKPOT' | 'ELIMINATED';
+  completionType: "CASH_OUT" | "JACKPOT" | "ELIMINATED";
   finalLevel: number;
   totalWinnings: number;
   gamesPlayed: number;
@@ -247,7 +247,7 @@ export interface RunCompletedEvent extends BaseEvent {
 
 // ===== EVENT TYPE UNION =====
 
-export type SimulationEvent = 
+export type SimulationEvent =
   | ErrorEvent
   | GameCreatedEvent
   | GameResolvedEvent
@@ -276,49 +276,52 @@ export type SimulationEvent =
 
 export const EVENT_TYPES = {
   // Error events
-  EVENT_ERROR: 'EVENT_ERROR',
-  
+  EVENT_ERROR: "EVENT_ERROR",
+
   // Game events
-  GAME_CREATED: 'GAME_CREATED',
-  GAME_RESOLVED: 'GAME_RESOLVED',
-  
+  GAME_CREATED: "GAME_CREATED",
+  GAME_RESOLVED: "GAME_RESOLVED",
+
   // Player progression events
-  PLAYER_ADVANCED: 'PLAYER_ADVANCED',
-  PLAYER_PROGRESSION_FAILED: 'PLAYER_PROGRESSION_FAILED',
-  
+  PLAYER_ADVANCED: "PLAYER_ADVANCED",
+  PLAYER_PROGRESSION_FAILED: "PLAYER_PROGRESSION_FAILED",
+
   // Cash-out events
-  CASH_OUT_DECISION: 'CASH_OUT_DECISION',
-  CASH_OUT_COMPLETED: 'CASH_OUT_COMPLETED',
-  
+  CASH_OUT_DECISION: "CASH_OUT_DECISION",
+  CASH_OUT_COMPLETED: "CASH_OUT_COMPLETED",
+
   // Pool management events
-  RE_POOL_REQUEST: 'RE_POOL_REQUEST',
-  POOL_ADDED: 'POOL_ADDED',
-  POOL_REMOVED: 'POOL_REMOVED',
-  POOL_UPDATED: 'POOL_UPDATED',
-  
+  RE_POOL_REQUEST: "RE_POOL_REQUEST",
+  POOL_ADDED: "POOL_ADDED",
+  POOL_REMOVED: "POOL_REMOVED",
+  POOL_UPDATED: "POOL_UPDATED",
+
   // Revenue events
-  REVENUE_GAME_PROCESSED: 'REVENUE_GAME_PROCESSED',
-  REVENUE_CASH_OUT_PROCESSED: 'REVENUE_CASH_OUT_PROCESSED',
-  REVENUE_UPDATE: 'REVENUE_UPDATE',
-  
+  REVENUE_GAME_PROCESSED: "REVENUE_GAME_PROCESSED",
+  REVENUE_CASH_OUT_PROCESSED: "REVENUE_CASH_OUT_PROCESSED",
+  REVENUE_UPDATE: "REVENUE_UPDATE",
+
   // Player management events
-  PLAYER_CREATED: 'PLAYER_CREATED',
-  PLAYER_RETIRED: 'PLAYER_RETIRED',
-  NEW_RUN_CREATED: 'NEW_RUN_CREATED',
-  
+  PLAYER_CREATED: "PLAYER_CREATED",
+  PLAYER_RETIRED: "PLAYER_RETIRED",
+  NEW_RUN_CREATED: "NEW_RUN_CREATED",
+
   // Simulation control events
-  DAY_STARTED: 'DAY_STARTED',
-  DAY_COMPLETED: 'DAY_COMPLETED',
-  SIMULATION_STARTED: 'SIMULATION_STARTED',
-  SIMULATION_COMPLETED: 'SIMULATION_COMPLETED',
-  
+  DAY_STARTED: "DAY_STARTED",
+  DAY_COMPLETED: "DAY_COMPLETED",
+  SIMULATION_STARTED: "SIMULATION_STARTED",
+  SIMULATION_COMPLETED: "SIMULATION_COMPLETED",
+
   // Run management events
-  RUN_STARTED: 'RUN_STARTED',
-  RUN_COMPLETED: 'RUN_COMPLETED'
+  RUN_STARTED: "RUN_STARTED",
+  RUN_COMPLETED: "RUN_COMPLETED",
 } as const;
 
 // ===== TYPE HELPERS =====
 
 export type EventType = keyof typeof EVENT_TYPES;
 
-export type EventDataFor<T extends EventType> = Extract<SimulationEvent, { type: typeof EVENT_TYPES[T] }>;
+export type EventDataFor<T extends EventType> = Extract<
+  SimulationEvent,
+  { type: (typeof EVENT_TYPES)[T] }
+>;

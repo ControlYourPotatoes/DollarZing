@@ -15,13 +15,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.5 Add event tracing and debugging capabilities
   - [x] 1.6 Verify all EventBus tests pass
 
-- [ ] 2. Create Game Event Handler
-  - [ ] 2.1 Write tests for GameEventHandler with game resolution scenarios
-  - [ ] 2.2 Implement GameEventHandler to replace GameProcessor game resolution logic
-  - [ ] 2.3 Add event emission for game completion and results
-  - [ ] 2.4 Integrate with existing GameMatchingEngine through events
-  - [ ] 2.5 Handle error scenarios and edge cases
-  - [ ] 2.6 Verify all GameEventHandler tests pass
+- [x] 2. Create Game Event Handler
+  - [x] 2.1 Write tests for GameEventHandler with game resolution scenarios
+  - [x] 2.2 Implement GameEventHandler to replace GameProcessor game resolution logic
+  - [x] 2.3 Add event emission for game completion and results
+  - [x] 2.4 Integrate with existing GameMatchingEngine through events
+  - [x] 2.5 Handle error scenarios and edge cases
+  - [x] 2.6 Verify all GameEventHandler tests pass
 
 - [ ] 3. Implement Player Progression Handler
   - [ ] 3.1 Write tests for PlayerProgressionHandler with level advancement logic
