@@ -255,6 +255,15 @@ export interface DayStartedEvent extends BaseEvent {
   totalPlayers: number;
   activePlayers: number;
   poolSize: number;
+  // Growth model parameters for S-curve
+  growthModel: {
+    adoptionRate: number;
+    baseMarket: number;
+    midpointDay: number;
+    steepnessFactor: number;
+  };
+  // Player strategy distribution
+  playerStrategies: Partial<Record<CashOutStrategy, number>>;
 }
 
 export interface DayCompletedEvent extends BaseEvent {

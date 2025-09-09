@@ -8,7 +8,9 @@ import {
   EVENT_TYPES,
   DayStartedEvent,
   DayCompletedEvent,
+  NewRunCreatedEvent,
 } from "../events/event-types";
+import { SimulationConfig } from "./game-engine-simulator";
 
 /**
  * Configuration for daily processing
@@ -30,12 +32,45 @@ export class DayProcessor {
     private dollarManager: VirtualDollarManager,
     private revenueCalculator: RevenueCalculator,
     private eventBus: EventBus
-  ) {}
+  ) {
+    this.setupEventSubscriptions();
+  }
+
+  /**
+   * Setup event subscriptions for event-driven processing
+   */
+  private setupEventSubscriptions(): void {
+    this.eventBus.on(
+      EVENT_TYPES.NEW_RUN_CREATED,
+      this.handleNewRunCreated.bind(this)
+    );
+  }
+
+  /**
+   * Handle new run created event - add to pool
+   */
+  private async handleNewRunCreated(event: NewRunCreatedEvent): Promise<void> {
+    // Add the new run to the game matching engine pool
+    this.dollarManager.updateDollarState(
+      event.virtualDollarId,
+      DollarState.POOLED
+    );
+
+    // Get the virtual dollar from the manager
+    const virtualDollar = this.dollarManager.getDollar(event.virtualDollarId);
+    if (virtualDollar) {
+      this.gameMatchingEngine.addToPool(virtualDollar);
+    }
+  }
 
   /**
    * Process a single day of simulation
    */
-  async processDay(day: number, config: DayProcessingConfig): Promise<void> {
+  async processDay(
+    day: number,
+    config: DayProcessingConfig,
+    simulationConfig: SimulationConfig
+  ): Promise<void> {
     console.log(`DEBUG: [DayProcessor] ===== PROCESSING DAY ${day} =====`);
 
     // Emit day started event
@@ -47,9 +82,10 @@ export class DayProcessor {
       totalPlayers: 0, // Will need to track this properly
       activePlayers: 0, // Will need to track this properly
       poolSize: initialPoolStats.totalDollarsInPool,
+      growthModel: simulationConfig.growthModel,
+      playerStrategies: simulationConfig.playerStrategies,
     } as DayStartedEvent);
-    // Add new virtual dollars to the pool
-    await this.addNewRunsToPool();
+    // Note: addNewRunsToPool() is now handled by PlayerManager via DAY_STARTED event
 
     // Process available games for the day
     const maxGamesPerDay = Math.max(25, config.initialPlayerCount * 2);
