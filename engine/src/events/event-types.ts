@@ -146,6 +146,46 @@ export interface PoolUpdatedEvent extends BaseEvent {
   levelDistribution: Record<number, number>; // level -> count
 }
 
+export interface NewRunPooledEvent extends BaseEvent {
+  type: "NEW_RUN_POOLED";
+  playerId: string;
+  virtualDollarId: string;
+  previousRunId?: string;
+  fundingSource: "CASH_OUT_REINVESTMENT" | "DONATION";
+  poolSize: number;
+}
+
+export interface PoolCapacityReachedEvent extends BaseEvent {
+  type: "POOL_CAPACITY_REACHED";
+  currentPoolSize: number;
+  maxCapacity: number;
+  reason: string;
+  rejectedDollarId?: string;
+}
+
+export interface PoolManagementErrorEvent extends BaseEvent {
+  type: "POOL_MANAGEMENT_ERROR";
+  virtualDollarId: string;
+  operation: "RE_POOL_WINNER" | "ADD_TO_POOL" | "STATE_VALIDATION" | "POOL_SYNC";
+  error: string;
+  integrationComponent?: "GameMatchingEngine" | "VirtualDollarManager";
+}
+
+export interface PoolStatsUpdatedEvent extends BaseEvent {
+  type: "POOL_STATS_UPDATED";
+  previousStats: {
+    totalDollarsInPool: number;
+    availableForMatching: number;
+    dollarsInGame: number;
+  };
+  currentStats: {
+    totalDollarsInPool: number;
+    availableForMatching: number;
+    dollarsInGame: number;
+  };
+  operation: "ADD_TO_POOL" | "REMOVE_FROM_POOL";
+}
+
 // ===== REVENUE EVENTS =====
 
 export interface RevenueGameProcessedEvent extends BaseEvent {
@@ -279,6 +319,10 @@ export type SimulationEvent =
   | PoolAddedEvent
   | PoolRemovedEvent
   | PoolUpdatedEvent
+  | NewRunPooledEvent
+  | PoolCapacityReachedEvent
+  | PoolManagementErrorEvent
+  | PoolStatsUpdatedEvent
   | RevenueGameProcessedEvent
   | RevenueCashOutProcessedEvent
   | RevenueUpdateEvent
@@ -317,6 +361,10 @@ export const EVENT_TYPES = {
   POOL_ADDED: "POOL_ADDED",
   POOL_REMOVED: "POOL_REMOVED",
   POOL_UPDATED: "POOL_UPDATED",
+  NEW_RUN_POOLED: "NEW_RUN_POOLED",
+  POOL_CAPACITY_REACHED: "POOL_CAPACITY_REACHED",
+  POOL_MANAGEMENT_ERROR: "POOL_MANAGEMENT_ERROR",
+  POOL_STATS_UPDATED: "POOL_STATS_UPDATED",
 
   // Revenue events
   REVENUE_GAME_PROCESSED: "REVENUE_GAME_PROCESSED",
