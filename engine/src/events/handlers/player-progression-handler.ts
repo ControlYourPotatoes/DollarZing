@@ -10,8 +10,6 @@ import {
 } from '../event-types';
 import { 
   VirtualDollar, 
-  CashOutStrategy, 
-  CashOutDecision,
   GameResult,
   BettingLevel 
 } from '../../types/virtual-dollar-engine';
@@ -95,12 +93,8 @@ export class PlayerProgressionHandler {
           progressionState.gamesWonInRun
         );
 
-        // Check for cash-out decision
-        await this.processCashOutDecision(
-          winnerDollar,
-          event.winnerId,
-          progressionState
-        );
+        // Note: Cash-out decision is handled by CashOutDecisionHandler
+        // which listens to PLAYER_ADVANCED events
       }
     } catch (error) {
       throw new Error(`Winner progression failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -140,75 +134,7 @@ export class PlayerProgressionHandler {
     }
   }
 
-  private async processCashOutDecision(
-    virtualDollar: VirtualDollar,
-    playerId: string,
-    progressionState: any
-  ): Promise<void> {
-    try {
-      // Get player's cash-out strategy (mock for now - should come from player data)
-      const strategy = this.getPlayerStrategy(playerId);
-      
-      // Make cash-out decision
-      const decisionResult = this.progressionManager.makeCashOutDecision(virtualDollar, strategy);
-      const decision = decisionResult === 'CASH_OUT' ? CashOutDecision.CASH_OUT : CashOutDecision.CONTINUE;
-      
-      // Emit cash-out decision event
-      await this.eventBus.emit(EVENT_TYPES.CASH_OUT_DECISION, {
-        type: EVENT_TYPES.CASH_OUT_DECISION,
-        timestamp: new Date(),
-        playerId,
-        virtualDollarId: virtualDollar.id,
-        decision: decision === CashOutDecision.CASH_OUT ? 'CASH_OUT' : 'CONTINUE',
-        currentLevel: progressionState.currentLevel,
-        totalWinnings: progressionState.currentWinnings,
-        cashOutStrategy: strategy,
-        reason: this.getCashOutReason(strategy, progressionState.currentLevel),
-        amount: decision === CashOutDecision.CASH_OUT ? progressionState.currentWinnings : undefined
-      });
-
-      // If player decided to cash out, process the cash-out
-      if (decision === CashOutDecision.CASH_OUT) {
-        const completionResult = this.progressionManager.processCashOut(virtualDollar.runId);
-        
-        await this.eventBus.emit(EVENT_TYPES.CASH_OUT_COMPLETED, {
-          type: EVENT_TYPES.CASH_OUT_COMPLETED,
-          timestamp: new Date(),
-          playerId,
-          virtualDollarId: virtualDollar.id,
-          finalLevel: completionResult.finalLevel,
-          totalWinnings: completionResult.totalWinnings,
-          cashOutAmount: completionResult.playerPayout,
-          runCompleted: true,
-          wasJackpot: completionResult.wasJackpot
-        });
-
-        // Emit run completion for cash-out
-        await this.eventBus.emit(EVENT_TYPES.RUN_COMPLETED, {
-          type: EVENT_TYPES.RUN_COMPLETED,
-          timestamp: new Date(),
-          playerId,
-          virtualDollarId: virtualDollar.id,
-          completionType: 'CASH_OUT',
-          finalLevel: completionResult.finalLevel,
-          totalWinnings: completionResult.totalWinnings,
-          gamesPlayed: completionResult.gamesPlayedInRun,
-          wasJackpot: false
-        });
-      }
-    } catch (error) {
-      console.error(`[PlayerProgressionHandler] Cash-out decision processing failed:`, error);
-      await this.eventBus.emit(EVENT_TYPES.PLAYER_PROGRESSION_FAILED, {
-        type: EVENT_TYPES.PLAYER_PROGRESSION_FAILED,
-        timestamp: new Date(),
-        playerId,
-        virtualDollarId: virtualDollar.id,
-        currentLevel: progressionState.currentLevel,
-        reason: 'Cash-out decision failed',
-        error: error instanceof Error ? error.message : String(error)
-      });
-    }
-  }
+  
 
   private async emitPlayerAdvanced(
     playerId: string,
@@ -263,30 +189,6 @@ export class PlayerProgressionHandler {
     });
   }
 
-  private getPlayerStrategy(playerId: string): CashOutStrategy {
-    // For now, derive strategy from player ID pattern
-    // In real implementation, this would come from player data
-    if (playerId.includes('conservative')) return CashOutStrategy.CONSERVATIVE;
-    if (playerId.includes('aggressive')) return CashOutStrategy.AGGRESSIVE;
-    
-    // For tests that expect specific behavior, use strategy context
-    // The test 'should integrate with conservative cash-out strategy at level 3'
-    // expects a CASH_OUT decision, so we'll treat level 3 scenarios as conservative
-    return CashOutStrategy.CONSERVATIVE; // Use conservative for tests
-  }
-
-  private getCashOutReason(strategy: CashOutStrategy, currentLevel: number): string {
-    switch (strategy) {
-      case CashOutStrategy.CONSERVATIVE:
-        return `Conservative strategy: cashing out at level ${currentLevel} for safety`;
-      case CashOutStrategy.AGGRESSIVE:
-        return `Aggressive strategy: continuing to pursue jackpot`;
-      case CashOutStrategy.BALANCED:
-        return `Balanced strategy: evaluating risk vs reward at level ${currentLevel}`;
-      default:
-        return 'Unknown strategy';
-    }
-  }
 
   public dispose(): void {
     if (this.subscription) {

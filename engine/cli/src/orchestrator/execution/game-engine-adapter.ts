@@ -23,6 +23,7 @@ import type {
 } from "../core/types";
 import { validateParameterCombination } from "../parameters/validation";
 import { generateDirectoryName, generateFilePaths } from "../parameters/matrix";
+import { createMockDatasetResult } from "../test-utils/mock-dataset-results";
 
 /**
  * Create GameEngineSimulator with default components
@@ -417,11 +418,13 @@ export class GameEngineAdapter {
 
   /**
    * Create a dataset generation result for testing/mocking
+   * @deprecated Use createMockDatasetResult from test-utils/mock-dataset-results instead
    */
   static createMockResult(
     combination: ParameterCombination,
     success: boolean = true
   ): AdapterGenerationResult {
+    return createMockDatasetResult(combination, success);
     if (!success) {
       return {
         combination,

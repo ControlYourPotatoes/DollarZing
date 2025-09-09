@@ -62,6 +62,9 @@ export type {
   DatasetGenerationCompletedEvent,
   DatasetValidationEvent,
   ParameterValidationEvent,
+  OrchestratorConfigValidationEvent,
+  ParameterMatrixValidationEvent,
+  QualityAssuranceEvent,
 } from "./events/event-types";
 
 // Utility functions

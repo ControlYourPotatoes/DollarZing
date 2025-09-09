@@ -368,6 +368,42 @@ export interface ParameterValidationEvent extends BaseEvent {
   };
 }
 
+export interface OrchestratorConfigValidationEvent extends BaseEvent {
+  type: "ORCHESTRATOR_CONFIG_VALIDATION";
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  config: {
+    batchSize: number;
+    timeoutPerDataset: number;
+    outputDirectory: string;
+  };
+}
+
+export interface ParameterMatrixValidationEvent extends BaseEvent {
+  type: "PARAMETER_MATRIX_VALIDATION";
+  totalCombinations: number;
+  validCombinations: number;
+  invalidCombinations: number;
+  validationErrors: Array<{
+    combination: {
+      growthRate: number;
+      riskLevel: string;
+      charityPercentage: number;
+    };
+    errors: string[];
+  }>;
+}
+
+export interface QualityAssuranceEvent extends BaseEvent {
+  type: "QUALITY_ASSURANCE";
+  parameterId: string;
+  checkType: "DATA_INTEGRITY" | "PERFORMANCE" | "CONSISTENCY" | "COMPLETENESS";
+  passed: boolean;
+  details: string;
+  metrics: Record<string, number>;
+}
+
 // ===== EVENT TYPE UNION =====
 
 export type SimulationEvent =
@@ -404,7 +440,10 @@ export type SimulationEvent =
   | DatasetGenerationProgressEvent
   | DatasetGenerationCompletedEvent
   | DatasetValidationEvent
-  | ParameterValidationEvent;
+  | ParameterValidationEvent
+  | OrchestratorConfigValidationEvent
+  | ParameterMatrixValidationEvent
+  | QualityAssuranceEvent;
 
 // ===== EVENT TYPE CONSTANTS =====
 
@@ -462,6 +501,11 @@ export const EVENT_TYPES = {
   DATASET_GENERATION_COMPLETED: "DATASET_GENERATION_COMPLETED",
   DATASET_VALIDATION: "DATASET_VALIDATION",
   PARAMETER_VALIDATION: "PARAMETER_VALIDATION",
+
+  // Orchestrator validation events
+  ORCHESTRATOR_CONFIG_VALIDATION: "ORCHESTRATOR_CONFIG_VALIDATION",
+  PARAMETER_MATRIX_VALIDATION: "PARAMETER_MATRIX_VALIDATION",
+  QUALITY_ASSURANCE: "QUALITY_ASSURANCE",
 } as const;
 
 // ===== TYPE HELPERS =====

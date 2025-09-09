@@ -22,6 +22,7 @@ import {
   DatasetGenerationCompletedEvent,
   DatasetValidationEvent,
   ParameterValidationEvent,
+  QualityAssuranceEvent,
 } from "@/index";
 import type {
   ParameterCombination,
@@ -270,6 +271,9 @@ export class DatasetOrchestrator {
         } as DatasetValidationEvent);
       }
 
+      // Perform quality assurance checks
+      await this.performQualityAssurance(parameterId, simulationResults);
+
       // Check for simulation success
       if (!simulationResults.success) {
         const result: AdapterGenerationResult = {
@@ -490,87 +494,6 @@ export class DatasetOrchestrator {
   }
 
   /**
-   * Create a dataset generation result for testing/mocking
-   */
-  static createMockResult(
-    combination: ParameterCombination,
-    success: boolean = true
-  ): AdapterGenerationResult {
-    if (!success) {
-      return {
-        combination,
-        success: false,
-        error: "Mock failure for testing",
-        generationTimeMs: 1000,
-      };
-    }
-
-    // Create minimal mock simulation results
-    const mockResults: SimulationResults = {
-      success: true,
-      simulationDurationMs: 5000,
-      config: {
-        durationDays: 365,
-        initialPlayerCount: 1000,
-        dailySeed: "mock-seed",
-        charityPercentage: combination.charityPercentage / 100,
-        playerStrategies: { conservative: 0.5, balanced: 0.3, aggressive: 0.2 },
-        initialDonationAmount: 50,
-        maxSimulationTimeMs: 300000,
-        enableProgressReporting: false,
-      },
-      playerStats: {
-        totalPlayers: 1000,
-        activePlayers: 800,
-        retiredPlayers: 200,
-        totalDonationsFunds: 50000,
-        totalWinningsFunds: 25000,
-        totalProgressionFunds: 15000,
-        averageGamesPerPlayer: 45,
-        playerRetirementRate: 0.2,
-      },
-      revenueStats: {
-        totalPlatformRevenue: 10000,
-        totalCharityContributions: combination.charityPercentage * 500,
-        totalPlayerPayouts: 20000,
-        revenuePerGame: 2.5,
-        charityPercentage: combination.charityPercentage / 100,
-        averageRevenuePerDay: 27.4,
-      },
-      gameStats: {
-        totalGames: 4000,
-        averageGamesPerDay: 11.0,
-        totalVirtualDollars: 8000,
-        completedRuns: 1200,
-        activeRuns: 400,
-        jackpotsWon: 15,
-        averageRunLength: 3.3,
-      },
-      summary: {
-        totalDays: 365,
-        totalPlayers: 1000,
-        simulationCompleted: true,
-      },
-      dailyResults: [],
-      completedAt: new Date(),
-    };
-
-    return {
-      combination,
-      success: true,
-      simulationResults: mockResults,
-      generationTimeMs: 5000,
-      outputPaths: {
-        directory: `test/anchor-datasets/${generateDirectoryName(combination)}`,
-        datasetFile: `test/anchor-datasets/${generateDirectoryName(
-          combination
-        )}/dataset.json`,
-        metadataFile: `test/anchor-datasets/${generateDirectoryName(
-          combination
-        )}/metadata.json`,
-      },
-    };
-  }
 
   /**
    * Generate a unique parameter ID for tracking
@@ -615,5 +538,80 @@ export class DatasetOrchestrator {
    */
   private calculateRecordCount(results: SimulationResults): number {
     return results.dailyResults?.length || 0;
+  }
+
+  /**
+   * Perform quality assurance checks and emit events
+   */
+  private async performQualityAssurance(
+    parameterId: string,
+    simulationResults: SimulationResults
+  ): Promise<void> {
+    if (!this.eventBus) return;
+
+    // Data integrity check
+    const dataIntegrityPassed =
+      simulationResults.success &&
+      simulationResults.gameStats?.totalGames > 0 &&
+      simulationResults.playerStats?.totalPlayers > 0;
+
+    await this.eventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
+      type: EVENT_TYPES.QUALITY_ASSURANCE,
+      timestamp: new Date(),
+      parameterId,
+      checkType: "DATA_INTEGRITY",
+      passed: dataIntegrityPassed,
+      details: dataIntegrityPassed
+        ? "All essential data fields present and valid"
+        : "Missing or invalid essential data fields",
+      metrics: {
+        totalGames: simulationResults.gameStats?.totalGames || 0,
+        totalPlayers: simulationResults.playerStats?.totalPlayers || 0,
+      },
+    } as QualityAssuranceEvent);
+
+    // Performance check
+    const performancePassed =
+      simulationResults.simulationDurationMs < this.config.maxSimulationTimeMs;
+
+    await this.eventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
+      type: EVENT_TYPES.QUALITY_ASSURANCE,
+      timestamp: new Date(),
+      parameterId,
+      checkType: "PERFORMANCE",
+      passed: performancePassed,
+      details: performancePassed
+        ? "Simulation completed within acceptable time limits"
+        : `Simulation exceeded time limit: ${simulationResults.simulationDurationMs}ms vs ${this.config.maxSimulationTimeMs}ms`,
+      metrics: {
+        simulationDurationMs: simulationResults.simulationDurationMs,
+        maxAllowedMs: this.config.maxSimulationTimeMs,
+      },
+    } as QualityAssuranceEvent);
+
+    // Revenue consistency check
+    const revenueConsistency = simulationResults.revenueStats
+      ? simulationResults.revenueStats.totalPlatformRevenue >= 0 &&
+        simulationResults.revenueStats.totalCharityContributions >= 0 &&
+        simulationResults.revenueStats.totalPlayerPayouts >= 0
+      : false;
+
+    await this.eventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
+      type: EVENT_TYPES.QUALITY_ASSURANCE,
+      timestamp: new Date(),
+      parameterId,
+      checkType: "CONSISTENCY",
+      passed: revenueConsistency,
+      details: revenueConsistency
+        ? "Revenue calculations are consistent and valid"
+        : "Revenue calculations show inconsistencies or invalid values",
+      metrics: {
+        platformRevenue:
+          simulationResults.revenueStats?.totalPlatformRevenue || 0,
+        charityContributions:
+          simulationResults.revenueStats?.totalCharityContributions || 0,
+        playerPayouts: simulationResults.revenueStats?.totalPlayerPayouts || 0,
+      },
+    } as QualityAssuranceEvent);
   }
 }

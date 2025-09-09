@@ -201,14 +201,15 @@ describe("Event Flow Integration Tests", () => {
       const cashOutEvents = eventLog.filter(
         (e) => e.type === EVENT_TYPES.CASH_OUT_DECISION
       );
-      expect(cashOutEvents).toHaveLength(1);
+      expect(cashOutEvents).toHaveLength(1); // Only winner should get cash-out decision
       expect(cashOutEvents[0].data.decision).toBe("CONTINUE");
 
-      // Verify re-pooling was NOT triggered (since it's a continue decision)
+      // Verify continue play event was emitted (this is correct behavior)
       const continueEvents = eventLog.filter(
         (e) => e.type === EVENT_TYPES.CONTINUE_PLAY
       );
-      expect(continueEvents).toHaveLength(0); // Continue play events not implemented yet
+      expect(continueEvents).toHaveLength(1); // CONTINUE decision should trigger CONTINUE_PLAY event
+      expect(continueEvents[0].data.playerId).toBe("player-conservative");
     });
 
     it("should handle cash-out decision and run completion", async () => {
