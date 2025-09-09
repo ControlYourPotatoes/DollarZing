@@ -62,6 +62,10 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [ ] 7.4 Refactor PlayerManager to subscribe to relevant events
   - [ ] 7.5 Add event system initialization to game engine setup
   - [ ] 7.6 Verify all integration tests pass
+  - [ ] 7.7 Add event integration to DatasetOrchestrator for generation progress tracking
+  - [ ] 7.8 Implement orchestrator event emission for parameter validation and quality checks  
+  - [ ] 7.9 Update orchestrator GameEngineSimulator creation to use event-driven initialization
+  - [ ] 7.10 Write orchestrator event integration tests
 
 - [ ] 8. Remove Legacy Coupling and Clean Up
   - [ ] 8.1 Write tests to verify component independence after cleanup
