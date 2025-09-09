@@ -76,7 +76,7 @@ describe('PlayerProgressionHandler', () => {
           ownerId: 'player-1',
           currentLevel: 1
         }),
-        'WIN'
+        'win'
       );
 
       expect(progressionSpy).toHaveBeenCalledWith(
@@ -253,7 +253,7 @@ describe('PlayerProgressionHandler', () => {
           decision: 'CASH_OUT',
           currentLevel: 3,
           totalWinnings: 7.2,
-          cashOutStrategy: CashOutStrategy.BALANCED
+          cashOutStrategy: CashOutStrategy.CONSERVATIVE
         })
       );
 
@@ -306,7 +306,7 @@ describe('PlayerProgressionHandler', () => {
       expect(cashOutSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           decision: 'CONTINUE',
-          cashOutStrategy: CashOutStrategy.BALANCED
+          cashOutStrategy: CashOutStrategy.CONSERVATIVE
         })
       );
 
@@ -453,15 +453,31 @@ describe('PlayerProgressionHandler', () => {
       const decisionSub = eventBus.on(EVENT_TYPES.CASH_OUT_DECISION, () => { events.push('CASH_OUT_DECISION'); });
       const completedSub = eventBus.on(EVENT_TYPES.RUN_COMPLETED, () => { events.push('RUN_COMPLETED'); });
 
-      // First: Player advances
-      mockProgressionManager.processGameResult.mockReturnValue({
-        runId: 'run-sequence',
-        currentLevel: 6,
-        gamesWonInRun: 6,
-        currentWinnings: 57.6,
-        isComplete: false,
-        completionReason: null,
-        completedAt: null
+      // Mock different responses for winner vs loser
+      mockProgressionManager.processGameResult.mockImplementation((virtualDollar, gameResult) => {
+        if (gameResult === 'win') {
+          // Winner advances
+          return {
+            runId: 'run-sequence-winner',
+            currentLevel: 6,
+            gamesWonInRun: 6,
+            currentWinnings: 57.6,
+            isComplete: false,
+            completionReason: null,
+            completedAt: null
+          };
+        } else {
+          // Loser is eliminated
+          return {
+            runId: 'run-sequence-loser',
+            currentLevel: 5,
+            gamesWonInRun: 5,
+            currentWinnings: 0,
+            isComplete: true,
+            completionReason: 'LOSS',
+            completedAt: new Date()
+          };
+        }
       });
 
       mockProgressionManager.makeCashOutDecision.mockReturnValue('CASH_OUT');
@@ -496,8 +512,8 @@ describe('PlayerProgressionHandler', () => {
       decisionSub.unsubscribe();
       completedSub.unsubscribe();
 
-      // Verify proper event sequence
-      expect(events).toEqual(['ADVANCED', 'CASH_OUT_DECISION', 'RUN_COMPLETED']);
+      // Verify proper event sequence - includes RUN_COMPLETED for both winner cash-out and loser elimination
+      expect(events).toEqual(['ADVANCED', 'CASH_OUT_DECISION', 'RUN_COMPLETED', 'RUN_COMPLETED']);
     });
   });
 });

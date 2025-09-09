@@ -23,21 +23,21 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.5 Handle error scenarios and edge cases
   - [x] 2.6 Verify all GameEventHandler tests pass
 
-- [ ] 3. Implement Player Progression Handler
-  - [ ] 3.1 Write tests for PlayerProgressionHandler with level advancement logic
-  - [ ] 3.2 Extract player progression logic from PlayerManager into event handler
-  - [ ] 3.3 Implement event-driven level advancement and state tracking
-  - [ ] 3.4 Add integration with cash-out decision events
-  - [ ] 3.5 Handle edge cases for maximum level and progression failures
-  - [ ] 3.6 Verify all PlayerProgressionHandler tests pass
+- [x] 3. Implement Player Progression Handler
+  - [x] 3.1 Write tests for PlayerProgressionHandler with level advancement logic
+  - [x] 3.2 Extract player progression logic from PlayerManager into event handler
+  - [x] 3.3 Implement event-driven level advancement and state tracking
+  - [x] 3.4 Add integration with cash-out decision events
+  - [x] 3.5 Handle edge cases for maximum level and progression failures
+  - [x] 3.6 Verify all PlayerProgressionHandler tests pass
 
-- [ ] 4. Create Cash-Out Decision Handler
-  - [ ] 4.1 Write tests for CashOutDecisionHandler with strategy-based decisions
-  - [ ] 4.2 Implement cash-out decision logic based on player strategies
-  - [ ] 4.3 Create event emission for cash-out and continue-play decisions
-  - [ ] 4.4 Integrate with existing player strategy configurations
-  - [ ] 4.5 Handle complex decision scenarios and edge cases
-  - [ ] 4.6 Verify all CashOutDecisionHandler tests pass
+- [x] 4. Create Cash-Out Decision Handler
+  - [x] 4.1 Write tests for CashOutDecisionHandler with strategy-based decisions
+  - [x] 4.2 Implement cash-out decision logic based on player strategies
+  - [x] 4.3 Create event emission for cash-out and continue-play decisions
+  - [x] 4.4 Integrate with existing player strategy configurations
+  - [x] 4.5 Handle complex decision scenarios and edge cases
+  - [x] 4.6 Verify all CashOutDecisionHandler tests pass
 
 - [ ] 5. Implement Pool Management Handler
   - [ ] 5.1 Write tests for PoolManagementHandler with re-pooling scenarios

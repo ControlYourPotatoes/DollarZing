@@ -89,9 +89,9 @@ This is the tests coverage details for the spec detailed in @.agent-os/specs/202
 ### Mocking Requirements
 
 **GameMatchingEngine** - Mock game session creation and pool operations to test event handlers in isolation
-**PlayerBalanceManager** - Mock player balance operations to focus on event flow without financial complexity
+
 **RevenueCalculator** - Mock revenue calculations to test event integration without calculation overhead
-**VirtualDollarManager** - Mock virtual dollar state management to test event-driven state changes
+
 
 ### End-to-End Scenario Tests
 
@@ -99,6 +99,7 @@ This is the tests coverage details for the spec detailed in @.agent-os/specs/202
 - New player joins -> creates run -> plays game -> wins/loses -> progression decision -> re-pool or cash-out
 - Verify all events are emitted in correct order
 - Validate final system state matches expected outcome
+- Each game has 2 players so the loser cannot proceed
 
 **Multiple Player Concurrent Games**
 - Multiple players with different strategies playing simultaneously
@@ -124,7 +125,7 @@ This is the tests coverage details for the spec detailed in @.agent-os/specs/202
 
 ### Mock Strategy
 
-**Event Bus Mocking** - Use Jest spies to verify event emission and subscription patterns without actual processing
+
 **Handler Isolation** - Mock dependencies for each handler to test logic in isolation
-**State Verification** - Mock state managers to verify event-driven state changes without persistence complexity
-**Async Testing** - Use Jest async utilities to properly test Promise-based event handling and error scenarios
+
+**Async Testing** - Use vitest async utilities to properly test Promise-based event handling and error scenarios

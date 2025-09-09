@@ -92,6 +92,24 @@ export interface CashOutCompletedEvent extends BaseEvent {
   wasJackpot: boolean;
 }
 
+export interface CashOutDecisionFailedEvent extends BaseEvent {
+  type: "CASH_OUT_DECISION_FAILED";
+  playerId: string;
+  virtualDollarId: string;
+  reason: string;
+  error: string;
+}
+
+export interface ContinuePlayEvent extends BaseEvent {
+  type: "CONTINUE_PLAY";
+  playerId: string;
+  virtualDollarId: string;
+  currentLevel: number;
+  potentialWinnings: number;
+  nextLevel: number;
+  nextPotentialWinnings: number;
+}
+
 // ===== POOL MANAGEMENT EVENTS =====
 
 export interface RePoolRequestEvent extends BaseEvent {
@@ -255,6 +273,8 @@ export type SimulationEvent =
   | PlayerProgressionFailedEvent
   | CashOutDecisionEvent
   | CashOutCompletedEvent
+  | CashOutDecisionFailedEvent
+  | ContinuePlayEvent
   | RePoolRequestEvent
   | PoolAddedEvent
   | PoolRemovedEvent
@@ -289,6 +309,8 @@ export const EVENT_TYPES = {
   // Cash-out events
   CASH_OUT_DECISION: "CASH_OUT_DECISION",
   CASH_OUT_COMPLETED: "CASH_OUT_COMPLETED",
+  CASH_OUT_DECISION_FAILED: "CASH_OUT_DECISION_FAILED",
+  CONTINUE_PLAY: "CONTINUE_PLAY",
 
   // Pool management events
   RE_POOL_REQUEST: "RE_POOL_REQUEST",
