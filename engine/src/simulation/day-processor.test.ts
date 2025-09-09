@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DayProcessor } from "./day-processor";
 import { DollarState, GameResult } from "../types/virtual-dollar-engine";
+import { EventBus } from "../events/event-bus";
 
 // Mock the external dependencies
 vi.mock("../types/game-matching-engine");
@@ -14,6 +15,7 @@ describe("DayProcessor", () => {
   let mockPlayerManager: any;
   let mockDollarManager: any;
   let mockRevenueCalculator: any;
+  let mockEventBus: EventBus;
 
   beforeEach(() => {
     // Reset all mocks
@@ -48,12 +50,16 @@ describe("DayProcessor", () => {
       getTotalGames: vi.fn().mockReturnValue(5),
     };
 
+    // Create mock EventBus
+    mockEventBus = new EventBus();
+
     // Create DayProcessor instance
     dayProcessor = new DayProcessor(
       mockGameMatchingEngine,
       mockPlayerManager,
       mockDollarManager,
-      mockRevenueCalculator
+      mockRevenueCalculator,
+      mockEventBus
     );
   });
 
@@ -209,7 +215,7 @@ describe("DayProcessor", () => {
         currentLevel: 2,
       };
       const mockLoser = {
-        id: "loser-1", 
+        id: "loser-1",
         ownerId: "player-2",
         currentLevel: 1,
       };
@@ -284,11 +290,11 @@ describe("DayProcessor", () => {
 
       // Mock PlayerManager returning cash-out result for winner
       mockPlayerManager.processGameResult
-        .mockReturnValueOnce({ 
-          completionType: "CASH_OUT", 
+        .mockReturnValueOnce({
+          completionType: "CASH_OUT",
           totalWinnings: 100,
           shouldCreateNewRun: true,
-          playerId: "player-1"
+          playerId: "player-1",
         }) // Winner cashes out
         .mockReturnValueOnce({ completionType: "LOSS", totalWinnings: 0 }); // Loser eliminated
 

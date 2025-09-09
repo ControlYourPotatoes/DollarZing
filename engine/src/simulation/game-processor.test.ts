@@ -1,19 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { GameProcessor } from "./game-processor";
-import { GameResult, DollarState } from "../types/virtual-dollar-engine";
+import { EventBus } from "../events/event-bus";
 
 // Mock the external dependencies
 vi.mock("../types/game-matching-engine");
-vi.mock("../types/player-run-manager");
 vi.mock("../types/revenue-calculator");
-vi.mock("../types/virtual-dollar-types");
 
 describe("GameProcessor", () => {
   let gameProcessor: GameProcessor;
   let mockGameMatchingEngine: any;
-  let mockRunOrchestrator: any;
   let mockRevenueCalculator: any;
-  let mockDollarManager: any;
+  let mockEventBus: EventBus;
 
   beforeEach(() => {
     // Reset all mocks
@@ -23,30 +20,24 @@ describe("GameProcessor", () => {
     mockGameMatchingEngine = {
       resolveGame: vi.fn().mockReturnValue({ success: true }),
       getGameSession: vi.fn(),
-      addToPool: vi.fn().mockReturnValue({ success: true }),
-    };
-
-    mockRunOrchestrator = {
-      processGameResult: vi.fn(),
-      getPlayerStrategy: vi.fn().mockReturnValue("AVERAGE"),
-      createNewRun: vi.fn().mockReturnValue({ id: "new-run-1" }),
     };
 
     mockRevenueCalculator = {
       processGameRevenue: vi.fn(),
-      processCashOut: vi.fn(),
     };
 
-    mockDollarManager = {
-      updateDollarState: vi.fn(),
-    };
+    mockEventBus = {
+      emit: vi.fn(),
+      subscribe: vi.fn(),
+      unsubscribe: vi.fn(),
+      getEventHistory: vi.fn().mockReturnValue([]),
+    } as any;
 
     // Create GameProcessor instance
     gameProcessor = new GameProcessor(
       mockGameMatchingEngine,
-      mockRunOrchestrator,
       mockRevenueCalculator,
-      mockDollarManager
+      mockEventBus
     );
   });
 
@@ -106,31 +97,35 @@ describe("GameProcessor", () => {
   });
 
   describe("processGameResults", () => {
-    it("should process game results with winner and loser", async () => {
+    it("should emit GAME_RESOLVED events for games with winner and loser", async () => {
       const games = [{ id: "game-1" }];
       const resolvedGame = {
         id: "game-1",
-        winner: { ownerId: "player-1", currentLevel: 2 },
-        loser: { ownerId: "player-2", currentLevel: 1 },
+        winner: { id: "winner-1", ownerId: "player-1", currentLevel: 2 },
+        loser: { id: "loser-1", ownerId: "player-2", currentLevel: 1 },
       };
 
       mockGameMatchingEngine.getGameSession.mockReturnValue(resolvedGame);
-      mockRunOrchestrator.processGameResult
-        .mockReturnValueOnce({ completionType: "CONTINUE", totalWinnings: 100 })
-        .mockReturnValueOnce({ completionType: "CONTINUE", totalWinnings: 0 });
 
       await gameProcessor.processGameResults(games);
 
       expect(mockGameMatchingEngine.getGameSession).toHaveBeenCalledWith(
         "game-1"
       );
-      expect(mockRunOrchestrator.processGameResult).toHaveBeenCalledWith(
-        resolvedGame.winner,
-        GameResult.WIN
-      );
-      expect(mockRunOrchestrator.processGameResult).toHaveBeenCalledWith(
-        resolvedGame.loser,
-        GameResult.LOSS
+      expect(mockEventBus.emit).toHaveBeenCalledWith(
+        "GAME_RESOLVED",
+        expect.objectContaining({
+          type: "GAME_RESOLVED",
+          gameId: "game-1",
+          winnerId: "player-1",
+          loserId: "player-2",
+          winnerLevel: 2,
+          loserLevel: 1,
+          winnerDollarId: "winner-1",
+          loserDollarId: "loser-1",
+          winnings: 20, // 2 * 10
+          gameResult: "WIN",
+        })
       );
     });
 
@@ -146,103 +141,42 @@ describe("GameProcessor", () => {
 
       await gameProcessor.processGameResults(games);
 
-      // Should not process incomplete games
-      expect(mockRunOrchestrator.processGameResult).not.toHaveBeenCalled();
-    });
-
-    it("should process cash-outs for revenue tracking", async () => {
-      const games = [{ id: "game-1" }];
-      const resolvedGame = {
-        id: "game-1",
-        winner: { ownerId: "player-1", currentLevel: 2 },
-        loser: { ownerId: "player-2", currentLevel: 1 },
-      };
-
-      mockGameMatchingEngine.getGameSession.mockReturnValue(resolvedGame);
-      mockRunOrchestrator.processGameResult
-        .mockReturnValueOnce({
-          completionType: "CASH_OUT",
-          totalWinnings: 500,
-          shouldCreateNewRun: false,
-        })
-        .mockReturnValueOnce({
-          completionType: "CONTINUE",
-          totalWinnings: 0,
-          shouldCreateNewRun: false,
-        });
-
-      await gameProcessor.processGameResults(games);
-
-      expect(mockRevenueCalculator.processCashOut).toHaveBeenCalledWith(500);
-    });
-
-    it("should create new runs when shouldCreateNewRun is true", async () => {
-      const games = [{ id: "game-1" }];
-      const resolvedGame = {
-        id: "game-1",
-        winner: { ownerId: "player-1", currentLevel: 2 },
-        loser: { ownerId: "player-2", currentLevel: 1 },
-      };
-
-      mockGameMatchingEngine.getGameSession.mockReturnValue(resolvedGame);
-      mockRunOrchestrator.processGameResult
-        .mockReturnValueOnce({
-          completionType: "CASH_OUT",
-          totalWinnings: 500,
-          shouldCreateNewRun: true,
-          playerId: "player-1",
-        })
-        .mockReturnValueOnce({
-          completionType: "CONTINUE",
-          totalWinnings: 0,
-          shouldCreateNewRun: false,
-        });
-
-      await gameProcessor.processGameResults(games);
-
-      expect(mockRunOrchestrator.getPlayerStrategy).toHaveBeenCalledWith(
-        "player-1"
-      );
-      expect(mockRunOrchestrator.createNewRun).toHaveBeenCalledWith({
-        playerId: "player-1",
-        cashOutStrategy: "AVERAGE",
-        fundingSource: "DONATION",
-      });
-      expect(mockDollarManager.updateDollarState).toHaveBeenCalledWith(
-        "new-run-1",
-        DollarState.POOLED
-      );
-      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith({
-        id: "new-run-1",
-      });
+      // Should not emit events for incomplete games
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
     });
 
     it("should handle multiple games in batch", async () => {
       const games = [{ id: "game-1" }, { id: "game-2" }];
       const resolvedGame1 = {
         id: "game-1",
-        winner: { ownerId: "player-1", currentLevel: 2 },
-        loser: { ownerId: "player-2", currentLevel: 1 },
+        winner: { id: "winner-1", ownerId: "player-1", currentLevel: 2 },
+        loser: { id: "loser-1", ownerId: "player-2", currentLevel: 1 },
       };
       const resolvedGame2 = {
         id: "game-2",
-        winner: { ownerId: "player-3", currentLevel: 3 },
-        loser: { ownerId: "player-4", currentLevel: 2 },
+        winner: { id: "winner-2", ownerId: "player-3", currentLevel: 3 },
+        loser: { id: "loser-2", ownerId: "player-4", currentLevel: 2 },
       };
 
       mockGameMatchingEngine.getGameSession
         .mockReturnValueOnce(resolvedGame1)
         .mockReturnValueOnce(resolvedGame2);
 
-      mockRunOrchestrator.processGameResult.mockReturnValue({
-        completionType: "CONTINUE",
-        totalWinnings: 0,
-      });
-
       await gameProcessor.processGameResults(games);
 
       expect(mockGameMatchingEngine.getGameSession).toHaveBeenCalledTimes(2);
-      expect(mockRunOrchestrator.processGameResult).toHaveBeenCalledTimes(4); // 2 games * 2 players each
+      expect(mockEventBus.emit).toHaveBeenCalledTimes(2);
+    });
+
+    it("should handle missing game session data gracefully", async () => {
+      const games = [{ id: "game-1" }];
+
+      mockGameMatchingEngine.getGameSession.mockReturnValue(null);
+
+      await gameProcessor.processGameResults(games);
+
+      // Should not emit events for missing game sessions
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
     });
   });
 });

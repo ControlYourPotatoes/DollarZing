@@ -3,6 +3,12 @@ import { PlayerManager } from "./player-manager";
 import { VirtualDollarManager } from "../types/virtual-dollar-types";
 import { RevenueCalculator } from "../types/revenue-calculator";
 import { DollarState, GameResult } from "../types/virtual-dollar-engine";
+import { EventBus } from "../events/event-bus";
+import {
+  EVENT_TYPES,
+  DayStartedEvent,
+  DayCompletedEvent,
+} from "../events/event-types";
 
 /**
  * Configuration for daily processing
@@ -22,7 +28,8 @@ export class DayProcessor {
     private gameMatchingEngine: GameMatchingEngine,
     private playerManager: PlayerManager,
     private dollarManager: VirtualDollarManager,
-    private revenueCalculator: RevenueCalculator
+    private revenueCalculator: RevenueCalculator,
+    private eventBus: EventBus
   ) {}
 
   /**
@@ -30,11 +37,22 @@ export class DayProcessor {
    */
   async processDay(day: number, config: DayProcessingConfig): Promise<void> {
     console.log(`DEBUG: [DayProcessor] ===== PROCESSING DAY ${day} =====`);
+
+    // Emit day started event
+    const initialPoolStats = this.gameMatchingEngine.getPoolStatistics();
+    await this.eventBus.emit(EVENT_TYPES.DAY_STARTED, {
+      type: EVENT_TYPES.DAY_STARTED,
+      timestamp: new Date(),
+      dayNumber: day,
+      totalPlayers: 0, // Will need to track this properly
+      activePlayers: 0, // Will need to track this properly
+      poolSize: initialPoolStats.totalDollarsInPool,
+    } as DayStartedEvent);
     // Add new virtual dollars to the pool
     await this.addNewRunsToPool();
 
     // Process available games for the day
-    const maxGamesPerDay = Math.max(10, config.initialPlayerCount * 2);
+    const maxGamesPerDay = Math.max(25, config.initialPlayerCount * 2);
 
     const poolStats = this.gameMatchingEngine.getPoolStatistics();
     console.log(
@@ -56,7 +74,9 @@ export class DayProcessor {
       // Process the games through GameMatchingEngine first (this handles the basic resolution)
       // Then process the results for cash-out decisions and re-pooling
       if (matchResult.gamesCreated.length > 0) {
-        console.log(`DEBUG: About to process game results for ${matchResult.gamesCreated.length} games`);
+        console.log(
+          `DEBUG: About to process game results for ${matchResult.gamesCreated.length} games`
+        );
         await this.processGameResults(matchResult.gamesCreated);
         console.log(`DEBUG: Finished processing game results`);
       }
@@ -66,6 +86,19 @@ export class DayProcessor {
         await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
+
+    // Emit day completed event
+    const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();
+    await this.eventBus.emit(EVENT_TYPES.DAY_COMPLETED, {
+      type: EVENT_TYPES.DAY_COMPLETED,
+      timestamp: new Date(),
+      dayNumber: day,
+      gamesProcessed: maxGamesPerDay, // Approximate
+      newPlayers: 0, // Would need to track this
+      totalRevenue: 0, // Would need to track this through revenue events
+      poolSize: finalPoolStats.totalDollarsInPool,
+      activePlayers: 0, // Would need to track this properly
+    } as DayCompletedEvent);
   }
 
   /**
@@ -93,7 +126,9 @@ export class DayProcessor {
    * Resolve games to determine winners and losers
    */
   async resolveGames(games: any[], dailySeed: string): Promise<void> {
-    console.log(`DEBUG: [DayProcessor.resolveGames] Processing ${games.length} games`);
+    console.log(
+      `DEBUG: [DayProcessor.resolveGames] Processing ${games.length} games`
+    );
     games.forEach((gameSession) => {
       // Generate proper daily seed format (YYYY-MM-DD) from config or current date
       const seed = dailySeed.match(/^\d{4}-\d{2}-\d{2}$/)
@@ -109,7 +144,7 @@ export class DayProcessor {
         success: resolutionResult.success,
         hasWinner: !!resolutionResult.winner,
         hasLoser: !!resolutionResult.loser,
-        error: resolutionResult.error
+        error: resolutionResult.error,
       });
 
       if (!resolutionResult.success) {
@@ -141,7 +176,10 @@ export class DayProcessor {
             : "null (run continues)"
         );
         console.log(`DEBUG: Winner result is null:`, winnerResult === null);
-        console.log(`DEBUG: Winner result is undefined:`, winnerResult === undefined);
+        console.log(
+          `DEBUG: Winner result is undefined:`,
+          winnerResult === undefined
+        );
         console.log(
           `DEBUG: Winner current level: ${resolutionResult.winner.currentLevel}`
         );

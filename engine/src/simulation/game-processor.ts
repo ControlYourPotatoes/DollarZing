@@ -1,8 +1,7 @@
 import { GameMatchingEngine } from "../types/game-matching-engine";
-import { PlayerManager } from "./player-manager";
 import { RevenueCalculator } from "../types/revenue-calculator";
-import { VirtualDollarManager } from "../types/virtual-dollar-types";
-import { GameResult, DollarState } from "../types/virtual-dollar-engine";
+import { EventBus } from "../events/event-bus";
+import { EVENT_TYPES, GameResolvedEvent } from "../events/event-types";
 
 /**
  * GameProcessor handles game resolution and result processing
@@ -11,9 +10,8 @@ import { GameResult, DollarState } from "../types/virtual-dollar-engine";
 export class GameProcessor {
   constructor(
     private gameMatchingEngine: GameMatchingEngine,
-    private playerManager: PlayerManager,
     private revenueCalculator: RevenueCalculator,
-    private dollarManager: VirtualDollarManager
+    private eventBus: EventBus
   ) {}
 
   /**
@@ -43,10 +41,11 @@ export class GameProcessor {
   }
 
   /**
-   * Process game results through run orchestrator
+   * Process game results through event system instead of direct orchestration
    */
   async processGameResults(games: any[]): Promise<void> {
-    games.forEach((originalGameSession) => {
+    // Process each game and emit events instead of direct processing
+    for (const originalGameSession of games) {
       // CRITICAL FIX: Fetch the updated game session from completedGames
       const gameSession = this.gameMatchingEngine.getGameSession(
         originalGameSession.id
@@ -56,7 +55,7 @@ export class GameProcessor {
         console.warn(
           `DEBUG: Skipping game ${originalGameSession.id} - missing winner/loser data`
         );
-        return;
+        continue;
       }
 
       const winner = gameSession.winner;
@@ -66,64 +65,25 @@ export class GameProcessor {
         `DEBUG: [GameProcessor] Processing game ${gameSession.id} with winner ${winner.ownerId} (Level ${winner.currentLevel}) and loser ${loser.ownerId} (Level ${loser.currentLevel})`
       );
 
-      // Process winner progression
-      const winnerResult = this.playerManager.processGameResult(
-        winner,
-        GameResult.WIN
+      // Instead of direct processing, emit GAME_RESOLVED event
+      // Event handlers will now process the winner and loser progression
+      await this.eventBus.emit(EVENT_TYPES.GAME_RESOLVED, {
+        type: EVENT_TYPES.GAME_RESOLVED,
+        timestamp: new Date(),
+        gameId: gameSession.id,
+        winnerId: winner.ownerId,
+        loserId: loser.ownerId,
+        winnerLevel: winner.currentLevel,
+        loserLevel: loser.currentLevel,
+        winnerDollarId: winner.id,
+        loserDollarId: loser.id,
+        winnings: winner.currentLevel * 10, // Approximate winnings calculation
+        gameResult: "WIN",
+      } as GameResolvedEvent);
+
+      console.log(
+        `DEBUG: [GameProcessor] Emitted GAME_RESOLVED event for game ${gameSession.id} with winner ${winner.ownerId} and loser ${loser.ownerId}`
       );
-
-      if (winnerResult) {
-        console.log(
-          `DEBUG: Winner result: ${winnerResult.completionType}, Level: ${winner.currentLevel}, Winnings: $${winnerResult.totalWinnings}`
-        );
-      } else {
-        // Winner advanced to next level but run continues - re-add to pool
-        console.log(
-          `DEBUG: Winner ${winner.ownerId} advanced to level ${winner.currentLevel}, re-adding to pool`
-        );
-        this.dollarManager.updateDollarState(
-          winner.id,
-          DollarState.POOLED
-        );
-        this.gameMatchingEngine.addToPool(winner);
-      }
-
-      // Process loser result
-      const loserResult = this.playerManager.processGameResult(
-        loser,
-        GameResult.LOSS
-      );
-
-      if (loserResult) {
-        console.log(`DEBUG: Loser result: ${loserResult.completionType}`);
-      }
-
-      // Process cash-outs for revenue tracking
-      [winnerResult, loserResult].forEach((result) => {
-        if (result && result.completionType === "CASH_OUT") {
-          this.revenueCalculator.processCashOut(result.totalWinnings);
-        }
-      });
-
-      // Handle run completions and create new runs
-      [winnerResult, loserResult].forEach((result) => {
-        if (result && result.shouldCreateNewRun) {
-          const playerStrategy = this.playerManager.getPlayerStrategy(
-            result.playerId
-          );
-          const newRun = this.playerManager.createNewRun({
-            playerId: result.playerId,
-            cashOutStrategy: playerStrategy,
-            fundingSource: "DONATION",
-          });
-
-          if (newRun) {
-            // Update state from CREATED to POOLED before adding to matching engine
-            this.dollarManager.updateDollarState(newRun.id, DollarState.POOLED);
-            this.gameMatchingEngine.addToPool(newRun);
-          }
-        }
-      });
-    });
+    }
   }
 }

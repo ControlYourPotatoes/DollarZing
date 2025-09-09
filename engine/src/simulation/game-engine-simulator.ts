@@ -11,6 +11,12 @@ import { CashOutStrategy } from "../types/virtual-dollar-engine";
 import { DayProcessor } from "./day-processor";
 import { PlayerManager } from "./player-manager";
 import { GameProcessor } from "./game-processor";
+import { EventBus } from "../events/event-bus";
+import { GameEventHandler } from "../events/handlers/game-event-handler";
+import { PlayerProgressionHandler } from "../events/handlers/player-progression-handler";
+import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-handler";
+import { PoolManagementHandler } from "../events/handlers/pool-management-handler";
+import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -138,6 +144,10 @@ export class GameEngineSimulator {
   private startTime: number = 0;
   private simulationAborted: boolean = false;
 
+  // Event system
+  private eventBus: EventBus;
+  private eventHandlers: any[] = [];
+
   // Focused component classes
   public readonly dayProcessor: DayProcessor;
   public readonly playerManager: PlayerManager;
@@ -151,6 +161,9 @@ export class GameEngineSimulator {
     revenueCalculator: RevenueCalculator,
     scoringEngine: ScoringEngine
   ) {
+    // Initialize event system
+    this.eventBus = new EventBus();
+
     // Create progression manager with proper charity percentage
     const progressionManager = new ProgressionManager(0.1); // Default charity percentage
 
@@ -164,6 +177,19 @@ export class GameEngineSimulator {
       revenueCalculator,
     };
 
+    // Initialize event handlers
+    this.eventHandlers = [
+      new GameEventHandler(this.eventBus),
+      new PlayerProgressionHandler(this.eventBus, progressionManager),
+      new CashOutDecisionHandler(this.eventBus),
+      new PoolManagementHandler(
+        this.eventBus,
+        virtualDollarManager,
+        gameMatchingEngine
+      ),
+      new RevenueTrackingHandler(this.eventBus, revenueCalculator),
+    ];
+
     // Initialize focused component classes
     this.playerManager = new PlayerManager(
       playerBalanceManager,
@@ -174,14 +200,14 @@ export class GameEngineSimulator {
       gameMatchingEngine,
       this.playerManager,
       virtualDollarManager,
-      revenueCalculator
+      revenueCalculator,
+      this.eventBus // Add EventBus parameter
     );
 
     this.gameProcessor = new GameProcessor(
       gameMatchingEngine,
-      this.playerManager,
       revenueCalculator,
-      virtualDollarManager
+      this.eventBus // Add EventBus parameter
     );
   }
 
@@ -530,5 +556,17 @@ export class GameEngineSimulator {
       jackpotsWon: 0,
       averageRunLength: 0,
     };
+  }
+
+  /**
+   * Clean up event handlers
+   */
+  dispose(): void {
+    this.eventHandlers.forEach((handler) => {
+      if (handler.dispose) {
+        handler.dispose();
+      }
+    });
+    this.eventHandlers = [];
   }
 }
