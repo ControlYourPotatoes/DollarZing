@@ -166,7 +166,11 @@ export interface PoolCapacityReachedEvent extends BaseEvent {
 export interface PoolManagementErrorEvent extends BaseEvent {
   type: "POOL_MANAGEMENT_ERROR";
   virtualDollarId: string;
-  operation: "RE_POOL_WINNER" | "ADD_TO_POOL" | "STATE_VALIDATION" | "POOL_SYNC";
+  operation:
+    | "RE_POOL_WINNER"
+    | "ADD_TO_POOL"
+    | "STATE_VALIDATION"
+    | "POOL_SYNC";
   error: string;
   integrationComponent?: "GameMatchingEngine" | "VirtualDollarManager";
 }
@@ -303,6 +307,67 @@ export interface RunCompletedEvent extends BaseEvent {
   wasJackpot: boolean;
 }
 
+// ===== DATASET ORCHESTRATOR EVENTS =====
+
+export interface DatasetGenerationStartedEvent extends BaseEvent {
+  type: "DATASET_GENERATION_STARTED";
+  parameterId: string;
+  combination: {
+    growthRate: number;
+    riskLevel: string;
+    charityPercentage: number;
+  };
+  estimatedDurationMs: number;
+}
+
+export interface DatasetGenerationProgressEvent extends BaseEvent {
+  type: "DATASET_GENERATION_PROGRESS";
+  parameterId: string;
+  currentDay: number;
+  totalDays: number;
+  progressPercentage: number;
+  gamesProcessed: number;
+  playersActive: number;
+}
+
+export interface DatasetGenerationCompletedEvent extends BaseEvent {
+  type: "DATASET_GENERATION_COMPLETED";
+  parameterId: string;
+  success: boolean;
+  durationMs: number;
+  recordCount: number;
+  outputPaths?: {
+    directory: string;
+    datasetFile: string;
+    metadataFile: string;
+  };
+  error?: string;
+}
+
+export interface DatasetValidationEvent extends BaseEvent {
+  type: "DATASET_VALIDATION";
+  parameterId: string;
+  isValid: boolean;
+  errors: string[];
+  qualityMetrics: {
+    totalGames: number;
+    totalPlayers: number;
+    revenueConsistency: boolean;
+  };
+}
+
+export interface ParameterValidationEvent extends BaseEvent {
+  type: "PARAMETER_VALIDATION";
+  parameterId: string;
+  isValid: boolean;
+  errors: string[];
+  combination: {
+    growthRate: number;
+    riskLevel: string;
+    charityPercentage: number;
+  };
+}
+
 // ===== EVENT TYPE UNION =====
 
 export type SimulationEvent =
@@ -334,7 +399,12 @@ export type SimulationEvent =
   | SimulationStartedEvent
   | SimulationCompletedEvent
   | RunStartedEvent
-  | RunCompletedEvent;
+  | RunCompletedEvent
+  | DatasetGenerationStartedEvent
+  | DatasetGenerationProgressEvent
+  | DatasetGenerationCompletedEvent
+  | DatasetValidationEvent
+  | ParameterValidationEvent;
 
 // ===== EVENT TYPE CONSTANTS =====
 
@@ -385,6 +455,13 @@ export const EVENT_TYPES = {
   // Run management events
   RUN_STARTED: "RUN_STARTED",
   RUN_COMPLETED: "RUN_COMPLETED",
+
+  // Dataset orchestrator events
+  DATASET_GENERATION_STARTED: "DATASET_GENERATION_STARTED",
+  DATASET_GENERATION_PROGRESS: "DATASET_GENERATION_PROGRESS",
+  DATASET_GENERATION_COMPLETED: "DATASET_GENERATION_COMPLETED",
+  DATASET_VALIDATION: "DATASET_VALIDATION",
+  PARAMETER_VALIDATION: "PARAMETER_VALIDATION",
 } as const;
 
 // ===== TYPE HELPERS =====

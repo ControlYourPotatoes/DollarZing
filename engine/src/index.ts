@@ -53,6 +53,17 @@ export { PlayerBalanceManager } from "./types/player-balance-manager";
 export { VirtualDollarManager } from "./types/virtual-dollar-types";
 export { RevenueCalculator } from "./types/revenue-calculator";
 
+// Event system
+export { EventBus } from "./events/event-bus";
+export { EVENT_TYPES } from "./events/event-types";
+export type {
+  DatasetGenerationStartedEvent,
+  DatasetGenerationProgressEvent,
+  DatasetGenerationCompletedEvent,
+  DatasetValidationEvent,
+  ParameterValidationEvent,
+} from "./events/event-types";
+
 // Utility functions
 export {
   getBettingLevelValue,

@@ -159,10 +159,11 @@ export class GameEngineSimulator {
     gameMatchingEngine: GameMatchingEngine,
     runOrchestrator: ProgressionManager,
     revenueCalculator: RevenueCalculator,
-    scoringEngine: ScoringEngine
+    scoringEngine: ScoringEngine,
+    eventBus?: EventBus
   ) {
     // Initialize event system
-    this.eventBus = new EventBus();
+    this.eventBus = eventBus || new EventBus();
 
     // Create progression manager with proper charity percentage
     const progressionManager = new ProgressionManager(0.1); // Default charity percentage
@@ -177,15 +178,31 @@ export class GameEngineSimulator {
       revenueCalculator,
     };
 
+    // Create a simple strategy manager for CashOutDecisionHandler
+    const strategyManager = {
+      getPlayerStrategy: (_playerId: string) => "AVERAGE" as any,
+      makeCashOutDecision: (_context: any) => "CONTINUE" as any,
+      getCashOutProbability: (_level: number, _strategy: any) => 0.1,
+      processDecision: (_context: any) => ({
+        finalLevel: 1,
+        totalWinnings: 0,
+        completed: false,
+      }),
+    };
+
     // Initialize event handlers
     this.eventHandlers = [
-      new GameEventHandler(this.eventBus),
+      new GameEventHandler(
+        this.eventBus,
+        gameMatchingEngine,
+        revenueCalculator
+      ),
       new PlayerProgressionHandler(this.eventBus, progressionManager),
-      new CashOutDecisionHandler(this.eventBus),
+      new CashOutDecisionHandler(this.eventBus, strategyManager),
       new PoolManagementHandler(
         this.eventBus,
-        virtualDollarManager,
-        gameMatchingEngine
+        gameMatchingEngine,
+        virtualDollarManager
       ),
       new RevenueTrackingHandler(this.eventBus, revenueCalculator),
     ];
@@ -409,7 +426,7 @@ export class GameEngineSimulator {
 
     const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
     const activePlayerCount =
-      this.components.runOrchestrator.getActivePlayerCount();
+      this.components.runOrchestrator.getActiveRuns().length;
 
     return {
       currentDay,
@@ -461,7 +478,7 @@ export class GameEngineSimulator {
     const totalVirtualDollars = poolStats.totalDollars;
 
     const runOrchestrator = this.components.runOrchestrator;
-    const activeRuns = runOrchestrator.getAllActiveRuns().length;
+    const activeRuns = runOrchestrator.getActiveRuns().length;
 
     const progressionManager = this.components.progressionManager;
     const completedRuns = progressionManager.getCompletedRuns().length;

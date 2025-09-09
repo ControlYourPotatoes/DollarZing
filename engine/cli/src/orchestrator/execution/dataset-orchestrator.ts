@@ -15,6 +15,13 @@ import {
   ScoringEngine,
   DirectGameSessionFactory,
   DEFAULT_PERFORMANCE_CONFIG,
+  EventBus,
+  EVENT_TYPES,
+  DatasetGenerationStartedEvent,
+  DatasetGenerationProgressEvent,
+  DatasetGenerationCompletedEvent,
+  DatasetValidationEvent,
+  ParameterValidationEvent,
 } from "@/index";
 import type {
   ParameterCombination,
@@ -28,7 +35,8 @@ import { generateDirectoryName, generateFilePaths } from "../parameters/matrix";
  * Create GameEngineSimulator with default components
  */
 function createGameEngineSimulator(
-  config: SimulationConfig
+  config: SimulationConfig,
+  eventBus?: EventBus
 ): GameEngineSimulator {
   // Create core components
   const playerBalanceManager = new PlayerBalanceManager();
@@ -48,11 +56,7 @@ function createGameEngineSimulator(
   );
 
   // Create player run manager
-  const playerRunManager = new PlayerRunManager(
-    undefined, // ProgressionManager will be created internally
-    virtualDollarManager,
-    config.charityPercentage
-  );
+  const playerRunManager = new PlayerRunManager(config.charityPercentage);
 
   // Create revenue calculator
   const revenueCalculator = new RevenueCalculator();
@@ -64,7 +68,8 @@ function createGameEngineSimulator(
     gameMatchingEngine,
     playerRunManager,
     revenueCalculator,
-    scoringEngine
+    scoringEngine,
+    eventBus
   );
 }
 
@@ -123,13 +128,16 @@ export type DatasetProgressCallback = (
 export class DatasetOrchestrator {
   private config: ParameterMappingConfig;
   private orchestratorConfig: OrchestratorConfig;
+  private eventBus: EventBus | undefined;
 
   constructor(
     orchestratorConfig: OrchestratorConfig,
-    mappingConfig?: Partial<ParameterMappingConfig>
+    mappingConfig?: Partial<ParameterMappingConfig>,
+    eventBus?: EventBus
   ) {
     this.orchestratorConfig = orchestratorConfig;
     this.config = this.createMappingConfig(mappingConfig);
+    this.eventBus = eventBus;
   }
 
   /**
@@ -140,11 +148,37 @@ export class DatasetOrchestrator {
     progressCallback?: DatasetProgressCallback
   ): Promise<AdapterGenerationResult> {
     const startTime = performance.now();
+    const parameterId = this.generateParameterId(combination);
 
     try {
-      // Validate parameter combination
-      if (!validateParameterCombination(combination)) {
-        return {
+      // Emit dataset generation started event
+      if (this.eventBus) {
+        await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_STARTED, {
+          type: EVENT_TYPES.DATASET_GENERATION_STARTED,
+          timestamp: new Date(),
+          parameterId,
+          combination,
+          estimatedDurationMs: this.config.maxSimulationTimeMs,
+        } as DatasetGenerationStartedEvent);
+      }
+
+      // Validate parameter combination and emit validation event
+      const isValid = validateParameterCombination(combination);
+      if (this.eventBus) {
+        await this.eventBus.emit(EVENT_TYPES.PARAMETER_VALIDATION, {
+          type: EVENT_TYPES.PARAMETER_VALIDATION,
+          timestamp: new Date(),
+          parameterId,
+          isValid,
+          errors: isValid
+            ? []
+            : [`Invalid parameter combination: ${JSON.stringify(combination)}`],
+          combination,
+        } as ParameterValidationEvent);
+      }
+
+      if (!isValid) {
+        const result: AdapterGenerationResult = {
           combination,
           success: false,
           error: `Invalid parameter combination: ${JSON.stringify(
@@ -152,13 +186,31 @@ export class DatasetOrchestrator {
           )}`,
           generationTimeMs: performance.now() - startTime,
         };
+
+        // Emit completion event with failure
+        if (this.eventBus) {
+          await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+            type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+            timestamp: new Date(),
+            parameterId,
+            success: false,
+            durationMs: result.generationTimeMs,
+            recordCount: 0,
+            error: result.error,
+          } as DatasetGenerationCompletedEvent);
+        }
+
+        return result;
       }
 
       // Create simulation configuration
       const simulationConfig = this.createSimulationConfig(combination);
 
-      // Create GameEngineSimulator with components
-      const simulator = createGameEngineSimulator(simulationConfig);
+      // Create GameEngineSimulator with EventBus
+      const simulator = createGameEngineSimulator(
+        simulationConfig,
+        this.eventBus as EventBus
+      );
 
       if (this.orchestratorConfig.verbose) {
         console.log(
@@ -168,11 +220,31 @@ export class DatasetOrchestrator {
         );
       }
 
-      // Create progress wrapper if callback provided
-      const wrappedCallback = progressCallback
-        ? (progress: SimulationProgress) =>
-            progressCallback(combination, progress)
-        : undefined;
+      // Create enhanced progress wrapper that emits events
+      const wrappedCallback =
+        progressCallback || this.eventBus
+          ? (progress: SimulationProgress) => {
+              // Call original callback if provided
+              if (progressCallback) {
+                progressCallback(combination, progress);
+              }
+
+              // Emit progress event if EventBus available
+              if (this.eventBus) {
+                this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_PROGRESS, {
+                  type: EVENT_TYPES.DATASET_GENERATION_PROGRESS,
+                  timestamp: new Date(),
+                  parameterId,
+                  currentDay: progress.currentDay,
+                  totalDays: progress.totalDays,
+                  progressPercentage:
+                    (progress.currentDay / progress.totalDays) * 100,
+                  gamesProcessed: progress.gamesCompleted || 0,
+                  playersActive: progress.playersActive || 0,
+                } as DatasetGenerationProgressEvent);
+              }
+            }
+          : undefined;
 
       // Run simulation
       const simulationResults = await simulator.executeSimulation(
@@ -180,9 +252,27 @@ export class DatasetOrchestrator {
         wrappedCallback
       );
 
+      // Validate simulation results and emit validation event
+      const validation = this.validateSimulationResults(simulationResults);
+      if (this.eventBus) {
+        await this.eventBus.emit(EVENT_TYPES.DATASET_VALIDATION, {
+          type: EVENT_TYPES.DATASET_VALIDATION,
+          timestamp: new Date(),
+          parameterId,
+          isValid: validation.isValid,
+          errors: validation.errors,
+          qualityMetrics: {
+            totalGames: simulationResults.gameStats?.totalGames || 0,
+            totalPlayers: simulationResults.playerStats?.totalPlayers || 0,
+            revenueConsistency:
+              (simulationResults.revenueStats?.totalPlatformRevenue || 0) >= 0,
+          },
+        } as DatasetValidationEvent);
+      }
+
       // Check for simulation success
       if (!simulationResults.success) {
-        return {
+        const result: AdapterGenerationResult = {
           combination,
           success: false,
           error:
@@ -191,6 +281,21 @@ export class DatasetOrchestrator {
           simulationResults,
           generationTimeMs: performance.now() - startTime,
         };
+
+        // Emit completion event with failure
+        if (this.eventBus) {
+          await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+            type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+            timestamp: new Date(),
+            parameterId,
+            success: false,
+            durationMs: result.generationTimeMs,
+            recordCount: 0,
+            error: result.error,
+          } as DatasetGenerationCompletedEvent);
+        }
+
+        return result;
       }
 
       // Generate output paths
@@ -199,22 +304,51 @@ export class DatasetOrchestrator {
         combination
       );
 
-      // Return successful result (actual file writing handled elsewhere)
-      return {
+      const result: AdapterGenerationResult = {
         combination,
         success: true,
         simulationResults,
         generationTimeMs: performance.now() - startTime,
         outputPaths,
       };
+
+      // Emit successful completion event
+      if (this.eventBus) {
+        await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+          type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+          timestamp: new Date(),
+          parameterId,
+          success: true,
+          durationMs: result.generationTimeMs,
+          recordCount: this.calculateRecordCount(simulationResults),
+          outputPaths,
+        } as DatasetGenerationCompletedEvent);
+      }
+
+      return result;
     } catch (error) {
-      return {
+      const result: AdapterGenerationResult = {
         combination,
         success: false,
         error:
           error instanceof Error ? error.message : "Unknown error occurred",
         generationTimeMs: performance.now() - startTime,
       };
+
+      // Emit completion event with error
+      if (this.eventBus) {
+        await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+          type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+          timestamp: new Date(),
+          parameterId,
+          success: false,
+          durationMs: result.generationTimeMs,
+          recordCount: 0,
+          error: result.error,
+        } as DatasetGenerationCompletedEvent);
+      }
+
+      return result;
     }
   }
 
@@ -335,66 +469,6 @@ export class DatasetOrchestrator {
   }
 
   /**
-   * Calculate estimated record count from simulation results
-   */
-  private calculateRecordCount(simulationResults: SimulationResults): number {
-    // Estimate based on days simulated and average daily activity
-    const { gameStats, config } = simulationResults;
-    return Math.round(
-      config.durationDays * gameStats.averageGamesPerDay +
-        gameStats.totalVirtualDollars +
-        simulationResults.playerStats.totalPlayers
-    );
-  }
-
-  /**
-   * Validate simulation results meet quality requirements
-   */
-  validateSimulationResults(simulationResults: SimulationResults): {
-    isValid: boolean;
-    errors: string[];
-  } {
-    const errors: string[] = [];
-
-    // Check basic success
-    if (!simulationResults.success) {
-      errors.push("Simulation did not complete successfully");
-    }
-
-    // Check minimum data requirements
-    if (simulationResults.gameStats.totalGames < 10) {
-      errors.push("Insufficient games generated (minimum 10 required)");
-    }
-
-    if (simulationResults.playerStats.totalPlayers < 1) {
-      errors.push("No players found in simulation results");
-    }
-
-    // Check revenue calculations are reasonable
-    const { revenueStats, playerStats } = simulationResults;
-    if (revenueStats.totalPlatformRevenue < 0) {
-      errors.push("Invalid negative platform revenue");
-    }
-
-    if (revenueStats.totalCharityContributions < 0) {
-      errors.push("Invalid negative charity contributions");
-    }
-
-    // Check data consistency
-    if (
-      playerStats.activePlayers + playerStats.retiredPlayers !==
-      playerStats.totalPlayers
-    ) {
-      errors.push("Player count inconsistency detected");
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
-  }
-
-  /**
    * Get current configuration
    */
   getConfig(): ParameterMappingConfig {
@@ -496,5 +570,50 @@ export class DatasetOrchestrator {
         )}/metadata.json`,
       },
     };
+  }
+
+  /**
+   * Generate a unique parameter ID for tracking
+   */
+  private generateParameterId(combination: ParameterCombination): string {
+    return `${combination.growthRate}-${combination.riskLevel}-${combination.charityPercentage}`;
+  }
+
+  /**
+   * Validate simulation results for quality metrics
+   */
+  private validateSimulationResults(results: SimulationResults): {
+    isValid: boolean;
+    errors: string[];
+  } {
+    const errors: string[] = [];
+
+    if (!results.success) {
+      errors.push("Simulation failed");
+    }
+
+    if (!results.gameStats || results.gameStats.totalGames === 0) {
+      errors.push("No games were processed");
+    }
+
+    if (!results.playerStats || results.playerStats.totalPlayers === 0) {
+      errors.push("No players were active");
+    }
+
+    if (results.revenueStats && results.revenueStats.totalPlatformRevenue < 0) {
+      errors.push("Invalid revenue data");
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }
+
+  /**
+   * Calculate record count from simulation results
+   */
+  private calculateRecordCount(results: SimulationResults): number {
+    return results.dailyResults?.length || 0;
   }
 }
