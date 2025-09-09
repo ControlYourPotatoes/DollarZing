@@ -67,10 +67,20 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [ ] 7.9 Update orchestrator GameEngineSimulator creation to use event-driven initialization
   - [ ] 7.10 Write orchestrator event integration tests
 
-- [ ] 8. Remove Legacy Coupling and Clean Up
-  - [ ] 8.1 Write tests to verify component independence after cleanup
-  - [ ] 8.2 Remove direct method calls between previously coupled components  
-  - [ ] 8.3 Clean up redundant state management and synchronization code
-  - [ ] 8.4 Update dependency injection to use event-driven patterns
-  - [ ] 8.5 Refactor existing tests to work with new event-driven architecture
-  - [ ] 8.6 Verify all tests pass and system maintains functionality
+- [ ] 8. Complete Parameter Modularity & Event-Driven Integration
+  - [ ] 8.1 Fix charity percentage flow to all event handlers (remove hardcoded 0.1 ProgressionManager)
+  - [ ] 8.2 Implement S-curve growth model integration with player spawning (Conservative/Market/Viral growth)
+  - [ ] 8.3 Update risk/strategy distribution to flow from dataset parameters to event handlers
+  - [ ] 8.4 Update PlayerBalanceManager for 1-to-1 VirtualDollar model (strategy-based allocation)
+  - [ ] 8.5 Remove duplicate business logic between legacy and event-driven systems
+  - [ ] 8.6 Verify all parameters flow correctly per-dataset (27 configuration matrix)
+  - [ ] 8.7 Test end-to-end parameter flow from DatasetOrchestrator to event handlers
+  - [ ] 8.8 Validate 3x3x3 configuration matrix: Growth(Conservative/Market/Viral) × Risk(low/mid/high) × Charity(10%/20%/30%)
+
+- [ ] 9. Remove Legacy Coupling and Clean Up
+  - [ ] 9.1 Write tests to verify component independence after cleanup
+  - [ ] 9.2 Remove direct method calls between previously coupled components  
+  - [ ] 9.3 Clean up redundant state management and synchronization code
+  - [ ] 9.4 Update dependency injection to use event-driven patterns
+  - [ ] 9.5 Refactor existing tests to work with new event-driven architecture
+  - [ ] 9.6 Verify all tests pass and system maintains functionality
