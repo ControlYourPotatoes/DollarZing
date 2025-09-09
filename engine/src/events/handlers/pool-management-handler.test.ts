@@ -163,10 +163,7 @@ describe("PoolManagementHandler", () => {
 
       // Verify new run was created and added to pool
       expect(mockDollarManager.createVirtualDollar).toHaveBeenCalledWith(
-        expect.objectContaining({
-          playerId: "cashout-player",
-          fundingSource: "CASH_OUT_REINVESTMENT",
-        })
+        "cashout-player"
       );
 
       expect(mockDollarManager.updateDollarState).toHaveBeenCalledWith(

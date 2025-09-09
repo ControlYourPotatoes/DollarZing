@@ -14,7 +14,7 @@ import {
   EVENT_TYPES,
 } from "../event-types";
 import { RevenueCalculator } from "../../types/revenue-calculator";
-import { GameSession } from "../../types/virtual-dollar-engine";
+import { GameSession, VirtualDollar, DollarState, BettingLevel } from "../../types/virtual-dollar-engine";
 
 /**
  * Transaction record for comprehensive financial logging
@@ -298,17 +298,54 @@ export class RevenueTrackingHandler {
 
   /**
    * Create game session from game resolved event
+   * Creates minimal VirtualDollar objects for revenue tracking purposes
    */
   private createGameSessionFromEvent(event: GameResolvedEvent): GameSession {
+    // Create minimal VirtualDollar objects with required properties
+    const winnerDollar: VirtualDollar = {
+      id: event.winnerDollarId,
+      serialNumber: `TRACK-${event.winnerDollarId}`,
+      currentScore: event.winnings,
+      currentLevel: event.winnerLevel as BettingLevel,
+      state: DollarState.WON,
+      playerId: event.winnerId,
+      gamesWon: 1,
+      gamesLost: 0,
+      gamesPlayed: 1,
+      currentProgression: event.winnings,
+      totalProgression: event.winnings,
+      isActive: true,
+      createdAt: event.timestamp
+    };
+
+    const loserDollar: VirtualDollar = {
+      id: event.loserDollarId,
+      serialNumber: `TRACK-${event.loserDollarId}`,
+      currentScore: 0,
+      currentLevel: event.loserLevel as BettingLevel,
+      state: DollarState.LOST,
+      playerId: event.loserId,
+      gamesWon: 0,
+      gamesLost: 1,
+      gamesPlayed: 1,
+      currentProgression: 0,
+      totalProgression: 0,
+      isActive: false,
+      createdAt: event.timestamp
+    };
+
     return {
       id: event.gameId,
-      timestamp: event.timestamp,
+      dollar1: winnerDollar,
+      dollar2: loserDollar,
+      winner: winnerDollar,
+      loser: loserDollar,
+      level: event.winnerLevel as BettingLevel,
       platformFee: 0.2, // Standard platform fee
-      winnings: event.winnings,
-      dollar1: { id: event.winnerDollarId },
-      dollar2: { id: event.loserDollarId },
-      winner: { id: event.winnerId },
-      loser: { id: event.loserId }
+      timestamp: event.timestamp,
+      gameNumber: 0, // Not available in event data
+      dailySeed: "revenue-tracking", // Placeholder for revenue tracking
+      winnings: event.winnings
     };
   }
 

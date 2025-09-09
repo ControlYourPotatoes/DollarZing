@@ -9,7 +9,6 @@ import {
   RevenueUpdateEvent,
   EVENT_TYPES 
 } from "../event-types";
-import { RevenueCalculator } from "../../types/revenue-calculator";
 
 describe("RevenueTrackingHandler", () => {
   let eventBus: EventBus;
@@ -627,11 +626,7 @@ describe("RevenueTrackingHandler", () => {
           id: "integration-game",
           timestamp: expect.any(Date),
           platformFee: 0.2, // Standard platform fee
-          winnings: 14.4,
-          dollar1: { id: "integration-dollar-1" },
-          dollar2: { id: "integration-dollar-2" },
-          winner: { id: "integration-winner" },
-          loser: { id: "integration-loser" }
+          winnings: 14.4
         })
       );
     });

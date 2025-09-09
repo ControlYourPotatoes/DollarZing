@@ -14,17 +14,9 @@ import {
   EVENT_TYPES,
 } from "../event-types";
 import { DollarState } from "../../types/virtual-dollar-engine";
-import { VirtualDollar, VirtualDollarManager } from "../../types/virtual-dollar-types";
-import { GameMatchingEngine, PoolOperationResult, PoolStatistics } from "../../types/game-matching-engine";
+import { VirtualDollarManager } from "../../types/virtual-dollar-types";
+import { GameMatchingEngine, PoolStatistics } from "../../types/game-matching-engine";
 
-/**
- * Interface for creating new virtual dollar runs
- */
-export interface NewRunCreationRequest {
-  playerId: string;
-  fundingSource: "CASH_OUT_REINVESTMENT" | "DONATION";
-  previousRunId?: string;
-}
 
 /**
  * Pool management handler that processes re-pooling events
@@ -189,17 +181,8 @@ export class PoolManagementHandler {
    * Create a new run for a player who just cashed out
    */
   private async createNewRunFromCashOut(event: CashOutCompletedEvent): Promise<void> {
-    const newRunRequest: NewRunCreationRequest = {
-      playerId: event.playerId,
-      fundingSource: "CASH_OUT_REINVESTMENT",
-      previousRunId: event.virtualDollarId,
-    };
-
-    // Create new virtual dollar for the run
-    const newRun = this.dollarManager.createVirtualDollar({
-      playerId: event.playerId,
-      fundingSource: "CASH_OUT_REINVESTMENT",
-    });
+    // Create new virtual dollar for the run (using only playerId as required by interface)
+    const newRun = this.dollarManager.createVirtualDollar(event.playerId);
 
     if (!newRun) {
       throw new Error("Failed to create new run");
