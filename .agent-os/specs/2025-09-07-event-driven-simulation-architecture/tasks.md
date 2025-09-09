@@ -39,13 +39,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 4.5 Handle complex decision scenarios and edge cases
   - [x] 4.6 Verify all CashOutDecisionHandler tests pass
 
-- [ ] 5. Implement Pool Management Handler
-  - [ ] 5.1 Write tests for PoolManagementHandler with re-pooling scenarios
-  - [ ] 5.2 Extract re-pooling logic from DayProcessor into event handler
-  - [ ] 5.3 Implement event-driven pool state management
-  - [ ] 5.4 Add integration with GameMatchingEngine through events
-  - [ ] 5.5 Handle pool capacity and state synchronization
-  - [ ] 5.6 Verify all PoolManagementHandler tests pass
+- [x] 5. Implement Pool Management Handler
+  - [x] 5.1 Write tests for PoolManagementHandler with re-pooling scenarios
+  - [x] 5.2 Extract re-pooling logic from DayProcessor into event handler
+  - [x] 5.3 Implement event-driven pool state management
+  - [x] 5.4 Add integration with GameMatchingEngine through events
+  - [x] 5.5 Handle pool capacity and state synchronization
+  - [x] 5.6 Verify all PoolManagementHandler tests pass
 
 - [ ] 6. Create Revenue Tracking Handler
   - [ ] 6.1 Write tests for RevenueTrackingHandler with financial event processing
