@@ -32,6 +32,13 @@ export interface SimulationConfig {
   initialDonationAmount: number;
   maxSimulationTimeMs: number;
   enableProgressReporting: boolean;
+  // Add S-curve growth model parameters
+  growthModel: {
+    adoptionRate: number; // 0.01, 0.1, or 0.5 for Conservative/Market/Viral
+    baseMarket: number; // Base market size (e.g., 1,000,000)
+    midpointDay: number; // Day 90 for S-curve inflection
+    steepnessFactor: number; // 20 for curve steepness
+  };
 }
 
 /**
@@ -126,7 +133,7 @@ export interface SimulationComponents {
   runOrchestrator: ProgressionManager;
   dollarManager: VirtualDollarManager;
   scoringEngine: ScoringEngine;
-  progressionManager: ProgressionManager;
+  progressionManager?: ProgressionManager; // Optional until executeSimulation
   revenueCalculator: RevenueCalculator;
 }
 
@@ -165,40 +172,22 @@ export class GameEngineSimulator {
     // Initialize event system
     this.eventBus = eventBus || new EventBus();
 
-    // Create progression manager with proper charity percentage
-    const progressionManager = new ProgressionManager(0.1); // Default charity percentage
-
     this.components = {
       playerBalanceManager,
       gameMatchingEngine,
       runOrchestrator,
       dollarManager: virtualDollarManager,
       scoringEngine,
-      progressionManager,
       revenueCalculator,
     };
 
-    // Create a simple strategy manager for CashOutDecisionHandler
-    const strategyManager = {
-      getPlayerStrategy: (_playerId: string) => "AVERAGE" as any,
-      makeCashOutDecision: (_context: any) => "CONTINUE" as any,
-      getCashOutProbability: (_level: number, _strategy: any) => 0.1,
-      processDecision: (_context: any) => ({
-        finalLevel: 1,
-        totalWinnings: 0,
-        completed: false,
-      }),
-    };
-
-    // Initialize event handlers
+    // Initialize event handlers (CashOutDecisionHandler will be added in executeSimulation)
     this.eventHandlers = [
       new GameEventHandler(
         this.eventBus,
         gameMatchingEngine,
         revenueCalculator
       ),
-      new PlayerProgressionHandler(this.eventBus, progressionManager),
-      new CashOutDecisionHandler(this.eventBus, strategyManager),
       new PoolManagementHandler(
         this.eventBus,
         gameMatchingEngine,
@@ -286,6 +275,27 @@ export class GameEngineSimulator {
     this.isRunning = true;
     this.simulationAborted = false;
     this.startTime = performance.now();
+
+    // Create progression manager with proper charity percentage from config
+    const progressionManager = new ProgressionManager(config.charityPercentage);
+    this.components.progressionManager = progressionManager;
+
+    // Create strategy manager with config-based player strategies
+    const strategyManager = this.createStrategyManager(config.playerStrategies);
+
+    // Create CashOutDecisionHandler with configured strategy manager
+    const cashOutDecisionHandler = new CashOutDecisionHandler(
+      this.eventBus,
+      strategyManager
+    );
+    this.eventHandlers.push(cashOutDecisionHandler);
+
+    // Create PlayerProgressionHandler with the configured ProgressionManager
+    const playerProgressionHandler = new PlayerProgressionHandler(
+      this.eventBus,
+      progressionManager
+    );
+    this.eventHandlers.push(playerProgressionHandler);
 
     try {
       return await this.runSimulation(progressCallback, cancellationToken);
@@ -481,6 +491,11 @@ export class GameEngineSimulator {
     const activeRuns = runOrchestrator.getActiveRuns().length;
 
     const progressionManager = this.components.progressionManager;
+    if (!progressionManager) {
+      throw new Error(
+        "ProgressionManager not initialized - simulation must be executed first"
+      );
+    }
     const completedRuns = progressionManager.getCompletedRuns().length;
     const allCompletedRuns = progressionManager.getCompletedRuns();
 
@@ -572,6 +587,73 @@ export class GameEngineSimulator {
       activeRuns: 0,
       jackpotsWon: 0,
       averageRunLength: 0,
+    };
+  }
+
+  /**
+   * Create strategy manager with proper cash-out probability formulas
+   */
+  private createStrategyManager(
+    playerStrategies: Partial<Record<CashOutStrategy, number>>
+  ) {
+    // Create player ID to strategy mapping based on distribution
+    const playerStrategiesMap = new Map<string, CashOutStrategy>();
+
+    // Helper function to get cash-out probability based on strategy
+    const getCashOutProbability = (
+      level: number,
+      strategy: CashOutStrategy
+    ): number => {
+      switch (strategy) {
+        case CashOutStrategy.CONSERVATIVE:
+          return Math.max(0.9 - level / 100, 0.1);
+        case CashOutStrategy.BALANCED:
+          return 0.3;
+        case CashOutStrategy.AGGRESSIVE:
+          return Math.min(0.1 + level / 100, 0.9);
+        default:
+          return 0.3;
+      }
+    };
+
+    return {
+      getPlayerStrategy: (playerId: string): CashOutStrategy => {
+        if (!playerStrategiesMap.has(playerId)) {
+          // Assign strategy based on distribution when first accessed
+          const strategies = Object.keys(playerStrategies) as CashOutStrategy[];
+          const weights = Object.values(playerStrategies);
+          const randomValue = Math.random();
+          let cumulativeWeight = 0;
+
+          for (let i = 0; i < strategies.length; i++) {
+            cumulativeWeight += weights[i];
+            if (randomValue <= cumulativeWeight) {
+              playerStrategiesMap.set(playerId, strategies[i]);
+              return strategies[i];
+            }
+          }
+          playerStrategiesMap.set(playerId, CashOutStrategy.BALANCED); // fallback
+        }
+        return playerStrategiesMap.get(playerId)!;
+      },
+
+      makeCashOutDecision: (context: any): "CASH_OUT" | "CONTINUE" => {
+        const strategy =
+          playerStrategiesMap.get(context.playerId) || CashOutStrategy.BALANCED;
+        const probability = getCashOutProbability(
+          context.currentLevel,
+          strategy
+        );
+        return Math.random() < probability ? "CASH_OUT" : "CONTINUE";
+      },
+
+      getCashOutProbability,
+
+      processDecision: (context: any) => ({
+        finalLevel: context.currentLevel,
+        totalWinnings: context.totalWinnings,
+        completed: true,
+      }),
     };
   }
 
