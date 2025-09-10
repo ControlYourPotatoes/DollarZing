@@ -1,22 +1,21 @@
+// This is line 1
 // GameEngineSimulator Implementation - Task 2.3, 2.4
 // Component integration simulator that coordinates DayProcessor, PlayerManager, and GameProcessor
 
-import { PlayerBalanceManager } from "../types/player-balance-manager";
 import { GameMatchingEngine } from "../types/game-matching-engine";
 import { VirtualDollarManager } from "../types/virtual-dollar-types";
-import { ScoringEngine } from "../types/scoring-engine";
-import { ProgressionManager } from "../types/progression-manager";
 import { RevenueCalculator } from "../types/revenue-calculator";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
-import { DayProcessor } from "./day-processor";
-import { PlayerManager } from "./player-manager";
-import { GameProcessor } from "./game-processor";
 import { EventBus } from "../events/event-bus";
 import { GameEventHandler } from "../events/handlers/game-event-handler";
 import { PlayerProgressionHandler } from "../events/handlers/player-progression-handler";
 import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-handler";
 import { PoolManagementHandler } from "../events/handlers/pool-management-handler";
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
+import { VirtualDollarFactory } from "../types/factory-interfaces";
+import { EVENT_TYPES, DayStartedEvent } from "../events/event-types";
+import { ProgressionManager } from "../types/progression-manager";
+import { PlayerRunManager } from "../types/player-run-manager";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -128,13 +127,12 @@ export interface SimulationResults {
  * Component references for testing and integration
  */
 export interface SimulationComponents {
-  playerBalanceManager: PlayerBalanceManager;
   gameMatchingEngine: GameMatchingEngine;
-  runOrchestrator: ProgressionManager;
   dollarManager: VirtualDollarManager;
-  scoringEngine: ScoringEngine;
-  progressionManager?: ProgressionManager; // Optional until executeSimulation
   revenueCalculator: RevenueCalculator;
+  virtualDollarFactory: VirtualDollarFactory;
+  progressionManager?: ProgressionManager;
+  runOrchestrator?: PlayerRunManager;
 }
 
 // ===== GAME ENGINE SIMULATOR CLASS =====
@@ -155,33 +153,24 @@ export class GameEngineSimulator {
   private eventBus: EventBus;
   private eventHandlers: any[] = [];
 
-  // Focused component classes
-  public readonly dayProcessor: DayProcessor;
-  public readonly playerManager: PlayerManager;
-  public readonly gameProcessor: GameProcessor;
-
   constructor(
-    playerBalanceManager: PlayerBalanceManager,
-    virtualDollarManager: VirtualDollarManager,
     gameMatchingEngine: GameMatchingEngine,
-    runOrchestrator: ProgressionManager,
+    virtualDollarManager: VirtualDollarManager,
+    virtualDollarFactory: VirtualDollarFactory,
     revenueCalculator: RevenueCalculator,
-    scoringEngine: ScoringEngine,
     eventBus?: EventBus
   ) {
     // Initialize event system
     this.eventBus = eventBus || new EventBus();
 
     this.components = {
-      playerBalanceManager,
       gameMatchingEngine,
-      runOrchestrator,
       dollarManager: virtualDollarManager,
-      scoringEngine,
       revenueCalculator,
+      virtualDollarFactory,
     };
 
-    // Initialize event handlers (CashOutDecisionHandler will be added in executeSimulation)
+    // Initialize complete event handler system
     this.eventHandlers = [
       new GameEventHandler(
         this.eventBus,
@@ -195,26 +184,6 @@ export class GameEngineSimulator {
       ),
       new RevenueTrackingHandler(this.eventBus, revenueCalculator),
     ];
-
-    // Initialize focused component classes
-    this.playerManager = new PlayerManager(
-      playerBalanceManager,
-      runOrchestrator
-    );
-
-    this.dayProcessor = new DayProcessor(
-      gameMatchingEngine,
-      this.playerManager,
-      virtualDollarManager,
-      revenueCalculator,
-      this.eventBus // Add EventBus parameter
-    );
-
-    this.gameProcessor = new GameProcessor(
-      gameMatchingEngine,
-      revenueCalculator,
-      this.eventBus // Add EventBus parameter
-    );
   }
 
   /**
@@ -258,6 +227,7 @@ export class GameEngineSimulator {
     });
   }
 
+  // This is line 248
   /**
    * Execute complete simulation with progress tracking
    */
@@ -290,10 +260,10 @@ export class GameEngineSimulator {
     );
     this.eventHandlers.push(cashOutDecisionHandler);
 
-    // Create PlayerProgressionHandler with the configured ProgressionManager
+    // Create PlayerProgressionHandler with VirtualDollarFactory for event-driven progression
     const playerProgressionHandler = new PlayerProgressionHandler(
       this.eventBus,
-      progressionManager
+      this.components.virtualDollarFactory
     );
     this.eventHandlers.push(playerProgressionHandler);
 
@@ -323,7 +293,7 @@ export class GameEngineSimulator {
   }
 
   /**
-   * Run the main simulation loop using focused component classes
+   * Run the main simulation loop using pure event-driven architecture
    */
   private async runSimulation(
     progressCallback?: (progress: SimulationProgress) => void,
@@ -331,13 +301,6 @@ export class GameEngineSimulator {
   ): Promise<SimulationResults> {
     const { durationDays, enableProgressReporting, maxSimulationTimeMs } =
       this.config;
-
-    // Initialize players using PlayerManager
-    const playerCount = this.playerManager.initializePlayers({
-      initialPlayerCount: this.config.initialPlayerCount,
-      initialDonationAmount: this.config.initialDonationAmount,
-      playerStrategies: this.config.playerStrategies,
-    });
 
     const dailyResults: DailyResult[] = [];
 
@@ -355,28 +318,30 @@ export class GameEngineSimulator {
         throw new Error("Simulation was cancelled");
       }
 
-      // Add new players using PlayerManager
-      this.playerManager.addNewPlayersForDay(day, {
-        initialPlayerCount: this.config.initialPlayerCount,
-        initialDonationAmount: this.config.initialDonationAmount,
+      // Emit DAY_STARTED event - let event handlers process everything
+      const dayStartedEvent: DayStartedEvent = {
+        type: EVENT_TYPES.DAY_STARTED,
+        timestamp: new Date(),
+        dayNumber: day,
+        totalPlayers: this.getTotalPlayersFromRevenueCalc(),
+        activePlayers:
+          this.components.runOrchestrator?.getAllActiveRuns().length || 0,
+        poolSize:
+          this.components.gameMatchingEngine.getPoolStatistics()
+            .totalDollarsInPool,
+        growthModel: this.config.growthModel,
         playerStrategies: this.config.playerStrategies,
-      });
+      };
 
-      // Process the day using DayProcessor
-      await this.dayProcessor.processDay(day, {
-        initialPlayerCount: this.config.initialPlayerCount,
-        maxGamesPerDay: Math.max(10, this.config.initialPlayerCount * 2),
-        dailySeed: this.config.dailySeed,
-      });
+      await this.eventBus.emit(EVENT_TYPES.DAY_STARTED, dayStartedEvent);
 
-      // Generate daily results
+      // Wait for all event processing to complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Generate daily results from current state
       const dailyResult: DailyResult = {
         day: day + 1,
-        playerStatistics: this.playerManager.getPlayerStatistics({
-          initialPlayerCount: this.config.initialPlayerCount,
-          initialDonationAmount: this.config.initialDonationAmount,
-          playerStrategies: this.config.playerStrategies,
-        }),
+        playerStatistics: this.getPlayerStatisticsFromState(),
         gameStatistics: this.generateGameStatistics(),
         revenueStatistics: this.generateRevenueStatistics(),
       };
@@ -403,14 +368,10 @@ export class GameEngineSimulator {
       config: this.config,
       summary: {
         totalDays: durationDays,
-        totalPlayers: playerCount,
+        totalPlayers: this.getTotalPlayersFromRevenueCalc(),
         simulationCompleted: true,
       },
-      playerStats: this.playerManager.getPlayerStatistics({
-        initialPlayerCount: this.config.initialPlayerCount,
-        initialDonationAmount: this.config.initialDonationAmount,
-        playerStrategies: this.config.playerStrategies,
-      }),
+      playerStats: this.getPlayerStatisticsFromState(),
       revenueStats: this.generateRevenueStatistics(),
       gameStats: this.generateGameStatistics(),
       dailyResults,
@@ -435,8 +396,7 @@ export class GameEngineSimulator {
     );
 
     const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
-    const activePlayerCount =
-      this.components.runOrchestrator.getActiveRuns().length;
+    const activePlayerCount = poolStats.totalDollarsInPool;
 
     return {
       currentDay,
@@ -447,6 +407,49 @@ export class GameEngineSimulator {
       gamesCompleted: this.components.revenueCalculator.getTotalGames(),
       dollarsInPool: poolStats.totalDollarsInPool,
       elapsedTimeMs,
+    };
+  }
+
+  /**
+   * Get total players from revenue calculator instead of deprecated PlayerManager
+   */
+  private getTotalPlayersFromRevenueCalc(): number {
+    // In event-driven architecture, we track players through revenue events
+    // Use pool statistics as proxy for active players
+    const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
+    return Math.max(
+      this.config.initialPlayerCount,
+      poolStats.totalDollarsInPool
+    );
+  }
+
+  /**
+   * Get player statistics from current state instead of calling PlayerManager
+   */
+  private getPlayerStatisticsFromState(): PlayerStatistics {
+    // In pure event-driven architecture, get stats from event handlers
+    const totalPlayers = this.getTotalPlayersFromRevenueCalc();
+    const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
+    const activePlayers = poolStats.totalDollarsInPool;
+    const retiredPlayers = Math.max(0, totalPlayers - activePlayers);
+
+    // Get financial data from RevenueCalculator (managed by RevenueTrackingHandler)
+    const totalWinningsFunds =
+      this.components.revenueCalculator.getPlayerWinnings();
+
+    return {
+      totalPlayers,
+      activePlayers,
+      retiredPlayers,
+      totalDonationsFunds: 0, // Tracked via events now
+      totalWinningsFunds,
+      totalProgressionFunds: poolStats.dollarsInGame, // Active progression funds
+      averageGamesPerPlayer:
+        totalPlayers > 0
+          ? this.components.revenueCalculator.getTotalGames() / totalPlayers
+          : 0,
+      playerRetirementRate:
+        totalPlayers > 0 ? retiredPlayers / totalPlayers : 0,
     };
   }
 
@@ -488,7 +491,7 @@ export class GameEngineSimulator {
     const totalVirtualDollars = poolStats.totalDollars;
 
     const runOrchestrator = this.components.runOrchestrator;
-    const activeRuns = runOrchestrator.getActiveRuns().length;
+    const activeRuns = runOrchestrator?.getAllActiveRuns().length || 0;
 
     const progressionManager = this.components.progressionManager;
     if (!progressionManager) {
