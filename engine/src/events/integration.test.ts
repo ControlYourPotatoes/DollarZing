@@ -68,8 +68,20 @@ describe("Event Flow Integration Tests", () => {
     } as any;
 
     mockRevenueCalculator = {
-      processGameRevenue: vi.fn(),
-      processCashOut: vi.fn(),
+      processGameRevenue: vi.fn().mockReturnValue({
+        isValid: true,
+        errors: [],
+        warnings: [],
+      }),
+      processCashOut: vi.fn().mockReturnValue({
+        playerAmount: 80,
+        charityAmount: 20,
+        validation: {
+          isValid: true,
+          errors: [],
+          warnings: [],
+        },
+      }),
       getTotalRevenue: vi.fn().mockReturnValue(1000),
       getRevenueStream: vi.fn().mockReturnValue({
         totalRevenue: 1000,

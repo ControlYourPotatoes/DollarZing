@@ -2,21 +2,25 @@
 // Provides abstraction layer for object creation with dependency injection support
 // Enables performance optimization through object pooling while maintaining clean code
 
-import { VirtualDollar, GameSession, BettingLevel } from './virtual-dollar-engine';
+import {
+  VirtualDollar,
+  GameSession,
+  BettingLevel,
+} from "./virtual-dollar-engine";
 
 /**
  * Statistics interface for factory performance monitoring
  * Tracks object creation, pooling efficiency, and performance metrics
  */
 export interface FactoryStatistics {
-  objectsCreated: number;          // Total objects created since initialization
-  objectsReleased: number;         // Total objects released back to factory
-  objectsInUse: number;            // Currently active objects not yet released
-  poolSize: number;                // Current size of object pool (0 for direct factories)
-  poolHitRate: number;             // Percentage of creates satisfied from pool (0-1)
-  averageCreationTime: number;     // Average time to create object in milliseconds
-  averageReleaseTime: number;      // Average time to release object in milliseconds
-  memoryUsageMB: number;           // Estimated memory usage in megabytes
+  objectsCreated: number; // Total objects created since initialization
+  objectsReleased: number; // Total objects released back to factory
+  objectsInUse: number; // Currently active objects not yet released
+  poolSize: number; // Current size of object pool (0 for direct factories)
+  poolHitRate: number; // Percentage of creates satisfied from pool (0-1)
+  averageCreationTime: number; // Average time to create object in milliseconds
+  averageReleaseTime: number; // Average time to release object in milliseconds
+  memoryUsageMB: number; // Estimated memory usage in megabytes
 }
 
 /**
@@ -51,6 +55,101 @@ export interface VirtualDollarFactory {
    * @returns Current factory statistics including performance metrics
    */
   getStatistics(): FactoryStatistics;
+
+  // ===========================================
+  // EVENT-DRIVEN STATE MANAGEMENT METHODS
+  // ===========================================
+
+  /**
+   * Advance a player to the next level with winnings calculation
+   * Handles level progression, winnings updates, and validation
+   * @param dollarId - ID of the VirtualDollar to advance
+   * @param newLevel - Target level to advance to (1-10)
+   * @param additionalWinnings - Winnings earned from advancing
+   * @returns Updated VirtualDollar with new state
+   * @throws Error if dollarId not found or invalid level progression
+   */
+  advancePlayerLevel(
+    dollarId: string,
+    newLevel: BettingLevel,
+    additionalWinnings: number
+  ): VirtualDollar;
+
+  /**
+   * Mark a player as eliminated and update their state
+   * Sets appropriate elimination state and completion data
+   * @param dollarId - ID of the VirtualDollar to eliminate
+   * @param eliminationLevel - Level at which player was eliminated
+   * @returns Updated VirtualDollar with elimination state
+   * @throws Error if dollarId not found
+   */
+  eliminatePlayer(
+    dollarId: string,
+    eliminationLevel: BettingLevel
+  ): VirtualDollar;
+
+  /**
+   * Complete a run with specified completion type
+   * Handles jackpot, cash-out, and elimination scenarios
+   * @param dollarId - ID of the VirtualDollar completing run
+   * @param completionType - Type of completion (JACKPOT, CASH_OUT, ELIMINATION)
+   * @param finalWinnings - Final winnings amount
+   * @returns Updated VirtualDollar with completion state
+   * @throws Error if dollarId not found
+   */
+  completeRun(
+    dollarId: string,
+    completionType: "JACKPOT" | "CASH_OUT" | "ELIMINATION",
+    finalWinnings: number
+  ): VirtualDollar;
+
+  /**
+   * Update player winnings without changing level
+   * Used for intermediate winnings calculations
+   * @param dollarId - ID of the VirtualDollar to update
+   * @param additionalWinnings - Amount to add to current winnings
+   * @returns Updated VirtualDollar with new winnings
+   * @throws Error if dollarId not found
+   */
+  addWinnings(dollarId: string, additionalWinnings: number): VirtualDollar;
+
+  /**
+   * Increment games played counter for a player
+   * Tracks game participation for statistics
+   * @param dollarId - ID of the VirtualDollar to update
+   * @returns Updated VirtualDollar with incremented game count
+   * @throws Error if dollarId not found
+   */
+  incrementGamesPlayed(dollarId: string): VirtualDollar;
+
+  // ===========================================
+  // VALIDATION AND BUSINESS RULES
+  // ===========================================
+
+  /**
+   * Check if a player can advance to the next level
+   * Validates level progression rules and constraints
+   * @param dollarId - ID of the VirtualDollar to check
+   * @param targetLevel - Level to advance to
+   * @returns True if advancement is valid, false otherwise
+   */
+  canPlayerAdvance(dollarId: string, targetLevel: BettingLevel): boolean;
+
+  /**
+   * Calculate winnings for reaching a specific level
+   * Implements exponential progression formula
+   * @param level - Betting level to calculate winnings for
+   * @returns Winnings amount for the specified level
+   */
+  calculateLevelWinnings(level: BettingLevel): number;
+
+  /**
+   * Get current state of a VirtualDollar by ID
+   * Safe getter that doesn't allow direct mutation
+   * @param dollarId - ID of the VirtualDollar to retrieve
+   * @returns ReadOnly copy of VirtualDollar or null if not found
+   */
+  getPlayerState(dollarId: string): Readonly<VirtualDollar> | null;
 }
 
 /**
@@ -71,12 +170,16 @@ export interface GameSessionFactory {
   /**
    * Create a new GameSession instance for the specified game parameters
    * @param dollar1 - First virtual dollar participant
-   * @param dollar2 - Second virtual dollar participant  
+   * @param dollar2 - Second virtual dollar participant
    * @param level - Betting level for this game
    * @returns Fully initialized GameSession ready for scoring
    * @throws Error if parameters are invalid
    */
-  create(dollar1: VirtualDollar, dollar2: VirtualDollar, level: BettingLevel): GameSession;
+  create(
+    dollar1: VirtualDollar,
+    dollar2: VirtualDollar,
+    level: BettingLevel
+  ): GameSession;
 
   /**
    * Release a GameSession instance back to the factory
@@ -104,14 +207,14 @@ export interface GameSessionFactory {
  * Controls factory behavior and object pooling parameters
  */
 export interface PerformanceConfig {
-  enableObjectPooling: boolean;     // Whether to use object pooling for performance
+  enableObjectPooling: boolean; // Whether to use object pooling for performance
   poolSizes: {
-    virtualDollar: number;          // Maximum size of VirtualDollar pool
-    gameSession: number;            // Maximum size of GameSession pool
+    virtualDollar: number; // Maximum size of VirtualDollar pool
+    gameSession: number; // Maximum size of GameSession pool
   };
   prewarmCounts: {
-    virtualDollar: number;          // Number of VirtualDollars to create on initialization
-    gameSession: number;            // Number of GameSessions to create on initialization
+    virtualDollar: number; // Number of VirtualDollars to create on initialization
+    gameSession: number; // Number of GameSessions to create on initialization
   };
   enableBatchOptimizations: boolean; // Whether to optimize batch operations
   enablePerformanceMetrics: boolean; // Whether to track detailed performance metrics
@@ -130,7 +233,7 @@ export interface FactorySelector {
   selectVirtualDollarFactory(config: PerformanceConfig): VirtualDollarFactory;
 
   /**
-   * Select appropriate GameSessionFactory based on configuration  
+   * Select appropriate GameSessionFactory based on configuration
    * @param config - Performance configuration settings
    * @returns Configured GameSessionFactory instance
    */
@@ -142,17 +245,17 @@ export interface FactorySelector {
  * Provides reasonable defaults for factory configuration
  */
 export const DEFAULT_PERFORMANCE_CONFIG: PerformanceConfig = {
-  enableObjectPooling: false,       // Disabled for development/testing by default
+  enableObjectPooling: false, // Disabled for development/testing by default
   poolSizes: {
     virtualDollar: 1000,
-    gameSession: 1000
+    gameSession: 1000,
   },
   prewarmCounts: {
     virtualDollar: 10,
-    gameSession: 10
+    gameSession: 10,
   },
   enableBatchOptimizations: true,
-  enablePerformanceMetrics: true
+  enablePerformanceMetrics: true,
 };
 
 /**
@@ -160,15 +263,15 @@ export const DEFAULT_PERFORMANCE_CONFIG: PerformanceConfig = {
  * Enables all optimizations for production workloads
  */
 export const PRODUCTION_PERFORMANCE_CONFIG: PerformanceConfig = {
-  enableObjectPooling: true,        // Enabled for production performance
+  enableObjectPooling: true, // Enabled for production performance
   poolSizes: {
     virtualDollar: 10000,
-    gameSession: 10000
+    gameSession: 10000,
   },
   prewarmCounts: {
     virtualDollar: 100,
-    gameSession: 100
+    gameSession: 100,
   },
   enableBatchOptimizations: true,
-  enablePerformanceMetrics: true
+  enablePerformanceMetrics: true,
 };

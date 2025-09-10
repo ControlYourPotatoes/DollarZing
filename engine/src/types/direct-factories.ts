@@ -72,6 +72,7 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
   private objectsReleased = 0;
   private performanceTracker: PerformanceTracker;
   private config: PerformanceConfig;
+  private dollarRegistry: Map<string, VirtualDollar> = new Map();
 
   constructor(config: PerformanceConfig) {
     this.config = config;
@@ -113,6 +114,9 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
 
       this.objectsCreated++;
 
+      // Register dollar in registry for event-driven state management
+      this.dollarRegistry.set(dollar.id, dollar);
+
       if (this.config.enablePerformanceMetrics) {
         const endTime = performance.now();
         this.performanceTracker.recordCreation(startTime, endTime);
@@ -132,6 +136,9 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
     if (!dollar) {
       return; // Handle null/undefined gracefully
     }
+
+    // Remove from registry when released
+    this.dollarRegistry.delete(dollar.id);
 
     // For direct factory, release is just a counter increment
     // No actual object pooling occurs
@@ -234,6 +241,134 @@ export class DirectVirtualDollarFactory implements VirtualDollarFactory {
       .toString()
       .padStart(8, "0");
     return `${firstLetter}${digits}${lastLetter}`;
+  }
+
+  // ===========================================
+  // EVENT-DRIVEN STATE MANAGEMENT IMPLEMENTATION
+  // ===========================================
+
+  advancePlayerLevel(
+    dollarId: string,
+    newLevel: BettingLevel,
+    additionalWinnings: number
+  ): VirtualDollar {
+    const dollar = this.findDollarById(dollarId);
+    if (!dollar) {
+      throw new Error(`VirtualDollar not found: ${dollarId}`);
+    }
+
+    // Validate level progression
+    if (newLevel <= dollar.currentLevel || newLevel > 10) {
+      throw new Error(
+        `Invalid level progression: ${dollar.currentLevel} -> ${newLevel}`
+      );
+    }
+
+    // Update dollar state
+    dollar.currentLevel = newLevel;
+    dollar.currentRunWinnings += additionalWinnings;
+    dollar.gamesInThisRun += 1;
+
+    console.log(
+      `[VirtualDollarFactory] Advanced ${dollarId} to Level ${newLevel}, winnings: ${dollar.currentRunWinnings}`
+    );
+
+    return dollar;
+  }
+
+  eliminatePlayer(
+    dollarId: string,
+    eliminationLevel: BettingLevel
+  ): VirtualDollar {
+    const dollar = this.findDollarById(dollarId);
+    if (!dollar) {
+      throw new Error(`VirtualDollar not found: ${dollarId}`);
+    }
+
+    // Update elimination state
+    dollar.state = "ELIMINATED" as any;
+    dollar.currentLevel = eliminationLevel;
+
+    console.log(
+      `[VirtualDollarFactory] Eliminated ${dollarId} at Level ${eliminationLevel}`
+    );
+
+    return dollar;
+  }
+
+  completeRun(
+    dollarId: string,
+    completionType: "JACKPOT" | "CASH_OUT" | "ELIMINATION",
+    finalWinnings: number
+  ): VirtualDollar {
+    const dollar = this.findDollarById(dollarId);
+    if (!dollar) {
+      throw new Error(`VirtualDollar not found: ${dollarId}`);
+    }
+
+    // Update completion state
+    dollar.state =
+      completionType === "ELIMINATION"
+        ? ("ELIMINATED" as any)
+        : ("COMPLETED" as any);
+    dollar.currentRunWinnings = finalWinnings;
+
+    console.log(
+      `[VirtualDollarFactory] Completed run for ${dollarId}: ${completionType}, winnings: ${finalWinnings}`
+    );
+
+    return dollar;
+  }
+
+  addWinnings(dollarId: string, additionalWinnings: number): VirtualDollar {
+    const dollar = this.findDollarById(dollarId);
+    if (!dollar) {
+      throw new Error(`VirtualDollar not found: ${dollarId}`);
+    }
+
+    dollar.currentRunWinnings += additionalWinnings;
+    return dollar;
+  }
+
+  incrementGamesPlayed(dollarId: string): VirtualDollar {
+    const dollar = this.findDollarById(dollarId);
+    if (!dollar) {
+      throw new Error(`VirtualDollar not found: ${dollarId}`);
+    }
+
+    dollar.gamesInThisRun += 1;
+    return dollar;
+  }
+
+  canPlayerAdvance(dollarId: string, targetLevel: BettingLevel): boolean {
+    const dollar = this.findDollarById(dollarId);
+    if (!dollar) {
+      return false;
+    }
+
+    return targetLevel > dollar.currentLevel && targetLevel <= 10;
+  }
+
+  calculateLevelWinnings(level: BettingLevel): number {
+    // Exponential progression: Level 1 = $1, Level 2 = $2, Level 3 = $4, etc.
+    return Math.pow(2, level - 1);
+  }
+
+  getPlayerState(dollarId: string): Readonly<VirtualDollar> | null {
+    const dollar = this.findDollarById(dollarId);
+    return dollar ? { ...dollar } : null; // Return copy to prevent mutation
+  }
+
+  // ===========================================
+  // HELPER METHODS
+  // ===========================================
+
+  /**
+   * Helper method to find a VirtualDollar by ID
+   * Uses the internal registry to locate dollars
+   */
+  private findDollarById(dollarId: string): VirtualDollar | null {
+    return this.dollarRegistry.get(dollarId) || null;
   }
 }
 

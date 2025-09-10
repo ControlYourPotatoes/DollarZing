@@ -209,11 +209,21 @@ export class PlayerManager {
       );
     }
 
-    // Create players with assigned strategies
+    // Create players with assigned strategies - use single player registry
     let playerIndex = 0;
     strategyCounts.forEach((count, strategy) => {
       for (let i = 0; i < count; i++) {
         const playerId = `player-${playerIndex}`;
+
+        // Register player in single registry (no duplicate state management)
+        this.playerRegistry.set(playerId, {
+          id: playerId,
+          strategy: strategy,
+          initialDonation: initialDonationAmount,
+          createdAt: new Date(),
+        });
+
+        // Create player balance entry
         this.playerBalanceManager.createPlayer(
           playerId,
           initialDonationAmount,
@@ -282,27 +292,13 @@ export class PlayerManager {
 
   /**
    * Process a game result with proper cash-out logic
+   * NOTE: This method is now deprecated in favor of event-driven approach
+   * Game processing should now be handled by:
+   * - GameEventHandler → emits GAME_RESOLVED events
+   * - PlayerProgressionHandler → handles progression
+   * - CashOutDecisionHandler → handles cash-out decisions
    */
-  processGameResult(virtualDollar: VirtualDollar, result: GameResult): any {
-    console.log(
-      `DEBUG: [PlayerManager] Processing ${result} for player ${virtualDollar.ownerId} at level ${virtualDollar.currentLevel}`
-    );
-
-    // Delegate to the underlying PlayerRunManager, but intercept the cash-out decision
-    const runManagerResult = this.runOrchestrator.processGameResult(
-      virtualDollar,
-      result
-    );
-
-    console.log(
-      `DEBUG: [PlayerManager] PlayerRunManager returned:`,
-      runManagerResult
-        ? `completionType: ${runManagerResult.completionType}`
-        : "null (run continues)"
-    );
-
-    return runManagerResult;
-  }
+  
 
   /**
    * Get player strategy from registry

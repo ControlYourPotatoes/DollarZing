@@ -364,6 +364,13 @@ export class DatasetOrchestrator {
   ): SimulationConfig {
     const { growthRate, riskLevel, charityPercentage } = combination;
 
+    // Map growth rate to S-curve adoption rate
+    const adoptionRateMapping = {
+      15: 0.01, // Conservative: 1% adoption rate (slow growth)
+      35: 0.1, // Market: 10% adoption rate (steady growth)
+      60: 0.5, // Viral: 50% adoption rate (explosive growth)
+    };
+
     // Apply growth rate scaling
     const playerCountMultiplier =
       this.config.growthRateScaling.playerCountMultiplier[growthRate];
@@ -392,6 +399,14 @@ export class DatasetOrchestrator {
       initialDonationAmount: this.config.baseInitialDonation,
       maxSimulationTimeMs: this.config.maxSimulationTimeMs,
       enableProgressReporting: this.orchestratorConfig.enableProgressReporting,
+
+      // S-curve growth model parameters
+      growthModel: {
+        adoptionRate: adoptionRateMapping[growthRate],
+        baseMarket: 1000000, // 1M base market size
+        midpointDay: 90, // S-curve inflection at day 90
+        steepnessFactor: 20, // Controls curve steepness
+      },
     };
   }
 
