@@ -398,6 +398,13 @@ export class VirtualDollarManager {
   }
 
   /**
+   * Get a virtual dollar by ID
+   */
+  getDollar(dollarId: string): VirtualDollar | null {
+    return this.dollars.get(dollarId) || null;
+  }
+
+  /**
    * Get all active runs for a player
    */
   getActiveRunsByPlayer(playerId: string): VirtualDollar[] {
