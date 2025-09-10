@@ -50,7 +50,7 @@ describe("GameEngineSimulator", () => {
       mockScoringEngine,
       gameSessionFactory
     );
-    mockRunOrchestrator = new PlayerRunManager(
+    mockRunOrchestrator = new PlayerManager(
       undefined, // ProgressionManager will be created internally
       mockVirtualDollarManager,
       0.1 // charity percentage

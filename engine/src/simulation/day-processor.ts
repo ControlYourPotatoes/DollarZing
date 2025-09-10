@@ -8,7 +8,6 @@ import {
   DayStartedEvent,
   DayCompletedEvent,
   NewRunCreatedEvent,
-  GameResolvedEvent,
 } from "../events/event-types";
 import { SimulationConfig } from "./game-engine-simulator";
 
@@ -106,15 +105,13 @@ export class DayProcessor {
         break; // No more matches possible
       }
 
-      // Process the games through GameMatchingEngine first (this handles the basic resolution)
-      // Then process the results for cash-out decisions and re-pooling
-      if (matchResult.gamesCreated.length > 0) {
-        console.log(
-          `DEBUG: About to process game results for ${matchResult.gamesCreated.length} games`
-        );
-        await this.processGameResults(matchResult.gamesCreated);
-        console.log(`DEBUG: Finished processing game results`);
-      }
+      // Games are now processed through event-driven architecture:
+      // 1. GameMatchingEngine should emit GAME_CREATED events for each game
+      // 2. GameEventHandler listens to GAME_CREATED and emits GAME_RESOLVED events
+      // 3. PlayerProgressionHandler listens to GAME_RESOLVED and handles progression
+      
+      // Note: This is a transition comment - GameMatchingEngine needs to be updated
+      // to emit GAME_CREATED events instead of relying on manual game processing
 
       // Small delay to prevent blocking
       if (gameAttempt % 50 === 0) {
@@ -138,23 +135,21 @@ export class DayProcessor {
 
   /**
    * Add new runs to the game matching engine pool
+   * DEPRECATED: This method is now deprecated in favor of event-driven approach
+   * New run creation is now handled by:
+   * 1. DayProcessor emits DAY_STARTED event
+   * 2. PlayerManager listens to DAY_STARTED and creates new runs
+   * 3. PlayerManager emits NEW_RUN_CREATED events
+   * 4. DayProcessor.handleNewRunCreated() adds runs to pool
    */
   async addNewRunsToPool(): Promise<void> {
-    // Auto-create new runs for eligible players
-    const newRuns = this.playerManager.autoCreateRuns(2); // Max 2 concurrent runs per player
-
-    console.log(`DEBUG: Created ${newRuns.length} new runs`);
-    newRuns.forEach((virtualDollar) => {
-      // Update state from CREATED to POOLED before adding to matching engine
-      this.dollarManager.updateDollarState(
-        virtualDollar.id,
-        DollarState.POOLED
-      );
-      const addResult = this.gameMatchingEngine.addToPool(virtualDollar);
-      console.log(
-        `DEBUG: Added dollar ${virtualDollar.id} to pool - Success: ${addResult.success}, Level: ${virtualDollar.currentLevel}`
-      );
-    });
+    console.warn(
+      `DEBUG: addNewRunsToPool called - this is deprecated in favor of event-driven approach`
+    );
+    console.warn(
+      `DEBUG: New runs should be created by PlayerManager listening to DAY_STARTED events`
+    );
+    // Deprecated - new runs are now handled via DAY_STARTED → PlayerManager → NEW_RUN_CREATED events
   }
 
   /**
@@ -172,45 +167,20 @@ export class DayProcessor {
 
   /**
    * Process game results through pure event emission
-   * Let event handlers do all the work - no direct method calls
+   * DEPRECATED: This method is now deprecated in favor of full event-driven architecture
+   * Game processing should now flow as:
+   * 1. GameMatchingEngine.attemptMatching() → creates games
+   * 2. GameMatchingEngine should emit GAME_CREATED events 
+   * 3. GameEventHandler listens to GAME_CREATED → resolves games → emits GAME_RESOLVED
+   * 4. PlayerProgressionHandler listens to GAME_RESOLVED → handles progression
    */
-  private async processGameResults(games: any[]): Promise<void> {
-    console.log(`DEBUG: Processing ${games.length} game results via events`);
-
-    for (const originalGameSession of games) {
-      // Fetch the updated game session from completedGames
-      const gameSession = this.gameMatchingEngine.getGameSession(
-        originalGameSession.id
-      );
-
-      if (!gameSession || !gameSession.winner || !gameSession.loser) {
-        console.warn(
-          `DEBUG: Skipping game ${originalGameSession.id} - missing winner/loser data`
-        );
-        continue;
-      }
-
-      const winner = gameSession.winner;
-      const loser = gameSession.loser;
-
-      console.log(
-        `DEBUG: Emitting GAME_RESOLVED event for game ${gameSession.id} with winner ${winner.ownerId} (Level ${winner.currentLevel}) and loser ${loser.ownerId} (Level ${loser.currentLevel})`
-      );
-
-      // Emit GAME_RESOLVED event - let event handlers do all the work
-      await this.eventBus.emit(EVENT_TYPES.GAME_RESOLVED, {
-        type: EVENT_TYPES.GAME_RESOLVED,
-        timestamp: new Date(),
-        gameId: gameSession.id,
-        winnerId: winner.ownerId,
-        winnerDollarId: winner.id,
-        winnerLevel: winner.currentLevel,
-        loserId: loser.ownerId,
-        loserDollarId: loser.id,
-        loserLevel: loser.currentLevel,
-        winnings: winner.currentRunWinnings,
-        gameResult: "WIN" as const,
-      } as GameResolvedEvent);
-    }
+  private async processGameResults(_games: any[]): Promise<void> {
+    console.warn(
+      `DEBUG: processGameResults called - this method is deprecated in favor of full event-driven approach`
+    );
+    console.warn(
+      `DEBUG: Game processing should now be handled by GameEventHandler listening to GAME_CREATED events`
+    );
+    // No longer processing games here - event handlers should do all the work
   }
 }
