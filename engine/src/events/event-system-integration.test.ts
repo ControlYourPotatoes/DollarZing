@@ -15,6 +15,7 @@ import { PlayerProgressionHandler } from "./handlers/player-progression-handler"
 import { CashOutDecisionHandler } from "./handlers/cash-out-decision-handler";
 import { PoolManagementHandler } from "./handlers/pool-management-handler";
 import { RevenueTrackingHandler } from "./handlers/revenue-tracking-handler";
+import { MatchmakingEventHandler } from "./handlers/matchmaking-event-handler";
 import { EVENT_TYPES, GameResolvedEvent } from "./event-types";
 
 // Real business logic components (no mocking)
@@ -34,6 +35,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
   let cashOutHandler: CashOutDecisionHandler;
   let poolHandler: PoolManagementHandler;
   let revenueHandler: RevenueTrackingHandler;
+  let matchmakingHandler: MatchmakingEventHandler;
 
   // Real business logic components (minimal mocking)
   let virtualDollarManager: VirtualDollarManager;
@@ -49,14 +51,14 @@ describe("Task 7.1: Event System Integration Tests", () => {
     eventBus = new EventBus();
     capturedEvents = [];
 
-    // Create real business logic instances with proper configuration
+    // Create real business logic instances with production-like configuration
     virtualDollarManager = new VirtualDollarManager();
     virtualDollarFactory = new DirectVirtualDollarFactory({
-      enableObjectPooling: false,
+      enableObjectPooling: true, // Enable for true integration testing
       poolSizes: { virtualDollar: 100, gameSession: 100 },
       prewarmCounts: { virtualDollar: 10, gameSession: 10 },
-      enableBatchOptimizations: false,
-      enablePerformanceMetrics: false,
+      enableBatchOptimizations: true, // Enable for production-like behavior
+      enablePerformanceMetrics: true, // Enable for production-like behavior
     });
 
     // GameMatchingEngine requires dependencies - we'll create a minimal setup
@@ -66,16 +68,17 @@ describe("Task 7.1: Event System Integration Tests", () => {
     );
     const scoringEngine = new ScoringEngine();
     const gameSessionFactory = new DirectGameSessionFactory({
-      enableObjectPooling: false,
+      enableObjectPooling: true, // Enable for true integration testing
       poolSizes: { virtualDollar: 100, gameSession: 100 },
       prewarmCounts: { virtualDollar: 10, gameSession: 10 },
-      enableBatchOptimizations: false,
-      enablePerformanceMetrics: false,
+      enableBatchOptimizations: true, // Enable for production-like behavior
+      enablePerformanceMetrics: true, // Enable for production-like behavior
     });
     gameMatchingEngine = new GameMatchingEngine(
       virtualDollarManager,
       scoringEngine,
-      gameSessionFactory
+      gameSessionFactory,
+      eventBus
     );
 
     revenueCalculator = new RevenueCalculator(0.2); // 20% charity rate
@@ -136,6 +139,13 @@ describe("Task 7.1: Event System Integration Tests", () => {
       virtualDollarManager
     );
     revenueHandler = new RevenueTrackingHandler(eventBus, revenueCalculator);
+    matchmakingHandler = new MatchmakingEventHandler(
+      eventBus,
+      gameMatchingEngine,
+      virtualDollarManager,
+      gameSessionFactory,
+      scoringEngine
+    );
 
     // Set up comprehensive event capture
     const eventTypes = Object.values(EVENT_TYPES);
@@ -159,6 +169,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
     void cashOutHandler;
     void poolHandler;
     void revenueHandler;
+    void matchmakingHandler;
   });
 
   describe("Complete Game Resolution Flow with Real Components", () => {
@@ -172,8 +183,8 @@ describe("Task 7.1: Event System Integration Tests", () => {
       const loserDollarId = createdLoserDollar.id;
 
       // Add to game pool
-      gameMatchingEngine.addToPool(createdWinnerDollar);
-      gameMatchingEngine.addToPool(createdLoserDollar);
+      await gameMatchingEngine.addToPool(createdWinnerDollar);
+      await gameMatchingEngine.addToPool(createdLoserDollar);
 
       const gameResolvedEvent: GameResolvedEvent = {
         type: EVENT_TYPES.GAME_RESOLVED,
@@ -227,7 +238,9 @@ describe("Task 7.1: Event System Integration Tests", () => {
     it("should handle winner progression and cash-out decision chain", async () => {
       // Arrange: Create winner with CONSERVATIVE strategy (more likely to cash out)
       // Create conservative winner using factory
-      const conservativeWinner = virtualDollarFactory.create("player-conservative");
+      const conservativeWinner = virtualDollarFactory.create(
+        "player-conservative"
+      );
       const winnerDollarId = conservativeWinner.id;
       conservativeWinner.currentLevel = 2;
       conservativeWinner.currentRunWinnings = 100;
@@ -489,13 +502,155 @@ describe("Task 7.1: Event System Integration Tests", () => {
       );
       expect(playerAdvancedEvents.length).toBe(5); // Only 5 winners advance
 
-      // Verify losers were eliminated (RUN_COMPLETED events)  
+      // Verify losers were eliminated (RUN_COMPLETED events)
       const runCompletedEvents = capturedEvents.filter(
         (e) => e.type === EVENT_TYPES.RUN_COMPLETED
       );
       expect(runCompletedEvents.length).toBe(5); // 5 losers eliminated
 
       console.log("✅ Concurrent processing performance validated");
+    });
+  });
+
+  describe("Matchmaking Event Integration", () => {
+    it("should process complete matchmaking flow with new events", async () => {
+      // Arrange: Create two VirtualDollar objects at the same level
+      const dollar1 = virtualDollarFactory.create("matchmaking-player-1");
+      const dollar2 = virtualDollarFactory.create("matchmaking-player-2");
+
+      // Set both to level 1 for matching
+      dollar1.currentLevel = 1;
+      dollar2.currentLevel = 1;
+
+      // Act: Add both dollars to the pool (this should trigger matchmaking)
+      await gameMatchingEngine.addToPool(dollar1);
+      await gameMatchingEngine.addToPool(dollar2);
+
+      // Allow all async event processing to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Assert: Verify matchmaking events were emitted
+      const eventTypes = capturedEvents.map((e) => e.type);
+
+      // Should have pool events
+      expect(eventTypes).toContain(EVENT_TYPES.POOL_ADDED);
+      expect(eventTypes).toContain(EVENT_TYPES.POOL_UPDATED);
+
+      // Should have matchmaking events
+      expect(eventTypes).toContain(EVENT_TYPES.MATCHMAKING_ATTEMPTED);
+      expect(eventTypes).toContain(EVENT_TYPES.MATCH_FOUND);
+      expect(eventTypes).toContain(EVENT_TYPES.FIFO_QUEUE_UPDATED);
+
+      // Should have game creation event
+      expect(eventTypes).toContain(EVENT_TYPES.GAME_CREATED);
+
+      // Verify matchmaking attempted event has correct data
+      const matchmakingAttemptedEvents = capturedEvents.filter(
+        (e) => e.type === EVENT_TYPES.MATCHMAKING_ATTEMPTED
+      );
+      expect(matchmakingAttemptedEvents.length).toBeGreaterThan(0);
+
+      const matchmakingEvent = matchmakingAttemptedEvents[0];
+      expect(
+        matchmakingEvent.data.poolSnapshot.totalDollarsInPool
+      ).toBeGreaterThan(0);
+      expect(matchmakingEvent.data.concurrentGamesCount).toBeDefined();
+      expect(matchmakingEvent.data.maxConcurrentGames).toBeDefined();
+
+      // Verify match found event has correct data
+      const matchFoundEvents = capturedEvents.filter(
+        (e) => e.type === EVENT_TYPES.MATCH_FOUND
+      );
+      expect(matchFoundEvents.length).toBeGreaterThan(0);
+
+      const matchFoundEvent = matchFoundEvents[0];
+      expect(matchFoundEvent.data.virtualDollar1Id).toBeDefined();
+      expect(matchFoundEvent.data.virtualDollar2Id).toBeDefined();
+      expect(matchFoundEvent.data.matchedLevel).toBe(1);
+      expect(matchFoundEvent.data.fifoOrder).toBeDefined();
+
+      console.log("✅ Complete matchmaking flow with new events validated");
+    });
+
+    it("should handle waiting players when no match is available", async () => {
+      // Arrange: Create only one VirtualDollar (odd number scenario)
+      const dollar = virtualDollarFactory.create("waiting-player");
+      dollar.currentLevel = 2;
+
+      // Act: Add dollar to pool
+      await gameMatchingEngine.addToPool(dollar);
+
+      // Allow all async event processing to complete
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Assert: Verify waiting events were emitted
+      const eventTypes = capturedEvents.map((e) => e.type);
+
+      // Should have pool events
+      expect(eventTypes).toContain(EVENT_TYPES.POOL_ADDED);
+      expect(eventTypes).toContain(EVENT_TYPES.POOL_UPDATED);
+
+      // Should have matchmaking attempted
+      expect(eventTypes).toContain(EVENT_TYPES.MATCHMAKING_ATTEMPTED);
+
+      // Should have player waiting event
+      expect(eventTypes).toContain(EVENT_TYPES.PLAYER_WAITING);
+
+      // Should have FIFO queue updated
+      expect(eventTypes).toContain(EVENT_TYPES.FIFO_QUEUE_UPDATED);
+
+      // Verify player waiting event has correct data
+      const playerWaitingEvents = capturedEvents.filter(
+        (e) => e.type === EVENT_TYPES.PLAYER_WAITING
+      );
+      expect(playerWaitingEvents.length).toBeGreaterThan(0);
+
+      const waitingEvent = playerWaitingEvents[0];
+      expect(waitingEvent.data.virtualDollarId).toBe(dollar.id);
+      expect(waitingEvent.data.playerId).toBe(dollar.ownerId);
+      expect(waitingEvent.data.waitingAtLevel).toBe(2);
+      expect(waitingEvent.data.queuePosition).toBe(1);
+      expect(waitingEvent.data.playersNeededForMatch).toBe(1);
+
+      console.log("✅ Waiting players scenario validated");
+    });
+
+    it("should handle pool removal and update events", async () => {
+      // Arrange: Create and add a dollar to pool
+      const dollar = virtualDollarFactory.create("removal-test-player");
+      dollar.currentLevel = 3;
+
+      await gameMatchingEngine.addToPool(dollar);
+
+      // Clear captured events to focus on removal
+      capturedEvents = [];
+
+      // Act: Remove dollar from pool
+      await gameMatchingEngine.removeFromPool(dollar.id, "CASHED_OUT");
+
+      // Allow all async event processing to complete
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Assert: Verify removal events were emitted
+      const eventTypes = capturedEvents.map((e) => e.type);
+
+      // Should have pool removal and update events
+      expect(eventTypes).toContain(EVENT_TYPES.POOL_REMOVED);
+      expect(eventTypes).toContain(EVENT_TYPES.POOL_UPDATED);
+
+      // Verify pool removed event has correct data
+      const poolRemovedEvents = capturedEvents.filter(
+        (e) => e.type === EVENT_TYPES.POOL_REMOVED
+      );
+      expect(poolRemovedEvents.length).toBe(1);
+
+      const removedEvent = poolRemovedEvents[0];
+      expect(removedEvent.data.virtualDollarId).toBe(dollar.id);
+      expect(removedEvent.data.playerId).toBe(dollar.ownerId);
+      expect(removedEvent.data.reason).toBe("CASHED_OUT");
+      expect(removedEvent.data.poolSize).toBe(0); // Should be empty after removal
+
+      console.log("✅ Pool removal and update events validated");
     });
   });
 });
