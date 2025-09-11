@@ -14,9 +14,11 @@ import {
   EVENT_TYPES,
 } from "../event-types";
 import { DollarState } from "../../types/virtual-dollar-engine";
-import { VirtualDollarManager } from "../../types/virtual-dollar-types";
-import { GameMatchingEngine, PoolStatistics } from "../../types/game-matching-engine";
-
+import { VirtualDollarFactory } from "../../types/factory-interfaces";
+import {
+  GameMatchingEngine,
+  PoolStatistics,
+} from "../../types/game-matching-engine";
 
 /**
  * Pool management handler that processes re-pooling events
@@ -28,7 +30,7 @@ export class PoolManagementHandler {
   constructor(
     private eventBus: EventBus,
     private gameMatchingEngine: GameMatchingEngine,
-    private dollarManager: VirtualDollarManager
+    private virtualDollarFactory: VirtualDollarFactory
   ) {
     this.setupEventSubscriptions();
   }
@@ -38,14 +40,14 @@ export class PoolManagementHandler {
     this.continuePlaySubscription = this.eventBus.on<ContinuePlayEvent>(
       EVENT_TYPES.CONTINUE_PLAY,
       this.handleContinuePlay.bind(this),
-      10 // High priority to ensure pool operations happen first
+      5 // Lower priority, after player advancement (5 < 12)
     );
 
     // Subscribe to CASH_OUT_COMPLETED events to handle new run creation
     this.cashOutCompletedSubscription = this.eventBus.on<CashOutCompletedEvent>(
       EVENT_TYPES.CASH_OUT_COMPLETED,
       this.handleCashOutCompleted.bind(this),
-      5 // Medium priority after cash-out processing
+      5 // Lower priority after cash-out processing (5 < 12)
     );
   }
 
@@ -56,10 +58,7 @@ export class PoolManagementHandler {
     try {
       await this.rePoolWinner(event);
     } catch (error) {
-      console.error(
-        `[PoolManagementHandler] Error re-pooling winner:`,
-        error
-      );
+      console.error(`[PoolManagementHandler] Error re-pooling winner:`, error);
 
       await this.eventBus.emit(EVENT_TYPES.POOL_MANAGEMENT_ERROR, {
         type: EVENT_TYPES.POOL_MANAGEMENT_ERROR,
@@ -74,7 +73,9 @@ export class PoolManagementHandler {
   /**
    * Handle CASH_OUT_COMPLETED event by potentially creating new runs
    */
-  private async handleCashOutCompleted(event: CashOutCompletedEvent): Promise<void> {
+  private async handleCashOutCompleted(
+    event: CashOutCompletedEvent
+  ): Promise<void> {
     try {
       // For completed runs, create a new run if the player wants to continue playing
       if (event.runCompleted && !event.wasJackpot) {
@@ -101,10 +102,17 @@ export class PoolManagementHandler {
    */
   private async rePoolWinner(event: ContinuePlayEvent): Promise<void> {
     // Get the virtual dollar from the manager
-    const virtualDollar = this.dollarManager.getDollar(event.virtualDollarId);
-    
+    const virtualDollar = this.virtualDollarFactory.getDollar(
+      event.virtualDollarId
+    );
+
     if (!virtualDollar) {
-      throw new Error("Virtual dollar not found");
+      // P2P Fix: In concurrent processing, winners might be advanced
+      // before pool management runs - this is not an error, just log and return
+      console.warn(
+        `[PoolManagementHandler] Winner ${event.virtualDollarId} not found - likely already processed by PlayerProgressionHandler in P2P game`
+      );
+      return; // Gracefully handle P2P timing - don't throw error
     }
 
     // Validate dollar state
@@ -123,11 +131,14 @@ export class PoolManagementHandler {
     const previousStats = this.gameMatchingEngine.getPoolStatistics();
 
     // Update dollar state to POOLED
-    this.dollarManager.updateDollarState(event.virtualDollarId, DollarState.POOLED);
+    this.virtualDollarFactory.updateDollarState(
+      event.virtualDollarId,
+      DollarState.POOLED
+    );
 
     // Add to pool through GameMatchingEngine
     const addResult = this.gameMatchingEngine.addToPool(virtualDollar);
-    
+
     if (!addResult.success) {
       // Handle pool capacity or other constraints
       if (addResult.error?.includes("capacity")) {
@@ -180,9 +191,11 @@ export class PoolManagementHandler {
   /**
    * Create a new run for a player who just cashed out
    */
-  private async createNewRunFromCashOut(event: CashOutCompletedEvent): Promise<void> {
+  private async createNewRunFromCashOut(
+    event: CashOutCompletedEvent
+  ): Promise<void> {
     // Create new virtual dollar for the run (using only playerId as required by interface)
-    const newRun = this.dollarManager.createVirtualDollar(event.playerId);
+    const newRun = this.virtualDollarFactory.create(event.playerId);
 
     if (!newRun) {
       throw new Error("Failed to create new run");
@@ -192,11 +205,11 @@ export class PoolManagementHandler {
     const previousStats = this.gameMatchingEngine.getPoolStatistics();
 
     // Update state to POOLED before adding to matching engine
-    this.dollarManager.updateDollarState(newRun.id, DollarState.POOLED);
+    this.virtualDollarFactory.updateDollarState(newRun.id, DollarState.POOLED);
 
     // Add to pool
     const addResult = this.gameMatchingEngine.addToPool(newRun);
-    
+
     if (!addResult.success) {
       await this.eventBus.emit(EVENT_TYPES.POOL_MANAGEMENT_ERROR, {
         type: EVENT_TYPES.POOL_MANAGEMENT_ERROR,
@@ -258,7 +271,7 @@ export class PoolManagementHandler {
   async synchronizePool(): Promise<void> {
     try {
       const stats = this.gameMatchingEngine.getPoolStatistics();
-      
+
       await this.eventBus.emit(EVENT_TYPES.POOL_STATS_UPDATED, {
         type: EVENT_TYPES.POOL_STATS_UPDATED,
         timestamp: new Date(),

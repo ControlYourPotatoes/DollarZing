@@ -5,8 +5,8 @@
 
 import { EventBus, EventSubscription } from "../event-bus";
 import { GameMatchingEngine } from "../../types/game-matching-engine";
-import { VirtualDollarManager } from "../../types/virtual-dollar-manager";
-import { GameSessionFactory } from "../../types/game-session-factory";
+import { VirtualDollarFactory } from "../../types/factory-interfaces";
+import { GameSessionFactory } from "../../types/factory-interfaces";
 import { ScoringEngine } from "../../types/scoring-engine";
 import {
   PoolAddedEvent,
@@ -38,7 +38,7 @@ export class MatchmakingEventHandler {
   constructor(
     private eventBus: EventBus,
     private gameMatchingEngine: GameMatchingEngine,
-    private dollarManager: VirtualDollarManager,
+    private virtualDollarFactory: VirtualDollarFactory,
     private gameSessionFactory: GameSessionFactory,
     private scoringEngine: ScoringEngine
   ) {
@@ -168,8 +168,14 @@ export class MatchmakingEventHandler {
           const game = this.createGameSession(dollar1, dollar2, bettingLevel);
 
           // Mark dollars as in-game
-          this.dollarManager.updateDollarState(dollar1.id, DollarState.IN_GAME);
-          this.dollarManager.updateDollarState(dollar2.id, DollarState.IN_GAME);
+          this.virtualDollarFactory.updateDollarState(
+            dollar1.id,
+            DollarState.IN_GAME
+          );
+          this.virtualDollarFactory.updateDollarState(
+            dollar2.id,
+            DollarState.IN_GAME
+          );
 
           // Remove from pool
           await this.gameMatchingEngine.removeFromPool(dollar1.id);

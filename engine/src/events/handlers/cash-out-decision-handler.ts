@@ -5,7 +5,7 @@
 
 import { EventBus, EventSubscription } from "../event-bus";
 import {
-  PlayerProgressionEvent,
+  GameResolvedEvent,
   CashOutDecisionEvent,
   CashOutCompletedEvent,
   ContinuePlayEvent,
@@ -68,19 +68,20 @@ export class CashOutDecisionHandler {
   }
 
   private setupEventSubscriptions(): void {
-    // Subscribe to PLAYER_ADVANCED events to handle cash-out decisions
-    this.subscription = this.eventBus.on<PlayerProgressionEvent>(
-      EVENT_TYPES.PLAYER_ADVANCED,
-      this.handlePlayerProgression.bind(this),
-      5 // Lower priority to ensure this runs after progression processing
+    // Subscribe to GAME_RESOLVED events to handle cash-out decisions
+    this.subscription = this.eventBus.on<GameResolvedEvent>(
+      EVENT_TYPES.GAME_RESOLVED,
+      this.handleGameResolved.bind(this),
+      15 // Higher priority to ensure cash-out decision happens before progression (15 > 10)
     );
   }
 
-  private async handlePlayerProgression(
-    event: PlayerProgressionEvent
-  ): Promise<void> {
+  private async handleGameResolved(event: GameResolvedEvent): Promise<void> {
     try {
-      await this.processCashOutDecision(event);
+      // Only process cash-out decisions for winners
+      if (event.gameResult === "WIN") {
+        await this.processCashOutDecision(event);
+      }
     } catch (error) {
       console.error(
         `[CashOutDecisionHandler] Error processing cash-out decision:`,
@@ -90,8 +91,8 @@ export class CashOutDecisionHandler {
       await this.eventBus.emit(EVENT_TYPES.CASH_OUT_DECISION_FAILED, {
         type: EVENT_TYPES.CASH_OUT_DECISION_FAILED,
         timestamp: new Date(),
-        playerId: event.playerId,
-        virtualDollarId: event.virtualDollarId,
+        playerId: event.winnerId,
+        virtualDollarId: event.winnerDollarId,
         reason: "Decision making failed",
         error: error instanceof Error ? error.message : String(error),
       });
@@ -99,11 +100,11 @@ export class CashOutDecisionHandler {
   }
 
   private async processCashOutDecision(
-    event: PlayerProgressionEvent
+    event: GameResolvedEvent
   ): Promise<void> {
     // Get player strategy
     const originalStrategy = this.strategyManager.getPlayerStrategy(
-      event.playerId
+      event.winnerId
     );
     let strategy = originalStrategy;
 
@@ -113,7 +114,7 @@ export class CashOutDecisionHandler {
     }
 
     // Special case: Level 10 (jackpot) - always cash out
-    if (event.toLevel === 10) {
+    if (event.winnerLevel === 10) {
       await this.emitCashOutDecision(
         event,
         "CASH_OUT",
@@ -123,14 +124,14 @@ export class CashOutDecisionHandler {
       return;
     }
 
-    // Build decision context
+    // Build decision context using current level (before advancement)
     const context: CashOutDecisionContext = {
-      currentLevel: event.toLevel,
-      totalWinnings: event.totalWinnings,
+      currentLevel: event.winnerLevel,
+      totalWinnings: event.winnings,
       strategy: strategy,
-      gamesPlayed: event.gamesPlayed,
-      playerId: event.playerId,
-      virtualDollarId: event.virtualDollarId,
+      gamesPlayed: 1, // From the resolved game
+      playerId: event.winnerId,
+      virtualDollarId: event.winnerDollarId,
     };
 
     // Make cash-out decision using strategy manager
@@ -139,7 +140,7 @@ export class CashOutDecisionHandler {
     if (strategy === CashOutStrategy.BALANCED) {
       // For balanced strategy, use probabilistic decision
       const probability = this.strategyManager.getCashOutProbability(
-        event.toLevel,
+        event.winnerLevel,
         strategy
       );
       decision = Math.random() < probability ? "CASH_OUT" : "CONTINUE";
@@ -152,7 +153,7 @@ export class CashOutDecisionHandler {
     const reason = this.buildDecisionReason(
       originalStrategy,
       decision,
-      event.toLevel
+      event.winnerLevel
     );
 
     // Emit the decision event
@@ -182,7 +183,7 @@ export class CashOutDecisionHandler {
   }
 
   private async emitCashOutDecision(
-    event: PlayerProgressionEvent,
+    event: GameResolvedEvent,
     decision: "CASH_OUT" | "CONTINUE",
     strategy: CashOutStrategy,
     reason: string
@@ -191,14 +192,14 @@ export class CashOutDecisionHandler {
     const decisionEvent: CashOutDecisionEvent = {
       type: EVENT_TYPES.CASH_OUT_DECISION,
       timestamp: new Date(),
-      playerId: event.playerId,
-      virtualDollarId: event.virtualDollarId,
+      playerId: event.winnerId,
+      virtualDollarId: event.winnerDollarId,
       decision,
-      currentLevel: event.toLevel,
-      totalWinnings: event.totalWinnings,
+      currentLevel: event.winnerLevel,
+      totalWinnings: event.winnings,
       cashOutStrategy: strategy,
       reason,
-      ...(decision === "CASH_OUT" && { amount: event.totalWinnings }),
+      ...(decision === "CASH_OUT" && { amount: event.winnings }),
     };
 
     await this.eventBus.emit(EVENT_TYPES.CASH_OUT_DECISION, decisionEvent);
@@ -211,15 +212,15 @@ export class CashOutDecisionHandler {
     }
   }
 
-  private async processCashOut(event: PlayerProgressionEvent): Promise<void> {
+  private async processCashOut(event: GameResolvedEvent): Promise<void> {
     try {
       // Process the cash-out using strategy manager
       const processContext: DecisionProcessContext = {
         decision: "CASH_OUT",
-        currentLevel: event.toLevel,
-        totalWinnings: event.totalWinnings,
-        playerId: event.playerId,
-        virtualDollarId: event.virtualDollarId,
+        currentLevel: event.winnerLevel,
+        totalWinnings: event.winnings,
+        playerId: event.winnerId,
+        virtualDollarId: event.winnerDollarId,
       };
 
       const result = this.strategyManager.processDecision(processContext);
@@ -228,13 +229,13 @@ export class CashOutDecisionHandler {
       const completedEvent: CashOutCompletedEvent = {
         type: EVENT_TYPES.CASH_OUT_COMPLETED,
         timestamp: new Date(),
-        playerId: event.playerId,
-        virtualDollarId: event.virtualDollarId,
+        playerId: event.winnerId,
+        virtualDollarId: event.winnerDollarId,
         finalLevel: result.finalLevel,
         totalWinnings: result.totalWinnings,
         cashOutAmount: result.cashOutAmount || 0,
         runCompleted: result.completed,
-        wasJackpot: event.toLevel === 10,
+        wasJackpot: event.winnerLevel === 10,
       };
 
       await this.eventBus.emit(EVENT_TYPES.CASH_OUT_COMPLETED, completedEvent);
@@ -247,21 +248,19 @@ export class CashOutDecisionHandler {
     }
   }
 
-  private async processContinuePlay(
-    event: PlayerProgressionEvent
-  ): Promise<void> {
+  private async processContinuePlay(event: GameResolvedEvent): Promise<void> {
     // Calculate next level potential winnings
-    const nextLevel = Math.min(event.toLevel + 1, 10);
+    const nextLevel = Math.min(event.winnerLevel + 1, 10);
     const nextPotentialWinnings = this.calculateNextLevelWinnings(nextLevel);
 
     // Emit continue play event
     const continueEvent: ContinuePlayEvent = {
       type: EVENT_TYPES.CONTINUE_PLAY,
       timestamp: new Date(),
-      playerId: event.playerId,
-      virtualDollarId: event.virtualDollarId,
-      currentLevel: event.toLevel,
-      potentialWinnings: event.totalWinnings,
+      playerId: event.winnerId,
+      virtualDollarId: event.winnerDollarId,
+      currentLevel: event.winnerLevel,
+      potentialWinnings: event.winnings,
       nextLevel,
       nextPotentialWinnings,
     };

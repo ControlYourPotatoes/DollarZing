@@ -4,12 +4,17 @@
  */
 
 import { EventBus, EventSubscription } from "../event-bus";
-import { GameResolvedEvent, EVENT_TYPES } from "../event-types";
+import {
+  GameResolvedEvent,
+  ContinuePlayEvent,
+  EVENT_TYPES,
+} from "../event-types";
 import { BettingLevel } from "../../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../../types/factory-interfaces";
 
 export class PlayerProgressionHandler {
-  private subscription: EventSubscription | null = null;
+  private gameResolvedSubscription: EventSubscription | null = null;
+  private continuePlaySubscription: EventSubscription | null = null;
 
   constructor(
     private eventBus: EventBus,
@@ -19,62 +24,90 @@ export class PlayerProgressionHandler {
   }
 
   private setupEventSubscriptions(): void {
-    // Subscribe to GAME_RESOLVED events to handle winner progression
-    this.subscription = this.eventBus.on<GameResolvedEvent>(
+    // Subscribe to GAME_RESOLVED events to handle loser elimination
+    this.gameResolvedSubscription = this.eventBus.on<GameResolvedEvent>(
       EVENT_TYPES.GAME_RESOLVED,
       this.handleGameResolved.bind(this),
-      10 // Higher priority to ensure we process progression before other handlers
+      12 // Higher priority to advance winner after cash-out decisions (12 < 15)
+    );
+
+    // Subscribe to CONTINUE_PLAY events to handle winner progression
+    this.continuePlaySubscription = this.eventBus.on<ContinuePlayEvent>(
+      EVENT_TYPES.CONTINUE_PLAY,
+      this.handleContinuePlay.bind(this),
+      12 // Higher priority to advance winner after cash-out decisions (12 < 15)
     );
   }
 
   private async handleGameResolved(event: GameResolvedEvent): Promise<void> {
     try {
-      // Process both winner and loser progression
-      await this.processWinnerProgression(event);
+      // Only process loser elimination - winners are processed after cash-out decision
       await this.processLoserElimination(event);
     } catch (error) {
       console.error(
-        `[PlayerProgressionHandler] Error processing game result:`,
+        `[PlayerProgressionHandler] Error processing loser elimination:`,
         error
       );
 
       await this.eventBus.emit(EVENT_TYPES.PLAYER_PROGRESSION_FAILED, {
         type: EVENT_TYPES.PLAYER_PROGRESSION_FAILED,
         timestamp: new Date(),
-        playerId: event.winnerId,
-        virtualDollarId: event.winnerDollarId,
-        currentLevel: event.winnerLevel,
-        reason: "Progression processing failed",
+        playerId: event.loserId,
+        virtualDollarId: event.loserDollarId,
+        currentLevel: event.loserLevel,
+        reason: "Loser elimination failed",
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private async handleContinuePlay(event: ContinuePlayEvent): Promise<void> {
+    try {
+      // Process winner progression only after they decided to continue
+      await this.processWinnerProgression(event);
+    } catch (error) {
+      console.error(
+        `[PlayerProgressionHandler] Error processing winner progression:`,
+        error
+      );
+
+      await this.eventBus.emit(EVENT_TYPES.PLAYER_PROGRESSION_FAILED, {
+        type: EVENT_TYPES.PLAYER_PROGRESSION_FAILED,
+        timestamp: new Date(),
+        playerId: event.playerId,
+        virtualDollarId: event.virtualDollarId,
+        currentLevel: event.currentLevel,
+        reason: "Winner progression failed",
         error: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
   private async processWinnerProgression(
-    event: GameResolvedEvent
+    event: ContinuePlayEvent
   ): Promise<void> {
     try {
       // Calculate progression using factory
-      const newLevel = Math.min(10, event.winnerLevel + 1) as BettingLevel;
+      const newLevel = Math.min(10, event.nextLevel) as BettingLevel;
       const levelWinnings =
         this.virtualDollarFactory.calculateLevelWinnings(newLevel);
 
       // Use factory to advance player - handles all validation and state management
       const updatedDollar = this.virtualDollarFactory.advancePlayerLevel(
-        event.winnerDollarId,
+        event.virtualDollarId,
         newLevel,
         levelWinnings
       );
 
       console.log(
-        `[PlayerProgressionHandler] Winner ${event.winnerId} advanced from Level ${event.winnerLevel} to Level ${newLevel}, winnings: ${updatedDollar.currentRunWinnings}`
+        `[PlayerProgressionHandler] Winner ${event.playerId} advanced from Level ${event.currentLevel} to Level ${newLevel}, winnings: ${updatedDollar.currentRunWinnings}`
       );
 
       // Check if run is complete (reached Level 10 = Jackpot)
       if (newLevel >= 10) {
         await this.emitRunCompleted(
-          event.winnerId,
-          event.winnerDollarId,
+          event.playerId,
+          event.virtualDollarId,
           newLevel,
           updatedDollar.currentRunWinnings,
           true // isJackpot
@@ -82,16 +115,13 @@ export class PlayerProgressionHandler {
       } else {
         // Player advanced to next level - emit PLAYER_ADVANCED event
         await this.emitPlayerAdvanced(
-          event.winnerId,
-          event.winnerDollarId,
-          event.winnerLevel as BettingLevel,
+          event.playerId,
+          event.virtualDollarId,
+          event.currentLevel as BettingLevel,
           newLevel,
           updatedDollar.currentRunWinnings,
           updatedDollar.gamesInThisRun
         );
-
-        // Note: Cash-out decision is handled by CashOutDecisionHandler
-        // which listens to PLAYER_ADVANCED events
       }
     } catch (error) {
       throw new Error(
@@ -185,9 +215,13 @@ export class PlayerProgressionHandler {
    * Clean up event subscriptions
    */
   dispose(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = null;
+    if (this.gameResolvedSubscription) {
+      this.gameResolvedSubscription.unsubscribe();
+      this.gameResolvedSubscription = null;
+    }
+    if (this.continuePlaySubscription) {
+      this.continuePlaySubscription.unsubscribe();
+      this.continuePlaySubscription = null;
     }
   }
 }

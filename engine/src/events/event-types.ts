@@ -52,10 +52,11 @@ export interface PlayerProgressionEvent extends BaseEvent {
   type: "PLAYER_ADVANCED";
   playerId: string;
   virtualDollarId: string;
-  fromLevel: number;
-  toLevel: number;
+  previousLevel: number;
+  currentLevel: number;
   totalWinnings: number;
-  gamesPlayed: number;
+  gamesWonInRun: number;
+  nextBettingAmount: number;
 }
 
 export interface PlayerProgressionFailedEvent extends BaseEvent {
@@ -118,6 +119,45 @@ export interface RePoolRequestEvent extends BaseEvent {
   playerId: string;
   currentLevel: number;
   reason: "WINNER_CONTINUES" | "NEW_RUN_CREATED";
+}
+
+// ===== MATCHMAKING EVENTS =====
+
+export interface MatchmakingAttemptedEvent extends BaseEvent {
+  type: "MATCHMAKING_ATTEMPTED";
+  poolSnapshot: {
+    totalDollarsInPool: number;
+    dollarsAvailableForMatching: number;
+    levelDistribution: Record<number, number>;
+  };
+  concurrentGamesCount: number;
+  maxConcurrentGames: number;
+}
+
+export interface PlayerWaitingEvent extends BaseEvent {
+  type: "PLAYER_WAITING";
+  virtualDollarId: string;
+  playerId: string;
+  waitingAtLevel: number;
+  queuePosition: number; // 1 = first in queue
+  playersNeededForMatch: number; // Usually 1 (need 1 more for pair)
+}
+
+export interface MatchFoundEvent extends BaseEvent {
+  type: "MATCH_FOUND";
+  virtualDollar1Id: string;
+  virtualDollar2Id: string;
+  player1Id: string;
+  player2Id: string;
+  matchedLevel: number;
+  fifoOrder: { player1Position: number; player2Position: number };
+}
+
+export interface FifoQueueUpdatedEvent extends BaseEvent {
+  type: "FIFO_QUEUE_UPDATED";
+  level: number;
+  queueLength: number;
+  waitingPlayerIds: string[]; // Ordered by createdAt (FIFO)
 }
 
 export interface PoolAddedEvent extends BaseEvent {
@@ -426,6 +466,10 @@ export type SimulationEvent =
   | CashOutDecisionFailedEvent
   | ContinuePlayEvent
   | RePoolRequestEvent
+  | MatchmakingAttemptedEvent
+  | PlayerWaitingEvent
+  | MatchFoundEvent
+  | FifoQueueUpdatedEvent
   | PoolAddedEvent
   | PoolRemovedEvent
   | PoolUpdatedEvent
@@ -483,6 +527,12 @@ export const EVENT_TYPES = {
   POOL_CAPACITY_REACHED: "POOL_CAPACITY_REACHED",
   POOL_MANAGEMENT_ERROR: "POOL_MANAGEMENT_ERROR",
   POOL_STATS_UPDATED: "POOL_STATS_UPDATED",
+
+  // Matchmaking events
+  MATCHMAKING_ATTEMPTED: "MATCHMAKING_ATTEMPTED",
+  PLAYER_WAITING: "PLAYER_WAITING",
+  MATCH_FOUND: "MATCH_FOUND",
+  FIFO_QUEUE_UPDATED: "FIFO_QUEUE_UPDATED",
 
   // Revenue events
   REVENUE_GAME_PROCESSED: "REVENUE_GAME_PROCESSED",
