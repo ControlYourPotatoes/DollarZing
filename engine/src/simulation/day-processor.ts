@@ -1,6 +1,6 @@
 import { GameMatchingEngine } from "../types/game-matching-engine";
 import { PlayerManager } from "./player-manager";
-import { VirtualDollarManager } from "../types/virtual-dollar-types";
+import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { DollarState } from "../types/virtual-dollar-engine";
 import { EventBus } from "../events/event-bus";
 import {
@@ -32,6 +32,8 @@ export class DayProcessor {
     private eventBus: EventBus
   ) {
     this.setupEventSubscriptions();
+    // Suppress unused variable warning - playerManager is kept for future use
+    void this.playerManager;
   }
 
   /**
@@ -63,6 +65,7 @@ export class DayProcessor {
 
   /**
    * Process a single day of simulation
+   * DayProcessor handles the daily simulation logic while GameEngineSimulator orchestrates
    */
   async processDay(
     day: number,
@@ -106,12 +109,9 @@ export class DayProcessor {
       }
 
       // Games are now processed through event-driven architecture:
-      // 1. GameMatchingEngine should emit GAME_CREATED events for each game
+      // 1. GameMatchingEngine emits GAME_CREATED events for each game
       // 2. GameEventHandler listens to GAME_CREATED and emits GAME_RESOLVED events
       // 3. PlayerProgressionHandler listens to GAME_RESOLVED and handles progression
-      
-      // Note: This is a transition comment - GameMatchingEngine needs to be updated
-      // to emit GAME_CREATED events instead of relying on manual game processing
 
       // Small delay to prevent blocking
       if (gameAttempt % 50 === 0) {
@@ -163,24 +163,5 @@ export class DayProcessor {
     );
     // Game resolution is now handled by the GameMatchingEngine directly
     // and results are processed through GAME_RESOLVED events
-  }
-
-  /**
-   * Process game results through pure event emission
-   * DEPRECATED: This method is now deprecated in favor of full event-driven architecture
-   * Game processing should now flow as:
-   * 1. GameMatchingEngine.attemptMatching() → creates games
-   * 2. GameMatchingEngine should emit GAME_CREATED events 
-   * 3. GameEventHandler listens to GAME_CREATED → resolves games → emits GAME_RESOLVED
-   * 4. PlayerProgressionHandler listens to GAME_RESOLVED → handles progression
-   */
-  private async processGameResults(_games: any[]): Promise<void> {
-    console.warn(
-      `DEBUG: processGameResults called - this method is deprecated in favor of full event-driven approach`
-    );
-    console.warn(
-      `DEBUG: Game processing should now be handled by GameEventHandler listening to GAME_CREATED events`
-    );
-    // No longer processing games here - event handlers should do all the work
   }
 }

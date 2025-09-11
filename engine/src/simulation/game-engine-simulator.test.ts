@@ -4,7 +4,7 @@ import { GameEngineSimulator } from "./game-engine-simulator";
 import { PlayerBalanceManager } from "../types/player-balance-manager";
 import { GameMatchingEngine } from "../types/game-matching-engine";
 import { PlayerRunManager } from "../types/player-run-manager"; //must be changed to new player manager engine/src/simulation/player-manager.ts
-import { VirtualDollarManager } from "../types/virtual-dollar-types";
+import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { RevenueCalculator } from "../types/revenue-calculator";
 import { ScoringEngine } from "../types/scoring-engine";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";

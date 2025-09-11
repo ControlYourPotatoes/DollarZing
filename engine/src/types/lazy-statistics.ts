@@ -7,7 +7,7 @@ import {
   BettingLevel,
   DollarState,
 } from "./virtual-dollar-engine";
-import { VirtualDollar } from "./virtual-dollar-types";
+import { VirtualDollar } from "./virtual-dollar-engine";
 
 /**
  * Interface for cacheable statistics

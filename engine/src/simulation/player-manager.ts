@@ -180,68 +180,24 @@ export class PlayerManager {
 
   /**
    * Initialize players with starting donation balance
+   * DEPRECATED: This method bypasses event-driven architecture
+   * 
+   * In pure event-driven architecture, initial players should be created by:
+   * 1. GameEngineSimulator emitting initialization events
+   * 2. PlayerManager.handleDayStarted() creating players via growth model
+   * 
+   * This method is kept temporarily for backward compatibility
    */
   initializePlayers(config: PlayerManagementConfig): number {
-    const { initialPlayerCount, initialDonationAmount, playerStrategies } =
-      config;
-
-    // Calculate strategy counts
-    const strategyCounts = new Map<CashOutStrategy, number>();
-    Object.entries(playerStrategies).forEach(([strategy, percentage]) => {
-      const count = Math.round(percentage * initialPlayerCount);
-      strategyCounts.set(strategy as CashOutStrategy, count);
-    });
-
-    // Ensure we have exactly the right number of players
-    let totalAssigned = Array.from(strategyCounts.values()).reduce(
-      (sum, count) => sum + count,
-      0
+    console.warn(
+      `[PlayerManager] initializePlayers called - this method bypasses event-driven architecture`
     );
-    if (totalAssigned !== initialPlayerCount) {
-      // Adjust the largest group to match exact count
-      const largestStrategy = Array.from(strategyCounts.entries()).sort(
-        ([, a], [, b]) => b - a
-      )[0][0];
-      const adjustment = initialPlayerCount - totalAssigned;
-      strategyCounts.set(
-        largestStrategy,
-        strategyCounts.get(largestStrategy)! + adjustment
-      );
-    }
-
-    // Create players with assigned strategies - use single player registry
-    let playerIndex = 0;
-    strategyCounts.forEach((count, strategy) => {
-      for (let i = 0; i < count; i++) {
-        const playerId = `player-${playerIndex}`;
-
-        // Register player in single registry (no duplicate state management)
-        this.playerRegistry.set(playerId, {
-          id: playerId,
-          strategy: strategy,
-          initialDonation: initialDonationAmount,
-          createdAt: new Date(),
-        });
-
-        // Create player balance entry
-        this.playerBalanceManager.createPlayer(
-          playerId,
-          initialDonationAmount,
-          strategy
-        );
-
-        // Initialize player in run orchestrator
-        this.runOrchestrator.initializePlayer(
-          playerId,
-          initialDonationAmount,
-          strategy
-        );
-
-        playerIndex++;
-      }
-    });
-
-    return playerIndex;
+    console.warn(
+      `[PlayerManager] Consider using DAY_STARTED events with growth model to create initial players`
+    );
+    
+    // Deprecated implementation - should be replaced with event-driven approach
+    return 0; // Return 0 to indicate no players created via this deprecated path
   }
 
   /**

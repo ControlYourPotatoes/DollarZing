@@ -57,9 +57,9 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 - [ ] 7. Integrate Event System with Existing Components
   - [ ] 7.1 Write integration tests for complete event flow chains
-  - [ ] 7.2 Modify DayProcessor to use event-driven architecture
-  - [ ] 7.3 Update GameProcessor to emit events instead of direct calls
-  - [ ] 7.4 Refactor PlayerManager to subscribe to relevant events
+  - [x] 7.2 Modify DayProcessor to use event-driven architecture
+  - [x] 7.3 Update GameProcessor to emit events instead of direct calls
+  - [x] 7.4 Refactor PlayerManager to subscribe to relevant events
   - [ ] 7.5 Add event system initialization to game engine setup
   - [ ] 7.6 Verify all integration tests pass
   - [ ] 7.7 Add event integration to DatasetOrchestrator for generation progress tracking
