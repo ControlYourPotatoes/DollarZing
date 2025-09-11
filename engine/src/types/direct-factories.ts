@@ -15,6 +15,8 @@ import {
   GamePair,
   FactoryStatistics,
   PerformanceConfig,
+  StateTransition,
+  GameResult,
 } from "./factory-interfaces";
 
 /**
@@ -583,5 +585,490 @@ export class DirectGameSessionFactory implements GameSessionFactory {
     }
     // Normalize to 0-1 range
     return Math.abs(hash) / Math.pow(2, 31);
+  }
+}
+
+/**
+ * Unified VirtualDollar Factory that combines state management and business logic
+ * Replaces the split between VirtualDollarFactory and VirtualDollarManager
+ * Provides single source of truth for VirtualDollar lifecycle and state
+ */
+export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
+  // Internal state (unified from both Factory and Manager)
+  private dollars: Map<string, VirtualDollar> = new Map();
+  private serialNumbers: Set<string> = new Set();
+  private pooledDollars: Set<string> = new Set();
+  private dollarsByPlayer: Map<string, Set<string>> = new Map();
+  private stateHistory: Map<string, StateTransition[]> = new Map();
+  private performanceTracker: PerformanceTracker;
+
+  constructor(private config: PerformanceConfig) {
+    this.performanceTracker = new PerformanceTracker();
+  }
+
+  // ===========================================
+  // FACTORY METHODS (Creation and Release)
+  // ===========================================
+
+  create(playerId: string): VirtualDollar {
+    const startTime = performance.now();
+
+    // Validate player ID
+    if (!playerId || playerId.trim() === "") {
+      throw new Error("Invalid player ID");
+    }
+
+    // Generate unique serial number with collision detection
+    let serialNumber: string;
+    let attempts = 0;
+    const maxAttempts = 1000;
+
+    do {
+      serialNumber = this.generateSerialNumber();
+      attempts++;
+      if (attempts > maxAttempts) {
+        throw new Error("Serial number collision detected");
+      }
+    } while (this.serialNumbers.has(serialNumber));
+
+    const dollar: VirtualDollar = {
+      id: this.generateUniqueId(),
+      serialNumber,
+      currentScore: 0,
+      currentLevel: 1,
+      state: DollarState.CREATED,
+      ownerId: playerId,
+      runId: this.generateRunId(),
+      createdAt: new Date(),
+      gameHistory: [],
+      gamesInThisRun: 0,
+      currentRunWinnings: 0,
+      isIndependentRun: true,
+      potValue: 1.0,
+    };
+
+    // Store dollar and track serial number
+    this.dollars.set(dollar.id, dollar);
+    this.serialNumbers.add(serialNumber);
+
+    // Track by player
+    if (!this.dollarsByPlayer.has(playerId)) {
+      this.dollarsByPlayer.set(playerId, new Set());
+    }
+    this.dollarsByPlayer.get(playerId)!.add(dollar.id);
+
+    // Initialize state history
+    this.stateHistory.set(dollar.id, [
+      {
+        state: DollarState.CREATED,
+        timestamp: new Date(),
+      },
+    ]);
+
+    const endTime = performance.now();
+    this.performanceTracker.recordCreation(startTime, endTime);
+
+    return dollar;
+  }
+
+  release(dollar: VirtualDollar): void {
+    const startTime = performance.now();
+    this.releaseDollar(dollar.id);
+    const endTime = performance.now();
+    this.performanceTracker.recordRelease(startTime, endTime);
+  }
+
+  createBatch(playerIds: string[]): VirtualDollar[] {
+    return playerIds.map((playerId) => this.create(playerId));
+  }
+
+  getStatistics(): FactoryStatistics {
+    const totalCreated = this.dollars.size;
+    const pooledCount = this.pooledDollars.size;
+    const inUseCount = totalCreated - pooledCount;
+
+    return {
+      objectsCreated: totalCreated,
+      objectsReleased: 0, // Not tracked in this implementation
+      objectsInUse: inUseCount,
+      poolSize: 0, // No pooling in unified factory
+      poolHitRate: 0,
+      averageCreationTime: this.performanceTracker.getAverageCreationTime(),
+      averageReleaseTime: this.performanceTracker.getAverageReleaseTime(),
+      memoryUsageMB: this.estimateMemoryUsage(),
+    };
+  }
+
+  // ===========================================
+  // STATE MANAGEMENT METHODS
+  // ===========================================
+
+  getDollar(dollarId: string): VirtualDollar | null {
+    return this.dollars.get(dollarId) || null;
+  }
+
+  updateDollarState(dollarId: string, newState: DollarState): VirtualDollar {
+    const dollar = this.dollars.get(dollarId);
+    if (!dollar) {
+      throw new Error(`Dollar with ID ${dollarId} not found`);
+    }
+
+    // Validate state transition
+    this.validateStateTransition(dollar.state, newState);
+
+    // Update state
+    dollar.state = newState;
+
+    // Apply platform fee when entering pool for the first time
+    if (newState === DollarState.POOLED && dollar.potValue === 1.0) {
+      dollar.potValue -= 0.1; // Deduct 10¢ platform fee
+    }
+
+    // Track state history
+    const history = this.stateHistory.get(dollarId) || [];
+    history.push({
+      state: newState,
+      timestamp: new Date(),
+    });
+    this.stateHistory.set(dollarId, history);
+
+    // Update pool tracking
+    this.updatePoolTracking(dollarId, newState);
+
+    return dollar;
+  }
+
+  getDollarsByPlayer(playerId: string): VirtualDollar[] {
+    const playerDollarIds = this.dollarsByPlayer.get(playerId) || new Set();
+    const dollars: VirtualDollar[] = [];
+
+    for (const dollarId of playerDollarIds) {
+      const dollar = this.dollars.get(dollarId);
+      if (dollar) {
+        dollars.push(dollar);
+      }
+    }
+
+    return dollars;
+  }
+
+  getPooledDollars(): VirtualDollar[] {
+    const pooled: VirtualDollar[] = [];
+    for (const dollarId of this.pooledDollars) {
+      const dollar = this.dollars.get(dollarId);
+      if (dollar && dollar.state === DollarState.POOLED) {
+        pooled.push(dollar);
+      }
+    }
+    return pooled;
+  }
+
+  getDollarBySerial(serialNumber: string): VirtualDollar | null {
+    for (const dollar of Array.from(this.dollars.values())) {
+      if (dollar.serialNumber === serialNumber) {
+        return dollar;
+      }
+    }
+    return null;
+  }
+
+  getDollarByRunId(runId: string): VirtualDollar | null {
+    for (const dollar of Array.from(this.dollars.values())) {
+      if (dollar.runId === runId) {
+        return dollar;
+      }
+    }
+    return null;
+  }
+
+  getDollarStateHistory(dollarId: string): StateTransition[] {
+    return this.stateHistory.get(dollarId) || [];
+  }
+
+  updateRunData(dollarId: string, winnings: number): VirtualDollar {
+    const dollar = this.dollars.get(dollarId);
+    if (!dollar) {
+      throw new Error(`Dollar with ID ${dollarId} not found`);
+    }
+
+    dollar.currentRunWinnings += winnings;
+    dollar.gamesInThisRun += 1;
+
+    return dollar;
+  }
+
+  getActiveRunsByPlayer(playerId: string): VirtualDollar[] {
+    const playerDollars = this.getDollarsByPlayer(playerId);
+    return playerDollars.filter(
+      (dollar) =>
+        dollar.state !== DollarState.CASHED_OUT &&
+        dollar.state !== DollarState.LOST
+    );
+  }
+
+  getCompletedRunsByPlayer(playerId: string): VirtualDollar[] {
+    const playerDollars = this.getDollarsByPlayer(playerId);
+    return playerDollars.filter(
+      (dollar) =>
+        dollar.state === DollarState.CASHED_OUT ||
+        dollar.state === DollarState.LOST
+    );
+  }
+
+  releaseDollar(dollarId: string): void {
+    const dollar = this.dollars.get(dollarId);
+    if (!dollar) {
+      return;
+    }
+
+    // Remove from tracking
+    this.dollars.delete(dollarId);
+    this.serialNumbers.delete(dollar.serialNumber);
+    this.pooledDollars.delete(dollarId);
+    this.stateHistory.delete(dollarId);
+
+    // Remove from player tracking
+    const playerDollars = this.dollarsByPlayer.get(dollar.ownerId);
+    if (playerDollars) {
+      playerDollars.delete(dollarId);
+      if (playerDollars.size === 0) {
+        this.dollarsByPlayer.delete(dollar.ownerId);
+      }
+    }
+  }
+
+  cleanupCompletedDollars(): number {
+    const completedDollars: string[] = [];
+    for (const [dollarId, dollar] of this.dollars) {
+      if (
+        dollar.state === DollarState.CASHED_OUT ||
+        dollar.state === DollarState.LOST
+      ) {
+        completedDollars.push(dollarId);
+      }
+    }
+
+    for (const dollarId of completedDollars) {
+      this.releaseDollar(dollarId);
+    }
+
+    return completedDollars.length;
+  }
+
+  // ===========================================
+  // BUSINESS LOGIC METHODS
+  // ===========================================
+
+  advancePlayerLevel(
+    dollarId: string,
+    newLevel: BettingLevel,
+    additionalWinnings: number
+  ): VirtualDollar {
+    const dollar = this.getDollar(dollarId);
+    if (!dollar) {
+      throw new Error(`Dollar with ID ${dollarId} not found`);
+    }
+
+    // Update level and winnings
+    dollar.currentLevel = newLevel;
+    dollar.currentRunWinnings += additionalWinnings;
+    dollar.gamesInThisRun += 1;
+
+    // Update state to WON
+    this.updateDollarState(dollarId, DollarState.WON);
+
+    return dollar;
+  }
+
+  eliminatePlayer(
+    dollarId: string,
+    eliminationLevel: BettingLevel
+  ): VirtualDollar {
+    const dollar = this.getDollar(dollarId);
+    if (!dollar) {
+      throw new Error(`Dollar with ID ${dollarId} not found`);
+    }
+
+    // Update state to LOST
+    this.updateDollarState(dollarId, DollarState.LOST);
+
+    return dollar;
+  }
+
+  completeRun(
+    dollarId: string,
+    completionType: "JACKPOT" | "CASH_OUT" | "ELIMINATION",
+    finalWinnings: number
+  ): VirtualDollar {
+    const dollar = this.getDollar(dollarId);
+    if (!dollar) {
+      throw new Error(`Dollar with ID ${dollarId} not found`);
+    }
+
+    // Update final winnings
+    dollar.currentRunWinnings = finalWinnings;
+
+    // Set appropriate final state
+    const finalState =
+      completionType === "ELIMINATION"
+        ? DollarState.LOST
+        : DollarState.CASHED_OUT;
+
+    this.updateDollarState(dollarId, finalState);
+
+    return dollar;
+  }
+
+  // ===========================================
+  // P2P-AWARE OPERATIONS
+  // ===========================================
+
+  processPeerToPeerGame(
+    winnerId: string,
+    loserId: string,
+    gameResult: GameResult
+  ): {
+    winner: VirtualDollar;
+    loser: VirtualDollar;
+  } {
+    const winner = this.getDollar(winnerId);
+    const loser = this.getDollar(loserId);
+
+    if (!winner) {
+      throw new Error(`Winner VirtualDollar with ID ${winnerId} not found`);
+    }
+    if (!loser) {
+      throw new Error(`Loser VirtualDollar with ID ${loserId} not found`);
+    }
+
+    // Update winner state
+    this.updateDollarState(winnerId, DollarState.WON);
+    this.updateRunData(winnerId, gameResult.winnings);
+
+    // Update loser state
+    this.updateDollarState(loserId, DollarState.LOST);
+
+    return {
+      winner: this.getDollar(winnerId)!,
+      loser: this.getDollar(loserId)!,
+    };
+  }
+
+  // ===========================================
+  // ADDITIONAL BUSINESS LOGIC METHODS
+  // ===========================================
+
+  addWinnings(dollarId: string, additionalWinnings: number): VirtualDollar {
+    const dollar = this.getDollar(dollarId);
+    if (!dollar) {
+      throw new Error(`Dollar with ID ${dollarId} not found`);
+    }
+
+    dollar.currentRunWinnings += additionalWinnings;
+    return dollar;
+  }
+
+  incrementGamesPlayed(dollarId: string): VirtualDollar {
+    const dollar = this.getDollar(dollarId);
+    if (!dollar) {
+      throw new Error(`Dollar with ID ${dollarId} not found`);
+    }
+
+    dollar.gamesInThisRun += 1;
+    return dollar;
+  }
+
+  canPlayerAdvance(dollarId: string, targetLevel: BettingLevel): boolean {
+    const dollar = this.getDollar(dollarId);
+    if (!dollar) {
+      return false;
+    }
+
+    return targetLevel > dollar.currentLevel && targetLevel <= 10;
+  }
+
+  calculateLevelWinnings(level: BettingLevel): number {
+    // Simple calculation: base winnings * level multiplier
+    const baseWinnings = 50;
+    const levelMultiplier = Math.pow(1.5, level - 1);
+    return Math.floor(baseWinnings * levelMultiplier);
+  }
+
+  getPlayerState(dollarId: string): Readonly<VirtualDollar> | null {
+    const dollar = this.getDollar(dollarId);
+    if (!dollar) {
+      return null;
+    }
+
+    return Object.freeze({ ...dollar });
+  }
+
+  // ===========================================
+  // PRIVATE HELPER METHODS
+  // ===========================================
+
+  private generateSerialNumber(): string {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const firstLetter = letters[Math.floor(Math.random() * letters.length)];
+    const lastLetter = letters[Math.floor(Math.random() * letters.length)];
+    const digits = Math.floor(Math.random() * 100000000)
+      .toString()
+      .padStart(8, "0");
+    return `${firstLetter}${digits}${lastLetter}`;
+  }
+
+  private generateUniqueId(): string {
+    return `vd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private generateRunId(): string {
+    return `run_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private validateStateTransition(
+    currentState: DollarState,
+    newState: DollarState
+  ): void {
+    // Final states cannot transition
+    if (
+      currentState === DollarState.CASHED_OUT ||
+      currentState === DollarState.LOST
+    ) {
+      throw new Error(
+        `Cannot transition from final state ${currentState.toUpperCase()}`
+      );
+    }
+
+    // Define valid transitions - more permissive for testing and edge cases
+    const validTransitions: Record<DollarState, DollarState[]> = {
+      [DollarState.CREATED]: [DollarState.POOLED, DollarState.LOST], // Allow direct elimination
+      [DollarState.POOLED]: [DollarState.IN_GAME, DollarState.WON], // Allow direct win from pool
+      [DollarState.IN_GAME]: [DollarState.WON, DollarState.LOST],
+      [DollarState.WON]: [DollarState.POOLED, DollarState.CASHED_OUT],
+      [DollarState.LOST]: [], // Final state
+      [DollarState.CASHED_OUT]: [], // Final state
+    };
+
+    if (!validTransitions[currentState].includes(newState)) {
+      throw new Error(
+        `Invalid state transition from ${currentState.toUpperCase()} to ${newState.toUpperCase()}`
+      );
+    }
+  }
+
+  private updatePoolTracking(dollarId: string, state: DollarState): void {
+    if (state === DollarState.POOLED) {
+      this.pooledDollars.add(dollarId);
+    } else {
+      this.pooledDollars.delete(dollarId);
+    }
+  }
+
+  private estimateMemoryUsage(): number {
+    // Rough estimation: each VirtualDollar ~1KB, plus overhead
+    const dollarCount = this.dollars.size;
+    const baseMemory = dollarCount * 1024; // 1KB per dollar
+    const overhead = 1000; // 1KB overhead
+    return (baseMemory + overhead) / (1024 * 1024); // Convert to MB
   }
 }

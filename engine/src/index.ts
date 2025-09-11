@@ -50,7 +50,7 @@ export { GameMatchingEngine } from "./types/game-matching-engine";
 export { ProgressionManager as PlayerRunManager } from "./types/progression-manager";
 export { ScoringEngine } from "./types/scoring-engine";
 export { PlayerBalanceManager } from "./types/player-balance-manager";
-export { VirtualDollarManager } from "./types/virtual-dollar-types";
+export { UnifiedVirtualDollarFactory } from "./types/direct-factories";
 export { RevenueCalculator } from "./types/revenue-calculator";
 
 // Event system

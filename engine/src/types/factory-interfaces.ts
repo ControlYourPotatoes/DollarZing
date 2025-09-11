@@ -6,7 +6,26 @@ import {
   VirtualDollar,
   GameSession,
   BettingLevel,
+  DollarState,
 } from "./virtual-dollar-engine";
+
+/**
+ * State transition record for tracking VirtualDollar state changes
+ */
+export interface StateTransition {
+  state: DollarState;
+  timestamp: Date;
+}
+
+/**
+ * Game result for P2P operations
+ */
+export interface GameResult {
+  winnerId: string;
+  loserId: string;
+  winnings: number;
+  gameId: string;
+}
 
 /**
  * Statistics interface for factory performance monitoring
@@ -57,7 +76,96 @@ export interface VirtualDollarFactory {
   getStatistics(): FactoryStatistics;
 
   // ===========================================
-  // EVENT-DRIVEN STATE MANAGEMENT METHODS
+  // UNIFIED STATE MANAGEMENT METHODS
+  // ===========================================
+
+  /**
+   * Get a VirtualDollar by its ID
+   * @param dollarId - Unique identifier for the VirtualDollar
+   * @returns VirtualDollar instance or null if not found
+   */
+  getDollar(dollarId: string): VirtualDollar | null;
+
+  /**
+   * Update VirtualDollar state with validation and history tracking
+   * @param dollarId - ID of the VirtualDollar to update
+   * @param newState - New state to transition to
+   * @returns Updated VirtualDollar with new state
+   * @throws Error if dollarId not found or invalid state transition
+   */
+  updateDollarState(dollarId: string, newState: DollarState): VirtualDollar;
+
+  /**
+   * Get all VirtualDollars belonging to a specific player
+   * @param playerId - Player identifier
+   * @returns Array of VirtualDollar instances for the player
+   */
+  getDollarsByPlayer(playerId: string): VirtualDollar[];
+
+  /**
+   * Get all VirtualDollars currently in the pool
+   * @returns Array of pooled VirtualDollar instances
+   */
+  getPooledDollars(): VirtualDollar[];
+
+  /**
+   * Get VirtualDollar by serial number
+   * @param serialNumber - Serial number to search for
+   * @returns VirtualDollar instance or null if not found
+   */
+  getDollarBySerial(serialNumber: string): VirtualDollar | null;
+
+  /**
+   * Get VirtualDollar by run ID
+   * @param runId - Run identifier to search for
+   * @returns VirtualDollar instance or null if not found
+   */
+  getDollarByRunId(runId: string): VirtualDollar | null;
+
+  /**
+   * Get state transition history for a VirtualDollar
+   * @param dollarId - ID of the VirtualDollar
+   * @returns Array of state transitions
+   */
+  getDollarStateHistory(dollarId: string): StateTransition[];
+
+  /**
+   * Update run data for a VirtualDollar
+   * @param dollarId - ID of the VirtualDollar to update
+   * @param winnings - Additional winnings to add
+   * @returns Updated VirtualDollar
+   * @throws Error if dollarId not found
+   */
+  updateRunData(dollarId: string, winnings: number): VirtualDollar;
+
+  /**
+   * Get active runs for a player
+   * @param playerId - Player identifier
+   * @returns Array of active VirtualDollar instances
+   */
+  getActiveRunsByPlayer(playerId: string): VirtualDollar[];
+
+  /**
+   * Get completed runs for a player
+   * @param playerId - Player identifier
+   * @returns Array of completed VirtualDollar instances
+   */
+  getCompletedRunsByPlayer(playerId: string): VirtualDollar[];
+
+  /**
+   * Release a VirtualDollar back to the factory for reuse
+   * @param dollarId - ID of the VirtualDollar to release
+   */
+  releaseDollar(dollarId: string): void;
+
+  /**
+   * Clean up completed VirtualDollars
+   * @returns Number of dollars cleaned up
+   */
+  cleanupCompletedDollars(): number;
+
+  // ===========================================
+  // BUSINESS LOGIC METHODS
   // ===========================================
 
   /**
@@ -102,6 +210,28 @@ export interface VirtualDollarFactory {
     completionType: "JACKPOT" | "CASH_OUT" | "ELIMINATION",
     finalWinnings: number
   ): VirtualDollar;
+
+  // ===========================================
+  // P2P-AWARE OPERATIONS
+  // ===========================================
+
+  /**
+   * Process a peer-to-peer game result with atomic state updates
+   * Updates both winner and loser states in a coordinated fashion
+   * @param winnerId - ID of the winning VirtualDollar
+   * @param loserId - ID of the losing VirtualDollar
+   * @param gameResult - Game result data
+   * @returns Object containing both updated VirtualDollars
+   * @throws Error if either VirtualDollar not found
+   */
+  processPeerToPeerGame(
+    winnerId: string,
+    loserId: string,
+    gameResult: GameResult
+  ): {
+    winner: VirtualDollar;
+    loser: VirtualDollar;
+  };
 
   /**
    * Update player winnings without changing level
