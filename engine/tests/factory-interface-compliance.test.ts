@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import {
-  DirectVirtualDollarFactory,
+  UnifiedVirtualDollarFactory,
   DirectGameSessionFactory,
 } from "../src/types/direct-factories";
 import {
@@ -25,7 +25,7 @@ import {
 } from "../src/types/virtual-dollar-engine";
 
 describe("Factory Interface Compliance", () => {
-  let directVirtualFactory: DirectVirtualDollarFactory;
+  let directVirtualFactory: UnifiedVirtualDollarFactory;
   let pooledVirtualFactory: PooledVirtualDollarFactory;
   let directGameFactory: DirectGameSessionFactory;
   let pooledGameFactory: PooledGameSessionFactory;
@@ -50,7 +50,7 @@ describe("Factory Interface Compliance", () => {
       prewarmCounts: { virtualDollar: 2, gameSession: 2 },
     };
 
-    directVirtualFactory = new DirectVirtualDollarFactory(directConfig);
+    directVirtualFactory = new UnifiedVirtualDollarFactory(directConfig);
     pooledVirtualFactory = new PooledVirtualDollarFactory(pooledConfig);
     directGameFactory = new DirectGameSessionFactory(directConfig);
     pooledGameFactory = new PooledGameSessionFactory(pooledConfig);
@@ -398,7 +398,7 @@ describe("Factory Interface Compliance", () => {
         enablePerformanceMetrics: true,
       };
 
-      const newDirectVirtual = new DirectVirtualDollarFactory(testConfig);
+      const newDirectVirtual = new UnifiedVirtualDollarFactory(testConfig);
       const newPooledVirtual = new PooledVirtualDollarFactory(testConfig);
       const newDirectGame = new DirectGameSessionFactory(testConfig);
       const newPooledGame = new PooledGameSessionFactory(testConfig);

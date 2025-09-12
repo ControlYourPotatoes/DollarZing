@@ -7,6 +7,10 @@ import { EventBus, EventSubscription } from "../event-bus";
 import {
   GameResolvedEvent,
   ContinuePlayEvent,
+  VirtualDollarAdvancedEvent,
+  VirtualDollarRunCompletedEvent,
+  VirtualDollarProgressionFailedEvent,
+  PlayerTotalWinningsUpdatedEvent,
   EVENT_TYPES,
 } from "../event-types";
 import { BettingLevel } from "../../types/virtual-dollar-engine";
@@ -49,15 +53,17 @@ export class PlayerProgressionHandler {
         error
       );
 
-      await this.eventBus.emit(EVENT_TYPES.PLAYER_PROGRESSION_FAILED, {
-        type: EVENT_TYPES.PLAYER_PROGRESSION_FAILED,
+      const progressionFailedEvent: VirtualDollarProgressionFailedEvent = {
+        type: EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
         timestamp: new Date(),
         playerId: event.loserId,
         virtualDollarId: event.loserDollarId,
         currentLevel: event.loserLevel,
         reason: "Loser elimination failed",
         error: error instanceof Error ? error.message : String(error),
-      });
+      };
+
+      await this.eventBus.emit(EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED, progressionFailedEvent);
     }
   }
 
@@ -71,15 +77,17 @@ export class PlayerProgressionHandler {
         error
       );
 
-      await this.eventBus.emit(EVENT_TYPES.PLAYER_PROGRESSION_FAILED, {
-        type: EVENT_TYPES.PLAYER_PROGRESSION_FAILED,
+      const progressionFailedEvent: VirtualDollarProgressionFailedEvent = {
+        type: EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
         timestamp: new Date(),
         playerId: event.playerId,
         virtualDollarId: event.virtualDollarId,
         currentLevel: event.currentLevel,
         reason: "Winner progression failed",
         error: error instanceof Error ? error.message : String(error),
-      });
+      };
+
+      await this.eventBus.emit(EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED, progressionFailedEvent);
     }
   }
 
@@ -105,7 +113,7 @@ export class PlayerProgressionHandler {
 
       // Check if run is complete (reached Level 10 = Jackpot)
       if (newLevel >= 10) {
-        await this.emitRunCompleted(
+        await this.emitVirtualDollarRunCompleted(
           event.playerId,
           event.virtualDollarId,
           newLevel,
@@ -113,8 +121,8 @@ export class PlayerProgressionHandler {
           true // isJackpot
         );
       } else {
-        // Player advanced to next level - emit PLAYER_ADVANCED event
-        await this.emitPlayerAdvanced(
+        // Player advanced to next level - emit VIRTUAL_DOLLAR_ADVANCED event
+        await this.emitVirtualDollarAdvanced(
           event.playerId,
           event.virtualDollarId,
           event.currentLevel as BettingLevel,
@@ -146,8 +154,8 @@ export class PlayerProgressionHandler {
         `[PlayerProgressionHandler] Loser ${event.loserId} eliminated at Level ${event.loserLevel}`
       );
 
-      // Emit RUN_COMPLETED event for the loser (elimination)
-      await this.emitRunCompleted(
+      // Emit VIRTUAL_DOLLAR_RUN_COMPLETED event for the loser (elimination)
+      await this.emitVirtualDollarRunCompleted(
         event.loserId,
         event.loserDollarId,
         event.loserLevel as BettingLevel,
@@ -164,9 +172,9 @@ export class PlayerProgressionHandler {
   }
 
   /**
-   * Emit PLAYER_ADVANCED event
+   * Emit VIRTUAL_DOLLAR_ADVANCED event (specific to one virtual dollar's progression)
    */
-  private async emitPlayerAdvanced(
+  private async emitVirtualDollarAdvanced(
     playerId: string,
     virtualDollarId: string,
     previousLevel: BettingLevel,
@@ -174,8 +182,8 @@ export class PlayerProgressionHandler {
     totalWinnings: number,
     gamesWon: number
   ): Promise<void> {
-    await this.eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, {
-      type: EVENT_TYPES.PLAYER_ADVANCED,
+    const virtualDollarAdvancedEvent: VirtualDollarAdvancedEvent = {
+      type: EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
       timestamp: new Date(),
       playerId,
       virtualDollarId,
@@ -186,29 +194,80 @@ export class PlayerProgressionHandler {
       nextBettingAmount: this.virtualDollarFactory.calculateLevelWinnings(
         Math.min(10, newLevel + 1) as BettingLevel
       ),
-    });
+    };
+
+    await this.eventBus.emit(EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED, virtualDollarAdvancedEvent);
+
+    // Also emit player-level aggregate event for total winnings update
+    await this.emitPlayerTotalWinningsUpdated(
+      playerId,
+      virtualDollarId,
+      totalWinnings,
+      "VIRTUAL_DOLLAR_ADVANCED"
+    );
   }
 
   /**
-   * Emit RUN_COMPLETED event
+   * Emit VIRTUAL_DOLLAR_RUN_COMPLETED event (specific to one virtual dollar's run completion)
    */
-  private async emitRunCompleted(
+  private async emitVirtualDollarRunCompleted(
     playerId: string,
     virtualDollarId: string,
     finalLevel: BettingLevel,
     totalWinnings: number,
     isJackpot: boolean
   ): Promise<void> {
-    await this.eventBus.emit(EVENT_TYPES.RUN_COMPLETED, {
-      type: EVENT_TYPES.RUN_COMPLETED,
+    const completionType: "CASH_OUT" | "JACKPOT" | "ELIMINATION" = isJackpot 
+      ? "JACKPOT" 
+      : "ELIMINATION";
+
+    const virtualDollarRunCompletedEvent: VirtualDollarRunCompletedEvent = {
+      type: EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
       timestamp: new Date(),
       playerId,
       virtualDollarId,
       finalLevel,
       totalWinnings,
-      completionType: isJackpot ? "JACKPOT" : "ELIMINATION",
+      completionType,
       wasSuccessful: isJackpot,
-    });
+    };
+
+    await this.eventBus.emit(EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED, virtualDollarRunCompletedEvent);
+
+    // Also emit player-level aggregate event for total winnings update
+    await this.emitPlayerTotalWinningsUpdated(
+      playerId,
+      virtualDollarId,
+      totalWinnings,
+      "VIRTUAL_DOLLAR_RUN_COMPLETED"
+    );
+  }
+
+  /**
+   * Emit PLAYER_TOTAL_WINNINGS_UPDATED event (aggregate across all virtual dollars for a player)
+   */
+  private async emitPlayerTotalWinningsUpdated(
+    playerId: string,
+    triggeringVirtualDollarId: string,
+    winningsChange: number,
+    triggeringEvent: "VIRTUAL_DOLLAR_ADVANCED" | "VIRTUAL_DOLLAR_RUN_COMPLETED" | "CASH_OUT_COMPLETED"
+  ): Promise<void> {
+    // TODO: In a full implementation, we'd need to query the VirtualDollarFactory
+    // to get total winnings across all of this player's virtual dollars.
+    // For now, we'll emit the event with the individual virtual dollar's winnings.
+    
+    const playerTotalWinningsEvent: PlayerTotalWinningsUpdatedEvent = {
+      type: EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED,
+      timestamp: new Date(),
+      playerId,
+      previousTotalWinnings: 0, // TODO: Calculate actual previous total
+      newTotalWinnings: winningsChange, // TODO: Calculate actual new total
+      winningsChange,
+      triggeringVirtualDollarId,
+      triggeringEvent,
+    };
+
+    await this.eventBus.emit(EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED, playerTotalWinningsEvent);
   }
 
   /**

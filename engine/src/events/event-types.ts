@@ -46,8 +46,53 @@ export interface GameResolvedEvent extends BaseEvent {
   gameResult: "WIN" | "LOSS";
 }
 
-// ===== PLAYER PROGRESSION EVENTS =====
+// ===== VIRTUAL DOLLAR PROGRESSION EVENTS =====
 
+export interface VirtualDollarAdvancedEvent extends BaseEvent {
+  type: "VIRTUAL_DOLLAR_ADVANCED";
+  playerId: string;
+  virtualDollarId: string;
+  previousLevel: number;
+  currentLevel: number;
+  totalWinnings: number;
+  gamesWonInRun: number;
+  nextBettingAmount: number;
+}
+
+export interface VirtualDollarProgressionFailedEvent extends BaseEvent {
+  type: "VIRTUAL_DOLLAR_PROGRESSION_FAILED";
+  playerId: string;
+  virtualDollarId: string;
+  currentLevel: number;
+  reason: string;
+  error?: string;
+}
+
+export interface VirtualDollarRunCompletedEvent extends BaseEvent {
+  type: "VIRTUAL_DOLLAR_RUN_COMPLETED";
+  playerId: string;
+  virtualDollarId: string;
+  completionType: "CASH_OUT" | "JACKPOT" | "ELIMINATION";
+  finalLevel: number;
+  totalWinnings: number;
+  wasSuccessful: boolean;
+}
+
+// ===== PLAYER AGGREGATE EVENTS =====
+
+export interface PlayerTotalWinningsUpdatedEvent extends BaseEvent {
+  type: "PLAYER_TOTAL_WINNINGS_UPDATED";
+  playerId: string;
+  previousTotalWinnings: number;
+  newTotalWinnings: number;
+  winningsChange: number;
+  triggeringVirtualDollarId: string;
+  triggeringEvent: "VIRTUAL_DOLLAR_ADVANCED" | "VIRTUAL_DOLLAR_RUN_COMPLETED" | "CASH_OUT_COMPLETED";
+}
+
+// ===== LEGACY EVENT INTERFACES (DEPRECATED - use Virtual Dollar events instead) =====
+
+/** @deprecated Use VirtualDollarAdvancedEvent instead */
 export interface PlayerProgressionEvent extends BaseEvent {
   type: "PLAYER_ADVANCED";
   playerId: string;
@@ -59,6 +104,7 @@ export interface PlayerProgressionEvent extends BaseEvent {
   nextBettingAmount: number;
 }
 
+/** @deprecated Use VirtualDollarProgressionFailedEvent instead */
 export interface PlayerProgressionFailedEvent extends BaseEvent {
   type: "PLAYER_PROGRESSION_FAILED";
   playerId: string;
@@ -345,6 +391,7 @@ export interface RunStartedEvent extends BaseEvent {
   cashOutStrategy: CashOutStrategy;
 }
 
+/** @deprecated Use VirtualDollarRunCompletedEvent instead */
 export interface RunCompletedEvent extends BaseEvent {
   type: "RUN_COMPLETED";
   playerId: string;
@@ -459,8 +506,12 @@ export type SimulationEvent =
   | ErrorEvent
   | GameCreatedEvent
   | GameResolvedEvent
-  | PlayerProgressionEvent
-  | PlayerProgressionFailedEvent
+  | VirtualDollarAdvancedEvent
+  | VirtualDollarProgressionFailedEvent
+  | VirtualDollarRunCompletedEvent
+  | PlayerTotalWinningsUpdatedEvent
+  | PlayerProgressionEvent // Legacy - deprecated
+  | PlayerProgressionFailedEvent // Legacy - deprecated
   | CashOutDecisionEvent
   | CashOutCompletedEvent
   | CashOutDecisionFailedEvent
@@ -508,7 +559,15 @@ export const EVENT_TYPES = {
   GAME_CREATED: "GAME_CREATED",
   GAME_RESOLVED: "GAME_RESOLVED",
 
-  // Player progression events
+  // Virtual Dollar progression events (new specific events)
+  VIRTUAL_DOLLAR_ADVANCED: "VIRTUAL_DOLLAR_ADVANCED",
+  VIRTUAL_DOLLAR_PROGRESSION_FAILED: "VIRTUAL_DOLLAR_PROGRESSION_FAILED",
+  VIRTUAL_DOLLAR_RUN_COMPLETED: "VIRTUAL_DOLLAR_RUN_COMPLETED",
+  
+  // Player aggregate events
+  PLAYER_TOTAL_WINNINGS_UPDATED: "PLAYER_TOTAL_WINNINGS_UPDATED",
+
+  // Legacy player progression events (deprecated)
   PLAYER_ADVANCED: "PLAYER_ADVANCED",
   PLAYER_PROGRESSION_FAILED: "PLAYER_PROGRESSION_FAILED",
 

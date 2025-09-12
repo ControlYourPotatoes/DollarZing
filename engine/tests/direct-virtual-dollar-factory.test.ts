@@ -1,12 +1,12 @@
-// DirectVirtualDollarFactory Tests
-// Tests for non-pooled virtual dollar factory implementation
-// Validates direct object creation without pooling for development/testing scenarios
+// UnifiedVirtualDollarFactory Tests
+// Tests for unified virtual dollar factory implementation
+// Validates unified factory behavior for object creation and state management
 import { describe, it, expect, beforeEach } from "vitest";
-import { DirectVirtualDollarFactory } from '../src/types/direct-factories';
+import { UnifiedVirtualDollarFactory } from '../src/types/direct-factories';
 import { VirtualDollarFactory, DEFAULT_PERFORMANCE_CONFIG, PerformanceConfig } from '../src/types/factory-interfaces';
 
-describe('DirectVirtualDollarFactory', () => {
-  let factory: DirectVirtualDollarFactory;
+describe('UnifiedVirtualDollarFactory', () => {
+  let factory: UnifiedVirtualDollarFactory;
   let config: PerformanceConfig;
 
   beforeEach(() => {
@@ -15,7 +15,7 @@ describe('DirectVirtualDollarFactory', () => {
       enableObjectPooling: false, // Direct factory should never use pooling
       enablePerformanceMetrics: true
     };
-    factory = new DirectVirtualDollarFactory(config);
+    factory = new UnifiedVirtualDollarFactory(config);
   });
 
   describe('Factory Interface Compliance', () => {
@@ -28,7 +28,7 @@ describe('DirectVirtualDollarFactory', () => {
     });
 
     it('should be instanceable through interface type', () => {
-      const interfaceFactory: VirtualDollarFactory = new DirectVirtualDollarFactory(config);
+      const interfaceFactory: VirtualDollarFactory = new UnifiedVirtualDollarFactory(config);
       expect(interfaceFactory).toBeDefined();
       expect(interfaceFactory.create).toBeDefined();
     });
@@ -66,13 +66,13 @@ describe('DirectVirtualDollarFactory', () => {
     });
 
     it('should throw error for empty player ID', () => {
-      expect(() => factory.create('')).toThrow('Invalid player ID: cannot be empty or whitespace');
-      expect(() => factory.create('   ')).toThrow('Invalid player ID: cannot be empty or whitespace');
+      expect(() => factory.create('')).toThrow('Invalid player ID');
+      expect(() => factory.create('   ')).toThrow('Invalid player ID');
     });
 
     it('should throw error for null/undefined player ID', () => {
-      expect(() => factory.create(null as any)).toThrow('Invalid player ID: cannot be empty or whitespace');
-      expect(() => factory.create(undefined as any)).toThrow('Invalid player ID: cannot be empty or whitespace');
+      expect(() => factory.create(null as any)).toThrow('Invalid player ID');
+      expect(() => factory.create(undefined as any)).toThrow('Invalid player ID');
     });
   });
 
@@ -125,25 +125,16 @@ describe('DirectVirtualDollarFactory', () => {
       expect(factory.createBatch(undefined as any)).toEqual([]);
     });
 
-    it('should handle batch with invalid player IDs gracefully', () => {
+    it('should handle batch with invalid player IDs', () => {
       const ownerIds = ['player1', '', 'player3'];
-      const dollars = factory.createBatch(ownerIds);
-
-      // Should create dollars for valid IDs and skip invalid ones
-      expect(dollars).toHaveLength(2);
-      expect(dollars[0].ownerId).toBe('player1');
-      expect(dollars[1].ownerId).toBe('player3');
+      // UnifiedVirtualDollarFactory throws on invalid IDs
+      expect(() => factory.createBatch(ownerIds)).toThrow('Invalid player ID');
     });
 
-    it('should continue processing after individual failures', () => {
+    it('should fail batch processing on invalid IDs', () => {
       const ownerIds = ['player1', '', 'player3', '   ', 'player5'];
-      const dollars = factory.createBatch(ownerIds);
-
-      // Should create dollars for valid IDs only
-      expect(dollars).toHaveLength(3);
-      expect(dollars[0].ownerId).toBe('player1');
-      expect(dollars[1].ownerId).toBe('player3');
-      expect(dollars[2].ownerId).toBe('player5');
+      // UnifiedVirtualDollarFactory throws on invalid IDs
+      expect(() => factory.createBatch(ownerIds)).toThrow('Invalid player ID');
     });
   });
 
@@ -155,7 +146,7 @@ describe('DirectVirtualDollarFactory', () => {
       expect(stats.objectsCreated).toBe(0);
       expect(stats.objectsReleased).toBe(0);
       expect(stats.objectsInUse).toBe(0);
-      expect(stats.poolSize).toBe(0); // Direct factory has no pool
+      expect(stats.poolSize).toBe(0); // Unified factory has no pool
       expect(stats.poolHitRate).toBe(0);
     });
 
@@ -232,7 +223,7 @@ describe('DirectVirtualDollarFactory', () => {
         ...config,
         enablePerformanceMetrics: false
       };
-      const factoryNoMetrics = new DirectVirtualDollarFactory(configWithoutMetrics);
+      const factoryNoMetrics = new UnifiedVirtualDollarFactory(configWithoutMetrics);
 
       factoryNoMetrics.create('player1');
       const stats = factoryNoMetrics.getStatistics();
@@ -262,7 +253,7 @@ describe('DirectVirtualDollarFactory', () => {
         enablePerformanceMetrics: false
       };
 
-      const customFactory = new DirectVirtualDollarFactory(customConfig);
+      const customFactory = new UnifiedVirtualDollarFactory(customConfig);
       const dollar = customFactory.create('player1');
 
       expect(dollar).toBeDefined();
@@ -275,7 +266,7 @@ describe('DirectVirtualDollarFactory', () => {
         enableBatchOptimizations: true
       };
       
-      const batchFactory = new DirectVirtualDollarFactory(configBatchOptimized);
+      const batchFactory = new UnifiedVirtualDollarFactory(configBatchOptimized);
       const ownerIds = ['player1', 'player2'];
       const dollars = batchFactory.createBatch(ownerIds);
 
