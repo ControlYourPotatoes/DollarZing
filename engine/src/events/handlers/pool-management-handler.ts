@@ -39,11 +39,12 @@ export class PoolManagementHandler {
   private setupEventSubscriptions(): void {
     // Subscribe to VIRTUAL_DOLLAR_ADVANCED events to re-pool winners (AFTER advancement)
     // This prevents the infinite loop by ensuring pool management happens AFTER player advancement
-    this.continuePlaySubscription = this.eventBus.on<VirtualDollarAdvancedEvent>(
-      EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
-      this.handleVirtualDollarAdvanced.bind(this),
-      8 // Lower priority than PlayerProgressionHandler (12) but higher than revenue (5)
-    );
+    this.continuePlaySubscription =
+      this.eventBus.on<VirtualDollarAdvancedEvent>(
+        EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
+        this.handleVirtualDollarAdvanced.bind(this),
+        8 // Lower priority than PlayerProgressionHandler (12) but higher than revenue (5)
+      );
 
     // Subscribe to CASH_OUT_COMPLETED events to handle new run creation
     this.cashOutCompletedSubscription = this.eventBus.on<CashOutCompletedEvent>(
@@ -57,12 +58,17 @@ export class PoolManagementHandler {
    * Handle VIRTUAL_DOLLAR_ADVANCED event by re-pooling the advanced winner
    * This prevents infinite loops by processing AFTER player advancement is complete
    */
-  private async handleVirtualDollarAdvanced(event: VirtualDollarAdvancedEvent): Promise<void> {
+  private async handleVirtualDollarAdvanced(
+    event: VirtualDollarAdvancedEvent
+  ): Promise<void> {
     try {
       // Convert VIRTUAL_DOLLAR_ADVANCED event to rePoolWinner format
       await this.rePoolAdvancedWinner(event);
     } catch (error) {
-      console.error(`[PoolManagementHandler] Error re-pooling advanced winner:`, error);
+      console.error(
+        `[PoolManagementHandler] Error re-pooling advanced winner:`,
+        error
+      );
 
       await this.eventBus.emit(EVENT_TYPES.POOL_MANAGEMENT_ERROR, {
         type: EVENT_TYPES.POOL_MANAGEMENT_ERROR,
@@ -104,7 +110,9 @@ export class PoolManagementHandler {
   /**
    * Re-pool an advanced winner (called after VIRTUAL_DOLLAR_ADVANCED)
    */
-  private async rePoolAdvancedWinner(event: VirtualDollarAdvancedEvent): Promise<void> {
+  private async rePoolAdvancedWinner(
+    event: VirtualDollarAdvancedEvent
+  ): Promise<void> {
     // Get the virtual dollar from the manager
     const virtualDollar = this.virtualDollarFactory.getDollar(
       event.virtualDollarId
