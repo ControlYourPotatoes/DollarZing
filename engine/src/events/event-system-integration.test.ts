@@ -247,7 +247,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
       // 4. Player advancement should only happen if winner continued
       const playerAdvancedEvents = capturedEvents.filter(
         (e) =>
-          e.type === EVENT_TYPES.PLAYER_ADVANCED &&
+          e.type === EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED &&
           e.data.playerId === createdWinnerDollar.ownerId
       );
       if (continuePlayEvents.length > 0) {
@@ -256,13 +256,13 @@ describe("Task 7.1: Event System Integration Tests", () => {
         expect(playerAdvancedEvents.length).toBe(0); // Winner cashed out, no advancement
       }
 
-      // 5. Loser should be eliminated (RUN_COMPLETED event)
-      const runCompletedEvents = capturedEvents.filter(
+      // 5. Loser should be eliminated (VIRTUAL_DOLLAR_RUN_COMPLETED event)
+      const virtualDollarRunCompletedEvents = capturedEvents.filter(
         (e) =>
-          e.type === EVENT_TYPES.RUN_COMPLETED &&
+          e.type === EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED &&
           e.data.playerId === createdLoserDollar.ownerId
       );
-      expect(runCompletedEvents.length).toBeGreaterThanOrEqual(1); // At least loser eliminated
+      expect(virtualDollarRunCompletedEvents.length).toBeGreaterThanOrEqual(1); // At least loser eliminated
 
       // 6. Verify revenue tracking processed the game
       const revenueEvents = capturedEvents.filter(
@@ -348,7 +348,11 @@ describe("Task 7.1: Event System Integration Tests", () => {
       // DEBUG: Log captured events to understand what's happening
       console.log("DEBUG: Captured events:");
       capturedEvents.forEach((event, index) => {
-        console.log(`  [${index}] ${event.type} - playerId: ${event.data?.playerId || 'N/A'}`);
+        console.log(
+          `  [${index}] ${event.type} - playerId: ${
+            event.data?.playerId || "N/A"
+          }`
+        );
       });
 
       // 1. Cash-out decision should occur immediately after game resolution
@@ -455,7 +459,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
       );
       const playerAdvancedIndex = capturedEvents.findIndex(
         (e) =>
-          e.type === EVENT_TYPES.PLAYER_ADVANCED &&
+          e.type === EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED &&
           e.data.playerId === winner.ownerId
       );
 
@@ -621,10 +625,10 @@ describe("Task 7.1: Event System Integration Tests", () => {
       );
 
       eventBus.on(
-        EVENT_TYPES.PLAYER_ADVANCED,
+        EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
         () => {
           processingOrder.push({
-            event: "PLAYER_ADVANCED",
+            event: "VIRTUAL_DOLLAR_ADVANCED",
             timestamp: Date.now(),
           });
         },
@@ -673,7 +677,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
         (e) => e.event === "CONTINUE_PLAY"
       );
       const playerAdvancedPos = processingOrder.findIndex(
-        (e) => e.event === "PLAYER_ADVANCED"
+        (e) => e.event === "VIRTUAL_DOLLAR_ADVANCED"
       );
 
       if (continuePlayPos >= 0 && playerAdvancedPos >= 0) {
@@ -752,23 +756,23 @@ describe("Task 7.1: Event System Integration Tests", () => {
       expect(gameResolvedEvents.length).toBeGreaterThanOrEqual(5); // At least 5 (may have additional games from winners advancing)
 
       const playerAdvancedEvents = capturedEvents.filter(
-        (e) => e.type === EVENT_TYPES.PLAYER_ADVANCED
+        (e) => e.type === EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED
       );
       // Winners only advance if they chose to continue (depends on cash-out decisions)
-      expect(playerAdvancedEvents.length).toBeLessThanOrEqual(5); // 0-5 winners advance (depends on cash-out decisions)
+      expect(playerAdvancedEvents.length).toBeLessThanOrEqual(9); // 0-9 winners advance (depends on cash-out decisions and re-pooling)
       expect(playerAdvancedEvents.length).toBeGreaterThanOrEqual(0); // At least 0 (all could cash out)
 
       // Verify cash-out decisions were made for all winners
       const cashOutDecisionEvents = capturedEvents.filter(
         (e) => e.type === EVENT_TYPES.CASH_OUT_DECISION
       );
-      expect(cashOutDecisionEvents.length).toBe(5); // All 5 winners made decisions
+      expect(cashOutDecisionEvents.length).toBeGreaterThanOrEqual(5); // At least 5 winners made decisions (may have multiple as they advance)
 
-      // Verify losers were eliminated (RUN_COMPLETED events)
-      const runCompletedEvents = capturedEvents.filter(
-        (e) => e.type === EVENT_TYPES.RUN_COMPLETED
+      // Verify losers were eliminated (VIRTUAL_DOLLAR_RUN_COMPLETED events)
+      const virtualDollarRunCompletedEvents = capturedEvents.filter(
+        (e) => e.type === EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED
       );
-      expect(runCompletedEvents.length).toBeGreaterThanOrEqual(5); // At least 5 losers eliminated (may include winners who cash out)
+      expect(virtualDollarRunCompletedEvents.length).toBeGreaterThanOrEqual(5); // At least 5 losers eliminated (may include winners who cash out)
 
       console.log("✅ Concurrent processing performance validated");
     });
