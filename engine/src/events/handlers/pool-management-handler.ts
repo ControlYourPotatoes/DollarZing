@@ -5,11 +5,9 @@
 
 import { EventBus, EventSubscription } from "../event-bus";
 import {
-  ContinuePlayEvent,
   CashOutCompletedEvent,
   VirtualDollarAdvancedEvent,
   NewRunPooledEvent,
-  PoolCapacityReachedEvent,
   PoolManagementErrorEvent,
   PoolStatsUpdatedEvent,
   EVENT_TYPES,
@@ -74,7 +72,7 @@ export class PoolManagementHandler {
         type: EVENT_TYPES.POOL_MANAGEMENT_ERROR,
         timestamp: new Date(),
         virtualDollarId: event.virtualDollarId,
-        operation: "RE_POOL_ADVANCED_WINNER",
+        operation: "RE_POOL_WINNER",
         error: error instanceof Error ? error.message : String(error),
       } as PoolManagementErrorEvent);
     }
@@ -141,97 +139,6 @@ export class PoolManagementHandler {
   }
 
   /**
-   * Re-pool a winner who chose to continue playing (LEGACY - kept for backward compatibility)
-   */
-  private async rePoolWinner(event: ContinuePlayEvent): Promise<void> {
-    // Get the virtual dollar from the manager
-    const virtualDollar = this.virtualDollarFactory.getDollar(
-      event.virtualDollarId
-    );
-
-    if (!virtualDollar) {
-      // P2P Fix: In concurrent processing, winners might be advanced
-      // before pool management runs - this is not an error, just log and return
-      console.warn(
-        `[PoolManagementHandler] Winner ${event.virtualDollarId} not found - likely already processed by PlayerProgressionHandler in P2P game`
-      );
-      return; // Gracefully handle P2P timing - don't throw error
-    }
-
-    // Validate dollar state
-    if (virtualDollar.state === DollarState.LOST) {
-      await this.eventBus.emit(EVENT_TYPES.POOL_MANAGEMENT_ERROR, {
-        type: EVENT_TYPES.POOL_MANAGEMENT_ERROR,
-        timestamp: new Date(),
-        virtualDollarId: event.virtualDollarId,
-        operation: "STATE_VALIDATION",
-        error: `Invalid dollar state for pooling: ${virtualDollar.state}`,
-      } as PoolManagementErrorEvent);
-      return;
-    }
-
-    // Get current pool statistics
-    const previousStats = this.gameMatchingEngine.getPoolStatistics();
-
-    // Update dollar state to POOLED
-    this.virtualDollarFactory.updateDollarState(
-      event.virtualDollarId,
-      DollarState.POOLED
-    );
-
-    // Add to pool through GameMatchingEngine
-    const addResult = this.gameMatchingEngine.addToPool(virtualDollar);
-
-    if (!addResult.success) {
-      // Handle pool capacity or other constraints
-      if (addResult.error?.includes("capacity")) {
-        await this.eventBus.emit(EVENT_TYPES.POOL_CAPACITY_REACHED, {
-          type: EVENT_TYPES.POOL_CAPACITY_REACHED,
-          timestamp: new Date(),
-          currentPoolSize: previousStats.totalDollarsInPool,
-          maxCapacity: 1000, // Default capacity
-          reason: addResult.error,
-          rejectedDollarId: event.virtualDollarId,
-        } as PoolCapacityReachedEvent);
-      } else {
-        await this.eventBus.emit(EVENT_TYPES.POOL_MANAGEMENT_ERROR, {
-          type: EVENT_TYPES.POOL_MANAGEMENT_ERROR,
-          timestamp: new Date(),
-          virtualDollarId: event.virtualDollarId,
-          operation: "ADD_TO_POOL",
-          error: addResult.error || "Unknown pool operation error",
-          integrationComponent: "GameMatchingEngine",
-        } as PoolManagementErrorEvent);
-      }
-      return;
-    }
-
-    // Get updated pool statistics
-    const currentStats = this.gameMatchingEngine.getPoolStatistics();
-
-    // Emit pool stats update event
-    await this.eventBus.emit(EVENT_TYPES.POOL_STATS_UPDATED, {
-      type: EVENT_TYPES.POOL_STATS_UPDATED,
-      timestamp: new Date(),
-      previousStats: {
-        totalDollarsInPool: previousStats.totalDollarsInPool,
-        availableForMatching: previousStats.availableForMatching,
-        dollarsInGame: previousStats.dollarsInGame,
-      },
-      currentStats: {
-        totalDollarsInPool: currentStats.totalDollarsInPool,
-        availableForMatching: currentStats.availableForMatching,
-        dollarsInGame: currentStats.dollarsInGame,
-      },
-      operation: "ADD_TO_POOL",
-    } as PoolStatsUpdatedEvent);
-
-    console.log(
-      `[PoolManagementHandler] Re-pooled winner ${event.playerId} (${event.virtualDollarId}) at level ${event.currentLevel}`
-    );
-  }
-
-  /**
    * Create a new run for a player who just cashed out
    */
   private async createNewRunFromCashOut(
@@ -251,7 +158,7 @@ export class PoolManagementHandler {
     this.virtualDollarFactory.updateDollarState(newRun.id, DollarState.POOLED);
 
     // Add to pool
-    const addResult = this.gameMatchingEngine.addToPool(newRun);
+    const addResult = await this.gameMatchingEngine.addToPool(newRun);
 
     if (!addResult.success) {
       await this.eventBus.emit(EVENT_TYPES.POOL_MANAGEMENT_ERROR, {
