@@ -7,6 +7,7 @@ import { EventBus, EventSubscription } from "../event-bus";
 import {
   ContinuePlayEvent,
   CashOutCompletedEvent,
+  VirtualDollarAdvancedEvent,
   NewRunPooledEvent,
   PoolCapacityReachedEvent,
   PoolManagementErrorEvent,
@@ -36,11 +37,12 @@ export class PoolManagementHandler {
   }
 
   private setupEventSubscriptions(): void {
-    // Subscribe to CONTINUE_PLAY events to re-pool winners
-    this.continuePlaySubscription = this.eventBus.on<ContinuePlayEvent>(
-      EVENT_TYPES.CONTINUE_PLAY,
-      this.handleContinuePlay.bind(this),
-      5 // Lower priority, after player advancement (5 < 12)
+    // Subscribe to VIRTUAL_DOLLAR_ADVANCED events to re-pool winners (AFTER advancement)
+    // This prevents the infinite loop by ensuring pool management happens AFTER player advancement
+    this.continuePlaySubscription = this.eventBus.on<VirtualDollarAdvancedEvent>(
+      EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
+      this.handleVirtualDollarAdvanced.bind(this),
+      8 // Lower priority than PlayerProgressionHandler (12) but higher than revenue (5)
     );
 
     // Subscribe to CASH_OUT_COMPLETED events to handle new run creation
@@ -52,19 +54,21 @@ export class PoolManagementHandler {
   }
 
   /**
-   * Handle CONTINUE_PLAY event by re-pooling the winner's dollar
+   * Handle VIRTUAL_DOLLAR_ADVANCED event by re-pooling the advanced winner
+   * This prevents infinite loops by processing AFTER player advancement is complete
    */
-  private async handleContinuePlay(event: ContinuePlayEvent): Promise<void> {
+  private async handleVirtualDollarAdvanced(event: VirtualDollarAdvancedEvent): Promise<void> {
     try {
-      await this.rePoolWinner(event);
+      // Convert VIRTUAL_DOLLAR_ADVANCED event to rePoolWinner format
+      await this.rePoolAdvancedWinner(event);
     } catch (error) {
-      console.error(`[PoolManagementHandler] Error re-pooling winner:`, error);
+      console.error(`[PoolManagementHandler] Error re-pooling advanced winner:`, error);
 
       await this.eventBus.emit(EVENT_TYPES.POOL_MANAGEMENT_ERROR, {
         type: EVENT_TYPES.POOL_MANAGEMENT_ERROR,
         timestamp: new Date(),
         virtualDollarId: event.virtualDollarId,
-        operation: "RE_POOL_WINNER",
+        operation: "RE_POOL_ADVANCED_WINNER",
         error: error instanceof Error ? error.message : String(error),
       } as PoolManagementErrorEvent);
     }
@@ -98,7 +102,38 @@ export class PoolManagementHandler {
   }
 
   /**
-   * Re-pool a winner who chose to continue playing
+   * Re-pool an advanced winner (called after VIRTUAL_DOLLAR_ADVANCED)
+   */
+  private async rePoolAdvancedWinner(event: VirtualDollarAdvancedEvent): Promise<void> {
+    // Get the virtual dollar from the manager
+    const virtualDollar = this.virtualDollarFactory.getDollar(
+      event.virtualDollarId
+    );
+
+    if (!virtualDollar) {
+      // Virtual dollar not found - this is expected after advancement completion
+      console.warn(
+        `[PoolManagementHandler] Advanced winner ${event.virtualDollarId} not found - likely already processed`
+      );
+      return;
+    }
+
+    // Validate dollar state - should be POOLED after advancement
+    if (virtualDollar.state !== DollarState.POOLED) {
+      console.warn(
+        `[PoolManagementHandler] Advanced winner ${event.virtualDollarId} not in POOLED state: ${virtualDollar.state}`
+      );
+      return;
+    }
+
+    // Dollar is already advanced and pooled - just log success
+    console.log(
+      `[PoolManagementHandler] Advanced winner ${event.playerId} (${event.virtualDollarId}) at level ${event.currentLevel} already pooled`
+    );
+  }
+
+  /**
+   * Re-pool a winner who chose to continue playing (LEGACY - kept for backward compatibility)
    */
   private async rePoolWinner(event: ContinuePlayEvent): Promise<void> {
     // Get the virtual dollar from the manager
