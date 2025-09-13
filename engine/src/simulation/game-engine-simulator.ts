@@ -10,9 +10,11 @@ import { EventBus } from "../events/event-bus";
 import { GameEventHandler } from "../events/handlers/game-event-handler";
 import { PlayerProgressionHandler } from "../events/handlers/player-progression-handler";
 import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-handler";
-import { PoolManagementHandler } from "../events/handlers/pool-management-handler";
+// PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
-import { VirtualDollarFactory } from "../types/factory-interfaces";
+import { MatchmakingEventHandler } from "../events/handlers/matchmaking-event-handler";
+import { PooledGameSessionFactory } from "../types/pooled-factories";
+import { ScoringEngine } from "../types/scoring-engine";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -125,9 +127,8 @@ export interface SimulationResults {
  */
 export interface SimulationComponents {
   gameMatchingEngine: GameMatchingEngine;
-  dollarManager: VirtualDollarManager;
-  revenueCalculator: RevenueCalculator;
   virtualDollarFactory: VirtualDollarFactory;
+  revenueCalculator: RevenueCalculator;
 }
 
 // ===== GAME ENGINE SIMULATOR CLASS =====
@@ -150,7 +151,6 @@ export class GameEngineSimulator {
 
   constructor(
     gameMatchingEngine: GameMatchingEngine,
-    virtualDollarManager: VirtualDollarManager,
     virtualDollarFactory: VirtualDollarFactory,
     revenueCalculator: RevenueCalculator,
     eventBus?: EventBus
@@ -163,9 +163,8 @@ export class GameEngineSimulator {
 
     this.components = {
       gameMatchingEngine,
-      dollarManager: virtualDollarManager,
-      revenueCalculator,
       virtualDollarFactory,
+      revenueCalculator,
     };
 
     // Initialize complete event handler system
@@ -175,11 +174,7 @@ export class GameEngineSimulator {
         gameMatchingEngine,
         revenueCalculator
       ),
-      new PoolManagementHandler(
-        this.eventBus,
-        gameMatchingEngine,
-        virtualDollarManager
-      ),
+      // PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
       new RevenueTrackingHandler(this.eventBus, revenueCalculator),
     ];
   }
@@ -256,7 +251,8 @@ export class GameEngineSimulator {
     // Create PlayerProgressionHandler with VirtualDollarFactory for event-driven progression
     const playerProgressionHandler = new PlayerProgressionHandler(
       this.eventBus,
-      this.components.virtualDollarFactory
+      this.components.virtualDollarFactory,
+      this.components.gameMatchingEngine
     );
     this.eventHandlers.push(playerProgressionHandler);
 

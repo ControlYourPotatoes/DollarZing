@@ -96,28 +96,16 @@ export class DayProcessor {
       `DEBUG: Day ${day} - Pool stats - Total: ${poolStats.totalDollarsInPool}, Available: ${poolStats.availableForMatching}`
     );
 
-    for (let gameAttempt = 0; gameAttempt < maxGamesPerDay; gameAttempt++) {
-      const matchResult = this.gameMatchingEngine.attemptMatching();
-      console.log(
-        `DEBUG: Day ${day} - Matching attempt ${
-          gameAttempt + 1
-        } - Games created: ${matchResult.gamesCreated.length}`
-      );
-
-      if (matchResult.gamesCreated.length === 0) {
-        break; // No more matches possible
-      }
-
-      // Games are now processed through event-driven architecture:
-      // 1. GameMatchingEngine emits GAME_CREATED events for each game
-      // 2. GameEventHandler listens to GAME_CREATED and emits GAME_RESOLVED events
-      // 3. PlayerProgressionHandler listens to GAME_RESOLVED and handles progression
-
-      // Small delay to prevent blocking
-      if (gameAttempt % 50 === 0) {
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      }
-    }
+    // Event-driven architecture: MatchmakingEventHandler will automatically
+    // attempt matchmaking when POOL_ADDED and POOL_UPDATED events are emitted
+    // The daily loop is no longer needed as matchmaking happens reactively
+    
+    console.log(
+      `DEBUG: Day ${day} - Matchmaking will be handled by MatchmakingEventHandler through events`
+    );
+    
+    // Small delay to allow event processing
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     // Emit day completed event
     const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();

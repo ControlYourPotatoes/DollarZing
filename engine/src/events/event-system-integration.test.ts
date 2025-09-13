@@ -13,7 +13,7 @@ import { EventBus } from "./event-bus";
 import { GameEventHandler } from "./handlers/game-event-handler";
 import { PlayerProgressionHandler } from "./handlers/player-progression-handler";
 import { CashOutDecisionHandler } from "./handlers/cash-out-decision-handler";
-import { PoolManagementHandler } from "./handlers/pool-management-handler";
+// PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
 import { RevenueTrackingHandler } from "./handlers/revenue-tracking-handler";
 import { MatchmakingEventHandler } from "./handlers/matchmaking-event-handler";
 import { EVENT_TYPES, GameResolvedEvent } from "./event-types";
@@ -36,7 +36,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
   let gameEventHandler: GameEventHandler;
   let playerProgressionHandler: PlayerProgressionHandler;
   let cashOutHandler: CashOutDecisionHandler;
-  let poolHandler: PoolManagementHandler;
+  // poolHandler removed - re-pooling logic moved to PlayerProgressionHandler
   let revenueHandler: RevenueTrackingHandler;
   let matchmakingHandler: MatchmakingEventHandler;
 
@@ -131,14 +131,11 @@ describe("Task 7.1: Event System Integration Tests", () => {
     );
     playerProgressionHandler = new PlayerProgressionHandler(
       eventBus,
-      virtualDollarFactory
+      virtualDollarFactory,
+      gameMatchingEngine
     );
     cashOutHandler = new CashOutDecisionHandler(eventBus, strategyManager);
-    poolHandler = new PoolManagementHandler(
-      eventBus,
-      gameMatchingEngine,
-      virtualDollarFactory
-    );
+    // PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
     revenueHandler = new RevenueTrackingHandler(eventBus, revenueCalculator);
     matchmakingHandler = new MatchmakingEventHandler(
       eventBus,
@@ -168,7 +165,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
     void gameEventHandler;
     void playerProgressionHandler;
     void cashOutHandler;
-    void poolHandler;
+    // void poolHandler; - removed
     void revenueHandler;
     void matchmakingHandler;
   });

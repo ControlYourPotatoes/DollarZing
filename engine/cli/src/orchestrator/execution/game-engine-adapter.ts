@@ -7,14 +7,13 @@ import {
   SimulationResults,
   SimulationProgress,
   CashOutStrategy,
-  PlayerBalanceManager,
   GameMatchingEngine,
-  PlayerRunManager,
-  VirtualDollarManager,
+  UnifiedVirtualDollarFactory,
   RevenueCalculator,
   ScoringEngine,
   DirectGameSessionFactory,
   DEFAULT_PERFORMANCE_CONFIG,
+  EventBus,
 } from "@/index";
 import type {
   ParameterCombination,
@@ -29,43 +28,37 @@ import { createMockDatasetResult } from "../test-utils/mock-dataset-results";
  * Create GameEngineSimulator with default components
  */
 function createGameEngineSimulator(
-  config: SimulationConfig
+  _config: SimulationConfig
 ): GameEngineSimulator {
   // Create core components
-  const playerBalanceManager = new PlayerBalanceManager();
-  const virtualDollarManager = new VirtualDollarManager();
   const scoringEngine = new ScoringEngine();
+
+  // Use UnifiedVirtualDollarFactory instead of VirtualDollarManager
+  const virtualDollarFactory = new UnifiedVirtualDollarFactory(
+    DEFAULT_PERFORMANCE_CONFIG
+  );
 
   // Create game session factory
   const gameSessionFactory = new DirectGameSessionFactory(
     DEFAULT_PERFORMANCE_CONFIG
   );
 
-  // Create game matching engine
+  // Create game matching engine with correct constructor
   const gameMatchingEngine = new GameMatchingEngine(
-    virtualDollarManager,
+    virtualDollarFactory,
     scoringEngine,
-    gameSessionFactory
-  );
-
-  // Create run orchestrator
-  const runOrchestrator = new PlayerRunManager(
-    undefined, // ProgressionManager will be created internally
-    virtualDollarManager,
-    config.charityPercentage
+    gameSessionFactory,
+    new EventBus() // EventBus will be created internally
   );
 
   // Create revenue calculator
   const revenueCalculator = new RevenueCalculator();
 
-  // Create GameEngineSimulator
+  // Create GameEngineSimulator with updated constructor
   return new GameEngineSimulator(
-    playerBalanceManager,
-    virtualDollarManager,
     gameMatchingEngine,
-    runOrchestrator,
-    revenueCalculator,
-    scoringEngine
+    virtualDollarFactory,
+    revenueCalculator
   );
 }
 
@@ -240,6 +233,13 @@ export class GameEngineAdapter {
       this.config.baseSimulationDays * durationMultiplier
     );
 
+    // Map growth rate to S-curve adoption rate
+    const adoptionRateMapping = {
+      15: 0.01, // Conservative: 1% adoption rate (slow growth)
+      35: 0.1, // Market: 10% adoption rate (steady growth)
+      60: 0.5, // Viral: 50% adoption rate (explosive growth)
+    };
+
     // Get cash-out strategy distribution
     const playerStrategies = this.config.riskStrategyMapping[riskLevel];
 
@@ -255,6 +255,13 @@ export class GameEngineAdapter {
       initialDonationAmount: this.config.baseInitialDonation,
       maxSimulationTimeMs: this.config.maxSimulationTimeMs,
       enableProgressReporting: this.orchestratorConfig.enableProgressReporting,
+      // Add S-curve growth model parameters
+      growthModel: {
+        adoptionRate: adoptionRateMapping[growthRate],
+        baseMarket: 1000000, // 1M base market size
+        midpointDay: 90, // S-curve inflection at day 90
+        steepnessFactor: 20, // Controls curve steepness
+      },
     };
   }
 
@@ -447,6 +454,12 @@ export class GameEngineAdapter {
         initialDonationAmount: 50,
         maxSimulationTimeMs: 300000,
         enableProgressReporting: false,
+        growthModel: {
+          adoptionRate: 0.1,
+          baseMarket: 1000000,
+          midpointDay: 90,
+          steepnessFactor: 20,
+        },
       },
       playerStats: {
         totalPlayers: 1000,

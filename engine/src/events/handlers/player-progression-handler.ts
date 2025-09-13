@@ -13,8 +13,9 @@ import {
   PlayerTotalWinningsUpdatedEvent,
   EVENT_TYPES,
 } from "../event-types";
-import { BettingLevel } from "../../types/virtual-dollar-engine";
+import { BettingLevel, DollarState } from "../../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../../types/factory-interfaces";
+import { GameMatchingEngine } from "../../types/game-matching-engine";
 
 export class PlayerProgressionHandler {
   private gameResolvedSubscription: EventSubscription | null = null;
@@ -22,7 +23,8 @@ export class PlayerProgressionHandler {
 
   constructor(
     private eventBus: EventBus,
-    private virtualDollarFactory: VirtualDollarFactory
+    private virtualDollarFactory: VirtualDollarFactory,
+    private gameMatchingEngine: GameMatchingEngine
   ) {
     this.setupEventSubscriptions();
   }
@@ -121,6 +123,9 @@ export class PlayerProgressionHandler {
           true // isJackpot
         );
       } else {
+        // Re-pool the advanced winner for next level matching
+        await this.rePoolAdvancedWinner(updatedDollar);
+
         // Player advanced to next level - emit VIRTUAL_DOLLAR_ADVANCED event
         await this.emitVirtualDollarAdvanced(
           event.playerId,
@@ -168,6 +173,33 @@ export class PlayerProgressionHandler {
         error
       );
       // Don't throw here - loser elimination shouldn't block winner progression
+    }
+  }
+
+  /**
+   * Re-pool an advanced winner for continued matching at their new level
+   */
+  private async rePoolAdvancedWinner(virtualDollar: any): Promise<void> {
+    try {
+      // Update state from WON to POOLED for re-matching
+      this.virtualDollarFactory.updateDollarState(virtualDollar.id, DollarState.POOLED);
+
+      // Add back to matching pool at new level
+      const addResult = await this.gameMatchingEngine.addToPool(virtualDollar);
+
+      if (!addResult.success) {
+        throw new Error(`Failed to re-pool advanced winner: ${addResult.error}`);
+      }
+
+      console.log(
+        `[PlayerProgressionHandler] Re-pooled advanced winner ${virtualDollar.ownerId} (${virtualDollar.id}) at level ${virtualDollar.currentLevel}`
+      );
+    } catch (error) {
+      console.error(
+        `[PlayerProgressionHandler] Error re-pooling advanced winner:`,
+        error
+      );
+      throw error; // Re-throw to trigger progression failure event
     }
   }
 

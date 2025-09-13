@@ -7,14 +7,13 @@ import {
   type SimulationConfig,
   type SimulationProgress,
   CashOutStrategy,
-  PlayerBalanceManager,
   GameMatchingEngine,
-  PlayerRunManager,
-  VirtualDollarManager,
+  UnifiedVirtualDollarFactory,
   RevenueCalculator,
   ScoringEngine,
   DirectGameSessionFactory,
   DEFAULT_PERFORMANCE_CONFIG,
+  EventBus,
 } from "../../../src/index";
 
 /**
@@ -24,40 +23,34 @@ function createGameEngineSimulator(
   config: SimulationConfig
 ): GameEngineSimulator {
   // Create core components
-  const playerBalanceManager = new PlayerBalanceManager();
-  const virtualDollarManager = new VirtualDollarManager();
   const scoringEngine = new ScoringEngine();
+
+  // Use UnifiedVirtualDollarFactory instead of VirtualDollarManager
+  const virtualDollarFactory = new UnifiedVirtualDollarFactory(
+    DEFAULT_PERFORMANCE_CONFIG
+  );
 
   // Create game session factory
   const gameSessionFactory = new DirectGameSessionFactory(
     DEFAULT_PERFORMANCE_CONFIG
   );
 
-  // Create game matching engine
+  // Create game matching engine with correct constructor
   const gameMatchingEngine = new GameMatchingEngine(
-    virtualDollarManager,
+    virtualDollarFactory,
     scoringEngine,
-    gameSessionFactory
-  );
-
-  // Create run orchestrator
-  const runOrchestrator = new PlayerRunManager(
-    undefined, // ProgressionManager will be created internally
-    virtualDollarManager,
-    config.charityPercentage
+    gameSessionFactory,
+    new EventBus()
   );
 
   // Create revenue calculator
   const revenueCalculator = new RevenueCalculator();
 
-  // Create GameEngineSimulator
+  // Create GameEngineSimulator with updated constructor
   return new GameEngineSimulator(
-    playerBalanceManager,
-    virtualDollarManager,
     gameMatchingEngine,
-    runOrchestrator,
-    revenueCalculator,
-    scoringEngine
+    virtualDollarFactory,
+    revenueCalculator
   );
 }
 
