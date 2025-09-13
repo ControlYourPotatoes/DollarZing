@@ -22,7 +22,7 @@ Complete the event-driven architecture transformation by properly integrating th
 - **Event Types**: Rich event type definitions with proper TypeScript interfaces
 - **Event Flow Documentation**: Comprehensive event-driven data flow patterns defined
 - **Event Priority System**: Well-defined priority system (15→12→10→8→0)
-- **Event Naming**: Updated to use VIRTUAL_DOLLAR_* events for clarity
+- **Event Naming**: Updated to use VIRTUAL*DOLLAR*\* events for clarity
 - **Legacy Deprecation**: Properly marked deprecated methods and patterns
 
 ### ❌ Critical Issues Found
@@ -61,16 +61,19 @@ Complete the event-driven architecture transformation by properly integrating th
 ### ✅ Issues Resolved Since Last Analysis
 
 #### **MatchmakingEventHandler Implementation**
+
 - **Status**: ✅ **IMPLEMENTED** - Complete matchmaking logic now handled by dedicated event handler
 - **Location**: `/workspace/engine/src/events/handlers/matchmaking-event-handler.ts`
 - **Improvement**: FIFO ordering, detailed event emission, concurrent game limits
 
 #### **GameMatchingEngine Abstraction**
+
 - **Status**: ✅ **CLEANED UP** - Removed `attemptMatching()` method, now focuses on pool management
 - **Location**: `/workspace/engine/src/types/game-matching-engine.ts:233`
 - **Improvement**: Clear separation of concerns - pool management vs matchmaking logic
 
 #### **PoolManagementHandler Removal**
+
 - **Status**: ✅ **REMOVED** - Redundant handler eliminated, re-pooling logic moved to PlayerProgressionHandler
 - **Location**: `/workspace/engine/src/events/handlers/pool-management-handler.ts` (deleted)
 - **Improvement**: Fixed state mismatch issue where handler expected POOLED state but received WON state
@@ -167,12 +170,12 @@ SIMULATION_COMPLETED event
 - Emit PLAYER_TOTAL_WINNINGS_UPDATED events
 - Priority 12 (after cash-out decisions)
 
-#### **PoolManagementHandler** (REMOVED)
+#### **PoolManagementHandler** (Event Processor)
 
-- **Status**: ❌ **REMOVED** - Redundant functionality moved to PlayerProgressionHandler
-- **Reason**: Created state mismatch - expected POOLED dollars but received WON dollars
-- **Replacement**: PlayerProgressionHandler.rePoolAdvancedWinner() handles re-pooling directly
-- **Former Location**: `/workspace/engine/src/events/handlers/pool-management-handler.ts` (deleted)
+- Listen to VIRTUAL_DOLLAR_ADVANCED, CASH_OUT_COMPLETED, NEW_RUN_CREATED events
+- Emit RE_POOL_REQUEST, POOL_ADDED, POOL_REMOVED, POOL_UPDATED events
+- Manage virtual dollar pool state
+- Priority 8 (after player progression)
 
 #### **RevenueTrackingHandler** (Event Processor)
 
@@ -261,6 +264,7 @@ engine/src/
 The following test files contain references to deprecated/removed functionality and need immediate attention:
 
 - **`/workspace/engine/src/simulation/day-processor.test.ts`**
+
   - ❌ References `attemptMatching` method (removed from GameMatchingEngine)
   - ✅ Update to test event-driven approach via MatchmakingEventHandler
 
