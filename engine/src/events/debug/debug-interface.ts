@@ -150,7 +150,7 @@ export class EventDebugInterface {
 
     this.logger.info('SESSION', `Ended debugging session: ${session.name}`, {
       sessionId: session.id,
-      duration: session.endTime - session.startTime,
+      duration: session.endTime ? session.endTime - session.startTime : 0,
       eventCount: session.traces.length
     });
 
