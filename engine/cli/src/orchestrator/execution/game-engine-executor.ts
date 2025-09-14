@@ -117,7 +117,18 @@ export class GameEngineExecutor {
 
   constructor(config: ExecutorConfig) {
     this.config = config;
-    this.adapter = new DatasetOrchestrator(config.orchestratorConfig);
+
+    // Import EventBus for event-driven orchestration
+    const { EventBus } = require("../../../index");
+    const eventBus = new EventBus();
+
+    // Create DatasetOrchestrator with EventBus integration
+    this.adapter = new DatasetOrchestrator(
+      config.orchestratorConfig,
+      undefined, // Use default mapping config
+      eventBus
+    );
+
     this.factoryManager = createOrchestratorFactoryManager(
       config.factoryPreset
     );
@@ -494,7 +505,15 @@ export class GameEngineExecutor {
 
     // Recreate adapter if orchestrator config changed
     if (updates.orchestratorConfig) {
-      this.adapter = new DatasetOrchestrator(this.config.orchestratorConfig);
+      // Import EventBus for event-driven orchestration
+      const { EventBus } = require("../../../index");
+      const eventBus = new EventBus();
+
+      this.adapter = new DatasetOrchestrator(
+        this.config.orchestratorConfig,
+        undefined, // Use default mapping config
+        eventBus
+      );
     }
 
     // Recreate factory manager if preset changed

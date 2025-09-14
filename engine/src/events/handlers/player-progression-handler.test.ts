@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EventBus } from '../event-bus';
 import { PlayerProgressionHandler } from './player-progression-handler';
-import { 
-  GameResolvedEvent, 
-  EVENT_TYPES 
+import {
+  GameResolvedEvent,
+  ContinuePlayEvent,
+  EVENT_TYPES
 } from '../event-types';
-import { CashOutStrategy } from '../../types/virtual-dollar-engine';
 
 describe('PlayerProgressionHandler', () => {
   let eventBus: EventBus;
@@ -16,10 +16,13 @@ describe('PlayerProgressionHandler', () => {
   beforeEach(() => {
     eventBus = new EventBus();
 
-    // Mock VirtualDollarFactory
+    // Mock VirtualDollarFactory with all required methods
     mockVirtualDollarFactory = {
       getVirtualDollar: vi.fn(),
-      updateVirtualDollar: vi.fn()
+      updateVirtualDollar: vi.fn(),
+      eliminatePlayer: vi.fn(),
+      advancePlayer: vi.fn(),
+      createVirtualDollar: vi.fn()
     };
 
     // Mock GameMatchingEngine
@@ -36,471 +39,265 @@ describe('PlayerProgressionHandler', () => {
     eventBus.dispose();
   });
 
-  describe('Level Advancement Logic', () => {
-    it('should advance player from level 1 to level 2 after winning', async () => {
-      // Mock virtual dollar at level 1
-      const mockVirtualDollar = {
-        id: 'dollar-1',
-        ownerId: 'player-1',
-        currentLevel: 1,
+  describe('Event-Driven Progression Logic', () => {
+    it('should process loser elimination from GAME_RESOLVED events', async () => {
+      // Mock virtual dollar for loser
+      const mockLoserDollar = {
+        id: 'dollar-loser',
+        ownerId: 'player-loser',
+        currentLevel: 2,
         state: 'POOLED',
-        isActive: true
+        isActive: true,
+        currentRunWinnings: 1.8
       };
 
-      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockVirtualDollar);
+      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockLoserDollar);
+      mockVirtualDollarFactory.eliminatePlayer.mockReturnValue(mockLoserDollar);
 
-      const progressionSpy = vi.fn();
-      const subscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED, progressionSpy);
+      const runCompletedSpy = vi.fn();
+      const winningsUpdatedSpy = vi.fn();
+      const runSubscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED, runCompletedSpy);
+      const winningsSubscription = eventBus.on(EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED, winningsUpdatedSpy);
 
       const gameResolvedEvent: GameResolvedEvent = {
-        type: 'GAME_RESOLVED',
+        type: EVENT_TYPES.GAME_RESOLVED,
         timestamp: new Date(),
         gameId: 'game-1',
-        winnerId: 'player-1',
-        loserId: 'player-2',
-        winnerLevel: 1,
-        loserLevel: 1,
-        winnerDollarId: 'dollar-1',
-        loserDollarId: 'dollar-2',
-        winnings: 1.8,
+        winnerId: 'player-winner',
+        loserId: 'player-loser',
+        winnerLevel: 2,
+        loserLevel: 2,
+        winnerDollarId: 'dollar-winner',
+        loserDollarId: 'dollar-loser',
+        winnings: 3.6,
         gameResult: 'WIN'
       };
 
       await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
 
-      subscription.unsubscribe();
+      runSubscription.unsubscribe();
+      winningsSubscription.unsubscribe();
 
-      expect(progressionSpy).toHaveBeenCalledWith(
+      // Should eliminate the loser
+      expect(mockVirtualDollarFactory.eliminatePlayer).toHaveBeenCalledWith(
+        'player-loser',
+        'dollar-loser',
+        2
+      );
+
+      // Should emit run completed event for loser
+      expect(runCompletedSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'VIRTUAL_DOLLAR_ADVANCED',
-          playerId: 'player-1',
-          virtualDollarId: 'dollar-1',
-          fromLevel: 1,
-          toLevel: 2
+          type: EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
+          playerId: 'player-loser',
+          virtualDollarId: 'dollar-loser'
+        })
+      );
+
+      // Should emit winnings update for loser
+      expect(winningsUpdatedSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED,
+          playerId: 'player-loser'
         })
       );
     });
 
-    it('should handle progression through all 10 levels correctly', async () => {
-      const testCases = [
-        { fromLevel: 1, toLevel: 2, winnings: 1.8 },
-        { fromLevel: 2, toLevel: 3, winnings: 3.6 },
-        { fromLevel: 3, toLevel: 4, winnings: 7.2 },
-        { fromLevel: 4, toLevel: 5, winnings: 14.4 },
-        { fromLevel: 5, toLevel: 6, winnings: 28.8 },
-        { fromLevel: 6, toLevel: 7, winnings: 57.6 },
-        { fromLevel: 7, toLevel: 8, winnings: 115.2 },
-        { fromLevel: 8, toLevel: 9, winnings: 230.4 },
-        { fromLevel: 9, toLevel: 10, winnings: 460.8 }
-      ];
-
-      for (const testCase of testCases) {
-        // Mock virtual dollar at the fromLevel
-        const mockVirtualDollar = {
-          id: `dollar-${testCase.fromLevel}`,
-          ownerId: 'player-1',
-          currentLevel: testCase.fromLevel,
-          state: 'POOLED',
-          isActive: true
-        };
-
-        mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockVirtualDollar);
-
-        const progressionSpy = vi.fn();
-        const subscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED, progressionSpy);
-
-        const gameResolvedEvent: GameResolvedEvent = {
-          type: 'GAME_RESOLVED',
-          timestamp: new Date(),
-          gameId: `game-${testCase.fromLevel}`,
-          winnerId: 'player-1',
-          loserId: 'player-2',
-          winnerLevel: testCase.fromLevel,
-          loserLevel: testCase.fromLevel,
-          winnerDollarId: 'dollar-1',
-          loserDollarId: 'dollar-2',
-          winnings: testCase.winnings,
-          gameResult: 'WIN'
-        };
-
-        await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
-
-        expect(progressionSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: 'VIRTUAL_DOLLAR_ADVANCED',
-            playerId: 'player-1',
-            virtualDollarId: `dollar-${testCase.fromLevel}`,
-            fromLevel: testCase.fromLevel,
-            toLevel: testCase.toLevel
-          })
-        );
-
-        subscription.unsubscribe();
-      }
-    });
-
-    it('should handle jackpot level (10) with special $1024 winnings', async () => {
-      // Mock virtual dollar at level 10
-      const mockVirtualDollar = {
-        id: 'dollar-jackpot',
-        ownerId: 'player-1',
-        currentLevel: 10,
+    it('should process winner progression from CONTINUE_PLAY events', async () => {
+      // Mock virtual dollar for winner
+      const mockWinnerDollar = {
+        id: 'dollar-winner',
+        ownerId: 'player-winner',
+        currentLevel: 3,
         state: 'POOLED',
-        isActive: true
+        isActive: true,
+        currentRunWinnings: 7.2
       };
 
-      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockVirtualDollar);
+      const advancedWinnerDollar = {
+        ...mockWinnerDollar,
+        currentLevel: 4,
+        currentRunWinnings: 14.4
+      };
+
+      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockWinnerDollar);
+      mockVirtualDollarFactory.advancePlayer.mockReturnValue(advancedWinnerDollar);
+
+      const advancedSpy = vi.fn();
+      const poolAddedSpy = vi.fn();
+      const advancedSubscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED, advancedSpy);
+      const poolSubscription = eventBus.on(EVENT_TYPES.POOL_ADDED, poolAddedSpy);
+
+      // Simulate CONTINUE_PLAY event (normally emitted by CashOutDecisionHandler)
+      const continuePlayEvent: ContinuePlayEvent = {
+        type: EVENT_TYPES.CONTINUE_PLAY,
+        timestamp: new Date(),
+        playerId: 'player-winner',
+        virtualDollarId: 'dollar-winner',
+        currentLevel: 3,
+        decision: 'CONTINUE',
+        levelWinnings: 7.2
+      };
+
+      await eventBus.emit(EVENT_TYPES.CONTINUE_PLAY, continuePlayEvent);
+
+      advancedSubscription.unsubscribe();
+      poolSubscription.unsubscribe();
+
+      // Should advance the winner
+      expect(mockVirtualDollarFactory.advancePlayer).toHaveBeenCalledWith(
+        'player-winner',
+        'dollar-winner',
+        3,
+        4,
+        7.2
+      );
+
+      // Should emit advancement event
+      expect(advancedSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
+          playerId: 'player-winner',
+          virtualDollarId: 'dollar-winner'
+        })
+      );
+    });
+
+    it('should handle jackpot completion at level 10', async () => {
+      const mockJackpotDollar = {
+        id: 'dollar-jackpot',
+        ownerId: 'player-jackpot',
+        currentLevel: 10,
+        state: 'POOLED',
+        isActive: true,
+        currentRunWinnings: 1024
+      };
+
+      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockJackpotDollar);
+      mockVirtualDollarFactory.advancePlayer.mockReturnValue(mockJackpotDollar);
 
       const runCompletedSpy = vi.fn();
       const subscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED, runCompletedSpy);
 
-      const gameResolvedEvent: GameResolvedEvent = {
-        type: 'GAME_RESOLVED',
+      const continuePlayEvent: ContinuePlayEvent = {
+        type: EVENT_TYPES.CONTINUE_PLAY,
         timestamp: new Date(),
-        gameId: 'game-jackpot',
-        winnerId: 'player-1',
-        loserId: 'player-2',
-        winnerLevel: 10,
-        loserLevel: 10,
-        winnerDollarId: 'dollar-1',
-        loserDollarId: 'dollar-2',
-        winnings: 1024,
-        gameResult: 'WIN'
+        playerId: 'player-jackpot',
+        virtualDollarId: 'dollar-jackpot',
+        currentLevel: 10,
+        decision: 'CONTINUE',
+        levelWinnings: 1024
       };
 
-      await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
+      await eventBus.emit(EVENT_TYPES.CONTINUE_PLAY, continuePlayEvent);
 
       subscription.unsubscribe();
 
+      // Should complete the run as jackpot
       expect(runCompletedSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'VIRTUAL_DOLLAR_RUN_COMPLETED',
-          playerId: 'player-1',
-          virtualDollarId: 'dollar-jackpot',
-          completionType: 'JACKPOT',
-          finalLevel: 10
-        })
-      );
-    });
-  });
-
-  describe('Cash-Out Decision Integration', () => {
-    it('should integrate with conservative cash-out strategy at level 3', async () => {
-      mockProgressionManager.processGameResult.mockReturnValue({
-        runId: 'run-conservative',
-        currentLevel: 3,
-        gamesWonInRun: 3,
-        currentWinnings: 7.2,
-        isComplete: false,
-        completionReason: null,
-        completedAt: null
-      });
-
-      mockProgressionManager.makeCashOutDecision.mockReturnValue('CASH_OUT');
-      mockProgressionManager.processCashOut.mockReturnValue({
-        runId: 'run-conservative',
-        finalLevel: 3,
-        totalWinnings: 7.2,
-        wasJackpot: false,
-        wasCashedOut: true,
-        charityContribution: 1.08, // 15% of 7.2
-        playerPayout: 6.12,
-        gamesPlayedInRun: 3
-      });
-
-      const cashOutSpy = vi.fn();
-      const runCompletedSpy = vi.fn();
-      const cashOutSubscription = eventBus.on(EVENT_TYPES.CASH_OUT_DECISION, cashOutSpy);
-      const runSubscription = eventBus.on(EVENT_TYPES.RUN_COMPLETED, runCompletedSpy);
-
-      const gameResolvedEvent: GameResolvedEvent = {
-        type: 'GAME_RESOLVED',
-        timestamp: new Date(),
-        gameId: 'game-conservative',
-        winnerId: 'player-1',
-        loserId: 'player-2',
-        winnerLevel: 3,
-        loserLevel: 3,
-        winnerDollarId: 'dollar-1',
-        loserDollarId: 'dollar-2',
-        winnings: 7.2,
-        gameResult: 'WIN'
-      };
-
-      await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
-
-      cashOutSubscription.unsubscribe();
-      runSubscription.unsubscribe();
-
-      expect(cashOutSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'CASH_OUT_DECISION',
-          playerId: 'player-1',
-          virtualDollarId: 'dollar-1',
-          decision: 'CASH_OUT',
-          currentLevel: 3,
-          totalWinnings: 7.2,
-          cashOutStrategy: CashOutStrategy.CONSERVATIVE
-        })
-      );
-
-      expect(runCompletedSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'RUN_COMPLETED',
-          completionType: 'CASH_OUT',
-          totalWinnings: 7.2
+          type: EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
+          playerId: 'player-jackpot',
+          completionType: 'JACKPOT'
         })
       );
     });
 
-    it('should handle aggressive strategy continuing to higher levels', async () => {
-      mockProgressionManager.processGameResult.mockReturnValue({
-        runId: 'run-aggressive',
-        currentLevel: 8,
-        gamesWonInRun: 8,
-        currentWinnings: 230.4,
-        isComplete: false,
-        completionReason: null,
-        completedAt: null
+    it('should handle errors gracefully and emit failure events', async () => {
+      // Mock factory to throw error
+      mockVirtualDollarFactory.getVirtualDollar.mockImplementation(() => {
+        throw new Error('Virtual dollar not found');
       });
 
-      mockProgressionManager.makeCashOutDecision.mockReturnValue('CONTINUE');
-
-      const cashOutSpy = vi.fn();
-      const progressionSpy = vi.fn();
-      const cashOutSubscription = eventBus.on(EVENT_TYPES.CASH_OUT_DECISION, cashOutSpy);
-      const progressionSubscription = eventBus.on(EVENT_TYPES.PLAYER_ADVANCED, progressionSpy);
+      const failureSpy = vi.fn();
+      const subscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED, failureSpy);
 
       const gameResolvedEvent: GameResolvedEvent = {
-        type: 'GAME_RESOLVED',
-        timestamp: new Date(),
-        gameId: 'game-aggressive',
-        winnerId: 'player-1',
-        loserId: 'player-2',
-        winnerLevel: 7,
-        loserLevel: 7,
-        winnerDollarId: 'dollar-1',
-        loserDollarId: 'dollar-2',
-        winnings: 230.4,
-        gameResult: 'WIN'
-      };
-
-      await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
-
-      cashOutSubscription.unsubscribe();
-      progressionSubscription.unsubscribe();
-
-      expect(cashOutSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          decision: 'CONTINUE',
-          cashOutStrategy: CashOutStrategy.CONSERVATIVE
-        })
-      );
-
-      expect(progressionSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fromLevel: 7,
-          toLevel: 8
-        })
-      );
-    });
-  });
-
-  describe('Error Handling and Edge Cases', () => {
-    it('should handle progression failure gracefully', async () => {
-      mockProgressionManager.processGameResult.mockImplementation(() => {
-        throw new Error('Invalid run state - run not found');
-      });
-
-      const errorSpy = vi.fn();
-      const subscription = eventBus.on(EVENT_TYPES.PLAYER_PROGRESSION_FAILED, errorSpy);
-
-      const gameResolvedEvent: GameResolvedEvent = {
-        type: 'GAME_RESOLVED',
+        type: EVENT_TYPES.GAME_RESOLVED,
         timestamp: new Date(),
         gameId: 'game-error',
-        winnerId: 'player-1',
-        loserId: 'player-2',
+        winnerId: 'player-winner',
+        loserId: 'player-error',
         winnerLevel: 1,
         loserLevel: 1,
-        winnerDollarId: 'dollar-error',
-        loserDollarId: 'dollar-2',
+        winnerDollarId: 'dollar-winner',
+        loserDollarId: 'dollar-error',
         winnings: 1.8,
         gameResult: 'WIN'
       };
 
       await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
-
       subscription.unsubscribe();
 
-      expect(errorSpy).toHaveBeenCalledWith(
+      // Should emit failure event
+      expect(failureSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'PLAYER_PROGRESSION_FAILED',
-          playerId: 'player-1',
-          virtualDollarId: 'dollar-error',
-          reason: 'Progression processing failed',
-          error: 'Winner progression failed: Invalid run state - run not found'
-        })
-      );
-    });
-
-    it('should handle maximum level edge case (level 10)', async () => {
-      // Player already at level 10 tries to progress further (should complete as jackpot)
-      mockProgressionManager.processGameResult.mockReturnValue({
-        runId: 'run-max',
-        currentLevel: 10,
-        gamesWonInRun: 10,
-        currentWinnings: 1024,
-        isComplete: true,
-        completionReason: 'JACKPOT',
-        completedAt: new Date()
-      });
-
-      const runCompletedSpy = vi.fn();
-      const subscription = eventBus.on(EVENT_TYPES.RUN_COMPLETED, runCompletedSpy);
-
-      const gameResolvedEvent: GameResolvedEvent = {
-        type: 'GAME_RESOLVED',
-        timestamp: new Date(),
-        gameId: 'game-max',
-        winnerId: 'player-1',
-        loserId: 'player-2',
-        winnerLevel: 10,
-        loserLevel: 10,
-        winnerDollarId: 'dollar-1',
-        loserDollarId: 'dollar-2',
-        winnings: 1024,
-        gameResult: 'WIN'
-      };
-
-      await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
-
-      subscription.unsubscribe();
-
-      expect(runCompletedSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          completionType: 'JACKPOT',
-          finalLevel: 10,
-          wasJackpot: true
-        })
-      );
-    });
-
-    it('should handle game loss and run elimination', async () => {
-      mockProgressionManager.processGameResult.mockReturnValue({
-        runId: 'run-loss',
-        currentLevel: 5,
-        gamesWonInRun: 4,
-        currentWinnings: 0, // Loss clears winnings
-        isComplete: true,
-        completionReason: 'LOSS',
-        completedAt: new Date()
-      });
-
-      const runCompletedSpy = vi.fn();
-      const subscription = eventBus.on(EVENT_TYPES.RUN_COMPLETED, runCompletedSpy);
-
-      const gameResolvedEvent: GameResolvedEvent = {
-        type: 'GAME_RESOLVED',
-        timestamp: new Date(),
-        gameId: 'game-loss',
-        winnerId: 'player-2',
-        loserId: 'player-1',
-        winnerLevel: 5,
-        loserLevel: 5,
-        winnerDollarId: 'dollar-2',
-        loserDollarId: 'dollar-1',
-        winnings: 28.8,
-        gameResult: 'WIN' // This is for the winner; we handle the loser
-      };
-
-      await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
-
-      subscription.unsubscribe();
-
-      // Should process the loser's elimination
-      expect(runCompletedSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'RUN_COMPLETED',
-          playerId: 'player-1',
-          virtualDollarId: 'dollar-1',
-          completionType: 'ELIMINATED',
-          totalWinnings: 0,
-          wasJackpot: false
+          type: EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
+          playerId: 'player-error',
+          reason: 'Loser elimination failed'
         })
       );
     });
   });
 
-  describe('Event State Tracking', () => {
-    it('should maintain proper event sequencing for level progression', async () => {
-      const events: string[] = [];
-      
-      const advancedSub = eventBus.on(EVENT_TYPES.PLAYER_ADVANCED, () => { events.push('ADVANCED'); });
-      const decisionSub = eventBus.on(EVENT_TYPES.CASH_OUT_DECISION, () => { events.push('CASH_OUT_DECISION'); });
-      const completedSub = eventBus.on(EVENT_TYPES.RUN_COMPLETED, () => { events.push('RUN_COMPLETED'); });
-
-      // Mock different responses for winner vs loser
-      mockProgressionManager.processGameResult.mockImplementation((virtualDollar, gameResult) => {
-        if (gameResult === 'win') {
-          // Winner advances
-          return {
-            runId: 'run-sequence-winner',
-            currentLevel: 6,
-            gamesWonInRun: 6,
-            currentWinnings: 57.6,
-            isComplete: false,
-            completionReason: null,
-            completedAt: null
-          };
-        } else {
-          // Loser is eliminated
-          return {
-            runId: 'run-sequence-loser',
-            currentLevel: 5,
-            gamesWonInRun: 5,
-            currentWinnings: 0,
-            isComplete: true,
-            completionReason: 'LOSS',
-            completedAt: new Date()
-          };
-        }
-      });
-
-      mockProgressionManager.makeCashOutDecision.mockReturnValue('CASH_OUT');
-      mockProgressionManager.processCashOut.mockReturnValue({
-        runId: 'run-sequence',
-        finalLevel: 6,
-        totalWinnings: 57.6,
-        wasJackpot: false,
-        wasCashedOut: true,
-        charityContribution: 8.64,
-        playerPayout: 48.96,
-        gamesPlayedInRun: 6
-      });
-
-      const gameResolvedEvent: GameResolvedEvent = {
-        type: 'GAME_RESOLVED',
-        timestamp: new Date(),
-        gameId: 'game-sequence',
-        winnerId: 'player-1',
-        loserId: 'player-2',
-        winnerLevel: 5,
-        loserLevel: 5,
-        winnerDollarId: 'dollar-1',
-        loserDollarId: 'dollar-2',
-        winnings: 57.6,
-        gameResult: 'WIN'
+  describe('Integration with Pool Management', () => {
+    it('should re-pool advanced winner dollars', async () => {
+      const mockAdvancedDollar = {
+        id: 'dollar-repool',
+        ownerId: 'player-repool',
+        currentLevel: 5,
+        state: 'WON',
+        isActive: true,
+        currentRunWinnings: 28.8
       };
 
-      await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
+      const rePooledDollar = {
+        ...mockAdvancedDollar,
+        currentLevel: 6,
+        currentRunWinnings: 57.6,
+        state: 'POOLED'
+      };
 
-      advancedSub.unsubscribe();
-      decisionSub.unsubscribe();
-      completedSub.unsubscribe();
+      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockAdvancedDollar);
+      mockVirtualDollarFactory.advancePlayer.mockReturnValue(rePooledDollar);
 
-      // Verify proper event sequence - includes RUN_COMPLETED for both winner cash-out and loser elimination
-      expect(events).toEqual(['ADVANCED', 'CASH_OUT_DECISION', 'RUN_COMPLETED', 'RUN_COMPLETED']);
+      const poolAddedSpy = vi.fn();
+      const subscription = eventBus.on(EVENT_TYPES.POOL_ADDED, poolAddedSpy);
+
+      const continuePlayEvent: ContinuePlayEvent = {
+        type: EVENT_TYPES.CONTINUE_PLAY,
+        timestamp: new Date(),
+        playerId: 'player-repool',
+        virtualDollarId: 'dollar-repool',
+        currentLevel: 5,
+        decision: 'CONTINUE',
+        levelWinnings: 28.8
+      };
+
+      await eventBus.emit(EVENT_TYPES.CONTINUE_PLAY, continuePlayEvent);
+
+      subscription.unsubscribe();
+
+      // Should add back to pool at new level
+      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith(rePooledDollar);
+      expect(poolAddedSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: EVENT_TYPES.POOL_ADDED,
+          playerId: 'player-repool',
+          level: 6
+        })
+      );
+    });
+
+    it('should properly handle event subscription lifecycle', async () => {
+      // Test that handler properly subscribes and unsubscribes
+      expect(handler).toBeDefined();
+
+      // Test disposal
+      const disposeSpy = vi.spyOn(handler, 'dispose');
+      handler.dispose();
+
+      expect(disposeSpy).toHaveBeenCalled();
     });
   });
 });

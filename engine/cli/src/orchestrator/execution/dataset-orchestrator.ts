@@ -31,16 +31,20 @@ import { validateParameterCombination } from "../parameters/validation";
 import { generateDirectoryName, generateFilePaths } from "../parameters/matrix";
 
 /**
- * Create GameEngineSimulator with default components
+ * Create event-driven GameEngineSimulator with dependency injection
+ * Uses event bus for all component communication
  */
 function createGameEngineSimulator(
   _config: SimulationConfig,
   eventBus?: EventBus
 ): GameEngineSimulator {
-  // Create core components
+  // Initialize EventBus first
+  const sharedEventBus = eventBus || new EventBus();
+
+  // Create core components with EventBus integration
   const scoringEngine = new ScoringEngine();
 
-  // Use UnifiedVirtualDollarFactory instead of VirtualDollarManager
+  // Use UnifiedVirtualDollarFactory with performance config
   const virtualDollarFactory = new UnifiedVirtualDollarFactory(
     DEFAULT_PERFORMANCE_CONFIG
   );
@@ -50,23 +54,26 @@ function createGameEngineSimulator(
     DEFAULT_PERFORMANCE_CONFIG
   );
 
-  // Create game matching engine with correct constructor
+  // Create game matching engine with EventBus
   const gameMatchingEngine = new GameMatchingEngine(
     virtualDollarFactory,
     scoringEngine,
     gameSessionFactory,
-    eventBus as EventBus
+    sharedEventBus
   );
 
   // Create revenue calculator
   const revenueCalculator = new RevenueCalculator();
 
-  // Create PlayerBalanceManager and runOrchestrator
+  // Import simulation components with event-driven architecture
   const { PlayerBalanceManager } = require("../../../../src/types/player-balance-manager");
   const { PlayerManager } = require("../../../../src/simulation/player-manager");
   const { DayProcessor } = require("../../../../src/simulation/day-processor");
 
+  // Create player balance manager
   const playerBalanceManager = new PlayerBalanceManager();
+
+  // Create lightweight run orchestrator for compatibility
   const runOrchestrator = {
     initializePlayer: () => {},
     getActivePlayerCount: () => 0,
@@ -77,27 +84,30 @@ function createGameEngineSimulator(
     autoCreateRuns: () => [],
   };
 
+  // Create player manager with event bus integration
   const playerManager = new PlayerManager(
     playerBalanceManager,
     runOrchestrator,
-    eventBus
+    sharedEventBus
   );
 
+  // Create day processor with event bus integration
   const dayProcessor = new DayProcessor(
     gameMatchingEngine,
     playerManager,
-    virtualDollarFactory, // This was missing in the original GameEngineSimulator - should be virtualDollarFactory instead of dollarManager
-    eventBus
+    virtualDollarFactory,
+    sharedEventBus
   );
 
-  // Create GameEngineSimulator with updated constructor (now includes dayProcessor and playerManager)
+  // Create GameEngineSimulator with pure event-driven architecture
+  // All components communicate through the EventBus
   return new GameEngineSimulator(
     gameMatchingEngine,
     virtualDollarFactory,
     revenueCalculator,
     dayProcessor,
     playerManager,
-    eventBus
+    sharedEventBus
   );
 }
 
