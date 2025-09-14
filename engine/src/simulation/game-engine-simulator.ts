@@ -173,14 +173,20 @@ export class GameEngineSimulator {
       playerManager,
     };
 
-    // Initialize complete event handler system
+    // Initialize complete event handler system with all required handlers
     this.eventHandlers = [
       new GameEventHandler(
         this.eventBus,
         gameMatchingEngine,
         revenueCalculator
       ),
-      // PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
+      new PlayerProgressionHandler(
+        this.eventBus,
+        virtualDollarFactory,
+        revenueCalculator
+      ),
+      new CashOutDecisionHandler(this.eventBus, virtualDollarFactory),
+      new MatchmakingEventHandler(this.eventBus, gameMatchingEngine),
       new RevenueTrackingHandler(this.eventBus, revenueCalculator),
     ];
   }
@@ -286,16 +292,16 @@ export class GameEngineSimulator {
 
       // Emit SIMULATION_COMPLETED event even on error
       try {
-        await this.eventBus.emit('SIMULATION_COMPLETED', {
-          type: 'SIMULATION_COMPLETED',
+        await this.eventBus.emit("SIMULATION_COMPLETED", {
+          type: "SIMULATION_COMPLETED",
           timestamp: new Date(),
           results: errorResults,
           durationMs: errorResults.simulationDurationMs,
           success: false,
-          error: errorResults.error
+          error: errorResults.error,
         });
       } catch (emitError) {
-        console.error('Failed to emit SIMULATION_COMPLETED event:', emitError);
+        console.error("Failed to emit SIMULATION_COMPLETED event:", emitError);
       }
 
       return errorResults;
@@ -315,12 +321,12 @@ export class GameEngineSimulator {
       this.config;
 
     // Emit SIMULATION_STARTED event
-    await this.eventBus.emit('SIMULATION_STARTED', {
-      type: 'SIMULATION_STARTED',
+    await this.eventBus.emit("SIMULATION_STARTED", {
+      type: "SIMULATION_STARTED",
       timestamp: new Date(),
       config: this.config,
       totalDays: durationDays,
-      initialPlayerCount: this.config.initialPlayerCount
+      initialPlayerCount: this.config.initialPlayerCount,
     });
 
     const dailyResults: DailyResult[] = [];
@@ -392,12 +398,12 @@ export class GameEngineSimulator {
     };
 
     // Emit SIMULATION_COMPLETED event
-    await this.eventBus.emit('SIMULATION_COMPLETED', {
-      type: 'SIMULATION_COMPLETED',
+    await this.eventBus.emit("SIMULATION_COMPLETED", {
+      type: "SIMULATION_COMPLETED",
       timestamp: new Date(),
       results: results,
       durationMs: simulationDurationMs,
-      success: true
+      success: true,
     });
 
     return results;
@@ -522,7 +528,9 @@ export class GameEngineSimulator {
       activeRuns: poolStats.totalDollarsInPool,
       jackpotsWon: 0, // Would need event tracking
       averageRunLength:
-        totalGames > 0 ? totalGames / Math.max(poolStats.totalDollarsInPool, 1) : 0,
+        totalGames > 0
+          ? totalGames / Math.max(poolStats.totalDollarsInPool, 1)
+          : 0,
     };
   }
 
