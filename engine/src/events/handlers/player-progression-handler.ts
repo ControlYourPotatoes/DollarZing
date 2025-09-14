@@ -65,7 +65,10 @@ export class PlayerProgressionHandler {
         error: error instanceof Error ? error.message : String(error),
       };
 
-      await this.eventBus.emit(EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED, progressionFailedEvent);
+      await this.eventBus.emit(
+        EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
+        progressionFailedEvent
+      );
     }
   }
 
@@ -89,7 +92,10 @@ export class PlayerProgressionHandler {
         error: error instanceof Error ? error.message : String(error),
       };
 
-      await this.eventBus.emit(EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED, progressionFailedEvent);
+      await this.eventBus.emit(
+        EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
+        progressionFailedEvent
+      );
     }
   }
 
@@ -182,13 +188,18 @@ export class PlayerProgressionHandler {
   private async rePoolAdvancedWinner(virtualDollar: any): Promise<void> {
     try {
       // Update state from WON to POOLED for re-matching
-      this.virtualDollarFactory.updateDollarState(virtualDollar.id, DollarState.POOLED);
+      this.virtualDollarFactory.updateDollarState(
+        virtualDollar.id,
+        DollarState.POOLED
+      );
 
       // Add back to matching pool at new level
       const addResult = await this.gameMatchingEngine.addToPool(virtualDollar);
 
       if (!addResult.success) {
-        throw new Error(`Failed to re-pool advanced winner: ${addResult.error}`);
+        throw new Error(
+          `Failed to re-pool advanced winner: ${addResult.error}`
+        );
       }
 
       console.log(
@@ -228,7 +239,10 @@ export class PlayerProgressionHandler {
       ),
     };
 
-    await this.eventBus.emit(EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED, virtualDollarAdvancedEvent);
+    await this.eventBus.emit(
+      EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
+      virtualDollarAdvancedEvent
+    );
 
     // Also emit player-level aggregate event for total winnings update
     await this.emitPlayerTotalWinningsUpdated(
@@ -249,8 +263,8 @@ export class PlayerProgressionHandler {
     totalWinnings: number,
     isJackpot: boolean
   ): Promise<void> {
-    const completionType: "CASH_OUT" | "JACKPOT" | "ELIMINATION" = isJackpot 
-      ? "JACKPOT" 
+    const completionType: "CASH_OUT" | "JACKPOT" | "ELIMINATION" = isJackpot
+      ? "JACKPOT"
       : "ELIMINATION";
 
     const virtualDollarRunCompletedEvent: VirtualDollarRunCompletedEvent = {
@@ -264,7 +278,10 @@ export class PlayerProgressionHandler {
       wasSuccessful: isJackpot,
     };
 
-    await this.eventBus.emit(EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED, virtualDollarRunCompletedEvent);
+    await this.eventBus.emit(
+      EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
+      virtualDollarRunCompletedEvent
+    );
 
     // Also emit player-level aggregate event for total winnings update
     await this.emitPlayerTotalWinningsUpdated(
@@ -282,12 +299,15 @@ export class PlayerProgressionHandler {
     playerId: string,
     triggeringVirtualDollarId: string,
     winningsChange: number,
-    triggeringEvent: "VIRTUAL_DOLLAR_ADVANCED" | "VIRTUAL_DOLLAR_RUN_COMPLETED" | "CASH_OUT_COMPLETED"
+    triggeringEvent:
+      | "VIRTUAL_DOLLAR_ADVANCED"
+      | "VIRTUAL_DOLLAR_RUN_COMPLETED"
+      | "CASH_OUT_COMPLETED"
   ): Promise<void> {
     // TODO: In a full implementation, we'd need to query the VirtualDollarFactory
     // to get total winnings across all of this player's virtual dollars.
     // For now, we'll emit the event with the individual virtual dollar's winnings.
-    
+
     const playerTotalWinningsEvent: PlayerTotalWinningsUpdatedEvent = {
       type: EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED,
       timestamp: new Date(),
@@ -299,7 +319,10 @@ export class PlayerProgressionHandler {
       triggeringEvent,
     };
 
-    await this.eventBus.emit(EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED, playerTotalWinningsEvent);
+    await this.eventBus.emit(
+      EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED,
+      playerTotalWinningsEvent
+    );
   }
 
   /**
