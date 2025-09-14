@@ -13,8 +13,7 @@ import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-han
 // PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
 import { MatchmakingEventHandler } from "../events/handlers/matchmaking-event-handler";
-import { PooledGameSessionFactory } from "../types/pooled-factories";
-import { ScoringEngine } from "../types/scoring-engine";
+import { DirectGameSessionFactory } from "../types/direct-factories";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -173,20 +172,25 @@ export class GameEngineSimulator {
       playerManager,
     };
 
-    // Initialize complete event handler system with all required handlers
+    // Initialize basic event handler system (strategy-dependent handlers created in executeSimulation)
     this.eventHandlers = [
       new GameEventHandler(
         this.eventBus,
         gameMatchingEngine,
         revenueCalculator
       ),
-      new PlayerProgressionHandler(
+      new MatchmakingEventHandler(
         this.eventBus,
+        gameMatchingEngine,
         virtualDollarFactory,
-        revenueCalculator
+        new DirectGameSessionFactory({
+          enableObjectPooling: false,
+          poolSizes: { virtualDollar: 100, gameSession: 50 },
+          prewarmCounts: { virtualDollar: 10, gameSession: 5 },
+          enableBatchOptimizations: false,
+          enablePerformanceMetrics: false,
+        })
       ),
-      new CashOutDecisionHandler(this.eventBus, virtualDollarFactory),
-      new MatchmakingEventHandler(this.eventBus, gameMatchingEngine),
       new RevenueTrackingHandler(this.eventBus, revenueCalculator),
     ];
   }
