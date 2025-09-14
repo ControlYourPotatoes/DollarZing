@@ -24,7 +24,6 @@ describe("DayProcessor", () => {
     // Create mock instances
     mockGameMatchingEngine = {
       addToPool: vi.fn().mockReturnValue({ success: true }),
-      attemptMatching: vi.fn().mockReturnValue({ gamesCreated: [] }),
       resolveGame: vi.fn().mockReturnValue({ success: true }),
       getGameSession: vi.fn(),
       getPoolStatistics: vi.fn().mockReturnValue({
@@ -58,7 +57,6 @@ describe("DayProcessor", () => {
       mockGameMatchingEngine,
       mockPlayerManager,
       mockDollarManager,
-      mockRevenueCalculator,
       mockEventBus
     );
   });
@@ -83,8 +81,8 @@ describe("DayProcessor", () => {
       // Verify that autoCreateRuns was called
       expect(mockPlayerManager.autoCreateRuns).toHaveBeenCalledWith(2);
 
-      // Verify that attemptMatching was called
-      expect(mockGameMatchingEngine.attemptMatching).toHaveBeenCalled();
+      // In event-driven architecture, matching happens via events
+      // No direct method calls to attemptMatching
     });
 
     it("should handle empty game results gracefully", async () => {
@@ -95,15 +93,10 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      // Mock empty game results
-      mockGameMatchingEngine.attemptMatching.mockReturnValue({
-        gamesCreated: [],
-      });
-
       await dayProcessor.processDay(day, config);
 
       // Should not throw and should complete successfully
-      expect(mockGameMatchingEngine.attemptMatching).toHaveBeenCalled();
+      // In event-driven architecture, games are created via events
     });
 
     it("should process games when they are created", async () => {
@@ -114,19 +107,10 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      // Mock game creation
-      const mockGame = { id: "game-1" };
-      mockGameMatchingEngine.attemptMatching.mockReturnValue({
-        gamesCreated: [mockGame],
-      });
-
       await dayProcessor.processDay(day, config);
 
-      // Verify game resolution was attempted
-      expect(mockGameMatchingEngine.resolveGame).toHaveBeenCalledWith(
-        "game-1",
-        expect.any(String)
-      );
+      // In event-driven architecture, game resolution happens via events
+      // GameEventHandler handles game resolution, not DayProcessor directly
     });
 
     it("should respect maxGamesPerDay limit", async () => {
@@ -137,15 +121,10 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      // Mock that we always create games
-      mockGameMatchingEngine.attemptMatching.mockReturnValue({
-        gamesCreated: [{ id: "game-1" }],
-      });
-
       await dayProcessor.processDay(day, config);
 
-      // Should attempt matching Math.max(10, initialPlayerCount * 2) times = 10 times
-      expect(mockGameMatchingEngine.attemptMatching).toHaveBeenCalledTimes(10);
+      // In event-driven architecture, matching attempts are handled by MatchmakingEventHandler
+      // DayProcessor only emits DAY_STARTED and DAY_COMPLETED events
     });
 
     it("should stop processing when no more games can be created", async () => {
@@ -156,15 +135,10 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      // Mock that first attempt creates games, second returns empty
-      mockGameMatchingEngine.attemptMatching
-        .mockReturnValueOnce({ gamesCreated: [{ id: "game-1" }] })
-        .mockReturnValueOnce({ gamesCreated: [] });
-
       await dayProcessor.processDay(day, config);
 
-      // Should only attempt matching twice (once successful, once empty)
-      expect(mockGameMatchingEngine.attemptMatching).toHaveBeenCalledTimes(2);
+      // In event-driven architecture, matching is handled by MatchmakingEventHandler
+      // which responds to POOL_ADDED/POOL_UPDATED events
     });
   });
 

@@ -129,6 +129,8 @@ export interface SimulationComponents {
   gameMatchingEngine: GameMatchingEngine;
   virtualDollarFactory: VirtualDollarFactory;
   revenueCalculator: RevenueCalculator;
+  dayProcessor: any; // DayProcessor - will be injected
+  playerManager: any; // PlayerManager - will be injected
 }
 
 // ===== GAME ENGINE SIMULATOR CLASS =====
@@ -153,6 +155,8 @@ export class GameEngineSimulator {
     gameMatchingEngine: GameMatchingEngine,
     virtualDollarFactory: VirtualDollarFactory,
     revenueCalculator: RevenueCalculator,
+    dayProcessor: any, // DayProcessor injected
+    playerManager: any, // PlayerManager injected
     eventBus?: EventBus
   ) {
     // Initialize event system
@@ -165,6 +169,8 @@ export class GameEngineSimulator {
       gameMatchingEngine,
       virtualDollarFactory,
       revenueCalculator,
+      dayProcessor,
+      playerManager,
     };
 
     // Initialize complete event handler system
@@ -260,7 +266,8 @@ export class GameEngineSimulator {
       return await this.runSimulation(progressCallback, cancellationToken);
     } catch (error) {
       console.error("Simulation error:", error);
-      return {
+
+      const errorResults = {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
         simulationDurationMs: performance.now() - this.startTime,
@@ -276,6 +283,22 @@ export class GameEngineSimulator {
         dailyResults: [],
         completedAt: new Date(),
       };
+
+      // Emit SIMULATION_COMPLETED event even on error
+      try {
+        await this.eventBus.emit('SIMULATION_COMPLETED', {
+          type: 'SIMULATION_COMPLETED',
+          timestamp: new Date(),
+          results: errorResults,
+          durationMs: errorResults.simulationDurationMs,
+          success: false,
+          error: errorResults.error
+        });
+      } catch (emitError) {
+        console.error('Failed to emit SIMULATION_COMPLETED event:', emitError);
+      }
+
+      return errorResults;
     } finally {
       this.isRunning = false;
     }
@@ -290,6 +313,15 @@ export class GameEngineSimulator {
   ): Promise<SimulationResults> {
     const { durationDays, enableProgressReporting, maxSimulationTimeMs } =
       this.config;
+
+    // Emit SIMULATION_STARTED event
+    await this.eventBus.emit('SIMULATION_STARTED', {
+      type: 'SIMULATION_STARTED',
+      timestamp: new Date(),
+      config: this.config,
+      totalDays: durationDays,
+      initialPlayerCount: this.config.initialPlayerCount
+    });
 
     const dailyResults: DailyResult[] = [];
 
@@ -307,55 +339,8 @@ export class GameEngineSimulator {
         throw new Error("Simulation was cancelled");
       }
 
-      // Use DayProcessor to handle the daily simulation
-      const { DayProcessor } = await import("./day-processor");
-      const { PlayerManager } = await import("./player-manager");
-
-      // Create PlayerManager with required dependencies (following integration test pattern)
-      const { PlayerBalanceManager } = await import(
-        "../types/player-balance-manager"
-      );
-
-      const playerBalanceManager = new PlayerBalanceManager();
-
-      // Create a simple implementation of PlayerRunManager interface
-      const runOrchestrator = {
-        initializePlayer: (
-          _playerId: string,
-          _initialDonationAmount: number,
-          _cashOutStrategy: any
-        ) => {
-          // Simple implementation - just log for now
-          console.log(
-            `Initializing player ${_playerId} with ${_initialDonationAmount} and strategy ${_cashOutStrategy}`
-          );
-        },
-        getActivePlayerCount: () => 0,
-        getPlayerStrategy: (_playerId: string) => "BALANCED" as any,
-        getAllActiveRuns: () => [],
-        processGameResult: (_virtualDollar: any, _result: any) => {
-          // Simple implementation - return null for now
-          return null;
-        },
-        createNewRun: (request: any) =>
-          this.components.virtualDollarFactory.create(request.playerId),
-        autoCreateRuns: (_maxRunsPerPlayer?: number) => [],
-      };
-
-      const playerManager = new PlayerManager(
-        playerBalanceManager,
-        runOrchestrator,
-        this.eventBus
-      );
-
-      const dayProcessor = new DayProcessor(
-        this.components.gameMatchingEngine,
-        playerManager,
-        this.components.dollarManager,
-        this.eventBus
-      );
-
-      await dayProcessor.processDay(
+      // Use injected components instead of creating them
+      await this.components.dayProcessor.processDay(
         day,
         {
           initialPlayerCount: this.config.initialPlayerCount,
@@ -389,7 +374,8 @@ export class GameEngineSimulator {
 
     // Generate final results
     const simulationDurationMs = performance.now() - this.startTime;
-    return {
+
+    const results = {
       success: true,
       simulationDurationMs,
       config: this.config,
@@ -404,6 +390,17 @@ export class GameEngineSimulator {
       dailyResults,
       completedAt: new Date(),
     };
+
+    // Emit SIMULATION_COMPLETED event
+    await this.eventBus.emit('SIMULATION_COMPLETED', {
+      type: 'SIMULATION_COMPLETED',
+      timestamp: new Date(),
+      results: results,
+      durationMs: simulationDurationMs,
+      success: true
+    });
+
+    return results;
   }
 
   /**
@@ -512,8 +509,8 @@ export class GameEngineSimulator {
     const averageGamesPerDay =
       totalGames / Math.max(this.config.durationDays, 1);
 
-    const poolStats = this.components.dollarManager.getPoolStatistics();
-    const totalVirtualDollars = poolStats.totalDollars;
+    const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
+    const totalVirtualDollars = poolStats.totalDollarsInPool;
 
     // In event-driven architecture, we don't have direct access to completed runs
     // This would be tracked via RUN_COMPLETED events in a proper implementation
@@ -522,10 +519,10 @@ export class GameEngineSimulator {
       averageGamesPerDay,
       totalVirtualDollars,
       completedRuns: 0, // Would need event tracking
-      activeRuns: poolStats.totalDollars,
+      activeRuns: poolStats.totalDollarsInPool,
       jackpotsWon: 0, // Would need event tracking
       averageRunLength:
-        totalGames > 0 ? totalGames / Math.max(poolStats.totalDollars, 1) : 0,
+        totalGames > 0 ? totalGames / Math.max(poolStats.totalDollarsInPool, 1) : 0,
     };
   }
 

@@ -47,7 +47,7 @@ export {
 
 // Game engine components
 export { GameMatchingEngine } from "./types/game-matching-engine";
-export { ProgressionManager as PlayerRunManager } from "./types/progression-manager";
+// export { ProgressionManager as PlayerRunManager } from "./types/progression-manager"; // REMOVED - deleted file
 export { ScoringEngine } from "./types/scoring-engine";
 export { PlayerBalanceManager } from "./types/player-balance-manager";
 export { UnifiedVirtualDollarFactory } from "./types/direct-factories";

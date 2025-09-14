@@ -7,7 +7,7 @@ import { EventBus, EventSubscription } from "../event-bus";
 import { GameMatchingEngine } from "../../types/game-matching-engine";
 import { VirtualDollarFactory } from "../../types/factory-interfaces";
 import { GameSessionFactory } from "../../types/factory-interfaces";
-import { ScoringEngine } from "../../types/scoring-engine";
+// ScoringEngine removed - not used in matchmaking, only in game resolution
 import {
   PoolAddedEvent,
   PoolUpdatedEvent,
@@ -39,8 +39,7 @@ export class MatchmakingEventHandler {
     private eventBus: EventBus,
     private gameMatchingEngine: GameMatchingEngine,
     private virtualDollarFactory: VirtualDollarFactory,
-    private gameSessionFactory: GameSessionFactory,
-    private scoringEngine: ScoringEngine
+    private gameSessionFactory: GameSessionFactory
   ) {
     this.initialize();
   }

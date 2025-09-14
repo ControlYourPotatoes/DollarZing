@@ -79,6 +79,12 @@ Complete the event-driven architecture transformation by properly integrating th
 - **Improvement**: Fixed state mismatch issue where handler expected POOLED state but received WON state
 - **Fix Applied**: Re-pooling logic now integrated directly into PlayerProgressionHandler.rePoolAdvancedWinner()
 
+#### **MatchmakingEventHandler Cleanup**
+- **Status**: ✅ **CLEANED UP** - Removed unused ScoringEngine dependency
+- **Location**: `/workspace/engine/src/events/handlers/matchmaking-event-handler.ts:10,43`
+- **Issue**: ScoringEngine parameter was declared but never used (belongs in GameEventHandler)
+- **Fix Applied**: Removed unused import and constructor parameter
+
 ## Intended Event Flow Architecture
 
 ### **Complete Event Flow Chain** (Based on event-driven-data-flow.md)

@@ -141,8 +141,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
       eventBus,
       gameMatchingEngine,
       virtualDollarFactory,
-      gameSessionFactory,
-      scoringEngine
+      gameSessionFactory
     );
 
     // Set up comprehensive event capture

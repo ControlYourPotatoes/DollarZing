@@ -61,11 +61,42 @@ function createGameEngineSimulator(
   // Create revenue calculator
   const revenueCalculator = new RevenueCalculator();
 
-  // Create GameEngineSimulator with updated constructor
+  // Create PlayerBalanceManager and runOrchestrator
+  const { PlayerBalanceManager } = require("../../../../src/types/player-balance-manager");
+  const { PlayerManager } = require("../../../../src/simulation/player-manager");
+  const { DayProcessor } = require("../../../../src/simulation/day-processor");
+
+  const playerBalanceManager = new PlayerBalanceManager();
+  const runOrchestrator = {
+    initializePlayer: () => {},
+    getActivePlayerCount: () => 0,
+    getPlayerStrategy: () => "BALANCED" as any,
+    getAllActiveRuns: () => [],
+    processGameResult: () => null,
+    createNewRun: (request: any) => virtualDollarFactory.create(request.playerId),
+    autoCreateRuns: () => [],
+  };
+
+  const playerManager = new PlayerManager(
+    playerBalanceManager,
+    runOrchestrator,
+    eventBus
+  );
+
+  const dayProcessor = new DayProcessor(
+    gameMatchingEngine,
+    playerManager,
+    virtualDollarFactory, // This was missing in the original GameEngineSimulator - should be virtualDollarFactory instead of dollarManager
+    eventBus
+  );
+
+  // Create GameEngineSimulator with updated constructor (now includes dayProcessor and playerManager)
   return new GameEngineSimulator(
     gameMatchingEngine,
     virtualDollarFactory,
     revenueCalculator,
+    dayProcessor,
+    playerManager,
     eventBus
   );
 }
