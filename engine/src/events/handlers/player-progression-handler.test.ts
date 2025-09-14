@@ -16,18 +16,22 @@ describe('PlayerProgressionHandler', () => {
   beforeEach(() => {
     eventBus = new EventBus();
 
-    // Mock VirtualDollarFactory with all required methods
+    // Mock VirtualDollarFactory with all required methods based on interface
     mockVirtualDollarFactory = {
-      getVirtualDollar: vi.fn(),
-      updateVirtualDollar: vi.fn(),
+      getDollar: vi.fn(),
+      updateDollarState: vi.fn(),
       eliminatePlayer: vi.fn(),
-      advancePlayer: vi.fn(),
-      createVirtualDollar: vi.fn()
+      advancePlayerLevel: vi.fn(),
+      calculateLevelWinnings: vi.fn(),
+      create: vi.fn(),
+      release: vi.fn(),
+      createBatch: vi.fn(),
+      getStatistics: vi.fn()
     };
 
     // Mock GameMatchingEngine
     mockGameMatchingEngine = {
-      addToPool: vi.fn(),
+      addToPool: vi.fn().mockReturnValue({ success: true }),
       removeFromPool: vi.fn()
     };
 
@@ -41,7 +45,7 @@ describe('PlayerProgressionHandler', () => {
 
   describe('Event-Driven Progression Logic', () => {
     it('should process loser elimination from GAME_RESOLVED events', async () => {
-      // Mock virtual dollar for loser
+      // Mock virtual dollar for the losing player
       const mockLoserDollar = {
         id: 'dollar-loser',
         ownerId: 'player-loser',
@@ -51,7 +55,7 @@ describe('PlayerProgressionHandler', () => {
         currentRunWinnings: 1.8
       };
 
-      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockLoserDollar);
+      mockVirtualDollarFactory.getDollar.mockReturnValue(mockLoserDollar);
       mockVirtualDollarFactory.eliminatePlayer.mockReturnValue(mockLoserDollar);
 
       const runCompletedSpy = vi.fn();
@@ -78,9 +82,8 @@ describe('PlayerProgressionHandler', () => {
       runSubscription.unsubscribe();
       winningsSubscription.unsubscribe();
 
-      // Should eliminate the loser
+      // Should eliminate the loser with correct parameters
       expect(mockVirtualDollarFactory.eliminatePlayer).toHaveBeenCalledWith(
-        'player-loser',
         'dollar-loser',
         2
       );
@@ -120,8 +123,9 @@ describe('PlayerProgressionHandler', () => {
         currentRunWinnings: 14.4
       };
 
-      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockWinnerDollar);
-      mockVirtualDollarFactory.advancePlayer.mockReturnValue(advancedWinnerDollar);
+      mockVirtualDollarFactory.getDollar.mockReturnValue(mockWinnerDollar);
+      mockVirtualDollarFactory.advancePlayerLevel.mockReturnValue(advancedWinnerDollar);
+      mockVirtualDollarFactory.calculateLevelWinnings.mockReturnValue(14.4);
 
       const advancedSpy = vi.fn();
       const poolAddedSpy = vi.fn();
@@ -135,8 +139,9 @@ describe('PlayerProgressionHandler', () => {
         playerId: 'player-winner',
         virtualDollarId: 'dollar-winner',
         currentLevel: 3,
-        decision: 'CONTINUE',
-        levelWinnings: 7.2
+        potentialWinnings: 7.2,
+        nextLevel: 4,
+        nextPotentialWinnings: 14.4
       };
 
       await eventBus.emit(EVENT_TYPES.CONTINUE_PLAY, continuePlayEvent);
@@ -144,13 +149,11 @@ describe('PlayerProgressionHandler', () => {
       advancedSubscription.unsubscribe();
       poolSubscription.unsubscribe();
 
-      // Should advance the winner
-      expect(mockVirtualDollarFactory.advancePlayer).toHaveBeenCalledWith(
-        'player-winner',
+      // Should advance the winner with correct parameters
+      expect(mockVirtualDollarFactory.advancePlayerLevel).toHaveBeenCalledWith(
         'dollar-winner',
-        3,
         4,
-        7.2
+        14.4
       );
 
       // Should emit advancement event
@@ -173,8 +176,9 @@ describe('PlayerProgressionHandler', () => {
         currentRunWinnings: 1024
       };
 
-      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockJackpotDollar);
-      mockVirtualDollarFactory.advancePlayer.mockReturnValue(mockJackpotDollar);
+      mockVirtualDollarFactory.getDollar.mockReturnValue(mockJackpotDollar);
+      mockVirtualDollarFactory.advancePlayerLevel.mockReturnValue(mockJackpotDollar);
+      mockVirtualDollarFactory.calculateLevelWinnings.mockReturnValue(1024);
 
       const runCompletedSpy = vi.fn();
       const subscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED, runCompletedSpy);
@@ -185,8 +189,9 @@ describe('PlayerProgressionHandler', () => {
         playerId: 'player-jackpot',
         virtualDollarId: 'dollar-jackpot',
         currentLevel: 10,
-        decision: 'CONTINUE',
-        levelWinnings: 1024
+        potentialWinnings: 1024,
+        nextLevel: 10,
+        nextPotentialWinnings: 1024
       };
 
       await eventBus.emit(EVENT_TYPES.CONTINUE_PLAY, continuePlayEvent);
@@ -204,9 +209,17 @@ describe('PlayerProgressionHandler', () => {
     });
 
     it('should handle errors gracefully and emit failure events', async () => {
-      // Mock factory to throw error
-      mockVirtualDollarFactory.getVirtualDollar.mockImplementation(() => {
-        throw new Error('Virtual dollar not found');
+      // Mock factory to throw error on eliminatePlayer call
+      mockVirtualDollarFactory.getDollar.mockReturnValue({
+        id: 'dollar-error',
+        ownerId: 'player-error',
+        currentLevel: 1,
+        state: 'POOLED',
+        isActive: true,
+        currentRunWinnings: 0
+      });
+      mockVirtualDollarFactory.eliminatePlayer.mockImplementation(() => {
+        throw new Error('Elimination failed');
       });
 
       const failureSpy = vi.fn();
@@ -227,6 +240,10 @@ describe('PlayerProgressionHandler', () => {
       };
 
       await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
+
+      // Wait a bit for async processing to complete
+      await new Promise(resolve => setTimeout(resolve, 10));
+
       subscription.unsubscribe();
 
       // Should emit failure event
@@ -258,11 +275,12 @@ describe('PlayerProgressionHandler', () => {
         state: 'POOLED'
       };
 
-      mockVirtualDollarFactory.getVirtualDollar.mockReturnValue(mockAdvancedDollar);
-      mockVirtualDollarFactory.advancePlayer.mockReturnValue(rePooledDollar);
+      mockVirtualDollarFactory.getDollar.mockReturnValue(mockAdvancedDollar);
+      mockVirtualDollarFactory.advancePlayerLevel.mockReturnValue(rePooledDollar);
+      mockVirtualDollarFactory.calculateLevelWinnings.mockReturnValue(57.6);
 
-      const poolAddedSpy = vi.fn();
-      const subscription = eventBus.on(EVENT_TYPES.POOL_ADDED, poolAddedSpy);
+      const advancedSpy = vi.fn();
+      const subscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED, advancedSpy);
 
       const continuePlayEvent: ContinuePlayEvent = {
         type: EVENT_TYPES.CONTINUE_PLAY,
@@ -270,21 +288,27 @@ describe('PlayerProgressionHandler', () => {
         playerId: 'player-repool',
         virtualDollarId: 'dollar-repool',
         currentLevel: 5,
-        decision: 'CONTINUE',
-        levelWinnings: 28.8
+        potentialWinnings: 28.8,
+        nextLevel: 6,
+        nextPotentialWinnings: 57.6
       };
 
       await eventBus.emit(EVENT_TYPES.CONTINUE_PLAY, continuePlayEvent);
 
       subscription.unsubscribe();
 
-      // Should add back to pool at new level
+      // Should advance the winner and add back to pool at new level
+      expect(mockVirtualDollarFactory.advancePlayerLevel).toHaveBeenCalledWith(
+        'dollar-repool',
+        6,
+        57.6
+      );
       expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith(rePooledDollar);
-      expect(poolAddedSpy).toHaveBeenCalledWith(
+      expect(advancedSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: EVENT_TYPES.POOL_ADDED,
+          type: EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
           playerId: 'player-repool',
-          level: 6
+          virtualDollarId: 'dollar-repool'
         })
       );
     });
