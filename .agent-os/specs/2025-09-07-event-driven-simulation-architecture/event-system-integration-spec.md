@@ -80,6 +80,7 @@ Complete the event-driven architecture transformation by properly integrating th
 - **Fix Applied**: Re-pooling logic now integrated directly into PlayerProgressionHandler.rePoolAdvancedWinner()
 
 #### **MatchmakingEventHandler Cleanup**
+
 - **Status**: ✅ **CLEANED UP** - Removed unused ScoringEngine dependency
 - **Location**: `/workspace/engine/src/events/handlers/matchmaking-event-handler.ts:10,43`
 - **Issue**: ScoringEngine parameter was declared but never used (belongs in GameEventHandler)
@@ -248,20 +249,184 @@ engine/src/
 - [x] 3.4 Event handler isolation achieved ✅ DONE
 - [ ] 3.5 Add event tracing and debugging capabilities ⚠️ PENDING
 
-### **Phase 4: Update Parent Orchestrators**
+### **Phase 4: Event Debugging and Monitoring Infrastructure**
 
-- [ ] 4.1 Update DatasetOrchestrator to use event-driven GameEngineSimulator
-- [ ] 4.2 Update GameEngineAdapter to use event-driven architecture
-- [ ] 4.3 Ensure all CLI commands work with event-driven system
-- [ ] 4.4 Test complete end-to-end event flow
+#### **Phase 4.1: Core Event Debugging Infrastructure (1-2 weeks)**
 
-### **Phase 5: Testing and Validation** ⚠️ HIGH PRIORITY
+**New File Structure:**
 
-- [ ] 5.1 Update test files to remove deprecated method mocks ⚠️ **CRITICAL**
-- [ ] 5.2 Fix `day-processor.test.ts` - Remove `attemptMatching` references
-- [ ] 5.3 Fix `player-progression-handler.test.ts` - Remove `ProgressionManager` references
-- [ ] 5.4 Test error handling and event recovery
-- [ ] 5.5 Verify all existing functionality preserved with new event system
+```
+engine/src/events/
+├── debugging/
+│   ├── event-tracer.ts              # Enhanced event tracing (150 lines)
+│   ├── event-validator.ts           # Event flow validation (120 lines)
+│   ├── error-tracker.ts             # Centralized error handling (100 lines)
+│   └── types/
+│       ├── debug-types.ts           # Debugging interfaces (80 lines)
+│       └── trace-types.ts           # Event tracing types (60 lines)
+├── event-bus.ts                     # Enhanced with debugging hooks
+└── event-types.ts                   # Add debugging event types
+```
+
+**Tasks:**
+
+- [ ] 4.1.1 Create EventTracer with enhanced tracing capabilities
+- [ ] 4.1.2 Implement EventValidator for event flow validation
+- [ ] 4.1.3 Build ErrorTracker for centralized error handling
+- [ ] 4.1.4 Define debugging types and interfaces
+- [ ] 4.1.5 Enhance EventBus with debugging hooks
+- [ ] 4.1.6 Add debugging event types to event-types.ts
+
+#### **Phase 4.2: Development Monitoring Tools (1-2 weeks)**
+
+**New File Structure:**
+
+```
+engine/src/events/
+├── monitoring/
+│   ├── event-monitor.ts             # Real-time monitoring (180 lines)
+│   ├── performance-analyzer.ts      # Handler performance tracking (140 lines)
+│   ├── flow-analyzer.ts             # Event chain analysis (160 lines)
+│   └── reporters/
+│       ├── console-reporter.ts      # Console output formatting (100 lines)
+│       ├── json-reporter.ts         # JSON export functionality (80 lines)
+│       └── summary-reporter.ts      # Summary statistics (90 lines)
+├── testing/
+│   ├── mock-event-generator.ts      # Test event generation (120 lines)
+│   └── event-test-helpers.ts        # Testing utilities (100 lines)
+└── debugging/ (from Phase 4.1)
+```
+
+**Tasks:**
+
+- [ ] 4.2.1 Create EventMonitor for real-time metrics collection
+- [ ] 4.2.2 Build PerformanceAnalyzer for handler performance tracking
+- [ ] 4.2.3 Implement FlowAnalyzer for event chain analysis
+- [ ] 4.2.4 Create reporting infrastructure (console, JSON, summary)
+- [ ] 4.2.5 Build MockEventGenerator for testing scenarios
+- [ ] 4.2.6 Create event testing helper utilities
+
+### **Core Component Specifications**
+
+#### **EventTracer (`debugging/event-tracer.ts`)**
+
+```typescript
+interface EventTrace {
+  eventId: string; // Unique event identifier
+  type: string; // Event type name
+  timestamp: number; // Event creation time
+  data: any; // Event payload data
+  handlerCount: number; // Number of handlers that processed event
+  processingTime?: number; // Total processing time in ms
+  errors?: string[]; // Any errors that occurred
+}
+
+class EventTracer {
+  private traces: Map<string, EventTrace>;
+  private maxTraces: number;
+
+  startTrace(eventType: string, eventId: string, data: any): void;
+  endTrace(eventId: string, errors?: string[]): void;
+  getTrace(eventId: string): EventTrace | undefined;
+  getTraces(eventType?: string): EventTrace[];
+  clearTraces(): void;
+}
+```
+
+#### **EventValidator (`debugging/event-validator.ts`)**
+
+```typescript
+interface EventFlowRule {
+  triggerEvent: string; // Event that starts the flow
+  expectedEvents: string[]; // Events that should follow
+  timeoutMs: number; // Max time to wait for completion
+}
+
+interface ValidationResult {
+  flowId: string;
+  isValid: boolean;
+  missingEvents: string[];
+  timeoutEvents: string[];
+}
+
+class EventValidator {
+  private flowRules: Map<string, EventFlowRule>;
+  private pendingValidations: Map<string, NodeJS.Timeout>;
+
+  addFlowRule(rule: EventFlowRule): void;
+  validateEventFlow(triggerEventId: string): Promise<ValidationResult>;
+  getIncompleteFlows(): ValidationResult[];
+}
+```
+
+#### **EventMonitor (`monitoring/event-monitor.ts`)**
+
+```typescript
+interface EventMetrics {
+  eventType: string;
+  count: number;
+  avgProcessingTime: number;
+  errorRate: number;
+  lastSeen: number;
+  peakProcessingTime: number;
+}
+
+class EventMonitor {
+  private metrics: Map<string, EventMetrics>;
+  private isActive: boolean;
+
+  startMonitoring(): void;
+  stopMonitoring(): void;
+  recordEvent(
+    eventType: string,
+    processingTime: number,
+    hasError: boolean
+  ): void;
+  getMetrics(eventType?: string): EventMetrics[];
+  getSystemHealth(): SystemHealthReport;
+}
+```
+
+#### **PerformanceAnalyzer (`monitoring/performance-analyzer.ts`)**
+
+```typescript
+interface HandlerPerformance {
+  handlerName: string;
+  eventType: string;
+  executionCount: number;
+  avgExecutionTime: number;
+  maxExecutionTime: number;
+  errorCount: number;
+  lastExecutionTime: number;
+}
+
+class PerformanceAnalyzer {
+  trackHandlerExecution(
+    handlerName: string,
+    eventType: string,
+    duration: number,
+    hasError: boolean
+  ): void;
+  getSlowHandlers(threshold: number): HandlerPerformance[];
+  getHandlerStats(handlerName: string): HandlerPerformance[];
+  generatePerformanceReport(): PerformanceReport;
+}
+```
+
+### **Phase 5: Update Parent Orchestrators**
+
+- [ ] 5.1 Update DatasetOrchestrator to use event-driven GameEngineSimulator
+- [ ] 5.2 Update GameEngineAdapter to use event-driven architecture
+- [ ] 5.3 Ensure all CLI commands work with event-driven system
+- [ ] 5.4 Test complete end-to-end event flow
+
+### **Phase 6: Testing and Validation** ⚠️ HIGH PRIORITY
+
+- [ ] 6.1 Update test files to remove deprecated method mocks ⚠️ **CRITICAL**
+- [ ] 6.2 Fix `day-processor.test.ts` - Remove `attemptMatching` references
+- [ ] 6.3 Fix `player-progression-handler.test.ts` - Remove `ProgressionManager` references
+- [ ] 6.4 Test error handling and event recovery
+- [ ] 6.5 Verify all existing functionality preserved with new event system
 
 ## **IMMEDIATE ACTION ITEMS** ⚠️
 
@@ -284,15 +449,15 @@ The following test files contain references to deprecated/removed functionality 
 - **Deprecated method warnings** - Consider removing deprecated methods entirely
 - **Event type cleanup** - Remove deprecated event types from `event-types.ts`
 
-### **Phase 6: Mapping Separation (DatasetOrchestrator Refactor)**
+### **Phase 7: Mapping Separation (DatasetOrchestrator Refactor)**
 
-- [ ] 6.1 Create `parameter-mapper.ts` - Extract core parameter mapping logic
-- [ ] 6.2 Create `growth-model-mapper.ts` - Extract growth model mapping logic
-- [ ] 6.3 Create `strategy-mapper.ts` - Extract strategy mapping logic
-- [ ] 6.4 Update `dataset-orchestrator.ts` to use mapping modules
-- [ ] 6.5 Remove mapping logic from `dataset-orchestrator.ts`
-- [ ] 6.6 Test mapping separation maintains functionality
-- [ ] 6.7 Update imports and dependencies across CLI tools
+- [ ] 7.1 Create `parameter-mapper.ts` - Extract core parameter mapping logic
+- [ ] 7.2 Create `growth-model-mapper.ts` - Extract growth model mapping logic
+- [ ] 7.3 Create `strategy-mapper.ts` - Extract strategy mapping logic
+- [ ] 7.4 Update `dataset-orchestrator.ts` to use mapping modules
+- [ ] 7.5 Remove mapping logic from `dataset-orchestrator.ts`
+- [ ] 7.6 Test mapping separation maintains functionality
+- [ ] 7.7 Update imports and dependencies across CLI tools
 
 ## Context for Agent-Assisted Coding
 

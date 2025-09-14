@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DayProcessor } from "./day-processor";
-import { DollarState, GameResult } from "../types/virtual-dollar-engine";
-import { EventBus } from "../events/event-bus";
+import { SimulationConfig } from "./game-engine-simulator";
 
 // Mock the external dependencies
 vi.mock("../types/game-matching-engine");
@@ -15,11 +14,30 @@ describe("DayProcessor", () => {
   let mockPlayerManager: any;
   let mockDollarManager: any;
   let mockRevenueCalculator: any;
-  let mockEventBus: EventBus;
+  let mockEventBus: any;
+  let mockSimulationConfig: SimulationConfig;
 
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
+
+    // Create mock simulation config
+    mockSimulationConfig = {
+      durationDays: 30,
+      initialPlayerCount: 100,
+      dailySeed: "test-seed",
+      charityPercentage: 0.2,
+      playerStrategies: { conservative: 0.3, balanced: 0.4, aggressive: 0.3 },
+      initialDonationAmount: 1000,
+      maxSimulationTimeMs: 60000,
+      enableProgressReporting: false,
+      growthModel: {
+        adoptionRate: 0.1,
+        baseMarket: 1000000,
+        midpointDay: 90,
+        steepnessFactor: 20,
+      },
+    };
 
     // Create mock instances
     mockGameMatchingEngine = {
@@ -30,6 +48,7 @@ describe("DayProcessor", () => {
         totalDollarsInPool: 100,
         availableForMatching: 50,
       }),
+      // Note: attemptMatching removed - now handled by MatchmakingEventHandler
     };
 
     mockPlayerManager = {
@@ -49,8 +68,21 @@ describe("DayProcessor", () => {
       getTotalGames: vi.fn().mockReturnValue(5),
     };
 
-    // Create mock EventBus
-    mockEventBus = new EventBus();
+    // Suppress unused variable warning
+    void mockRevenueCalculator;
+
+    // Create mock EventBus with all required methods
+    mockEventBus = {
+      on: vi.fn(),
+      emit: vi.fn(),
+      off: vi.fn(),
+      once: vi.fn(),
+      getListeners: vi.fn().mockReturnValue(new Map()),
+      getEventTrace: vi.fn().mockReturnValue([]),
+      clearEventTrace: vi.fn(),
+      dispose: vi.fn(),
+      getListenerCount: vi.fn().mockReturnValue(0),
+    };
 
     // Create DayProcessor instance
     dayProcessor = new DayProcessor(
@@ -76,13 +108,15 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      await dayProcessor.processDay(day, config);
+      await dayProcessor.processDay(day, config, mockSimulationConfig);
 
-      // Verify that autoCreateRuns was called
-      expect(mockPlayerManager.autoCreateRuns).toHaveBeenCalledWith(2);
-
-      // In event-driven architecture, matching happens via events
-      // No direct method calls to attemptMatching
+      // In event-driven architecture, PlayerManager creates runs via DAY_STARTED events
+      // DayProcessor no longer directly calls autoCreateRuns
+      // Verify DAY_STARTED event was emitted which triggers PlayerManager
+      expect(mockEventBus.emit).toHaveBeenCalledWith(
+        "DAY_STARTED",
+        expect.any(Object)
+      );
     });
 
     it("should handle empty game results gracefully", async () => {
@@ -93,7 +127,7 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      await dayProcessor.processDay(day, config);
+      await dayProcessor.processDay(day, config, mockSimulationConfig);
 
       // Should not throw and should complete successfully
       // In event-driven architecture, games are created via events
@@ -107,7 +141,7 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      await dayProcessor.processDay(day, config);
+      await dayProcessor.processDay(day, config, mockSimulationConfig);
 
       // In event-driven architecture, game resolution happens via events
       // GameEventHandler handles game resolution, not DayProcessor directly
@@ -121,7 +155,7 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      await dayProcessor.processDay(day, config);
+      await dayProcessor.processDay(day, config, mockSimulationConfig);
 
       // In event-driven architecture, matching attempts are handled by MatchmakingEventHandler
       // DayProcessor only emits DAY_STARTED and DAY_COMPLETED events
@@ -135,46 +169,57 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      await dayProcessor.processDay(day, config);
+      await dayProcessor.processDay(day, config, mockSimulationConfig);
 
       // In event-driven architecture, matching is handled by MatchmakingEventHandler
       // which responds to POOL_ADDED/POOL_UPDATED events
     });
   });
 
-  describe("addNewRunsToPool", () => {
-    it("should add new runs to the game matching engine pool", async () => {
-      const mockRun = {
-        id: "run-1",
-        currentLevel: 1,
-      };
-
-      mockPlayerManager.autoCreateRuns.mockReturnValue([mockRun]);
-
-      await dayProcessor.addNewRunsToPool();
-
-      // Verify dollar state was updated
-      expect(mockDollarManager.updateDollarState).toHaveBeenCalledWith(
-        "run-1",
-        DollarState.POOLED
+  describe("event subscriptions", () => {
+    it("should setup event subscriptions on construction", () => {
+      // Verify that eventBus.on was called during construction for NEW_RUN_CREATED
+      expect(mockEventBus.on).toHaveBeenCalledWith(
+        "NEW_RUN_CREATED",
+        expect.any(Function)
       );
-
-      // Verify run was added to pool
-      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith(mockRun);
     });
 
-    it("should handle empty run list", async () => {
-      mockPlayerManager.autoCreateRuns.mockReturnValue([]);
+    it("should handle NEW_RUN_CREATED event", async () => {
+      // Test the event handler directly
+      const mockNewRunEvent = {
+        type: "NEW_RUN_CREATED",
+        virtualDollarId: "test-dollar-id",
+        playerId: "test-player",
+        timestamp: new Date(),
+      };
 
-      await dayProcessor.addNewRunsToPool();
+      // Mock the dollar manager to return a valid virtual dollar
+      const mockVirtualDollar = {
+        id: "test-dollar-id",
+        currentLevel: 1,
+      };
+      mockDollarManager.getDollar = vi.fn().mockReturnValue(mockVirtualDollar);
 
-      // Should not call addToPool with empty array
-      expect(mockGameMatchingEngine.addToPool).not.toHaveBeenCalled();
+      // Get the registered handler
+      const onCalls = mockEventBus.on.mock.calls;
+      const newRunHandlerCall = onCalls.find(
+        (call: any) => call[0] === "NEW_RUN_CREATED"
+      );
+      expect(newRunHandlerCall).toBeDefined();
+
+      const handler = newRunHandlerCall![1];
+      await handler(mockNewRunEvent);
+
+      // Verify that the virtual dollar was added to the pool
+      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith(
+        mockVirtualDollar
+      );
     });
   });
 
-  describe("game resolution and re-pooling", () => {
-    it("should re-pool winners who choose to continue playing", async () => {
+  describe("event-driven behavior", () => {
+    it("should emit DAY_STARTED event with correct data", async () => {
       const day = 1;
       const config = {
         initialPlayerCount: 10,
@@ -182,127 +227,22 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      // Mock a game session with winner and loser
-      const mockWinner = {
-        id: "winner-1",
-        ownerId: "player-1",
-        currentLevel: 2,
-      };
-      const mockLoser = {
-        id: "loser-1",
-        ownerId: "player-2",
-        currentLevel: 1,
-      };
-      const mockGame = { id: "game-1" };
+      await dayProcessor.processDay(day, config, mockSimulationConfig);
 
-      // Mock game creation
-      mockGameMatchingEngine.attemptMatching.mockReturnValue({
-        gamesCreated: [mockGame],
-      });
-
-      // Mock successful game resolution
-      mockGameMatchingEngine.resolveGame.mockReturnValue({
-        success: true,
-        winner: mockWinner,
-        loser: mockLoser,
-      });
-
-      // Mock PlayerManager returning null for winner (continues playing) and completion for loser
-      mockPlayerManager.processGameResult
-        .mockReturnValueOnce(null) // Winner continues
-        .mockReturnValueOnce({ completionType: "LOSS", totalWinnings: 0 }); // Loser eliminated
-
-      await dayProcessor.processDay(day, config);
-
-      // Verify that processGameResult was called for both winner and loser
-      expect(mockPlayerManager.processGameResult).toHaveBeenCalledWith(
-        mockWinner,
-        GameResult.WIN
-      );
-      expect(mockPlayerManager.processGameResult).toHaveBeenCalledWith(
-        mockLoser,
-        GameResult.LOSS
-      );
-
-      // Verify that winner was re-pooled (since processGameResult returned null)
-      expect(mockDollarManager.updateDollarState).toHaveBeenCalledWith(
-        "winner-1",
-        DollarState.POOLED
-      );
-      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith(mockWinner);
-    });
-
-    it("should not re-pool winners who choose to cash out", async () => {
-      const day = 1;
-      const config = {
-        initialPlayerCount: 10,
-        maxGamesPerDay: 20,
-        dailySeed: "2025-09-01",
-      };
-
-      const mockWinner = {
-        id: "winner-1",
-        ownerId: "player-1",
-        currentLevel: 2,
-      };
-      const mockLoser = {
-        id: "loser-1",
-        ownerId: "player-2",
-        currentLevel: 1,
-      };
-      const mockGame = { id: "game-1" };
-
-      mockGameMatchingEngine.attemptMatching.mockReturnValue({
-        gamesCreated: [mockGame],
-      });
-
-      mockGameMatchingEngine.resolveGame.mockReturnValue({
-        success: true,
-        winner: mockWinner,
-        loser: mockLoser,
-      });
-
-      // Mock PlayerManager returning cash-out result for winner
-      mockPlayerManager.processGameResult
-        .mockReturnValueOnce({
-          completionType: "CASH_OUT",
-          totalWinnings: 100,
-          shouldCreateNewRun: true,
-          playerId: "player-1",
-        }) // Winner cashes out
-        .mockReturnValueOnce({ completionType: "LOSS", totalWinnings: 0 }); // Loser eliminated
-
-      // Mock new run creation
-      mockPlayerManager.createNewRun.mockReturnValue({
-        id: "new-run-1",
-        ownerId: "player-1",
-      });
-
-      await dayProcessor.processDay(day, config);
-
-      // Verify that winner was NOT re-pooled (since they cashed out)
-      // But the new run created should be pooled
-      expect(mockDollarManager.updateDollarState).toHaveBeenCalledWith(
-        "new-run-1",
-        DollarState.POOLED
-      );
-      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith({
-        id: "new-run-1",
-        ownerId: "player-1",
-      });
-
-      // Verify that cash-out was processed
-      expect(mockRevenueCalculator.processCashOut).toHaveBeenCalledWith(100);
-
-      // Verify that new run was created and added to pool
-      expect(mockPlayerManager.createNewRun).toHaveBeenCalledWith({
-        playerId: "player-1",
-        cashOutStrategy: "BALANCED",
-        fundingSource: "DONATION",
+      // Verify DAY_STARTED event was emitted
+      expect(mockEventBus.emit).toHaveBeenCalledWith("DAY_STARTED", {
+        type: "DAY_STARTED",
+        timestamp: expect.any(Date),
+        dayNumber: 1,
+        totalPlayers: 0,
+        activePlayers: 0,
+        poolSize: 100,
+        growthModel: mockSimulationConfig.growthModel,
+        playerStrategies: mockSimulationConfig.playerStrategies,
       });
     });
 
-    it("should handle failed game resolution gracefully", async () => {
+    it("should emit DAY_COMPLETED event", async () => {
       const day = 1;
       const config = {
         initialPlayerCount: 10,
@@ -310,51 +250,19 @@ describe("DayProcessor", () => {
         dailySeed: "2025-09-01",
       };
 
-      const mockGame = { id: "game-1" };
+      await dayProcessor.processDay(day, config, mockSimulationConfig);
 
-      mockGameMatchingEngine.attemptMatching.mockReturnValue({
-        gamesCreated: [mockGame],
+      // Verify DAY_COMPLETED event was emitted with correct structure
+      expect(mockEventBus.emit).toHaveBeenCalledWith("DAY_COMPLETED", {
+        type: "DAY_COMPLETED",
+        timestamp: expect.any(Date),
+        dayNumber: 1,
+        gamesProcessed: expect.any(Number),
+        newPlayers: expect.any(Number),
+        activePlayers: expect.any(Number),
+        poolSize: 100,
+        totalRevenue: expect.any(Number),
       });
-
-      // Mock failed game resolution
-      mockGameMatchingEngine.resolveGame.mockReturnValue({
-        success: false,
-        error: "Resolution failed",
-      });
-
-      await dayProcessor.processDay(day, config);
-
-      // Should not crash and should not call processGameResult
-      expect(mockPlayerManager.processGameResult).not.toHaveBeenCalled();
-      // Game revenue should NOT be processed if resolution fails (early return)
-      expect(mockRevenueCalculator.processGameRevenue).not.toHaveBeenCalled();
-    });
-
-    it("should handle missing winner/loser data gracefully", async () => {
-      const day = 1;
-      const config = {
-        initialPlayerCount: 10,
-        maxGamesPerDay: 20,
-        dailySeed: "2025-09-01",
-      };
-
-      const mockGame = { id: "game-1" };
-
-      mockGameMatchingEngine.attemptMatching.mockReturnValue({
-        gamesCreated: [mockGame],
-      });
-
-      // Mock resolution with missing winner/loser
-      mockGameMatchingEngine.resolveGame.mockReturnValue({
-        success: true,
-        winner: null,
-        loser: null,
-      });
-
-      await dayProcessor.processDay(day, config);
-
-      // Should not call processGameResult with null values
-      expect(mockPlayerManager.processGameResult).not.toHaveBeenCalled();
     });
   });
 });
