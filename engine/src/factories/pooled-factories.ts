@@ -488,6 +488,11 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
       throw new Error(`Dollar with ID ${dollarId} not found`);
     }
 
+    // Defensive check - if already eliminated, return as-is
+    if (dollar.state === DollarState.LOST) {
+      return dollar; // Already eliminated, no-op
+    }
+
     // Update state to LOST
     this.updateDollarState(dollarId, DollarState.LOST);
 
