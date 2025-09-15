@@ -26,5 +26,21 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/core",
+    "src/factories",
+    "src/store",
+    "src/utils",
+    "src/components/AdjustedChart.tsx",
+    "src/components/BaseChart.tsx",
+    "src/components/NavBar.tsx",
+    "src/components/SimulationEngine.tsx",
+    "src/components/ComparisonChart.tsx",
+    "src/pages/AdjustedView.tsx",
+    "src/pages/BaselineView.tsx",
+    "src/pages/ComparisonView.tsx",
+    "src/pages/SimulationPage.tsx",
+    "src/test-utils"
+  ]
 }

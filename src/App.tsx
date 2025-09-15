@@ -1,15 +1,10 @@
 import './styles/tailwind.css';
-import SimulationPage from './pages/SimulationPage';
+import PrototypeDashboard from './pages/PrototypeDashboard';
 
 function App() {
-
   return (
-    <>
-      <div>
-        <SimulationPage />
-      </div>
-    </>
-  )
+    <PrototypeDashboard />
+  );
 }
 
-export default App
+export default App;
