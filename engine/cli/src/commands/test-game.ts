@@ -7,42 +7,61 @@ import {
   type SimulationConfig,
   type SimulationProgress,
   CashOutStrategy,
+  GameMatchingEngine,
+  PooledVirtualDollarFactory,
+  RevenueCalculator,
+  ScoringEngine,
+  DirectGameSessionFactory,
+  DEFAULT_PERFORMANCE_CONFIG,
+  EventBus,
 } from "../../../src/index";
-
-// Import orchestrator components for proper factory integration
-import { createGameEngineSimulator } from "../orchestrator/execution/dataset-orchestrator";
+import { DayProcessor } from "../../../src/simulation/day-processor";
+import { PlayerManager } from "../../../src/simulation/player-manager";
 
 /**
- * Create GameEngineSimulator using orchestrator factory pattern
- * This leverages the established CLI orchestrator architecture
+ * Create GameEngineSimulator with direct component initialization
+ * This creates all necessary components for a working simulation
  */
 function createTestGameSimulator(): GameEngineSimulator {
-  // Use the orchestrator's factory pattern for proper component integration
-  // Create a minimal simulation config for the orchestrator function
-  const config: SimulationConfig = {
-    durationDays: 1,
-    initialPlayerCount: 10,
-    dailySeed: "test",
-    charityPercentage: 0.2,
-    playerStrategies: {
-      [CashOutStrategy.CONSERVATIVE]: 0.4,
-      [CashOutStrategy.BALANCED]: 0.4,
-      [CashOutStrategy.AGGRESSIVE]: 0.2,
-    },
-    initialDonationAmount: 25,
-    maxSimulationTimeMs: 60000,
-    enableProgressReporting: false,
-    growthModel: {
-      adoptionRate: 0.1,
-      baseMarket: 10000,
-      midpointDay: 1,
-      steepnessFactor: 20,
-    },
-  };
+  // Initialize EventBus first
+  const eventBus = new EventBus();
 
-  // Use the orchestrator's createGameEngineSimulator function
-  // This ensures proper factory integration and event system setup
-  return createGameEngineSimulator(config);
+  // Create core components with object pooling enabled
+  const scoringEngine = new ScoringEngine();
+  const poolingConfig = {
+    ...DEFAULT_PERFORMANCE_CONFIG,
+    enableObjectPooling: true,
+  };
+  const virtualDollarFactory = new PooledVirtualDollarFactory(poolingConfig);
+  const gameSessionFactory = new DirectGameSessionFactory(poolingConfig);
+  const revenueCalculator = new RevenueCalculator();
+
+  // Create game matching engine with EventBus
+  const gameMatchingEngine = new GameMatchingEngine(
+    virtualDollarFactory,
+    scoringEngine,
+    gameSessionFactory,
+    eventBus
+  );
+
+  // Create real simulation components
+  const playerManager = new PlayerManager(eventBus, virtualDollarFactory);
+  const dayProcessor = new DayProcessor(
+    gameMatchingEngine,
+    playerManager,
+    virtualDollarFactory,
+    eventBus
+  );
+
+  // Create GameEngineSimulator with all components
+  return new GameEngineSimulator(
+    gameMatchingEngine,
+    virtualDollarFactory,
+    revenueCalculator,
+    dayProcessor,
+    playerManager,
+    eventBus
+  );
 }
 
 /**
