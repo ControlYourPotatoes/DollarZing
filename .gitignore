@@ -32,3 +32,4 @@ dist-ssr
 .agent-os/instructions/
 .agent-os/product/
 .claude/
+.References/
