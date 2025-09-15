@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { EventBus } from "../event-bus.js";
-import { EVENT_TYPES } from "../event-types.js";
+import { EventBus } from "../event-bus";
+import { EVENT_TYPES } from "../event-types";
 import {
   EventDebugInterface,
   EventDebugger,
@@ -11,7 +11,7 @@ import {
   setupProductionMonitoring,
   generateQuickReport,
   checkSystemHealth,
-} from "./index.js";
+} from "./index";
 
 describe("Event Debug Infrastructure", () => {
   let eventBus: EventBus;
@@ -449,7 +449,7 @@ describe("Event Debug Infrastructure", () => {
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
       debugInterface.startSession("Quick Report Test");
-      const session = debugInterface.endSession();
+      debugInterface.endSession();
 
       // Generate report using the completed session
       generateQuickReport(debugInterface);
@@ -475,7 +475,7 @@ describe("Event Debug Infrastructure", () => {
     it("should handle complete event lifecycle debugging", async () => {
       // Setup debugging
       debugInterface.attachToEventBus(eventBus);
-      const sessionId = debugInterface.startSession("Integration Test");
+      debugInterface.startSession("Integration Test");
 
       // Wait for attachment to complete
       await new Promise((resolve) => setTimeout(resolve, 10));

@@ -6,44 +6,47 @@
  */
 
 // Import for internal use
-import { EventDebugInterface } from "./debug-interface.js";
+import {
+  EventDebugInterface,
+  type DebugInterfaceConfig,
+} from "./debug-interface";
 
 // Main debugging interface
-export { EventDebugInterface } from "./debug-interface.js";
+export { EventDebugInterface } from "./debug-interface";
 export type {
   DebugInterfaceConfig,
   DebugSession,
   DebugReport,
-} from "./debug-interface.js";
+} from "./debug-interface";
 
 // Event debugger
-export { EventDebugger } from "./event-debugger.js";
+export { EventDebugger } from "./event-debugger";
 export type {
   EventTrace,
   EventMetrics,
   DebuggerConfig,
-} from "./event-debugger.js";
+} from "./event-debugger";
 
 // Event logger
-export { EventLogger } from "./event-logger.js";
-export type { LogLevel, LogEntry, LoggerConfig } from "./event-logger.js";
+export { EventLogger } from "./event-logger";
+export type { LogLevel, LogEntry, LoggerConfig } from "./event-logger";
 
 // Flow visualization
-export { EventFlowVisualizer } from "./event-flow-visualizer.js";
+export { EventFlowVisualizer } from "./event-flow-visualizer";
 export type {
   FlowNode,
   FlowVisualization,
   FlowAnalysis,
-} from "./event-flow-visualizer.js";
+} from "./event-flow-visualizer";
 
 // Performance monitoring
-export { PerformanceMonitor } from "./performance-monitor.js";
+export { PerformanceMonitor } from "./performance-monitor";
 export type {
   PerformanceMetric,
   PerformanceSnapshot,
   PerformanceAlert,
   MonitorConfig,
-} from "./performance-monitor.js";
+} from "./performance-monitor";
 
 /**
  * Factory function to create a preconfigured debugging interface

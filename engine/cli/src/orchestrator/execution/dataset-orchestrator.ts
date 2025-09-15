@@ -8,7 +8,7 @@ import {
   SimulationProgress,
   CashOutStrategy,
   GameMatchingEngine,
-  UnifiedVirtualDollarFactory,
+  PooledVirtualDollarFactory,
   RevenueCalculator,
   ScoringEngine,
   DirectGameSessionFactory,
@@ -34,7 +34,7 @@ import { generateDirectoryName, generateFilePaths } from "../parameters/matrix";
  * Create event-driven GameEngineSimulator with dependency injection
  * Uses event bus for all component communication
  */
-function createGameEngineSimulator(
+export function createGameEngineSimulator(
   _config: SimulationConfig,
   eventBus?: EventBus
 ): GameEngineSimulator {
@@ -45,7 +45,7 @@ function createGameEngineSimulator(
   const scoringEngine = new ScoringEngine();
 
   // Use UnifiedVirtualDollarFactory with performance config
-  const virtualDollarFactory = new UnifiedVirtualDollarFactory(
+  const virtualDollarFactory = new PooledVirtualDollarFactory(
     DEFAULT_PERFORMANCE_CONFIG
   );
 
@@ -66,8 +66,12 @@ function createGameEngineSimulator(
   const revenueCalculator = new RevenueCalculator();
 
   // Import simulation components with event-driven architecture
-  const { PlayerBalanceManager } = require("../../../../src/types/player-balance-manager");
-  const { PlayerManager } = require("../../../../src/simulation/player-manager");
+  const {
+    PlayerBalanceManager,
+  } = require("../../../../src/types/player-balance-manager");
+  const {
+    PlayerManager,
+  } = require("../../../../src/simulation/player-manager");
   const { DayProcessor } = require("../../../../src/simulation/day-processor");
 
   // Create player balance manager
@@ -80,7 +84,8 @@ function createGameEngineSimulator(
     getPlayerStrategy: () => "BALANCED" as any,
     getAllActiveRuns: () => [],
     processGameResult: () => null,
-    createNewRun: (request: any) => virtualDollarFactory.create(request.playerId),
+    createNewRun: (request: any) =>
+      virtualDollarFactory.create(request.playerId),
     autoCreateRuns: () => [],
   };
 

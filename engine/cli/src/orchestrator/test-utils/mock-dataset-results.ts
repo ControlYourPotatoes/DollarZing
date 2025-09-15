@@ -1,11 +1,12 @@
 // Test utility for creating mock DatasetOrchestrator results
 // Provides realistic mock data for testing and development
 
-import type { 
-  ParameterCombination, 
-  AdapterGenerationResult 
+import type {
+  ParameterCombination,
+  DatasetGenerationResult,
 } from "../core/types";
-import type { SimulationResults } from "../../../src/index";
+import type { SimulationResults } from "../../../../src/simulation/game-engine-simulator";
+import type { AdapterGenerationResult } from "../execution/dataset-orchestrator";
 import { generateDirectoryName } from "../parameters/matrix";
 
 /**
@@ -14,7 +15,7 @@ import { generateDirectoryName } from "../parameters/matrix";
 export function createMockDatasetResult(
   combination: ParameterCombination,
   success: boolean = true
-): AdapterGenerationResult {
+): DatasetGenerationResult {
   if (!success) {
     return {
       combination,
@@ -24,70 +25,17 @@ export function createMockDatasetResult(
     };
   }
 
-  // Create minimal mock simulation results
-  const mockResults: SimulationResults = {
-    success: true,
-    simulationDurationMs: 5000,
-    config: {
-      durationDays: 365,
-      initialPlayerCount: 1000,
-      dailySeed: "mock-seed",
-      charityPercentage: combination.charityPercentage / 100,
-      playerStrategies: { conservative: 0.5, balanced: 0.3, aggressive: 0.2 },
-      initialDonationAmount: 50,
-      maxSimulationTimeMs: 300000,
-      enableProgressReporting: false,
-    },
-    playerStats: {
-      totalPlayers: 1000,
-      activePlayers: 800,
-      retiredPlayers: 200,
-      totalDonationsFunds: 50000,
-      totalWinningsFunds: 25000,
-      totalProgressionFunds: 15000,
-      averageGamesPerPlayer: 45,
-      playerRetirementRate: 0.2,
-    },
-    revenueStats: {
-      totalPlatformRevenue: 10000,
-      totalCharityContributions: combination.charityPercentage * 500,
-      totalPlayerPayouts: 20000,
-      revenuePerGame: 2.5,
-      charityPercentage: combination.charityPercentage / 100,
-      averageRevenuePerDay: 27.4,
-    },
-    gameStats: {
-      totalGames: 4000,
-      averageGamesPerDay: 11.0,
-      totalVirtualDollars: 8000,
-      completedRuns: 1200,
-      activeRuns: 400,
-      jackpotsWon: 15,
-      averageRunLength: 3.3,
-    },
-    summary: {
-      totalDays: 365,
-      totalPlayers: 1000,
-      simulationCompleted: true,
-    },
-    dailyResults: [],
-    completedAt: new Date(),
-  };
-
   return {
     combination,
     success: true,
-    simulationResults: mockResults,
     generationTimeMs: 5000,
-    outputPaths: {
-      directory: `test/anchor-datasets/${generateDirectoryName(combination)}`,
-      datasetFile: `test/anchor-datasets/${generateDirectoryName(
-        combination
-      )}/dataset.json`,
-      metadataFile: `test/anchor-datasets/${generateDirectoryName(
-        combination
-      )}/metadata.json`,
-    },
+    outputPath: `test/anchor-datasets/${generateDirectoryName(
+      combination
+    )}/dataset.json`,
+    metadataPath: `test/anchor-datasets/${generateDirectoryName(
+      combination
+    )}/metadata.json`,
+    datasetSizeBytes: 1024000, // Mock 1MB dataset
   };
 }
 
@@ -98,9 +46,90 @@ export function createMockDatasetResults(
   combinations: ParameterCombination[],
   successRate: number = 1.0
 ): AdapterGenerationResult[] {
-  return combinations.map((combination, index) => {
+  return combinations.map((combination) => {
     const success = Math.random() < successRate;
-    return createMockDatasetResult(combination, success);
+    const datasetResult = createMockDatasetResult(combination, success);
+
+    // Create mock simulation results for AdapterGenerationResult
+    const mockResults: SimulationResults = {
+      success: true,
+      simulationDurationMs: 5000,
+      config: {
+        durationDays: 365,
+        initialPlayerCount: 1000,
+        dailySeed: "mock-seed",
+        charityPercentage: combination.charityPercentage / 100,
+        playerStrategies: { conservative: 0.5, balanced: 0.3, aggressive: 0.2 },
+        initialDonationAmount: 50,
+        maxSimulationTimeMs: 300000,
+        enableProgressReporting: false,
+        growthModel: {
+          adoptionRate: 0.1,
+          baseMarket: 1000000,
+          midpointDay: 90,
+          steepnessFactor: 20,
+        },
+      },
+      playerStats: {
+        totalPlayers: 1000,
+        activePlayers: 800,
+        retiredPlayers: 200,
+        totalDonationsFunds: 50000,
+        totalWinningsFunds: 25000,
+        totalProgressionFunds: 15000,
+        averageGamesPerPlayer: 45,
+        playerRetirementRate: 0.2,
+      },
+      revenueStats: {
+        totalPlatformRevenue: 10000,
+        totalCharityContributions: combination.charityPercentage * 500,
+        totalPlayerPayouts: 20000,
+        revenuePerGame: 2.5,
+        charityPercentage: combination.charityPercentage / 100,
+        averageRevenuePerDay: 27.4,
+      },
+      gameStats: {
+        totalGames: 4000,
+        averageGamesPerDay: 11.0,
+        totalVirtualDollars: 8000,
+        completedRuns: 1200,
+        activeRuns: 400,
+        jackpotsWon: 15,
+        averageRunLength: 3.3,
+      },
+      summary: {
+        totalDays: 365,
+        totalPlayers: 1000,
+        simulationCompleted: true,
+      },
+      dailyResults: [],
+      completedAt: new Date(),
+    };
+
+    // Convert DatasetGenerationResult to AdapterGenerationResult
+    const result: AdapterGenerationResult = {
+      combination: datasetResult.combination,
+      success: datasetResult.success,
+      generationTimeMs: datasetResult.generationTimeMs,
+    };
+
+    if (datasetResult.error) {
+      result.error = datasetResult.error;
+    }
+
+    if (success) {
+      result.simulationResults = mockResults;
+    }
+
+    if (datasetResult.outputPath) {
+      result.outputPaths = {
+        directory: `test/anchor-datasets/${generateDirectoryName(combination)}`,
+        datasetFile: datasetResult.outputPath,
+        metadataFile: datasetResult.metadataPath || "",
+      };
+    }
+
+    return result;
   });
 }
 
