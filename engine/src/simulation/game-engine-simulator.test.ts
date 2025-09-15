@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { GameEngineSimulator } from "./game-engine-simulator";
 
-import { PlayerBalanceManager } from "../types/player-balance-manager";
 import { GameMatchingEngine } from "../core/game-matching-engine";
 import { PlayerManager } from "./player-manager"; // Event-driven player manager
 import { VirtualDollarFactory } from "../types/factory-interfaces";
@@ -24,19 +23,40 @@ vi.mock("performance", () => ({
 
 describe("GameEngineSimulator", () => {
   let gameEngineSimulator: GameEngineSimulator;
-  let mockPlayerBalanceManager: PlayerBalanceManager;
   let mockGameMatchingEngine: GameMatchingEngine;
   let mockPlayerManager: PlayerManager;
   let mockVirtualDollarFactory: VirtualDollarFactory;
   let mockRevenueCalculator: RevenueCalculator;
   let mockScoringEngine: ScoringEngine;
 
-  beforeEach(() => {
+  // Helper function to create valid simulation config
+  const createValidConfig = (overrides: any = {}) => ({
+    durationDays: 3,
+    initialPlayerCount: 5,
+    dailySeed: "2025-09-01",
+    charityPercentage: 0.1,
+    playerStrategies: {
+      [CashOutStrategy.CONSERVATIVE]: 0.3,
+      [CashOutStrategy.BALANCED]: 0.4,
+      [CashOutStrategy.AGGRESSIVE]: 0.3,
+    },
+    initialDonationAmount: 20.0,
+    maxSimulationTimeMs: 30000,
+    enableProgressReporting: true,
+    growthModel: {
+      adoptionRate: 0.1,
+      baseMarket: 1000000,
+      midpointDay: 90,
+      steepnessFactor: 20,
+    },
+    ...overrides,
+  });
+
+  beforeEach(async () => {
     // Reset all mocks
     vi.clearAllMocks();
 
     // Create real instances of core components
-    mockPlayerBalanceManager = new PlayerBalanceManager();
     const { UnifiedVirtualDollarFactory } = await import(
       "../test-utils/direct-factories"
     );
@@ -87,20 +107,7 @@ describe("GameEngineSimulator", () => {
   });
 
   describe("executeSimulation", () => {
-    const validConfig = {
-      durationDays: 3,
-      initialPlayerCount: 5,
-      dailySeed: "2025-09-01",
-      charityPercentage: 0.1,
-      playerStrategies: {
-        [CashOutStrategy.CONSERVATIVE]: 0.3,
-        [CashOutStrategy.BALANCED]: 0.4,
-        [CashOutStrategy.AGGRESSIVE]: 0.3,
-      },
-      initialDonationAmount: 20.0,
-      maxSimulationTimeMs: 30000,
-      enableProgressReporting: true,
-    };
+    const validConfig = createValidConfig();
 
     it("should execute a complete simulation successfully", async () => {
       const results = await gameEngineSimulator.executeSimulation(validConfig);
@@ -130,10 +137,9 @@ describe("GameEngineSimulator", () => {
     });
 
     it("should handle simulation timeout", async () => {
-      const timeoutConfig = {
-        ...validConfig,
+      const timeoutConfig = createValidConfig({
         maxSimulationTimeMs: 1000, // 1 second timeout
-      };
+      });
 
       const results = await gameEngineSimulator.executeSimulation(
         timeoutConfig
@@ -144,10 +150,9 @@ describe("GameEngineSimulator", () => {
     });
 
     it("should validate configuration parameters", async () => {
-      const invalidConfig = {
-        ...validConfig,
+      const invalidConfig = createValidConfig({
         durationDays: -1, // Invalid duration
-      };
+      });
 
       await expect(
         gameEngineSimulator.executeSimulation(invalidConfig)
@@ -155,10 +160,9 @@ describe("GameEngineSimulator", () => {
     });
 
     it("should handle empty player strategies", async () => {
-      const emptyStrategiesConfig = {
-        ...validConfig,
+      const emptyStrategiesConfig = createValidConfig({
         playerStrategies: {},
-      };
+      });
 
       await expect(
         gameEngineSimulator.executeSimulation(emptyStrategiesConfig)
@@ -195,18 +199,14 @@ describe("GameEngineSimulator", () => {
 
   describe("component integration", () => {
     it("should properly coordinate DayProcessor, PlayerManager, and GameProcessor", async () => {
-      const config = {
+      const config = createValidConfig({
         durationDays: 2,
         initialPlayerCount: 3,
-        dailySeed: "2025-09-01",
-        charityPercentage: 0.1,
         playerStrategies: {
           [CashOutStrategy.BALANCED]: 1.0,
         },
-        initialDonationAmount: 20.0,
-        maxSimulationTimeMs: 30000,
         enableProgressReporting: false,
-      };
+      });
 
       const results = await gameEngineSimulator.executeSimulation(config);
 
@@ -224,18 +224,14 @@ describe("GameEngineSimulator", () => {
 
     it("should handle component errors gracefully", async () => {
       // Mock a component to throw an error
-      const errorConfig = {
+      const errorConfig = createValidConfig({
         durationDays: 1,
         initialPlayerCount: 1,
-        dailySeed: "2025-09-01",
-        charityPercentage: 0.1,
         playerStrategies: {
           [CashOutStrategy.BALANCED]: 1.0,
         },
-        initialDonationAmount: 20.0,
-        maxSimulationTimeMs: 30000,
         enableProgressReporting: false,
-      };
+      });
 
       // This should not throw, but should handle errors gracefully
       const results = await gameEngineSimulator.executeSimulation(errorConfig);
@@ -245,18 +241,14 @@ describe("GameEngineSimulator", () => {
 
   describe("data flow validation", () => {
     it("should maintain data consistency across components", async () => {
-      const config = {
+      const config = createValidConfig({
         durationDays: 1,
         initialPlayerCount: 2,
-        dailySeed: "2025-09-01",
-        charityPercentage: 0.1,
         playerStrategies: {
           [CashOutStrategy.BALANCED]: 1.0,
         },
-        initialDonationAmount: 20.0,
-        maxSimulationTimeMs: 30000,
         enableProgressReporting: false,
-      };
+      });
 
       const results = await gameEngineSimulator.executeSimulation(config);
 

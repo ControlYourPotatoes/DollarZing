@@ -1,16 +1,16 @@
-import type { GameEvent } from '../types.js';
+import type { SimulationEvent } from "../event-types";
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LogEntry {
   timestamp: number;
   level: LogLevel;
   eventType: string;
   message: string;
-  data?: any;
-  correlationId?: string;
-  source?: string;
-  traceId?: string;
+  data: any | undefined;
+  correlationId: string | undefined;
+  source: string | undefined;
+  traceId: string | undefined;
 }
 
 export interface LoggerConfig {
@@ -18,9 +18,9 @@ export interface LoggerConfig {
   level: LogLevel;
   maxEntries: number;
   includeData: boolean;
-  timestampFormat: 'iso' | 'epoch' | 'relative';
+  timestampFormat: "iso" | "epoch" | "relative";
   colorized: boolean;
-  outputTargets: Array<'console' | 'memory' | 'file'>;
+  outputTargets: Array<"console" | "memory" | "file">;
 }
 
 export class EventLogger {
@@ -28,34 +28,40 @@ export class EventLogger {
   private config: LoggerConfig;
   private startTime: number = Date.now();
   private logColors = {
-    debug: '\x1b[36m', // Cyan
-    info: '\x1b[32m',  // Green
-    warn: '\x1b[33m',  // Yellow
-    error: '\x1b[31m', // Red
-    reset: '\x1b[0m'   // Reset
+    debug: "\x1b[36m", // Cyan
+    info: "\x1b[32m", // Green
+    warn: "\x1b[33m", // Yellow
+    error: "\x1b[31m", // Red
+    reset: "\x1b[0m", // Reset
   };
 
   constructor(config: Partial<LoggerConfig> = {}) {
     this.config = {
       enabled: true,
-      level: 'info',
+      level: "info",
       maxEntries: 1000,
       includeData: true,
-      timestampFormat: 'iso',
+      timestampFormat: "iso",
       colorized: true,
-      outputTargets: ['console', 'memory'],
-      ...config
+      outputTargets: ["console", "memory"],
+      ...config,
     };
   }
 
   /**
    * Log an event with specified level
    */
-  log(level: LogLevel, eventType: string, message: string, data?: any, context?: {
-    correlationId?: string;
-    source?: string;
-    traceId?: string;
-  }): void {
+  log(
+    level: LogLevel,
+    eventType: string,
+    message: string,
+    data?: any,
+    context?: {
+      correlationId?: string;
+      source?: string;
+      traceId?: string;
+    }
+  ): void {
     if (!this.config.enabled || !this.shouldLog(level)) {
       return;
     }
@@ -66,9 +72,9 @@ export class EventLogger {
       eventType,
       message,
       data: this.config.includeData ? this.sanitizeData(data) : undefined,
-      correlationId: context?.correlationId,
-      source: context?.source,
-      traceId: context?.traceId
+      correlationId: context?.correlationId || undefined,
+      source: context?.source || undefined,
+      traceId: context?.traceId || undefined,
     };
 
     this.addLogEntry(entry);
@@ -79,52 +85,71 @@ export class EventLogger {
    * Log debug level event
    */
   debug(eventType: string, message: string, data?: any, context?: any): void {
-    this.log('debug', eventType, message, data, context);
+    this.log("debug", eventType, message, data, context);
   }
 
   /**
    * Log info level event
    */
   info(eventType: string, message: string, data?: any, context?: any): void {
-    this.log('info', eventType, message, data, context);
+    this.log("info", eventType, message, data, context);
   }
 
   /**
    * Log warning level event
    */
   warn(eventType: string, message: string, data?: any, context?: any): void {
-    this.log('warn', eventType, message, data, context);
+    this.log("warn", eventType, message, data, context);
   }
 
   /**
    * Log error level event
    */
-  error(eventType: string, message: string, error?: Error | any, context?: any): void {
-    const errorData = error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    } : error;
+  error(
+    eventType: string,
+    message: string,
+    error?: Error | any,
+    context?: any
+  ): void {
+    const errorData =
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : error;
 
-    this.log('error', eventType, message, errorData, context);
+    this.log("error", eventType, message, errorData, context);
   }
 
   /**
    * Log event lifecycle (emitted, processed, completed)
    */
-  logEventLifecycle(phase: 'emitted' | 'processing' | 'completed' | 'failed', event: GameEvent, additionalData?: any): void {
-    const message = `Event ${phase}: ${event.type || 'unknown'}`;
-    const level: LogLevel = phase === 'failed' ? 'error' : phase === 'processing' ? 'debug' : 'info';
+  logEventLifecycle(
+    phase: "emitted" | "processing" | "completed" | "failed",
+    event: SimulationEvent,
+    additionalData?: any
+  ): void {
+    const message = `Event ${phase}: ${event.type || "unknown"}`;
+    const level: LogLevel =
+      phase === "failed" ? "error" : phase === "processing" ? "debug" : "info";
 
-    this.log(level, event.type || 'unknown', message, {
-      event: event,
-      phase,
-      ...additionalData
-    }, {
-      correlationId: event.correlationId,
-      source: event.source,
-      traceId: event.traceId
-    });
+    this.log(
+      level,
+      event.type || "unknown",
+      message,
+      {
+        event: event,
+        phase,
+        ...additionalData,
+      },
+      {
+        correlationId: (event as any).correlationId,
+        source: (event as any).source,
+        traceId: (event as any).traceId,
+      }
+    );
   }
 
   /**
@@ -142,22 +167,29 @@ export class EventLogger {
     if (filter) {
       if (filter.level) {
         const levelIndex = this.getLevelIndex(filter.level);
-        filteredLogs = filteredLogs.filter(log => this.getLevelIndex(log.level) >= levelIndex);
+        filteredLogs = filteredLogs.filter(
+          (log) => this.getLevelIndex(log.level) >= levelIndex
+        );
       }
 
       if (filter.eventType) {
-        filteredLogs = filteredLogs.filter(log => log.eventType === filter.eventType);
+        filteredLogs = filteredLogs.filter(
+          (log) => log.eventType === filter.eventType
+        );
       }
 
       if (filter.timeRange) {
-        filteredLogs = filteredLogs.filter(log =>
-          log.timestamp >= filter.timeRange!.start &&
-          log.timestamp <= filter.timeRange!.end
+        filteredLogs = filteredLogs.filter(
+          (log) =>
+            log.timestamp >= filter.timeRange!.start &&
+            log.timestamp <= filter.timeRange!.end
         );
       }
 
       if (filter.correlationId) {
-        filteredLogs = filteredLogs.filter(log => log.correlationId === filter.correlationId);
+        filteredLogs = filteredLogs.filter(
+          (log) => log.correlationId === filter.correlationId
+        );
       }
 
       if (filter.limit && filter.limit > 0) {
@@ -171,40 +203,49 @@ export class EventLogger {
   /**
    * Export logs to different formats
    */
-  exportLogs(format: 'json' | 'csv' | 'txt'): string {
+  exportLogs(format: "json" | "csv" | "txt"): string {
     const logs = this.getLogs();
 
     switch (format) {
-      case 'json':
+      case "json":
         return JSON.stringify(logs, null, 2);
 
-      case 'csv':
-        if (logs.length === 0) return '';
+      case "csv":
+        if (logs.length === 0) return "";
 
-        const headers = ['timestamp', 'level', 'eventType', 'message', 'source', 'correlationId'];
-        const csvRows = [headers.join(',')];
+        const headers = [
+          "timestamp",
+          "level",
+          "eventType",
+          "message",
+          "source",
+          "correlationId",
+        ];
+        const csvRows = [headers.join(",")];
 
-        logs.forEach(log => {
+        logs.forEach((log) => {
           const row = [
             log.timestamp,
             log.level,
             log.eventType,
             `"${log.message.replace(/"/g, '""')}"`,
-            log.source || '',
-            log.correlationId || ''
+            log.source || "",
+            log.correlationId || "",
           ];
-          csvRows.push(row.join(','));
+          csvRows.push(row.join(","));
         });
 
-        return csvRows.join('\n');
+        return csvRows.join("\n");
 
-      case 'txt':
-        return logs.map(log => {
-          const timestamp = this.formatTimestamp(log.timestamp);
-          const level = log.level.toUpperCase().padEnd(5);
-          const eventType = log.eventType.padEnd(20);
-          return `[${timestamp}] ${level} ${eventType} ${log.message}`;
-        }).join('\n');
+      case "txt":
+        return logs
+          .map((log) => {
+            const timestamp = this.formatTimestamp(log.timestamp);
+            const level = log.level.toUpperCase().padEnd(5);
+            const eventType = log.eventType.padEnd(20);
+            return `[${timestamp}] ${level} ${eventType} ${log.message}`;
+          })
+          .join("\n");
 
       default:
         throw new Error(`Unsupported export format: ${format}`);
@@ -216,7 +257,7 @@ export class EventLogger {
    */
   clearLogs(): void {
     this.logs = [];
-    this.info('SYSTEM', 'Event logs cleared');
+    this.info("SYSTEM", "Event logs cleared");
   }
 
   /**
@@ -233,9 +274,10 @@ export class EventLogger {
     const entriesByEventType: Record<string, number> = {};
     let timeRange: { start: number; end: number } | null = null;
 
-    this.logs.forEach(log => {
+    this.logs.forEach((log) => {
       entriesByLevel[log.level]++;
-      entriesByEventType[log.eventType] = (entriesByEventType[log.eventType] || 0) + 1;
+      entriesByEventType[log.eventType] =
+        (entriesByEventType[log.eventType] || 0) + 1;
 
       if (!timeRange) {
         timeRange = { start: log.timestamp, end: log.timestamp };
@@ -253,7 +295,7 @@ export class EventLogger {
       entriesByLevel,
       entriesByEventType,
       timeRange,
-      memoryUsage
+      memoryUsage,
     };
   }
 
@@ -262,14 +304,14 @@ export class EventLogger {
    */
   updateConfig(newConfig: Partial<LoggerConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    this.info('SYSTEM', 'Logger configuration updated', newConfig);
+    this.info("SYSTEM", "Logger configuration updated", newConfig);
   }
 
   /**
    * Add log entry to collection
    */
   private addLogEntry(entry: LogEntry): void {
-    if (this.config.outputTargets.includes('memory')) {
+    if (this.config.outputTargets.includes("memory")) {
       // Maintain max entries limit
       if (this.logs.length >= this.config.maxEntries) {
         this.logs.shift(); // Remove oldest entry
@@ -282,7 +324,7 @@ export class EventLogger {
    * Output log entry to configured targets
    */
   private output(entry: LogEntry): void {
-    if (this.config.outputTargets.includes('console')) {
+    if (this.config.outputTargets.includes("console")) {
       this.outputToConsole(entry);
     }
 
@@ -315,8 +357,8 @@ export class EventLogger {
     console.log(message);
 
     // Log data if present and debug level
-    if (entry.data && entry.level === 'debug') {
-      console.log('   Data:', entry.data);
+    if (entry.data && entry.level === "debug") {
+      console.log("   Data:", entry.data);
     }
   }
 
@@ -337,7 +379,7 @@ export class EventLogger {
       debug: 0,
       info: 1,
       warn: 2,
-      error: 3
+      error: 3,
     };
     return levels[level] || 0;
   }
@@ -347,11 +389,11 @@ export class EventLogger {
    */
   private formatTimestamp(timestamp: number): string {
     switch (this.config.timestampFormat) {
-      case 'iso':
+      case "iso":
         return new Date(timestamp).toISOString().substr(11, 12); // HH:mm:ss.sss
-      case 'epoch':
+      case "epoch":
         return timestamp.toString();
-      case 'relative':
+      case "relative":
         const elapsed = timestamp - this.startTime;
         return `+${elapsed}ms`;
       default:
@@ -370,19 +412,21 @@ export class EventLogger {
 
       // Remove potentially sensitive data recursively
       const sanitizeObject = (obj: any): any => {
-        if (obj && typeof obj === 'object') {
+        if (obj && typeof obj === "object") {
           if (Array.isArray(obj)) {
             return obj.map(sanitizeObject);
           }
 
           const result: any = {};
-          Object.keys(obj).forEach(key => {
+          Object.keys(obj).forEach((key) => {
             const lowercaseKey = key.toLowerCase();
-            if (lowercaseKey.includes('password') ||
-                lowercaseKey.includes('secret') ||
-                lowercaseKey.includes('token') ||
-                lowercaseKey.includes('key')) {
-              result[key] = '[REDACTED]';
+            if (
+              lowercaseKey.includes("password") ||
+              lowercaseKey.includes("secret") ||
+              lowercaseKey.includes("token") ||
+              lowercaseKey.includes("key")
+            ) {
+              result[key] = "[REDACTED]";
             } else {
               result[key] = sanitizeObject(obj[key]);
             }
@@ -394,7 +438,10 @@ export class EventLogger {
 
       return sanitizeObject(sanitized);
     } catch (error) {
-      return { sanitization_error: 'Failed to sanitize data', original_type: typeof data };
+      return {
+        sanitization_error: "Failed to sanitize data",
+        original_type: typeof data,
+      };
     }
   }
 }

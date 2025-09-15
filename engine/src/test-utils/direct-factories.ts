@@ -295,7 +295,7 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
   private stateHistory: Map<string, StateTransition[]> = new Map();
   private performanceTracker: PerformanceTracker;
 
-  constructor(private config: PerformanceConfig) {
+  constructor(_config: PerformanceConfig) {
     this.performanceTracker = new PerformanceTracker();
   }
 
@@ -575,7 +575,7 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
 
   eliminatePlayer(
     dollarId: string,
-    eliminationLevel: BettingLevel
+    _eliminationLevel: BettingLevel
   ): VirtualDollar {
     const dollar = this.getDollar(dollarId);
     if (!dollar) {

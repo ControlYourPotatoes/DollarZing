@@ -34,11 +34,7 @@ describe("GameProcessor", () => {
     } as any;
 
     // Create GameProcessor instance
-    gameProcessor = new GameProcessor(
-      mockGameMatchingEngine,
-      mockRevenueCalculator,
-      mockEventBus
-    );
+    gameProcessor = new GameProcessor(mockGameMatchingEngine, mockEventBus);
   });
 
   describe("constructor", () => {

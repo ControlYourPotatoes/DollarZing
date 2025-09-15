@@ -1,12 +1,10 @@
-import type { GameEvent } from '../types.js';
-
 export interface PerformanceMetric {
   id: string;
   name: string;
   value: number;
   unit: string;
   timestamp: number;
-  category: 'latency' | 'throughput' | 'memory' | 'cpu' | 'custom';
+  category: "latency" | "throughput" | "memory" | "cpu" | "custom";
   tags?: Record<string, string>;
 }
 
@@ -25,7 +23,7 @@ export interface PerformanceSnapshot {
 export interface PerformanceAlert {
   id: string;
   timestamp: number;
-  level: 'info' | 'warning' | 'critical';
+  level: "info" | "warning" | "critical";
   metric: string;
   message: string;
   currentValue: number;
@@ -51,8 +49,7 @@ export class PerformanceMonitor {
   private eventCounts: Map<string, number> = new Map();
   private latencies: Map<string, number[]> = new Map();
   private startTimes: Map<string, number> = new Map();
-  private intervalId?: NodeJS.Timeout;
-  private lastSnapshotTime = 0;
+  private intervalId: NodeJS.Timeout | undefined;
 
   constructor(config: Partial<MonitorConfig> = {}) {
     this.config = {
@@ -62,14 +59,17 @@ export class PerformanceMonitor {
       alertThresholds: {
         avgLatency: { warning: 100, critical: 500 },
         throughput: { warning: 10, critical: 5 },
-        memoryUsage: { warning: 100 * 1024 * 1024, critical: 500 * 1024 * 1024 }, // MB
+        memoryUsage: {
+          warning: 100 * 1024 * 1024,
+          critical: 500 * 1024 * 1024,
+        }, // MB
         eventQueueSize: { warning: 1000, critical: 5000 },
-        errorRate: { warning: 5, critical: 15 } // percentage
+        errorRate: { warning: 5, critical: 15 }, // percentage
       },
       enableMemoryMonitoring: true,
       enableLatencyMonitoring: true,
       enableThroughputMonitoring: true,
-      ...config
+      ...config,
     };
 
     if (this.config.enabled) {
@@ -125,17 +125,20 @@ export class PerformanceMonitor {
 
     // Count event completion
     if (this.config.enableThroughputMonitoring) {
-      this.eventCounts.set(eventType, (this.eventCounts.get(eventType) || 0) + 1);
+      this.eventCounts.set(
+        eventType,
+        (this.eventCounts.get(eventType) || 0) + 1
+      );
     }
 
     // Record error if present
     if (error) {
       this.recordMetric({
-        name: 'event_error',
+        name: "event_error",
         value: 1,
-        unit: 'count',
-        category: 'custom',
-        tags: { eventType, error: error.message }
+        unit: "count",
+        category: "custom",
+        tags: { eventType, error: error.message },
       });
     }
   }
@@ -143,11 +146,11 @@ export class PerformanceMonitor {
   /**
    * Record custom metric
    */
-  recordMetric(metric: Omit<PerformanceMetric, 'id' | 'timestamp'>): void {
+  recordMetric(metric: Omit<PerformanceMetric, "id" | "timestamp">): void {
     const fullMetric: PerformanceMetric = {
       id: this.generateMetricId(),
       timestamp: Date.now(),
-      ...metric
+      ...metric,
     };
 
     this.metrics.push(fullMetric);
@@ -171,11 +174,11 @@ export class PerformanceMonitor {
 
     // Record as metric
     this.recordMetric({
-      name: 'event_latency',
+      name: "event_latency",
       value: latency,
-      unit: 'ms',
-      category: 'latency',
-      tags: { eventType }
+      unit: "ms",
+      category: "latency",
+      tags: { eventType },
     });
   }
 
@@ -190,11 +193,10 @@ export class PerformanceMonitor {
     const snapshot: PerformanceSnapshot = {
       timestamp,
       metrics,
-      summary
+      summary,
     };
 
     this.snapshots.push(snapshot);
-    this.lastSnapshotTime = timestamp;
   }
 
   /**
@@ -204,24 +206,28 @@ export class PerformanceMonitor {
     const currentMetrics: PerformanceMetric[] = [];
 
     // Memory metrics
-    if (this.config.enableMemoryMonitoring && typeof process !== 'undefined' && process.memoryUsage) {
+    if (
+      this.config.enableMemoryMonitoring &&
+      typeof process !== "undefined" &&
+      process.memoryUsage
+    ) {
       const memUsage = process.memoryUsage();
       currentMetrics.push({
         id: this.generateMetricId(),
-        name: 'memory_heap_used',
+        name: "memory_heap_used",
         value: memUsage.heapUsed,
-        unit: 'bytes',
-        category: 'memory',
-        timestamp: Date.now()
+        unit: "bytes",
+        category: "memory",
+        timestamp: Date.now(),
       });
 
       currentMetrics.push({
         id: this.generateMetricId(),
-        name: 'memory_heap_total',
+        name: "memory_heap_total",
         value: memUsage.heapTotal,
-        unit: 'bytes',
-        category: 'memory',
-        timestamp: Date.now()
+        unit: "bytes",
+        category: "memory",
+        timestamp: Date.now(),
       });
     }
 
@@ -229,37 +235,38 @@ export class PerformanceMonitor {
     if (this.config.enableLatencyMonitoring) {
       this.latencies.forEach((latencies, eventType) => {
         if (latencies.length > 0) {
-          const avgLatency = latencies.reduce((sum, l) => sum + l, 0) / latencies.length;
+          const avgLatency =
+            latencies.reduce((sum, l) => sum + l, 0) / latencies.length;
           const maxLatency = Math.max(...latencies);
           const minLatency = Math.min(...latencies);
 
           currentMetrics.push(
             {
               id: this.generateMetricId(),
-              name: 'avg_latency',
+              name: "avg_latency",
               value: avgLatency,
-              unit: 'ms',
-              category: 'latency',
+              unit: "ms",
+              category: "latency",
               tags: { eventType },
-              timestamp: Date.now()
+              timestamp: Date.now(),
             },
             {
               id: this.generateMetricId(),
-              name: 'max_latency',
+              name: "max_latency",
               value: maxLatency,
-              unit: 'ms',
-              category: 'latency',
+              unit: "ms",
+              category: "latency",
               tags: { eventType },
-              timestamp: Date.now()
+              timestamp: Date.now(),
             },
             {
               id: this.generateMetricId(),
-              name: 'min_latency',
+              name: "min_latency",
               value: minLatency,
-              unit: 'ms',
-              category: 'latency',
+              unit: "ms",
+              category: "latency",
               tags: { eventType },
-              timestamp: Date.now()
+              timestamp: Date.now(),
             }
           );
         }
@@ -273,12 +280,12 @@ export class PerformanceMonitor {
         const throughput = count / timePeriod;
         currentMetrics.push({
           id: this.generateMetricId(),
-          name: 'event_throughput',
+          name: "event_throughput",
           value: throughput,
-          unit: 'events/sec',
-          category: 'throughput',
+          unit: "events/sec",
+          category: "throughput",
           tags: { eventType },
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       });
 
@@ -289,11 +296,11 @@ export class PerformanceMonitor {
     // Event queue size (if available)
     currentMetrics.push({
       id: this.generateMetricId(),
-      name: 'pending_events',
+      name: "pending_events",
       value: this.startTimes.size,
-      unit: 'count',
-      category: 'custom',
-      timestamp: Date.now()
+      unit: "count",
+      category: "custom",
+      timestamp: Date.now(),
     });
 
     return currentMetrics;
@@ -302,37 +309,48 @@ export class PerformanceMonitor {
   /**
    * Calculate performance summary
    */
-  private calculateSummary(metrics: PerformanceMetric[]): PerformanceSnapshot['summary'] {
-    const latencyMetrics = metrics.filter(m => m.name === 'avg_latency');
-    const throughputMetrics = metrics.filter(m => m.name === 'event_throughput');
-    const memoryMetrics = metrics.filter(m => m.name === 'memory_heap_used');
-    const queueMetrics = metrics.filter(m => m.name === 'pending_events');
+  private calculateSummary(
+    metrics: PerformanceMetric[]
+  ): PerformanceSnapshot["summary"] {
+    const latencyMetrics = metrics.filter((m) => m.name === "avg_latency");
+    const throughputMetrics = metrics.filter(
+      (m) => m.name === "event_throughput"
+    );
+    const memoryMetrics = metrics.filter((m) => m.name === "memory_heap_used");
+    const queueMetrics = metrics.filter((m) => m.name === "pending_events");
 
-    const avgLatency = latencyMetrics.length > 0 ?
-      latencyMetrics.reduce((sum, m) => sum + m.value, 0) / latencyMetrics.length : 0;
+    const avgLatency =
+      latencyMetrics.length > 0
+        ? latencyMetrics.reduce((sum, m) => sum + m.value, 0) /
+          latencyMetrics.length
+        : 0;
 
-    const throughput = throughputMetrics.length > 0 ?
-      throughputMetrics.reduce((sum, m) => sum + m.value, 0) : 0;
+    const throughput =
+      throughputMetrics.length > 0
+        ? throughputMetrics.reduce((sum, m) => sum + m.value, 0)
+        : 0;
 
     const memoryUsage = memoryMetrics.length > 0 ? memoryMetrics[0].value : 0;
 
     const eventQueueSize = queueMetrics.length > 0 ? queueMetrics[0].value : 0;
 
     // Calculate error rate from recent alerts
-    const recentErrors = this.alerts.filter(a =>
-      Date.now() - a.timestamp < this.config.samplingInterval &&
-      a.metric === 'event_error'
+    const recentErrors = this.alerts.filter(
+      (a) =>
+        Date.now() - a.timestamp < this.config.samplingInterval &&
+        a.metric === "event_error"
     ).length;
 
     const recentEvents = throughputMetrics.reduce((sum, m) => sum + m.value, 0);
-    const errorRate = recentEvents > 0 ? (recentErrors / recentEvents) * 100 : 0;
+    const errorRate =
+      recentEvents > 0 ? (recentErrors / recentEvents) * 100 : 0;
 
     return {
       avgLatency,
       throughput,
       memoryUsage,
       eventQueueSize,
-      errorRate
+      errorRate,
     };
   }
 
@@ -346,46 +364,59 @@ export class PerformanceMonitor {
     const { summary } = latestSnapshot;
 
     // Check each threshold
-    Object.entries(this.config.alertThresholds).forEach(([metric, thresholds]) => {
-      const value = (summary as any)[metric];
-      if (value === undefined) return;
+    Object.entries(this.config.alertThresholds).forEach(
+      ([metric, thresholds]) => {
+        const value = (summary as any)[metric];
+        if (value === undefined) return;
 
-      let level: PerformanceAlert['level'] | null = null;
-      let threshold = 0;
+        let level: PerformanceAlert["level"] | null = null;
+        let threshold = 0;
 
-      if (value >= thresholds.critical) {
-        level = 'critical';
-        threshold = thresholds.critical;
-      } else if (value >= thresholds.warning) {
-        level = 'warning';
-        threshold = thresholds.warning;
+        if (value >= thresholds.critical) {
+          level = "critical";
+          threshold = thresholds.critical;
+        } else if (value >= thresholds.warning) {
+          level = "warning";
+          threshold = thresholds.warning;
+        }
+
+        if (level) {
+          this.createAlert(level, metric, value, threshold);
+        }
       }
-
-      if (level) {
-        this.createAlert(level, metric, value, threshold);
-      }
-    });
+    );
   }
 
   /**
    * Create performance alert
    */
-  private createAlert(level: PerformanceAlert['level'], metric: string, value: number, threshold: number): void {
+  private createAlert(
+    level: PerformanceAlert["level"],
+    metric: string,
+    value: number,
+    threshold: number
+  ): void {
     // Don't create duplicate alerts within a short time period
-    const recentAlert = this.alerts.find(a =>
-      a.metric === metric &&
-      a.level === level &&
-      Date.now() - a.timestamp < 30000 // 30 seconds
+    const recentAlert = this.alerts.find(
+      (a) =>
+        a.metric === metric &&
+        a.level === level &&
+        Date.now() - a.timestamp < 30000 // 30 seconds
     );
 
     if (recentAlert) return;
 
     const suggestions: Record<string, string> = {
-      avgLatency: 'Consider optimizing event handlers or introducing async processing',
-      throughput: 'Event processing rate is low. Check for bottlenecks in handlers',
-      memoryUsage: 'Memory usage is high. Consider implementing object pooling or cleanup',
-      eventQueueSize: 'Event queue is growing. Consider increasing processing capacity',
-      errorRate: 'High error rate detected. Check event handler implementations'
+      avgLatency:
+        "Consider optimizing event handlers or introducing async processing",
+      throughput:
+        "Event processing rate is low. Check for bottlenecks in handlers",
+      memoryUsage:
+        "Memory usage is high. Consider implementing object pooling or cleanup",
+      eventQueueSize:
+        "Event queue is growing. Consider increasing processing capacity",
+      errorRate:
+        "High error rate detected. Check event handler implementations",
     };
 
     const alert: PerformanceAlert = {
@@ -393,10 +424,12 @@ export class PerformanceMonitor {
       timestamp: Date.now(),
       level,
       metric,
-      message: `${metric} exceeded ${level} threshold: ${value.toFixed(2)} >= ${threshold}`,
+      message: `${metric} exceeded ${level} threshold: ${value.toFixed(
+        2
+      )} >= ${threshold}`,
       currentValue: value,
       threshold,
-      suggestion: suggestions[metric]
+      suggestion: suggestions[metric],
     };
 
     this.alerts.push(alert);
@@ -406,7 +439,7 @@ export class PerformanceMonitor {
    * Get current performance metrics
    */
   getMetrics(filter?: {
-    category?: PerformanceMetric['category'];
+    category?: PerformanceMetric["category"];
     name?: string;
     timeRange?: { start: number; end: number };
     limit?: number;
@@ -415,17 +448,20 @@ export class PerformanceMonitor {
 
     if (filter) {
       if (filter.category) {
-        filteredMetrics = filteredMetrics.filter(m => m.category === filter.category);
+        filteredMetrics = filteredMetrics.filter(
+          (m) => m.category === filter.category
+        );
       }
 
       if (filter.name) {
-        filteredMetrics = filteredMetrics.filter(m => m.name === filter.name);
+        filteredMetrics = filteredMetrics.filter((m) => m.name === filter.name);
       }
 
       if (filter.timeRange) {
-        filteredMetrics = filteredMetrics.filter(m =>
-          m.timestamp >= filter.timeRange!.start &&
-          m.timestamp <= filter.timeRange!.end
+        filteredMetrics = filteredMetrics.filter(
+          (m) =>
+            m.timestamp >= filter.timeRange!.start &&
+            m.timestamp <= filter.timeRange!.end
         );
       }
 
@@ -441,18 +477,20 @@ export class PerformanceMonitor {
    * Get performance snapshots
    */
   getSnapshots(limit?: number): PerformanceSnapshot[] {
-    const snapshots = [...this.snapshots].sort((a, b) => b.timestamp - a.timestamp);
+    const snapshots = [...this.snapshots].sort(
+      (a, b) => b.timestamp - a.timestamp
+    );
     return limit ? snapshots.slice(0, limit) : snapshots;
   }
 
   /**
    * Get active alerts
    */
-  getAlerts(level?: PerformanceAlert['level']): PerformanceAlert[] {
+  getAlerts(level?: PerformanceAlert["level"]): PerformanceAlert[] {
     let alerts = [...this.alerts].sort((a, b) => b.timestamp - a.timestamp);
 
     if (level) {
-      alerts = alerts.filter(a => a.level === level);
+      alerts = alerts.filter((a) => a.level === level);
     }
 
     return alerts;
@@ -464,47 +502,59 @@ export class PerformanceMonitor {
   generateReport(): string {
     const latestSnapshot = this.snapshots[this.snapshots.length - 1];
     if (!latestSnapshot) {
-      return 'No performance data available';
+      return "No performance data available";
     }
 
     const { summary } = latestSnapshot;
     const activeAlerts = this.getAlerts();
 
-    let report = '\n=== PERFORMANCE REPORT ===\n';
+    let report = "\n=== PERFORMANCE REPORT ===\n";
     report += `Generated: ${new Date().toISOString()}\n\n`;
 
-    report += '--- Current Metrics ---\n';
+    report += "--- Current Metrics ---\n";
     report += `Average Latency: ${summary.avgLatency.toFixed(2)}ms\n`;
     report += `Throughput: ${summary.throughput.toFixed(2)} events/sec\n`;
-    report += `Memory Usage: ${(summary.memoryUsage / 1024 / 1024).toFixed(2)}MB\n`;
+    report += `Memory Usage: ${(summary.memoryUsage / 1024 / 1024).toFixed(
+      2
+    )}MB\n`;
     report += `Event Queue Size: ${summary.eventQueueSize}\n`;
     report += `Error Rate: ${summary.errorRate.toFixed(2)}%\n\n`;
 
     // Alerts section
     if (activeAlerts.length > 0) {
-      report += '--- Active Alerts ---\n';
+      report += "--- Active Alerts ---\n";
       activeAlerts.slice(0, 5).forEach((alert, index) => {
-        const icon = alert.level === 'critical' ? '🚨' :
-                    alert.level === 'warning' ? '⚠️' : 'ℹ️';
+        const icon =
+          alert.level === "critical"
+            ? "🚨"
+            : alert.level === "warning"
+            ? "⚠️"
+            : "ℹ️";
         report += `${index + 1}. ${icon} ${alert.message}\n`;
         if (alert.suggestion) {
           report += `   💡 ${alert.suggestion}\n`;
         }
       });
-      report += '\n';
+      report += "\n";
     } else {
-      report += '--- No Active Alerts ---\n\n';
+      report += "--- No Active Alerts ---\n\n";
     }
 
     // Trends section
     if (this.snapshots.length > 1) {
       const previousSnapshot = this.snapshots[this.snapshots.length - 2];
-      const latencyTrend = summary.avgLatency - previousSnapshot.summary.avgLatency;
-      const throughputTrend = summary.throughput - previousSnapshot.summary.throughput;
+      const latencyTrend =
+        summary.avgLatency - previousSnapshot.summary.avgLatency;
+      const throughputTrend =
+        summary.throughput - previousSnapshot.summary.throughput;
 
-      report += '--- Trends (vs previous snapshot) ---\n';
-      report += `Latency: ${latencyTrend >= 0 ? '+' : ''}${latencyTrend.toFixed(2)}ms\n`;
-      report += `Throughput: ${throughputTrend >= 0 ? '+' : ''}${throughputTrend.toFixed(2)} events/sec\n`;
+      report += "--- Trends (vs previous snapshot) ---\n";
+      report += `Latency: ${latencyTrend >= 0 ? "+" : ""}${latencyTrend.toFixed(
+        2
+      )}ms\n`;
+      report += `Throughput: ${
+        throughputTrend >= 0 ? "+" : ""
+      }${throughputTrend.toFixed(2)} events/sec\n`;
     }
 
     return report;
@@ -528,9 +578,9 @@ export class PerformanceMonitor {
   private cleanupOldData(): void {
     const cutoffTime = Date.now() - this.config.retentionPeriod;
 
-    this.metrics = this.metrics.filter(m => m.timestamp >= cutoffTime);
-    this.snapshots = this.snapshots.filter(s => s.timestamp >= cutoffTime);
-    this.alerts = this.alerts.filter(a => a.timestamp >= cutoffTime);
+    this.metrics = this.metrics.filter((m) => m.timestamp >= cutoffTime);
+    this.snapshots = this.snapshots.filter((s) => s.timestamp >= cutoffTime);
+    this.alerts = this.alerts.filter((a) => a.timestamp >= cutoffTime);
   }
 
   /**

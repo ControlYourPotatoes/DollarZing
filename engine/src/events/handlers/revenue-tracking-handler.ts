@@ -14,7 +14,13 @@ import {
   EVENT_TYPES,
 } from "../event-types";
 import { RevenueCalculator } from "../../core/revenue-calculator";
-import { GameSession, VirtualDollar, DollarState, BettingLevel } from "../../types/virtual-dollar-engine";
+import {
+  GameSession,
+  VirtualDollar,
+  DollarState,
+  BettingLevel,
+  getBettingLevelValue,
+} from "../../types/virtual-dollar-engine";
 
 /**
  * Transaction record for comprehensive financial logging
@@ -24,9 +30,9 @@ export interface TransactionRecord {
   type: "GAME_REVENUE" | "CASH_OUT_REVENUE";
   timestamp: Date;
   amount: number;
-  playerId?: string;
-  gameId?: string;
-  virtualDollarId?: string;
+  playerId: string | undefined;
+  gameId: string | undefined;
+  virtualDollarId: string | undefined;
   details: {
     [key: string]: any;
   };
@@ -73,7 +79,7 @@ export class RevenueTrackingHandler {
       enableTransactionLogging: true,
       maxTransactionHistory: 10000,
       enableRealtimeUpdates: true,
-      ...config
+      ...config,
     };
 
     this.setupEventSubscriptions();
@@ -108,7 +114,8 @@ export class RevenueTrackingHandler {
       const gameSession: GameSession = this.createGameSessionFromEvent(event);
 
       // Process revenue through calculator
-      const revenueResult = this.revenueCalculator.processGameRevenue(gameSession);
+      const revenueResult =
+        this.revenueCalculator.processGameRevenue(gameSession);
 
       if (!revenueResult.isValid) {
         await this.emitRevenueError(
@@ -139,8 +146,8 @@ export class RevenueTrackingHandler {
             winnings: event.winnings,
             platformFee: platformFee,
             winnerLevel: event.winnerLevel,
-            loserLevel: event.loserLevel
-          }
+            loserLevel: event.loserLevel,
+          },
         });
       }
 
@@ -180,19 +187,25 @@ export class RevenueTrackingHandler {
   /**
    * Handle CASH_OUT_COMPLETED event by processing cash-out revenue
    */
-  private async handleCashOutCompleted(event: CashOutCompletedEvent): Promise<void> {
+  private async handleCashOutCompleted(
+    event: CashOutCompletedEvent
+  ): Promise<void> {
     try {
       // Validate required event data
       this.validateCashOutCompletedEvent(event);
 
       // Process cash-out through revenue calculator
-      const cashOutResult = this.revenueCalculator.processCashOut(event.cashOutAmount);
+      const cashOutResult = this.revenueCalculator.processCashOut(
+        event.cashOutAmount
+      );
 
       if (!cashOutResult.validation.isValid) {
         await this.emitRevenueError(
           EVENT_TYPES.CASH_OUT_COMPLETED,
           event.virtualDollarId,
-          `Cash-out processing failed: ${cashOutResult.validation.errors.join(", ")}`
+          `Cash-out processing failed: ${cashOutResult.validation.errors.join(
+            ", "
+          )}`
         );
         return;
       }
@@ -214,8 +227,8 @@ export class RevenueTrackingHandler {
             finalLevel: event.finalLevel,
             totalWinnings: event.totalWinnings,
             runCompleted: event.runCompleted,
-            wasJackpot: event.wasJackpot
-          }
+            wasJackpot: event.wasJackpot,
+          },
         });
       }
 
@@ -266,12 +279,16 @@ export class RevenueTrackingHandler {
         totalCharityContributions: revenueStream.charityContributions,
         totalPlayerPayouts: revenueStream.playerWinnings,
         totalGames: revenueStream.totalGames,
-        revenuePerGame: revenueStream.totalGames > 0 
-          ? revenueStream.platformClickRevenue / revenueStream.totalGames 
-          : 0,
+        revenuePerGame:
+          revenueStream.totalGames > 0
+            ? revenueStream.platformClickRevenue / revenueStream.totalGames
+            : 0,
       } as RevenueUpdateEvent);
     } catch (error) {
-      console.error(`[RevenueTrackingHandler] Error emitting revenue update:`, error);
+      console.error(
+        `[RevenueTrackingHandler] Error emitting revenue update:`,
+        error
+      );
     }
   }
 
@@ -289,10 +306,13 @@ export class RevenueTrackingHandler {
         timestamp: new Date(),
         eventType: eventType,
         error: error,
-        context: { contextId }
+        context: { contextId },
       } as ErrorEvent);
     } catch (emitError) {
-      console.error(`[RevenueTrackingHandler] Failed to emit error event:`, emitError);
+      console.error(
+        `[RevenueTrackingHandler] Failed to emit error event:`,
+        emitError
+      );
     }
   }
 
@@ -308,14 +328,14 @@ export class RevenueTrackingHandler {
       currentScore: event.winnings,
       currentLevel: event.winnerLevel as BettingLevel,
       state: DollarState.WON,
-      playerId: event.winnerId,
-      gamesWon: 1,
-      gamesLost: 0,
-      gamesPlayed: 1,
-      currentProgression: event.winnings,
-      totalProgression: event.winnings,
-      isActive: true,
-      createdAt: event.timestamp
+      ownerId: event.winnerId,
+      runId: `run-${event.winnerId}`,
+      createdAt: event.timestamp,
+      gameHistory: [],
+      gamesInThisRun: 1,
+      currentRunWinnings: event.winnings,
+      isIndependentRun: false,
+      potValue: getBettingLevelValue(event.winnerLevel as BettingLevel),
     };
 
     const loserDollar: VirtualDollar = {
@@ -324,14 +344,14 @@ export class RevenueTrackingHandler {
       currentScore: 0,
       currentLevel: event.loserLevel as BettingLevel,
       state: DollarState.LOST,
-      playerId: event.loserId,
-      gamesWon: 0,
-      gamesLost: 1,
-      gamesPlayed: 1,
-      currentProgression: 0,
-      totalProgression: 0,
-      isActive: false,
-      createdAt: event.timestamp
+      ownerId: event.loserId,
+      runId: `run-${event.loserId}`,
+      createdAt: event.timestamp,
+      gameHistory: [],
+      gamesInThisRun: 1,
+      currentRunWinnings: 0,
+      isIndependentRun: false,
+      potValue: getBettingLevelValue(event.loserLevel as BettingLevel),
     };
 
     return {
@@ -345,7 +365,12 @@ export class RevenueTrackingHandler {
       timestamp: event.timestamp,
       gameNumber: 0, // Not available in event data
       dailySeed: "revenue-tracking", // Placeholder for revenue tracking
-      winnings: event.winnings
+      dollar1Score: event.winnings,
+      dollar2Score: 0,
+      winnings: event.winnings,
+      isCompleted: true,
+      duration: 0,
+      randomSeed: 0.5,
     };
   }
 
@@ -354,14 +379,14 @@ export class RevenueTrackingHandler {
    */
   private logTransaction(transaction: Partial<TransactionRecord>): void {
     const record: TransactionRecord = {
-      id: `TXN-${this.transactionIdCounter.toString().padStart(6, '0')}`,
+      id: `TXN-${this.transactionIdCounter.toString().padStart(6, "0")}`,
       type: transaction.type!,
       timestamp: transaction.timestamp!,
       amount: transaction.amount!,
       playerId: transaction.playerId,
       gameId: transaction.gameId,
       virtualDollarId: transaction.virtualDollarId,
-      details: transaction.details || {}
+      details: transaction.details || {},
     };
 
     this.transactionHistory.unshift(record); // Add to beginning for recent-first ordering
@@ -369,7 +394,10 @@ export class RevenueTrackingHandler {
 
     // Clean up old transactions if over limit
     if (this.transactionHistory.length > this.config.maxTransactionHistory) {
-      this.transactionHistory = this.transactionHistory.slice(0, this.config.maxTransactionHistory);
+      this.transactionHistory = this.transactionHistory.slice(
+        0,
+        this.config.maxTransactionHistory
+      );
     }
   }
 
@@ -384,11 +412,14 @@ export class RevenueTrackingHandler {
     if (!event.loserId) missingFields.push("loserId");
     if (!event.winnerDollarId) missingFields.push("winnerDollarId");
     if (!event.loserDollarId) missingFields.push("loserDollarId");
-    if (event.winnings === undefined || event.winnings === null) missingFields.push("winnings");
+    if (event.winnings === undefined || event.winnings === null)
+      missingFields.push("winnings");
     if (!event.timestamp) missingFields.push("timestamp");
 
     if (missingFields.length > 0) {
-      throw new Error(`Missing required event data: ${missingFields.join(", ")}`);
+      throw new Error(
+        `Missing required event data: ${missingFields.join(", ")}`
+      );
     }
   }
 
@@ -400,11 +431,14 @@ export class RevenueTrackingHandler {
 
     if (!event.playerId) missingFields.push("playerId");
     if (!event.virtualDollarId) missingFields.push("virtualDollarId");
-    if (event.cashOutAmount === undefined || event.cashOutAmount === null) missingFields.push("cashOutAmount");
+    if (event.cashOutAmount === undefined || event.cashOutAmount === null)
+      missingFields.push("cashOutAmount");
     if (!event.timestamp) missingFields.push("timestamp");
 
     if (missingFields.length > 0) {
-      throw new Error(`Missing required event data: ${missingFields.join(", ")}`);
+      throw new Error(
+        `Missing required event data: ${missingFields.join(", ")}`
+      );
     }
   }
 
@@ -415,14 +449,19 @@ export class RevenueTrackingHandler {
     try {
       // Verify revenue calculator is responsive
       const revenueStream = this.revenueCalculator.getRevenueStream();
-      
+
       if (!revenueStream) {
         throw new Error("Revenue calculator returned invalid revenue stream");
       }
 
-      console.log("[RevenueTrackingHandler] Revenue calculator integration validated");
+      console.log(
+        "[RevenueTrackingHandler] Revenue calculator integration validated"
+      );
     } catch (error) {
-      console.error("[RevenueTrackingHandler] Revenue calculator integration failed:", error);
+      console.error(
+        "[RevenueTrackingHandler] Revenue calculator integration failed:",
+        error
+      );
       throw error;
     }
   }
@@ -435,7 +474,7 @@ export class RevenueTrackingHandler {
       return [...this.transactionHistory];
     }
 
-    return this.transactionHistory.filter(transaction => {
+    return this.transactionHistory.filter((transaction) => {
       // Type filter
       if (filter.type && transaction.type !== filter.type) {
         return false;
@@ -460,10 +499,16 @@ export class RevenueTrackingHandler {
       }
 
       // Amount range filter
-      if (filter.minAmount !== undefined && transaction.amount < filter.minAmount) {
+      if (
+        filter.minAmount !== undefined &&
+        transaction.amount < filter.minAmount
+      ) {
         return false;
       }
-      if (filter.maxAmount !== undefined && transaction.amount > filter.maxAmount) {
+      if (
+        filter.maxAmount !== undefined &&
+        transaction.amount > filter.maxAmount
+      ) {
         return false;
       }
 
@@ -502,18 +547,26 @@ export class RevenueTrackingHandler {
     totalVolume: number;
     averageTransactionAmount: number;
   } {
-    const gameTransactions = this.transactionHistory.filter(t => t.type === "GAME_REVENUE");
-    const cashOutTransactions = this.transactionHistory.filter(t => t.type === "CASH_OUT_REVENUE");
-    const totalVolume = this.transactionHistory.reduce((sum, t) => sum + t.amount, 0);
+    const gameTransactions = this.transactionHistory.filter(
+      (t) => t.type === "GAME_REVENUE"
+    );
+    const cashOutTransactions = this.transactionHistory.filter(
+      (t) => t.type === "CASH_OUT_REVENUE"
+    );
+    const totalVolume = this.transactionHistory.reduce(
+      (sum, t) => sum + t.amount,
+      0
+    );
 
     return {
       totalTransactions: this.transactionHistory.length,
       gameTransactions: gameTransactions.length,
       cashOutTransactions: cashOutTransactions.length,
       totalVolume: totalVolume,
-      averageTransactionAmount: this.transactionHistory.length > 0 
-        ? totalVolume / this.transactionHistory.length 
-        : 0
+      averageTransactionAmount:
+        this.transactionHistory.length > 0
+          ? totalVolume / this.transactionHistory.length
+          : 0,
     };
   }
 
@@ -530,11 +583,16 @@ export class RevenueTrackingHandler {
    */
   updateConfiguration(config: Partial<RevenueTrackingConfig>): void {
     this.config = { ...this.config, ...config };
-    
+
     // Apply max history limit if changed
-    if (config.maxTransactionHistory !== undefined && 
-        this.transactionHistory.length > config.maxTransactionHistory) {
-      this.transactionHistory = this.transactionHistory.slice(0, config.maxTransactionHistory);
+    if (
+      config.maxTransactionHistory !== undefined &&
+      this.transactionHistory.length > config.maxTransactionHistory
+    ) {
+      this.transactionHistory = this.transactionHistory.slice(
+        0,
+        config.maxTransactionHistory
+      );
     }
   }
 

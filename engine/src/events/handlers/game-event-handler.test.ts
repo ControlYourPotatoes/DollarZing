@@ -4,9 +4,9 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { EventBus } from "../event-bus";
-import { GameEventHandler } from "./game-event-handler.js";
-import { GameMatchingEngine } from "../../types/game-matching-engine";
-import { RevenueCalculator } from "../../types/revenue-calculator";
+import { GameEventHandler } from "./game-event-handler";
+import { GameMatchingEngine } from "../../core/game-matching-engine";
+import { RevenueCalculator } from "../../core/revenue-calculator";
 import {
   GameCreatedEvent,
   GameResolvedEvent,

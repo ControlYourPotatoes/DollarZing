@@ -11,7 +11,7 @@ import { EVENT_TYPES, GameCreatedEvent } from "../events/event-types";
  */
 export class GameProcessor {
   constructor(
-    private gameMatchingEngine: GameMatchingEngine,
+    _gameMatchingEngine: GameMatchingEngine,
     private eventBus: EventBus
   ) {}
 
@@ -20,10 +20,13 @@ export class GameProcessor {
    * GameEventHandler will listen to these events and handle resolution
    */
   async createGames(games: any[], dailySeed: string): Promise<void> {
-    console.log(`[GameProcessor] Creating ${games.length} games and emitting GAME_CREATED events`);
-    
+    console.log(
+      `[GameProcessor] Creating ${games.length} games and emitting GAME_CREATED events`
+    );
+
     // Generate proper daily seed format (YYYY-MM-DD) from config or current date
-    const seed = dailySeed.match(/^\d{4}-\d{2}-\d{2}$/)
+    // Note: seed validation is done but not used in current implementation
+    dailySeed.match(/^\d{4}-\d{2}-\d{2}$/)
       ? dailySeed
       : new Date().toISOString().split("T")[0];
 
@@ -33,13 +36,17 @@ export class GameProcessor {
         type: EVENT_TYPES.GAME_CREATED,
         timestamp: new Date(),
         gameId: gameSession.id,
-        player1Id: gameSession.dollar1?.ownerId,
-        player2Id: gameSession.dollar2?.ownerId,
-        bettingLevel: gameSession.level,
-        dailySeed: seed,
+        player1Id: gameSession.dollar1?.ownerId || "",
+        player2Id: gameSession.dollar2?.ownerId || "",
+        player1Level: gameSession.level,
+        player2Level: gameSession.level,
+        virtualDollar1Id: gameSession.dollar1?.id || "",
+        virtualDollar2Id: gameSession.dollar2?.id || "",
       };
 
-      console.log(`[GameProcessor] Emitting GAME_CREATED for game ${gameSession.id}`);
+      console.log(
+        `[GameProcessor] Emitting GAME_CREATED for game ${gameSession.id}`
+      );
       await this.eventBus.emit(EVENT_TYPES.GAME_CREATED, gameCreatedEvent);
     }
   }
@@ -49,7 +56,9 @@ export class GameProcessor {
    * @deprecated Use createGames instead
    */
   async resolveGames(games: any[], dailySeed: string): Promise<void> {
-    console.warn(`[GameProcessor] resolveGames is deprecated - use createGames instead`);
+    console.warn(
+      `[GameProcessor] resolveGames is deprecated - use createGames instead`
+    );
     await this.createGames(games, dailySeed);
   }
 
@@ -58,11 +67,13 @@ export class GameProcessor {
    * This method should be called with fresh games that need to be processed
    */
   async processGameResults(games: any[]): Promise<void> {
-    console.log(`[GameProcessor] Processing ${games.length} newly created games via GAME_CREATED events`);
-    
+    console.log(
+      `[GameProcessor] Processing ${games.length} newly created games via GAME_CREATED events`
+    );
+
     // Use today's date as default seed
     const dailySeed = new Date().toISOString().split("T")[0];
-    
+
     // Emit GAME_CREATED events for each newly created game
     // GameEventHandler will handle resolution and emit GAME_RESOLVED events
     await this.createGames(games, dailySeed);

@@ -1,6 +1,5 @@
 import { GameMatchingEngine } from "../core/game-matching-engine";
 import { PlayerManager } from "./player-manager";
-import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { PooledVirtualDollarFactory } from "../factories";
 import { DollarState } from "../types/virtual-dollar-engine";
 import { EventBus } from "../events/event-bus";

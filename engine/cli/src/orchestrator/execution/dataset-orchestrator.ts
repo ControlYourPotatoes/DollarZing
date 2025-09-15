@@ -66,16 +66,13 @@ export function createGameEngineSimulator(
   const revenueCalculator = new RevenueCalculator();
 
   // Import simulation components with event-driven architecture
-  const {
-    PlayerBalanceManager,
-  } = require("../../../../src/types/player-balance-manager");
+
   const {
     PlayerManager,
   } = require("../../../../src/simulation/player-manager");
   const { DayProcessor } = require("../../../../src/simulation/day-processor");
 
   // Create player balance manager
-  const playerBalanceManager = new PlayerBalanceManager();
 
   // Create lightweight run orchestrator for compatibility
   const runOrchestrator = {
@@ -91,7 +88,6 @@ export function createGameEngineSimulator(
 
   // Create player manager with event bus integration
   const playerManager = new PlayerManager(
-    playerBalanceManager,
     runOrchestrator,
     sharedEventBus
   );

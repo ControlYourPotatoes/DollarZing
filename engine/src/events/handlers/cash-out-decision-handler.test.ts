@@ -46,10 +46,11 @@ describe("CashOutDecisionHandler", () => {
         timestamp: new Date(),
         playerId: "conservative-player",
         virtualDollarId: "dollar-conservative",
-        fromLevel: 2,
-        toLevel: 3,
+        previousLevel: 2,
+        currentLevel: 3,
         totalWinnings: 7.2,
-        gamesPlayed: 3,
+        gamesWonInRun: 3,
+        nextBettingAmount: 1.0,
       };
 
       await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);
@@ -98,10 +99,11 @@ describe("CashOutDecisionHandler", () => {
         timestamp: new Date(),
         playerId: "aggressive-player",
         virtualDollarId: "dollar-aggressive",
-        fromLevel: 6,
-        toLevel: 7,
+        previousLevel: 6,
+        currentLevel: 7,
         totalWinnings: 115.2,
-        gamesPlayed: 7,
+        gamesWonInRun: 7,
+        nextBettingAmount: 1.0,
       };
 
       await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);
@@ -139,10 +141,11 @@ describe("CashOutDecisionHandler", () => {
         timestamp: new Date(),
         playerId: "balanced-player",
         virtualDollarId: "dollar-balanced",
-        fromLevel: 4,
-        toLevel: 5,
+        previousLevel: 4,
+        currentLevel: 5,
         totalWinnings: 28.8,
-        gamesPlayed: 5,
+        gamesWonInRun: 5,
+        nextBettingAmount: 1.0,
       };
 
       await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);
@@ -190,10 +193,11 @@ describe("CashOutDecisionHandler", () => {
         timestamp: new Date(),
         playerId: "cashout-player",
         virtualDollarId: "dollar-cashout",
-        fromLevel: 3,
-        toLevel: 4,
+        previousLevel: 3,
+        currentLevel: 4,
         totalWinnings: 14.4,
-        gamesPlayed: 4,
+        gamesWonInRun: 4,
+        nextBettingAmount: 1.0,
       };
 
       await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);
@@ -230,10 +234,11 @@ describe("CashOutDecisionHandler", () => {
         timestamp: new Date(),
         playerId: "continue-player",
         virtualDollarId: "dollar-continue",
-        fromLevel: 5,
-        toLevel: 6,
+        previousLevel: 5,
+        currentLevel: 6,
         totalWinnings: 57.6,
-        gamesPlayed: 6,
+        gamesWonInRun: 6,
+        nextBettingAmount: 1.0,
       };
 
       await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);
@@ -272,10 +277,11 @@ describe("CashOutDecisionHandler", () => {
         timestamp: new Date(),
         playerId: "jackpot-player",
         virtualDollarId: "dollar-jackpot",
-        fromLevel: 9,
-        toLevel: 10,
+        previousLevel: 9,
+        currentLevel: 10,
         totalWinnings: 1024, // Jackpot amount
-        gamesPlayed: 10,
+        gamesWonInRun: 10,
+        nextBettingAmount: 1.0,
       };
 
       await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);
@@ -317,10 +323,11 @@ describe("CashOutDecisionHandler", () => {
         timestamp: new Date(),
         playerId: "error-player",
         virtualDollarId: "dollar-error",
-        fromLevel: 2,
-        toLevel: 3,
+        previousLevel: 2,
+        currentLevel: 3,
         totalWinnings: 7.2,
-        gamesPlayed: 3,
+        gamesWonInRun: 3,
+        nextBettingAmount: 1.0,
       };
 
       await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);
@@ -353,10 +360,11 @@ describe("CashOutDecisionHandler", () => {
         timestamp: new Date(),
         playerId: "unknown-player",
         virtualDollarId: "dollar-unknown",
-        fromLevel: 1,
-        toLevel: 2,
+        previousLevel: 1,
+        currentLevel: 2,
         totalWinnings: 3.6,
-        gamesPlayed: 2,
+        gamesWonInRun: 2,
+        nextBettingAmount: 1.0,
       };
 
       await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);
@@ -405,10 +413,11 @@ describe("CashOutDecisionHandler", () => {
           timestamp: new Date(),
           playerId: "strategy-test-player",
           virtualDollarId: `dollar-${level.toLevel}`,
-          fromLevel: level.fromLevel,
-          toLevel: level.toLevel,
+          previousLevel: level.fromLevel,
+          currentLevel: level.toLevel,
           totalWinnings: level.winnings,
-          gamesPlayed: level.toLevel,
+          gamesWonInRun: level.toLevel,
+          nextBettingAmount: 1.0,
         };
 
         await eventBus.emit(EVENT_TYPES.PLAYER_ADVANCED, playerAdvancedEvent);

@@ -1,13 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EventBus } from "../event-bus";
 import { RevenueTrackingHandler } from "./revenue-tracking-handler";
-import { 
+import {
   GameResolvedEvent,
   CashOutCompletedEvent,
-  RevenueGameProcessedEvent,
-  RevenueCashOutProcessedEvent,
-  RevenueUpdateEvent,
-  EVENT_TYPES 
+  EVENT_TYPES,
 } from "../event-types";
 
 describe("RevenueTrackingHandler", () => {
@@ -23,7 +20,7 @@ describe("RevenueTrackingHandler", () => {
       processGameRevenue: vi.fn().mockReturnValue({
         isValid: true,
         errors: [],
-        warnings: []
+        warnings: [],
       }),
       processCashOut: vi.fn().mockReturnValue({
         playerAmount: 8.5,
@@ -31,8 +28,8 @@ describe("RevenueTrackingHandler", () => {
         validation: {
           isValid: true,
           errors: [],
-          warnings: []
-        }
+          warnings: [],
+        },
       }),
       getRevenueStream: vi.fn().mockReturnValue({
         platformClickRevenue: 2.4,
@@ -41,7 +38,7 @@ describe("RevenueTrackingHandler", () => {
         totalGames: 12,
         totalCashOuts: 100.0,
         averageCashOutAmount: 10.0,
-        charityPercentage: 0.15
+        charityPercentage: 0.15,
       }),
       generateRevenueReport: vi.fn().mockReturnValue({
         summary: {
@@ -51,30 +48,30 @@ describe("RevenueTrackingHandler", () => {
           totalGames: 12,
           totalCashOuts: 100.0,
           averageCashOutAmount: 10.0,
-          charityPercentage: 0.15
+          charityPercentage: 0.15,
         },
         breakdown: {
           averageRevenuePerGame: 0.2,
           totalVolume: 102.4,
           platformMargin: 2.34,
-          charityImpact: 15.0
+          charityImpact: 15.0,
         },
         validation: {
           isValid: true,
           errors: [],
-          warnings: []
-        }
+          warnings: [],
+        },
       }),
       validateAmount: vi.fn().mockReturnValue({
         isValid: true,
         errors: [],
-        warnings: []
+        warnings: [],
       }),
       setCharityPercentage: vi.fn().mockReturnValue({
         isValid: true,
         errors: [],
-        warnings: []
-      })
+        warnings: [],
+      }),
     };
 
     handler = new RevenueTrackingHandler(eventBus, mockRevenueCalculator);
@@ -101,21 +98,12 @@ describe("RevenueTrackingHandler", () => {
         gameResult: "WIN",
       };
 
-      // Mock game session for revenue calculator
-      const mockGameSession = {
-        id: "game-revenue-123",
-        timestamp: new Date(),
-        platformFee: 0.2,
-        winnings: 7.2,
-        dollar1: { id: "dollar-winner" },
-        dollar2: { id: "dollar-loser" },
-        winner: { id: "player-winner" },
-        loser: { id: "player-loser" }
-      };
-
       // Create spy for revenue game processed event
       const revenueGameSpy = vi.fn();
-      const subscription = eventBus.on(EVENT_TYPES.REVENUE_GAME_PROCESSED, revenueGameSpy);
+      const subscription = eventBus.on(
+        EVENT_TYPES.REVENUE_GAME_PROCESSED,
+        revenueGameSpy
+      );
 
       await eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameEvent);
 
@@ -124,7 +112,7 @@ describe("RevenueTrackingHandler", () => {
         expect.objectContaining({
           id: "game-revenue-123",
           platformFee: 0.2,
-          winnings: 7.2
+          winnings: 7.2,
         })
       );
 
@@ -136,7 +124,7 @@ describe("RevenueTrackingHandler", () => {
           gameRevenue: 0.2,
           platformRevenue: 0.2,
           charityContribution: 0,
-          totalGameRevenue: 0.2
+          totalGameRevenue: 0.2,
         })
       );
 
@@ -158,7 +146,10 @@ describe("RevenueTrackingHandler", () => {
 
       // Create spy for revenue cash-out processed event
       const revenueCashOutSpy = vi.fn();
-      const subscription = eventBus.on(EVENT_TYPES.REVENUE_CASH_OUT_PROCESSED, revenueCashOutSpy);
+      const subscription = eventBus.on(
+        EVENT_TYPES.REVENUE_CASH_OUT_PROCESSED,
+        revenueCashOutSpy
+      );
 
       await eventBus.emit(EVENT_TYPES.CASH_OUT_COMPLETED, cashOutEvent);
 
@@ -173,7 +164,7 @@ describe("RevenueTrackingHandler", () => {
           virtualDollarId: "dollar-cashout",
           cashOutAmount: 10.0,
           playerWinnings: 8.5,
-          totalPlayerWinnings: 85.0
+          totalPlayerWinnings: 85.0,
         })
       );
 
@@ -225,7 +216,7 @@ describe("RevenueTrackingHandler", () => {
       await Promise.all([
         eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameEvent1),
         eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameEvent2),
-        eventBus.emit(EVENT_TYPES.CASH_OUT_COMPLETED, cashOutEvent)
+        eventBus.emit(EVENT_TYPES.CASH_OUT_COMPLETED, cashOutEvent),
       ]);
 
       // Verify all revenue processing calls were made
@@ -253,12 +244,15 @@ describe("RevenueTrackingHandler", () => {
         totalGames: totalGames,
         totalCashOuts: 60.0,
         averageCashOutAmount: 12.0,
-        charityPercentage: 0.15
+        charityPercentage: 0.15,
       }));
 
       // Create spy for revenue update events
       const revenueUpdateSpy = vi.fn();
-      const subscription = eventBus.on(EVENT_TYPES.REVENUE_UPDATE, revenueUpdateSpy);
+      const subscription = eventBus.on(
+        EVENT_TYPES.REVENUE_UPDATE,
+        revenueUpdateSpy
+      );
 
       // Process multiple games
       for (let i = 1; i <= 5; i++) {
@@ -281,7 +275,7 @@ describe("RevenueTrackingHandler", () => {
 
       // Verify revenue update events were emitted with cumulative data
       expect(revenueUpdateSpy).toHaveBeenCalledTimes(5);
-      
+
       // Check the final update has correct cumulative values
       const finalUpdate = revenueUpdateSpy.mock.calls[4][0];
       expect(finalUpdate).toMatchObject({
@@ -290,7 +284,7 @@ describe("RevenueTrackingHandler", () => {
         totalCharityContributions: 5.0,
         totalPlayerPayouts: 50.0,
         totalGames: 5,
-        revenuePerGame: 0.2
+        revenuePerGame: 0.2,
       });
 
       subscription.unsubscribe();
@@ -322,17 +316,17 @@ describe("RevenueTrackingHandler", () => {
           platformClickRevenue: 2.4,
           charityContributions: 15.0,
           playerWinnings: 85.0,
-          totalGames: 12
+          totalGames: 12,
         },
         breakdown: {
           averageRevenuePerGame: 0.2,
           totalVolume: 102.4,
           platformMargin: 2.34,
-          charityImpact: 15.0
+          charityImpact: 15.0,
         },
         validation: {
-          isValid: true
-        }
+          isValid: true,
+        },
       });
 
       // Verify report was generated through revenue calculator
@@ -371,8 +365,8 @@ describe("RevenueTrackingHandler", () => {
           winnerId: "logging-winner",
           loserId: "logging-loser",
           winnings: 14.4,
-          platformFee: 0.2
-        }
+          platformFee: 0.2,
+        },
       });
     });
 
@@ -404,8 +398,8 @@ describe("RevenueTrackingHandler", () => {
           playerAmount: 8.5,
           charityAmount: 1.5,
           finalLevel: 5,
-          wasJackpot: false
-        }
+          wasJackpot: false,
+        },
       });
     });
 
@@ -441,8 +435,12 @@ describe("RevenueTrackingHandler", () => {
       await eventBus.emit(EVENT_TYPES.CASH_OUT_COMPLETED, cashOutEvent);
 
       // Filter by transaction type
-      const gameTransactions = handler.getTransactionHistory({ type: "GAME_REVENUE" });
-      const cashOutTransactions = handler.getTransactionHistory({ type: "CASH_OUT_REVENUE" });
+      const gameTransactions = handler.getTransactionHistory({
+        type: "GAME_REVENUE",
+      });
+      const cashOutTransactions = handler.getTransactionHistory({
+        type: "CASH_OUT_REVENUE",
+      });
 
       expect(gameTransactions).toHaveLength(1);
       expect(gameTransactions[0].type).toBe("GAME_REVENUE");
@@ -451,8 +449,8 @@ describe("RevenueTrackingHandler", () => {
       expect(cashOutTransactions[0].type).toBe("CASH_OUT_REVENUE");
 
       // Filter by player
-      const playerTransactions = handler.getTransactionHistory({ 
-        playerId: "filter-cashout-player" 
+      const playerTransactions = handler.getTransactionHistory({
+        playerId: "filter-cashout-player",
       });
 
       expect(playerTransactions).toHaveLength(1);
@@ -466,7 +464,7 @@ describe("RevenueTrackingHandler", () => {
       mockRevenueCalculator.processGameRevenue.mockReturnValue({
         isValid: false,
         errors: ["Game validation failed"],
-        warnings: []
+        warnings: [],
       });
 
       const gameEvent: GameResolvedEvent = {
@@ -494,7 +492,7 @@ describe("RevenueTrackingHandler", () => {
         expect.objectContaining({
           type: "EVENT_ERROR",
           eventType: "GAME_RESOLVED",
-          error: expect.stringContaining("Game validation failed")
+          error: expect.stringContaining("Game validation failed"),
         })
       );
 
@@ -509,8 +507,8 @@ describe("RevenueTrackingHandler", () => {
         validation: {
           isValid: false,
           errors: ["Cash-out amount is invalid"],
-          warnings: []
-        }
+          warnings: [],
+        },
       });
 
       const cashOutEvent: CashOutCompletedEvent = {
@@ -534,7 +532,7 @@ describe("RevenueTrackingHandler", () => {
         expect.objectContaining({
           type: "EVENT_ERROR",
           eventType: "CASH_OUT_COMPLETED",
-          error: expect.stringContaining("Cash-out amount is invalid")
+          error: expect.stringContaining("Cash-out amount is invalid"),
         })
       );
 
@@ -558,7 +556,7 @@ describe("RevenueTrackingHandler", () => {
         expect.objectContaining({
           type: "EVENT_ERROR",
           eventType: "GAME_RESOLVED",
-          error: expect.stringContaining("Missing required event data")
+          error: expect.stringContaining("Missing required event data"),
         })
       );
 
@@ -594,7 +592,7 @@ describe("RevenueTrackingHandler", () => {
         expect.objectContaining({
           type: "EVENT_ERROR",
           eventType: "GAME_RESOLVED",
-          error: expect.stringContaining("Revenue calculator system failure")
+          error: expect.stringContaining("Revenue calculator system failure"),
         })
       );
 
@@ -626,23 +624,28 @@ describe("RevenueTrackingHandler", () => {
           id: "integration-game",
           timestamp: expect.any(Date),
           platformFee: 0.2, // Standard platform fee
-          winnings: 14.4
+          winnings: 14.4,
         })
       );
     });
 
     it("should handle revenue calculator configuration changes", async () => {
       // Test charity percentage updates
-      const charityPercentage = 0.20;
+      const charityPercentage = 0.2;
       handler.updateCharityPercentage(charityPercentage);
 
       // Should pass through to revenue calculator
-      expect(mockRevenueCalculator.setCharityPercentage).toHaveBeenCalledWith(charityPercentage);
+      expect(mockRevenueCalculator.setCharityPercentage).toHaveBeenCalledWith(
+        charityPercentage
+      );
     });
 
     it("should validate revenue calculator integration on startup", async () => {
       // Create a new handler to test initialization
-      const newHandler = new RevenueTrackingHandler(eventBus, mockRevenueCalculator);
+      const newHandler = new RevenueTrackingHandler(
+        eventBus,
+        mockRevenueCalculator
+      );
 
       // Should validate revenue calculator is properly configured
       expect(mockRevenueCalculator.getRevenueStream).toHaveBeenCalled();

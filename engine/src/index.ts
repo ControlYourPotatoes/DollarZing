@@ -51,7 +51,7 @@ export { ScoringEngine } from "./core";
 export { DirectGameSessionFactory } from "./test-utils";
 
 // Legacy/deprecated - will be removed in future versions
-export { PlayerBalanceManager } from "./types/player-balance-manager";
+// export { PlayerBalanceManager } from "./types/player-balance-manager";
 
 // Event system
 export { EventBus } from "./events/event-bus";
