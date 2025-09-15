@@ -1,6 +1,5 @@
-import { EventBus, EventListener } from '../event-bus.js';
-import { EVENT_TYPES } from '../event-types.js';
-import type { GameEvent } from '../types.js';
+import { EventBus, EventHandler } from "../event-bus";
+import { EVENT_TYPES, type SimulationEvent } from "../event-types";
 
 export interface EventTrace {
   id: string;
@@ -12,7 +11,7 @@ export interface EventTrace {
   correlationId?: string;
   parentEventId?: string;
   children: string[];
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   error?: Error;
 }
 
@@ -23,8 +22,16 @@ export interface EventMetrics {
   errors: Record<string, number>;
   eventFlow: EventTrace[];
   performanceStats: {
-    slowestEvents: Array<{ eventType: string; duration: number; timestamp: number }>;
-    fastestEvents: Array<{ eventType: string; duration: number; timestamp: number }>;
+    slowestEvents: Array<{
+      eventType: string;
+      duration: number;
+      timestamp: number;
+    }>;
+    fastestEvents: Array<{
+      eventType: string;
+      duration: number;
+      timestamp: number;
+    }>;
     errorRate: number;
     throughput: number;
   };
@@ -35,7 +42,7 @@ export interface DebuggerConfig {
   maxTraces: number;
   includeData: boolean;
   filterEvents?: string[];
-  logLevel: 'none' | 'error' | 'warn' | 'info' | 'debug';
+  logLevel: "none" | "error" | "warn" | "info" | "debug";
   enablePerformanceTracking: boolean;
   enableEventFlowVisualization: boolean;
 }
@@ -44,20 +51,22 @@ export class EventDebugger {
   private traces: Map<string, EventTrace> = new Map();
   private eventMetrics: EventMetrics;
   private config: DebuggerConfig;
-  private eventBus?: EventBus;
-  private listeners: Map<string, EventListener> = new Map();
+  private eventBus: EventBus | undefined;
+  private listeners: Map<string, EventHandler> = new Map();
   private sessionId: string;
 
   constructor(config: Partial<DebuggerConfig> = {}) {
-    this.sessionId = `debug_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.sessionId = `debug_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
     this.config = {
       enabled: true,
       maxTraces: 1000,
       includeData: true,
-      logLevel: 'info',
+      logLevel: "info",
       enablePerformanceTracking: true,
       enableEventFlowVisualization: true,
-      ...config
+      ...config,
     };
 
     this.eventMetrics = {
@@ -70,8 +79,8 @@ export class EventDebugger {
         slowestEvents: [],
         fastestEvents: [],
         errorRate: 0,
-        throughput: 0
-      }
+        throughput: 0,
+      },
     };
   }
 
@@ -82,10 +91,13 @@ export class EventDebugger {
     if (!this.config.enabled) return;
 
     this.eventBus = eventBus;
-    this.log('info', `EventDebugger attached to EventBus (Session: ${this.sessionId})`);
+    this.log(
+      "info",
+      `EventDebugger attached to EventBus (Session: ${this.sessionId})`
+    );
 
     // Listen to all event types for debugging
-    Object.values(EVENT_TYPES).forEach(eventType => {
+    Object.values(EVENT_TYPES).forEach((eventType) => {
       if (this.shouldTraceEvent(eventType)) {
         const listener = this.createEventListener(eventType);
         eventBus.on(eventType, listener);
@@ -93,7 +105,7 @@ export class EventDebugger {
       }
     });
 
-    this.log('info', `Monitoring ${this.listeners.size} event types`);
+    this.log("info", `Monitoring ${this.listeners.size} event types`);
   }
 
   /**
@@ -108,14 +120,14 @@ export class EventDebugger {
 
     this.listeners.clear();
     this.eventBus = undefined;
-    this.log('info', 'EventDebugger detached');
+    this.log("info", "EventDebugger detached");
   }
 
   /**
    * Create event listener for tracing
    */
-  private createEventListener(eventType: string): EventListener {
-    return (data: GameEvent) => {
+  private createEventListener(eventType: string): EventHandler {
+    return (data: SimulationEvent) => {
       const traceId = this.generateTraceId();
       const timestamp = Date.now();
 
@@ -124,15 +136,15 @@ export class EventDebugger {
         eventType,
         timestamp,
         data: this.config.includeData ? this.sanitizeData(data) : {},
-        correlationId: data.correlationId || this.sessionId,
-        source: data.source || 'unknown',
+        correlationId: (data as any).correlationId || this.sessionId,
+        source: (data as any).source || "unknown",
         children: [],
-        status: 'pending'
+        status: "pending",
       };
 
       this.addTrace(trace);
       this.updateMetrics(eventType, trace);
-      this.log('debug', `Event traced: ${eventType}`, { traceId, data });
+      this.log("debug", `Event traced: ${eventType}`, { traceId, data });
 
       // Mark as processing and measure performance
       if (this.config.enablePerformanceTracking) {
@@ -149,8 +161,9 @@ export class EventDebugger {
   private addTrace(trace: EventTrace): void {
     // Maintain max traces limit
     if (this.traces.size >= this.config.maxTraces) {
-      const oldestTrace = Array.from(this.traces.values())
-        .sort((a, b) => a.timestamp - b.timestamp)[0];
+      const oldestTrace = Array.from(this.traces.values()).sort(
+        (a, b) => a.timestamp - b.timestamp
+      )[0];
       if (oldestTrace) {
         this.traces.delete(oldestTrace.id);
       }
@@ -172,18 +185,20 @@ export class EventDebugger {
     const trace = this.traces.get(traceId);
     if (!trace) return;
 
-    trace.status = error ? 'failed' : 'completed';
+    trace.status = error ? "failed" : "completed";
     trace.duration = Date.now() - trace.timestamp;
-    trace.error = error;
+    if (error) {
+      trace.error = error;
+    }
 
     if (this.config.enablePerformanceTracking) {
       this.updatePerformanceStats(trace);
     }
 
-    this.log('debug', `Event processed: ${trace.eventType}`, {
+    this.log("debug", `Event processed: ${trace.eventType}`, {
       traceId,
       duration: trace.duration,
-      status: trace.status
+      status: trace.status,
     });
   }
 
@@ -198,7 +213,7 @@ export class EventDebugger {
       stats.slowestEvents.push({
         eventType: trace.eventType,
         duration: trace.duration,
-        timestamp: trace.timestamp
+        timestamp: trace.timestamp,
       });
       stats.slowestEvents.sort((a, b) => b.duration - a.duration);
       stats.slowestEvents = stats.slowestEvents.slice(0, 10);
@@ -207,26 +222,31 @@ export class EventDebugger {
       stats.fastestEvents.push({
         eventType: trace.eventType,
         duration: trace.duration,
-        timestamp: trace.timestamp
+        timestamp: trace.timestamp,
       });
       stats.fastestEvents.sort((a, b) => a.duration - b.duration);
       stats.fastestEvents = stats.fastestEvents.slice(0, 10);
 
       // Update average processing times
-      const currentAvg = this.eventMetrics.averageProcessingTime[trace.eventType] || 0;
+      const currentAvg =
+        this.eventMetrics.averageProcessingTime[trace.eventType] || 0;
       const count = this.eventMetrics.eventsByType[trace.eventType] || 0;
       this.eventMetrics.averageProcessingTime[trace.eventType] =
         (currentAvg * (count - 1) + trace.duration) / count;
     }
 
     // Update error rate
-    const totalErrors = Object.values(this.eventMetrics.errors).reduce((sum, count) => sum + count, 0);
+    const totalErrors = Object.values(this.eventMetrics.errors).reduce(
+      (sum, count) => sum + count,
+      0
+    );
     stats.errorRate = (totalErrors / this.eventMetrics.totalEvents) * 100;
 
     // Calculate throughput (events per second)
     const timeWindow = 60000; // 1 minute
-    const recentEvents = Array.from(this.traces.values())
-      .filter(t => Date.now() - t.timestamp < timeWindow);
+    const recentEvents = Array.from(this.traces.values()).filter(
+      (t) => Date.now() - t.timestamp < timeWindow
+    );
     stats.throughput = recentEvents.length / (timeWindow / 1000);
   }
 
@@ -235,10 +255,12 @@ export class EventDebugger {
    */
   private updateMetrics(eventType: string, trace: EventTrace): void {
     this.eventMetrics.totalEvents++;
-    this.eventMetrics.eventsByType[eventType] = (this.eventMetrics.eventsByType[eventType] || 0) + 1;
+    this.eventMetrics.eventsByType[eventType] =
+      (this.eventMetrics.eventsByType[eventType] || 0) + 1;
 
     if (trace.error) {
-      this.eventMetrics.errors[eventType] = (this.eventMetrics.errors[eventType] || 0) + 1;
+      this.eventMetrics.errors[eventType] =
+        (this.eventMetrics.errors[eventType] || 0) + 1;
     }
   }
 
@@ -254,7 +276,7 @@ export class EventDebugger {
    */
   getTraces(filter?: {
     eventType?: string;
-    status?: EventTrace['status'];
+    status?: EventTrace["status"];
     timeRange?: { start: number; end: number };
     correlationId?: string;
   }): EventTrace[] {
@@ -262,19 +284,20 @@ export class EventDebugger {
 
     if (filter) {
       if (filter.eventType) {
-        traces = traces.filter(t => t.eventType === filter.eventType);
+        traces = traces.filter((t) => t.eventType === filter.eventType);
       }
       if (filter.status) {
-        traces = traces.filter(t => t.status === filter.status);
+        traces = traces.filter((t) => t.status === filter.status);
       }
       if (filter.timeRange) {
-        traces = traces.filter(t =>
-          t.timestamp >= filter.timeRange!.start &&
-          t.timestamp <= filter.timeRange!.end
+        traces = traces.filter(
+          (t) =>
+            t.timestamp >= filter.timeRange!.start &&
+            t.timestamp <= filter.timeRange!.end
         );
       }
       if (filter.correlationId) {
-        traces = traces.filter(t => t.correlationId === filter.correlationId);
+        traces = traces.filter((t) => t.correlationId === filter.correlationId);
       }
     }
 
@@ -286,24 +309,32 @@ export class EventDebugger {
    */
   generateEventFlowVisualization(): string {
     if (!this.config.enableEventFlowVisualization) {
-      return 'Event flow visualization is disabled';
+      return "Event flow visualization is disabled";
     }
 
     const recentTraces = this.getTraces({
-      timeRange: { start: Date.now() - 60000, end: Date.now() }
+      timeRange: { start: Date.now() - 60000, end: Date.now() },
     }).slice(0, 20);
 
-    let visualization = '\n=== EVENT FLOW VISUALIZATION (Last 60 seconds) ===\n';
+    let visualization =
+      "\n=== EVENT FLOW VISUALIZATION (Last 60 seconds) ===\n";
 
     recentTraces.forEach((trace, index) => {
-      const status = trace.status === 'completed' ? '✅' :
-                    trace.status === 'failed' ? '❌' :
-                    trace.status === 'processing' ? '⏳' : '⏸️';
+      const status =
+        trace.status === "completed"
+          ? "✅"
+          : trace.status === "failed"
+          ? "❌"
+          : trace.status === "processing"
+          ? "⏳"
+          : "⏸️";
 
-      const duration = trace.duration ? ` (${trace.duration}ms)` : '';
+      const duration = trace.duration ? ` (${trace.duration}ms)` : "";
       const timestamp = new Date(trace.timestamp).toISOString().substr(11, 12);
 
-      visualization += `${index + 1}. [${timestamp}] ${status} ${trace.eventType}${duration}\n`;
+      visualization += `${index + 1}. [${timestamp}] ${status} ${
+        trace.eventType
+      }${duration}\n`;
 
       if (trace.error) {
         visualization += `   ❌ Error: ${trace.error.message}\n`;
@@ -320,21 +351,22 @@ export class EventDebugger {
     const metrics = this.getMetrics();
     const stats = metrics.performanceStats;
 
-    let report = '\n=== EVENT PERFORMANCE REPORT ===\n';
+    let report = "\n=== EVENT PERFORMANCE REPORT ===\n";
     report += `Total Events: ${metrics.totalEvents}\n`;
     report += `Error Rate: ${stats.errorRate.toFixed(2)}%\n`;
     report += `Throughput: ${stats.throughput.toFixed(2)} events/sec\n\n`;
 
-    report += '--- Events by Type ---\n';
+    report += "--- Events by Type ---\n";
     Object.entries(metrics.eventsByType)
       .sort((a, b) => b[1] - a[1])
       .forEach(([type, count]) => {
-        const avgTime = metrics.averageProcessingTime[type]?.toFixed(2) || 'N/A';
+        const avgTime =
+          metrics.averageProcessingTime[type]?.toFixed(2) || "N/A";
         report += `${type}: ${count} events (avg: ${avgTime}ms)\n`;
       });
 
     if (stats.slowestEvents.length > 0) {
-      report += '\n--- Slowest Events ---\n';
+      report += "\n--- Slowest Events ---\n";
       stats.slowestEvents.slice(0, 5).forEach((event, index) => {
         report += `${index + 1}. ${event.eventType}: ${event.duration}ms\n`;
       });
@@ -358,10 +390,10 @@ export class EventDebugger {
         slowestEvents: [],
         fastestEvents: [],
         errorRate: 0,
-        throughput: 0
-      }
+        throughput: 0,
+      },
     };
-    this.log('info', 'Event traces cleared');
+    this.log("info", "Event traces cleared");
   }
 
   /**
@@ -369,7 +401,7 @@ export class EventDebugger {
    */
   updateConfig(newConfig: Partial<DebuggerConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    this.log('info', 'Debugger configuration updated', newConfig);
+    this.log("info", "Debugger configuration updated", newConfig);
   }
 
   /**
@@ -404,15 +436,19 @@ export class EventDebugger {
       if (sanitized.token) delete sanitized.token;
       return sanitized;
     } catch (error) {
-      return { error: 'Failed to sanitize data' };
+      return { error: "Failed to sanitize data" };
     }
   }
 
   /**
    * Internal logging with level filtering
    */
-  private log(level: DebuggerConfig['logLevel'], message: string, data?: any): void {
-    const levels = ['none', 'error', 'warn', 'info', 'debug'];
+  private log(
+    level: DebuggerConfig["logLevel"],
+    message: string,
+    data?: any
+  ): void {
+    const levels = ["none", "error", "warn", "info", "debug"];
     const currentLevel = levels.indexOf(this.config.logLevel);
     const messageLevel = levels.indexOf(level);
 

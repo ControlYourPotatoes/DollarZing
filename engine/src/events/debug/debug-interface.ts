@@ -1,8 +1,19 @@
-import { EventDebugger, type DebuggerConfig, type EventTrace } from './event-debugger.js';
-import { EventLogger, type LoggerConfig, type LogEntry } from './event-logger.js';
-import { EventFlowVisualizer, type FlowAnalysis } from './event-flow-visualizer.js';
-import { PerformanceMonitor, type MonitorConfig, type PerformanceSnapshot } from './performance-monitor.js';
-import type { EventBus } from '../event-bus.js';
+import {
+  EventDebugger,
+  type DebuggerConfig,
+  type EventTrace,
+} from "./event-debugger";
+import { EventLogger, type LoggerConfig, type LogEntry } from "./event-logger";
+import {
+  EventFlowVisualizer,
+  type FlowAnalysis,
+} from "./event-flow-visualizer";
+import {
+  PerformanceMonitor,
+  type MonitorConfig,
+  type PerformanceSnapshot,
+} from "./performance-monitor";
+import type { EventBus } from "../event-bus";
 
 export interface DebugInterfaceConfig {
   debugger: Partial<DebuggerConfig>;
@@ -51,10 +62,10 @@ export class EventDebugInterface {
   private performanceMonitor: PerformanceMonitor;
   private config: DebugInterfaceConfig;
 
-  private currentSession?: DebugSession;
+  private currentSession: DebugSession | undefined;
   private sessions: DebugSession[] = [];
-  private eventBus?: EventBus;
-  private reportInterval?: NodeJS.Timeout;
+  private eventBus: EventBus | undefined;
+  private reportInterval: NodeJS.Timeout | undefined;
 
   constructor(config: Partial<DebugInterfaceConfig> = {}) {
     this.config = {
@@ -63,14 +74,16 @@ export class EventDebugInterface {
       performanceMonitor: {},
       autoStartMonitoring: true,
       reportInterval: 60000, // 1 minute
-      ...config
+      ...config,
     };
 
     // Initialize components
     this.debugger = new EventDebugger(this.config.debugger);
     this.logger = new EventLogger(this.config.logger);
     this.visualizer = new EventFlowVisualizer();
-    this.performanceMonitor = new PerformanceMonitor(this.config.performanceMonitor);
+    this.performanceMonitor = new PerformanceMonitor(
+      this.config.performanceMonitor
+    );
 
     if (this.config.autoStartMonitoring) {
       this.startPeriodicReporting();
@@ -87,7 +100,7 @@ export class EventDebugInterface {
     this.debugger.attachToEventBus(eventBus);
 
     // Log major lifecycle events
-    this.logger.info('SYSTEM', 'EventDebugInterface attached to EventBus');
+    this.logger.info("SYSTEM", "EventDebugInterface attached to EventBus");
 
     // Hook into event bus events for performance monitoring
     this.setupPerformanceHooks(eventBus);
@@ -99,7 +112,7 @@ export class EventDebugInterface {
   detach(): void {
     if (this.eventBus) {
       this.debugger.detach();
-      this.logger.info('SYSTEM', 'EventDebugInterface detached from EventBus');
+      this.logger.info("SYSTEM", "EventDebugInterface detached from EventBus");
       this.eventBus = undefined;
     }
   }
@@ -116,10 +129,12 @@ export class EventDebugInterface {
       startTime: Date.now(),
       traces: [],
       logs: [],
-      performanceSnapshots: []
+      performanceSnapshots: [],
     };
 
-    this.logger.info('SESSION', `Started debugging session: ${name}`, { sessionId });
+    this.logger.info("SESSION", `Started debugging session: ${name}`, {
+      sessionId,
+    });
     return sessionId;
   }
 
@@ -128,7 +143,7 @@ export class EventDebugInterface {
    */
   endSession(): DebugSession | null {
     if (!this.currentSession) {
-      this.logger.warn('SESSION', 'No active session to end');
+      this.logger.warn("SESSION", "No active session to end");
       return null;
     }
 
@@ -137,10 +152,13 @@ export class EventDebugInterface {
     // Collect final data
     this.currentSession.traces = this.debugger.getTraces();
     this.currentSession.logs = this.logger.getLogs();
-    this.currentSession.performanceSnapshots = this.performanceMonitor.getSnapshots();
+    this.currentSession.performanceSnapshots =
+      this.performanceMonitor.getSnapshots();
 
     // Perform flow analysis
-    this.currentSession.analysis = this.visualizer.analyzeFlow(this.currentSession.traces);
+    this.currentSession.analysis = this.visualizer.analyzeFlow(
+      this.currentSession.traces
+    );
 
     // Store session
     this.sessions.push(this.currentSession);
@@ -148,10 +166,10 @@ export class EventDebugInterface {
     const session = this.currentSession;
     this.currentSession = undefined;
 
-    this.logger.info('SESSION', `Ended debugging session: ${session.name}`, {
+    this.logger.info("SESSION", `Ended debugging session: ${session.name}`, {
       sessionId: session.id,
       duration: session.endTime ? session.endTime - session.startTime : 0,
-      eventCount: session.traces.length
+      eventCount: session.traces.length,
     });
 
     return session;
@@ -161,34 +179,38 @@ export class EventDebugInterface {
    * Generate comprehensive debug report
    */
   generateReport(sessionId?: string): DebugReport {
-    const session = sessionId ?
-      this.sessions.find(s => s.id === sessionId) || this.currentSession :
-      this.currentSession;
+    const session = sessionId
+      ? this.sessions.find((s) => s.id === sessionId) || this.currentSession
+      : this.currentSession;
 
     if (!session) {
-      throw new Error('No session available for report generation');
+      throw new Error("No session available for report generation");
     }
 
     const duration = (session.endTime || Date.now()) - session.startTime;
-    const errorLogs = session.logs.filter(l => l.level === 'error');
+    const errorLogs = session.logs.filter((l) => l.level === "error");
 
     // Calculate summary metrics
     const latencies = session.traces
-      .filter(t => t.duration !== undefined)
-      .map(t => t.duration!);
-    const avgLatency = latencies.length > 0 ?
-      latencies.reduce((sum, l) => sum + l, 0) / latencies.length : 0;
+      .filter((t) => t.duration !== undefined)
+      .map((t) => t.duration!);
+    const avgLatency =
+      latencies.length > 0
+        ? latencies.reduce((sum, l) => sum + l, 0) / latencies.length
+        : 0;
 
-    const throughputData = session.performanceSnapshots
-      .map(s => s.summary.throughput);
-    const peakThroughput = throughputData.length > 0 ? Math.max(...throughputData) : 0;
+    const throughputData = session.performanceSnapshots.map(
+      (s) => s.summary.throughput
+    );
+    const peakThroughput =
+      throughputData.length > 0 ? Math.max(...throughputData) : 0;
 
     const summary = {
       duration,
       totalEvents: session.traces.length,
       errorCount: errorLogs.length,
       avgLatency,
-      peakThroughput
+      peakThroughput,
     };
 
     // Generate sections
@@ -196,14 +218,14 @@ export class EventDebugInterface {
       eventFlow: this.generateEventFlowSection(session),
       performance: this.generatePerformanceSection(session),
       errors: this.generateErrorsSection(session),
-      recommendations: session.analysis?.recommendations || []
+      recommendations: session.analysis?.recommendations || [],
     };
 
     return {
       sessionId: session.id,
       generatedAt: Date.now(),
       summary,
-      sections
+      sections,
     };
   }
 
@@ -215,23 +237,26 @@ export class EventDebugInterface {
     recentEvents: EventTrace[];
     performanceSnapshot: PerformanceSnapshot | null;
     activeAlerts: any[];
-    systemStatus: 'healthy' | 'warning' | 'critical';
+    systemStatus: "healthy" | "warning" | "critical";
   } {
-    const recentEvents = this.debugger.getTraces({
-      timeRange: { start: Date.now() - 30000, end: Date.now() }
-    }).slice(0, 20);
+    const recentEvents = this.debugger
+      .getTraces({
+        timeRange: { start: Date.now() - 30000, end: Date.now() },
+      })
+      .slice(0, 20);
 
     const performanceSnapshots = this.performanceMonitor.getSnapshots(1);
-    const performanceSnapshot = performanceSnapshots.length > 0 ? performanceSnapshots[0] : null;
+    const performanceSnapshot =
+      performanceSnapshots.length > 0 ? performanceSnapshots[0] : null;
 
     const activeAlerts = this.performanceMonitor.getAlerts();
 
     // Determine system status
-    let systemStatus: 'healthy' | 'warning' | 'critical' = 'healthy';
-    if (activeAlerts.some(a => a.level === 'critical')) {
-      systemStatus = 'critical';
-    } else if (activeAlerts.some(a => a.level === 'warning')) {
-      systemStatus = 'warning';
+    let systemStatus: "healthy" | "warning" | "critical" = "healthy";
+    if (activeAlerts.some((a) => a.level === "critical")) {
+      systemStatus = "critical";
+    } else if (activeAlerts.some((a) => a.level === "warning")) {
+      systemStatus = "warning";
     }
 
     return {
@@ -239,30 +264,30 @@ export class EventDebugInterface {
       recentEvents,
       performanceSnapshot,
       activeAlerts,
-      systemStatus
+      systemStatus,
     };
   }
 
   /**
    * Export debug data in various formats
    */
-  exportData(format: 'json' | 'csv' | 'txt', sessionId?: string): string {
-    const session = sessionId ?
-      this.sessions.find(s => s.id === sessionId) || this.currentSession :
-      this.currentSession;
+  exportData(format: "json" | "csv" | "txt", sessionId?: string): string {
+    const session = sessionId
+      ? this.sessions.find((s) => s.id === sessionId) || this.currentSession
+      : this.currentSession;
 
     if (!session) {
-      throw new Error('No session available for export');
+      throw new Error("No session available for export");
     }
 
     switch (format) {
-      case 'json':
+      case "json":
         return JSON.stringify(session, null, 2);
 
-      case 'csv':
+      case "csv":
         return this.exportToCsv(session);
 
-      case 'txt':
+      case "txt":
         const report = this.generateReport(sessionId);
         return this.formatReportAsText(report);
 
@@ -282,23 +307,40 @@ export class EventDebugInterface {
     avgEventsPerSession: number;
     errorRate: number;
   } {
-    const completedSessions = this.sessions.filter(s => s.endTime);
-    const avgSessionDuration = completedSessions.length > 0 ?
-      completedSessions.reduce((sum, s) => sum + (s.endTime! - s.startTime), 0) / completedSessions.length : 0;
+    const completedSessions = this.sessions.filter((s) => s.endTime);
+    const avgSessionDuration =
+      completedSessions.length > 0
+        ? completedSessions.reduce(
+            (sum, s) => sum + (s.endTime! - s.startTime),
+            0
+          ) / completedSessions.length
+        : 0;
 
-    const totalEventsProcessed = this.sessions.reduce((sum, s) => sum + s.traces.length, 0);
-    const avgEventsPerSession = this.sessions.length > 0 ? totalEventsProcessed / this.sessions.length : 0;
+    const totalEventsProcessed = this.sessions.reduce(
+      (sum, s) => sum + s.traces.length,
+      0
+    );
+    const avgEventsPerSession =
+      this.sessions.length > 0
+        ? totalEventsProcessed / this.sessions.length
+        : 0;
 
-    const totalErrors = this.sessions.reduce((sum, s) => sum + s.logs.filter(l => l.level === 'error').length, 0);
-    const errorRate = totalEventsProcessed > 0 ? (totalErrors / totalEventsProcessed) * 100 : 0;
+    const totalErrors = this.sessions.reduce(
+      (sum, s) => sum + s.logs.filter((l) => l.level === "error").length,
+      0
+    );
+    const errorRate =
+      totalEventsProcessed > 0 ? (totalErrors / totalEventsProcessed) * 100 : 0;
 
     return {
       totalSessions: this.sessions.length,
-      currentSessionDuration: this.currentSession ? Date.now() - this.currentSession.startTime : undefined,
+      currentSessionDuration: this.currentSession
+        ? Date.now() - this.currentSession.startTime
+        : undefined,
       avgSessionDuration,
       totalEventsProcessed,
       avgEventsPerSession,
-      errorRate
+      errorRate,
     };
   }
 
@@ -313,7 +355,7 @@ export class EventDebugInterface {
     this.sessions = [];
     this.currentSession = undefined;
 
-    this.logger.info('SYSTEM', 'All debug data cleared');
+    this.logger.info("SYSTEM", "All debug data cleared");
   }
 
   /**
@@ -333,16 +375,16 @@ export class EventDebugInterface {
       this.performanceMonitor.updateConfig(newConfig.performanceMonitor);
     }
 
-    this.logger.info('SYSTEM', 'Debug interface configuration updated');
+    this.logger.info("SYSTEM", "Debug interface configuration updated");
   }
 
   /**
    * Setup performance monitoring hooks
    */
-  private setupPerformanceHooks(eventBus: EventBus): void {
+  private setupPerformanceHooks(_eventBus: EventBus): void {
     // We'll need to enhance EventBus to support these hooks
     // For now, this is a placeholder for future implementation
-    this.logger.debug('SYSTEM', 'Performance hooks setup (placeholder)');
+    this.logger.debug("SYSTEM", "Performance hooks setup (placeholder)");
   }
 
   /**
@@ -354,11 +396,15 @@ export class EventDebugInterface {
     this.reportInterval = setInterval(() => {
       const dashboardData = this.getDashboardData();
 
-      if (dashboardData.systemStatus !== 'healthy') {
-        this.logger.warn('MONITOR', `System status: ${dashboardData.systemStatus}`, {
-          activeAlerts: dashboardData.activeAlerts.length,
-          recentEvents: dashboardData.recentEvents.length
-        });
+      if (dashboardData.systemStatus !== "healthy") {
+        this.logger.warn(
+          "MONITOR",
+          `System status: ${dashboardData.systemStatus}`,
+          {
+            activeAlerts: dashboardData.activeAlerts.length,
+            recentEvents: dashboardData.recentEvents.length,
+          }
+        );
       }
     }, this.config.reportInterval);
   }
@@ -368,16 +414,18 @@ export class EventDebugInterface {
    */
   private generateEventFlowSection(session: DebugSession): string {
     if (session.analysis) {
-      const visualization = this.visualizer.createFlowVisualization(session.traces);
+      const visualization = this.visualizer.createFlowVisualization(
+        session.traces
+      );
       return this.visualizer.generateAsciiVisualization(visualization);
     }
-    return 'No flow analysis available';
+    return "No flow analysis available";
   }
 
   /**
    * Generate performance section of report
    */
-  private generatePerformanceSection(session: DebugSession): string {
+  private generatePerformanceSection(_session: DebugSession): string {
     return this.performanceMonitor.generateReport();
   }
 
@@ -385,20 +433,22 @@ export class EventDebugInterface {
    * Generate errors section of report
    */
   private generateErrorsSection(session: DebugSession): string {
-    const errorLogs = session.logs.filter(l => l.level === 'error');
+    const errorLogs = session.logs.filter((l) => l.level === "error");
 
     if (errorLogs.length === 0) {
-      return 'No errors recorded during this session.';
+      return "No errors recorded during this session.";
     }
 
     let section = `\n=== ERRORS (${errorLogs.length}) ===\n`;
 
     errorLogs.slice(0, 10).forEach((log, index) => {
       const timestamp = new Date(log.timestamp).toISOString().substr(11, 12);
-      section += `${index + 1}. [${timestamp}] ${log.eventType}: ${log.message}\n`;
+      section += `${index + 1}. [${timestamp}] ${log.eventType}: ${
+        log.message
+      }\n`;
 
-      if (log.data && typeof log.data === 'object' && log.data.stack) {
-        section += `   Stack: ${log.data.stack.split('\n')[0]}\n`;
+      if (log.data && typeof log.data === "object" && log.data.stack) {
+        section += `   Stack: ${log.data.stack.split("\n")[0]}\n`;
       }
     });
 
@@ -409,36 +459,43 @@ export class EventDebugInterface {
    * Export session to CSV format
    */
   private exportToCsv(session: DebugSession): string {
-    const headers = ['timestamp', 'type', 'eventType', 'status', 'duration', 'message'];
-    const rows = [headers.join(',')];
+    const headers = [
+      "timestamp",
+      "type",
+      "eventType",
+      "status",
+      "duration",
+      "message",
+    ];
+    const rows = [headers.join(",")];
 
     // Add trace data
-    session.traces.forEach(trace => {
+    session.traces.forEach((trace) => {
       const row = [
         trace.timestamp,
-        'event',
+        "event",
         trace.eventType,
         trace.status,
-        trace.duration || '',
-        `"Event ${trace.status}"`
+        trace.duration || "",
+        `"Event ${trace.status}"`,
       ];
-      rows.push(row.join(','));
+      rows.push(row.join(","));
     });
 
     // Add log data
-    session.logs.forEach(log => {
+    session.logs.forEach((log) => {
       const row = [
         log.timestamp,
-        'log',
+        "log",
         log.eventType,
         log.level,
-        '',
-        `"${log.message.replace(/"/g, '""')}"`
+        "",
+        `"${log.message.replace(/"/g, '""')}"`,
       ];
-      rows.push(row.join(','));
+      rows.push(row.join(","));
     });
 
-    return rows.join('\n');
+    return rows.join("\n");
   }
 
   /**
@@ -454,11 +511,13 @@ export class EventDebugInterface {
     text += `Total Events: ${report.summary.totalEvents}\n`;
     text += `Errors: ${report.summary.errorCount}\n`;
     text += `Average Latency: ${report.summary.avgLatency.toFixed(2)}ms\n`;
-    text += `Peak Throughput: ${report.summary.peakThroughput.toFixed(2)} events/sec\n\n`;
+    text += `Peak Throughput: ${report.summary.peakThroughput.toFixed(
+      2
+    )} events/sec\n\n`;
 
-    text += report.sections.eventFlow + '\n';
-    text += report.sections.performance + '\n';
-    text += report.sections.errors + '\n';
+    text += report.sections.eventFlow + "\n";
+    text += report.sections.performance + "\n";
+    text += report.sections.errors + "\n";
 
     if (report.sections.recommendations.length > 0) {
       text += `=== RECOMMENDATIONS ===\n`;
