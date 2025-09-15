@@ -6,7 +6,7 @@ import {
   GameSession,
   DollarState,
   BettingLevel,
-} from "./virtual-dollar-engine";
+} from "../types/virtual-dollar-engine";
 
 /**
  * Generic object pool interface

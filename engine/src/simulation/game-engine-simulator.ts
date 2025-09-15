@@ -2,9 +2,9 @@
 // GameEngineSimulator Implementation - Pure Event-Driven Architecture
 // Event orchestrator that coordinates event handlers without direct component dependencies
 
-import { GameMatchingEngine } from "../types/game-matching-engine";
+import { GameMatchingEngine } from "../core/game-matching-engine";
 import { VirtualDollarFactory } from "../types/factory-interfaces";
-import { RevenueCalculator } from "../types/revenue-calculator";
+import { RevenueCalculator } from "../core/revenue-calculator";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
 import { EventBus } from "../events/event-bus";
 import { GameEventHandler } from "../events/handlers/game-event-handler";
@@ -13,7 +13,7 @@ import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-han
 // PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
 import { MatchmakingEventHandler } from "../events/handlers/matchmaking-event-handler";
-import { DirectGameSessionFactory } from "../types/direct-factories";
+import { PooledGameSessionFactory } from "../factories";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -183,7 +183,7 @@ export class GameEngineSimulator {
         this.eventBus,
         gameMatchingEngine,
         virtualDollarFactory,
-        new DirectGameSessionFactory({
+        new PooledGameSessionFactory({
           enableObjectPooling: false,
           poolSizes: { virtualDollar: 100, gameSession: 50 },
           prewarmCounts: { virtualDollar: 10, gameSession: 5 },

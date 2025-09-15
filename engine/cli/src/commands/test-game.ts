@@ -7,51 +7,42 @@ import {
   type SimulationConfig,
   type SimulationProgress,
   CashOutStrategy,
-  GameMatchingEngine,
-  UnifiedVirtualDollarFactory,
-  RevenueCalculator,
-  ScoringEngine,
-  DirectGameSessionFactory,
-  DEFAULT_PERFORMANCE_CONFIG,
-  EventBus,
 } from "../../../src/index";
 
+// Import orchestrator components for proper factory integration
+import { createGameEngineSimulator } from "../orchestrator/execution/dataset-orchestrator";
+
 /**
- * Create GameEngineSimulator with default components
+ * Create GameEngineSimulator using orchestrator factory pattern
+ * This leverages the established CLI orchestrator architecture
  */
-function createGameEngineSimulator(
-  config: SimulationConfig
-): GameEngineSimulator {
-  // Create core components
-  const scoringEngine = new ScoringEngine();
+function createTestGameSimulator(): GameEngineSimulator {
+  // Use the orchestrator's factory pattern for proper component integration
+  // Create a minimal simulation config for the orchestrator function
+  const config: SimulationConfig = {
+    durationDays: 1,
+    initialPlayerCount: 10,
+    dailySeed: "test",
+    charityPercentage: 0.2,
+    playerStrategies: {
+      [CashOutStrategy.CONSERVATIVE]: 0.4,
+      [CashOutStrategy.BALANCED]: 0.4,
+      [CashOutStrategy.AGGRESSIVE]: 0.2,
+    },
+    initialDonationAmount: 25,
+    maxSimulationTimeMs: 60000,
+    enableProgressReporting: false,
+    growthModel: {
+      adoptionRate: 0.1,
+      baseMarket: 10000,
+      midpointDay: 1,
+      steepnessFactor: 20,
+    },
+  };
 
-  // Use UnifiedVirtualDollarFactory instead of VirtualDollarManager
-  const virtualDollarFactory = new UnifiedVirtualDollarFactory(
-    DEFAULT_PERFORMANCE_CONFIG
-  );
-
-  // Create game session factory
-  const gameSessionFactory = new DirectGameSessionFactory(
-    DEFAULT_PERFORMANCE_CONFIG
-  );
-
-  // Create game matching engine with correct constructor
-  const gameMatchingEngine = new GameMatchingEngine(
-    virtualDollarFactory,
-    scoringEngine,
-    gameSessionFactory,
-    new EventBus()
-  );
-
-  // Create revenue calculator
-  const revenueCalculator = new RevenueCalculator();
-
-  // Create GameEngineSimulator with updated constructor
-  return new GameEngineSimulator(
-    gameMatchingEngine,
-    virtualDollarFactory,
-    revenueCalculator
-  );
+  // Use the orchestrator's createGameEngineSimulator function
+  // This ensures proper factory integration and event system setup
+  return createGameEngineSimulator(config);
 }
 
 /**
@@ -140,10 +131,17 @@ async function executeTestGame(options: any): Promise<void> {
     initialDonationAmount: 25,
     maxSimulationTimeMs: 60000, // 1 minute timeout
     enableProgressReporting: verbose,
+    // Add growth model for S-curve player adoption
+    growthModel: {
+      adoptionRate: 0.1, // Market adoption rate
+      baseMarket: 10000, // Base market size
+      midpointDay: Math.floor(days / 2), // Midpoint at half duration
+      steepnessFactor: 20, // Standard steepness
+    },
   };
 
-  // Create GameEngineSimulator using the proper factory
-  const simulator = createGameEngineSimulator(config);
+  // Create GameEngineSimulator using the orchestrator factory pattern
+  const simulator = createTestGameSimulator();
 
   // Progress callback for verbose mode
   const progressCallback = verbose

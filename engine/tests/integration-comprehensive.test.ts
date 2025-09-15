@@ -14,11 +14,11 @@ import {
 } from "../src/types/virtual-dollar-engine";
 import { PlayerBalanceManager } from "../src/types/player-balance-manager";
 import { VirtualDollarManager } from "../src/types/virtual-dollar-types";
-import { GameMatchingEngine } from "../src/types/game-matching-engine";
+import { GameMatchingEngine } from "../src/core/game-matching-engine";
 import { PlayerRunManager } from "../src/types/player-run-manager";
-import { RevenueCalculator } from "../src/types/revenue-calculator";
-import { ScoringEngine } from "../src/types/scoring-engine";
-import { DirectGameSessionFactory } from "../src/types/direct-factories";
+import { RevenueCalculator } from "../src/core/revenue-calculator";
+import { ScoringEngine } from "../src/core/scoring-engine";
+import { DirectGameSessionFactory } from "../src/test-utils";
 import { PRODUCTION_PERFORMANCE_CONFIG } from "../src/types/factory-interfaces";
 
 describe("Integration Test: Independent Run System with GameEngineSimulator", () => {

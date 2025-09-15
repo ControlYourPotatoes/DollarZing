@@ -8,7 +8,7 @@ import {
   BettingLevel,
   DollarState,
   getBettingLevelValue,
-} from "./virtual-dollar-engine";
+} from "../types/virtual-dollar-engine";
 import {
   VirtualDollarFactory,
   GameSessionFactory,
@@ -17,7 +17,7 @@ import {
   PerformanceConfig,
   StateTransition,
   GameResult,
-} from "./factory-interfaces";
+} from "../types/factory-interfaces";
 
 /**
  * Performance tracking utility for timing operations

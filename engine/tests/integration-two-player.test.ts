@@ -12,7 +12,7 @@ import {
   DollarState,
   BettingLevel,
 } from "../src/types/virtual-dollar-engine";
-import { DirectGameSessionFactory } from "../src/types/direct-factories";
+import { DirectGameSessionFactory } from "../src/test-utils";
 import { PRODUCTION_PERFORMANCE_CONFIG } from "../src/types/factory-interfaces";
 
 describe("Integration Test: 2 Player Independent Run Flow", () => {

@@ -2,7 +2,7 @@
 // Tests for fixing fund flow and winnings distribution
 // Ensures players can continue playing until natural exit conditions
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { DirectGameSessionFactory } from "../src/types/direct-factories";
+import { DirectGameSessionFactory } from "../src/test-utils";
 import { GameMatchingEngine } from "../src/types/game-matching-engine";
 import { VirtualDollarManager } from "../src/types/virtual-dollar-types";
 import { ScoringEngine } from "../src/types/scoring-engine";

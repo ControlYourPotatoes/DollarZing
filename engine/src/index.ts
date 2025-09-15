@@ -17,6 +17,7 @@ export type {
   GameSession,
   BettingLevel,
   GameResult,
+  ValidationResult,
 } from "./types/virtual-dollar-engine";
 
 export { CashOutStrategy } from "./types/virtual-dollar-engine";
@@ -35,23 +36,22 @@ export type {
 // New component-integration simulator
 export { GameEngineSimulator } from "./simulation/game-engine-simulator";
 
-// Factory implementations
+// Factory implementations (production - use these)
 export {
   PooledVirtualDollarFactory,
   PooledGameSessionFactory,
-} from "./types/pooled-factories";
-export {
-  DirectVirtualDollarFactory,
-  DirectGameSessionFactory,
-} from "./types/direct-factories";
+} from "./factories";
 
 // Game engine components
-export { GameMatchingEngine } from "./types/game-matching-engine";
-// export { ProgressionManager as PlayerRunManager } from "./types/progression-manager"; // REMOVED - deleted file
-export { ScoringEngine } from "./types/scoring-engine";
+export { GameMatchingEngine } from "./core";
+export { RevenueCalculator } from "./core";
+export { ScoringEngine } from "./core";
+
+// Backward compatibility aliases
+export { DirectGameSessionFactory } from "./test-utils";
+
+// Legacy/deprecated - will be removed in future versions
 export { PlayerBalanceManager } from "./types/player-balance-manager";
-export { UnifiedVirtualDollarFactory } from "./types/direct-factories";
-export { RevenueCalculator } from "./types/revenue-calculator";
 
 // Event system
 export { EventBus } from "./events/event-bus";

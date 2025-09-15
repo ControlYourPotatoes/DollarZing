@@ -6,7 +6,7 @@ import {
   GameSession,
   ValidationResult,
   createEmptyRevenueStream
-} from './virtual-dollar-engine';
+} from '../types/virtual-dollar-engine';
 
 /**
  * Revenue Calculator - Manages all revenue streams and financial calculations

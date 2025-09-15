@@ -1,10 +1,8 @@
-import { PlayerBalanceManager } from "../types/player-balance-manager";
-import { PlayerRunManager } from "../types/player-run-manager";
 import {
   CashOutStrategy,
   VirtualDollar,
-  GameResult,
 } from "../types/virtual-dollar-engine";
+import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { EventBus } from "../events/event-bus";
 import {
   EVENT_TYPES,
@@ -38,7 +36,8 @@ export interface PlayerStatistics {
 
 /**
  * PlayerManager handles player lifecycle and initialization
- * Extracted from SimulationController to provide focused player management
+ * Event-driven component that manages players and virtual dollar runs
+ * Removed legacy dependencies on PlayerBalanceManager and PlayerRunManager
  */
 export class PlayerManager {
   // Single player registry to avoid duplicate state management
@@ -49,13 +48,14 @@ export class PlayerManager {
       strategy: CashOutStrategy;
       initialDonation: number;
       createdAt: Date;
+      activeRunIds: string[]; // Track active virtual dollar runs
+      totalRunsCreated: number;
     }
   >();
 
   constructor(
-    private playerBalanceManager: PlayerBalanceManager,
-    private runOrchestrator: PlayerRunManager,
-    private eventBus: EventBus
+    private eventBus: EventBus,
+    private virtualDollarFactory: VirtualDollarFactory
   ) {
     this.setupEventSubscriptions();
   }
@@ -86,7 +86,7 @@ export class PlayerManager {
     );
 
     // Calculate current player count
-    const currentPlayerCount = this.runOrchestrator.getActivePlayerCount();
+    const currentPlayerCount = this.getActivePlayerCount();
 
     // Add new players if we're below target
     const playersToAdd = Math.max(0, targetPlayers - currentPlayerCount);
@@ -124,6 +124,8 @@ export class PlayerManager {
           strategy: selectedStrategy,
           initialDonation: 100,
           createdAt: new Date(),
+          activeRunIds: [],
+          totalRunsCreated: 0,
         });
 
         // Emit PLAYER_CREATED event
@@ -136,8 +138,8 @@ export class PlayerManager {
           isNewPlayer: true,
         } as PlayerCreatedEvent);
 
-        // Create initial run for new player
-        const newRun = this.runOrchestrator.createNewRun({
+        // Create initial run for new player using VirtualDollarFactory
+        const newRun = this.createNewRun({
           playerId,
           cashOutStrategy: selectedStrategy,
           fundingSource: "DONATION",
@@ -159,13 +161,13 @@ export class PlayerManager {
     }
 
     // Auto-create runs for existing players
-    const newRuns = this.runOrchestrator.autoCreateRuns(2); // Max 2 concurrent runs per player
+    const newRuns = this.autoCreateRuns(2); // Max 2 concurrent runs per player
 
     // Emit NEW_RUN_CREATED events for auto-created runs
     for (const run of newRuns) {
-      const playerStrategy = this.runOrchestrator.getPlayerStrategy(
-        run.ownerId
-      );
+      const playerStrategy = this.getPlayerStrategy(run.ownerId);
+      const player = this.playerRegistry.get(run.ownerId);
+
       await this.eventBus.emit(EVENT_TYPES.NEW_RUN_CREATED, {
         type: EVENT_TYPES.NEW_RUN_CREATED,
         timestamp: new Date(),
@@ -173,7 +175,7 @@ export class PlayerManager {
         virtualDollarId: run.id,
         fundingSource: "DONATION",
         cashOutStrategy: playerStrategy,
-        runCount: 1, // This would need to be tracked properly
+        runCount: player ? player.totalRunsCreated : 1,
       } as NewRunCreatedEvent);
     }
   }
@@ -188,7 +190,7 @@ export class PlayerManager {
    * 
    * This method is kept temporarily for backward compatibility
    */
-  initializePlayers(config: PlayerManagementConfig): number {
+  initializePlayers(_config: PlayerManagementConfig): number {
     console.warn(
       `[PlayerManager] initializePlayers called - this method bypasses event-driven architecture`
     );
@@ -215,18 +217,16 @@ export class PlayerManager {
 
   /**
    * Generate player statistics
+   * NOTE: Financial data now handled by RevenueTrackingHandler via events
    */
   getPlayerStatistics(_config: PlayerManagementConfig): PlayerStatistics {
-    const totalDonationFunds = this.playerBalanceManager.getTotalDonations();
-    const totalWinningsFunds = this.playerBalanceManager.getTotalWinnings();
-
     // Use player registry for accurate player counts
     const totalPlayers = this.playerRegistry.size;
-    const activePlayers = this.runOrchestrator.getActivePlayerCount();
+    const activePlayers = this.getActivePlayerCount();
     const retiredPlayers = totalPlayers - activePlayers;
 
     // Calculate total progression funds from active runs
-    const activeRuns = this.runOrchestrator.getAllActiveRuns();
+    const activeRuns = this.getAllActiveRuns();
     const totalProgressionFunds = activeRuns.reduce(
       (sum: number, dollar: VirtualDollar) => {
         return sum + dollar.currentRunWinnings;
@@ -238,11 +238,11 @@ export class PlayerManager {
       totalPlayers,
       activePlayers,
       retiredPlayers,
-      totalDonationsFunds: totalDonationFunds,
-      totalWinningsFunds: totalWinningsFunds,
+      totalDonationsFunds: 0, // Now handled by RevenueTrackingHandler
+      totalWinningsFunds: 0, // Now handled by RevenueTrackingHandler
       totalProgressionFunds: totalProgressionFunds,
       averageGamesPerPlayer: 0, // Will be calculated by caller with game data
-      playerRetirementRate: retiredPlayers / totalPlayers,
+      playerRetirementRate: totalPlayers > 0 ? retiredPlayers / totalPlayers : 0,
     };
   }
 
@@ -264,21 +264,103 @@ export class PlayerManager {
     if (player) {
       return player.strategy;
     }
-    // Fallback to run orchestrator if not in registry
-    return this.runOrchestrator.getPlayerStrategy(playerId);
+    // Fallback to default strategy if not in registry
+    return CashOutStrategy.BALANCED;
   }
 
   /**
-   * Create new run
+   * Get the number of active players (players with active runs)
    */
-  createNewRun(request: any): VirtualDollar | null {
-    return this.runOrchestrator.createNewRun(request);
+  getActivePlayerCount(): number {
+    let activeCount = 0;
+    for (const player of this.playerRegistry.values()) {
+      if (player.activeRunIds.length > 0) {
+        activeCount++;
+      }
+    }
+    return activeCount;
   }
 
   /**
-   * Auto-create runs
+   * Get all active runs across all players
+   */
+  getAllActiveRuns(): VirtualDollar[] {
+    const activeRuns: VirtualDollar[] = [];
+
+    for (const player of this.playerRegistry.values()) {
+      for (const runId of player.activeRunIds) {
+        const dollar = this.virtualDollarFactory.getDollar(runId);
+        if (dollar) {
+          activeRuns.push(dollar);
+        }
+      }
+    }
+
+    return activeRuns;
+  }
+
+  /**
+   * Create new run for a player using VirtualDollarFactory
+   */
+  createNewRun(request: {
+    playerId: string;
+    cashOutStrategy: CashOutStrategy;
+    fundingSource: "DONATION" | "WINNINGS";
+  }): VirtualDollar | null {
+    try {
+      // Create virtual dollar using factory
+      const virtualDollar = this.virtualDollarFactory.create(request.playerId);
+
+      // Update player registry to track this run
+      const player = this.playerRegistry.get(request.playerId);
+      if (player) {
+        player.activeRunIds.push(virtualDollar.id);
+        player.totalRunsCreated++;
+      }
+
+      return virtualDollar;
+    } catch (error) {
+      console.error(`Failed to create new run for player ${request.playerId}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Auto-create runs for eligible players (those with fewer than maxRunsPerPlayer)
    */
   autoCreateRuns(maxRunsPerPlayer: number = 1): VirtualDollar[] {
-    return this.runOrchestrator.autoCreateRuns(maxRunsPerPlayer);
+    const newRuns: VirtualDollar[] = [];
+
+    for (const player of this.playerRegistry.values()) {
+      // Create runs for players with fewer than max concurrent runs
+      const runsNeeded = Math.max(0, maxRunsPerPlayer - player.activeRunIds.length);
+
+      for (let i = 0; i < runsNeeded; i++) {
+        const newRun = this.createNewRun({
+          playerId: player.id,
+          cashOutStrategy: player.strategy,
+          fundingSource: "DONATION",
+        });
+
+        if (newRun) {
+          newRuns.push(newRun);
+        }
+      }
+    }
+
+    return newRuns;
+  }
+
+  /**
+   * Remove a run from player's active runs (called when run completes)
+   */
+  removeActiveRun(playerId: string, virtualDollarId: string): void {
+    const player = this.playerRegistry.get(playerId);
+    if (player) {
+      const index = player.activeRunIds.indexOf(virtualDollarId);
+      if (index > -1) {
+        player.activeRunIds.splice(index, 1);
+      }
+    }
   }
 }

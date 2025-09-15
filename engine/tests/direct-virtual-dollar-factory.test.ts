@@ -2,7 +2,7 @@
 // Tests for unified virtual dollar factory implementation
 // Validates unified factory behavior for object creation and state management
 import { describe, it, expect, beforeEach } from "vitest";
-import { UnifiedVirtualDollarFactory } from '../src/types/direct-factories';
+import { UnifiedVirtualDollarFactory } from '../src/test-utils';
 import { VirtualDollarFactory, DEFAULT_PERFORMANCE_CONFIG, PerformanceConfig } from '../src/types/factory-interfaces';
 
 describe('UnifiedVirtualDollarFactory', () => {

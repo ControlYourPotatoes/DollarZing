@@ -13,7 +13,7 @@ import {
   GameSessionFactory,
   PRODUCTION_PERFORMANCE_CONFIG,
 } from "../src/types/factory-interfaces";
-import { DirectGameSessionFactory } from "../src/types/direct-factories";
+import { DirectGameSessionFactory } from "../src/test-utils";
 import {
   CashOutStrategy,
   CashOutDecision,

@@ -2,15 +2,15 @@
 // Handles virtual dollar pool management, 1v1 matching, and game resolution
 // Provides event-driven architecture for game tracking and analytics
 
-import { VirtualDollar, DollarState } from "./virtual-dollar-engine";
-import { VirtualDollarFactory } from "./factory-interfaces";
+import { VirtualDollar, DollarState } from "../types/virtual-dollar-engine";
+import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { ScoringEngine, ScoreResult } from "./scoring-engine";
 import {
   GameSession,
   BettingLevel,
   PlayerBalanceManager,
-} from "./virtual-dollar-engine";
-import { GameSessionFactory } from "./factory-interfaces";
+} from "../types/virtual-dollar-engine";
+import { GameSessionFactory } from "../types/factory-interfaces";
 import { EventBus } from "../events/event-bus";
 import {
   EVENT_TYPES,

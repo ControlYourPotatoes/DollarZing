@@ -1,6 +1,6 @@
-// Direct Factory Implementations
-// Creates objects directly without pooling for development and testing scenarios
-// Implements factory interfaces with direct object creation for clean testing
+// Pooled Factory Implementations
+// Utilizes existing object pool infrastructure for performance optimization
+// Implements factory interfaces with object pooling for memory efficiency
 
 import {
   VirtualDollar,
@@ -8,7 +8,7 @@ import {
   BettingLevel,
   DollarState,
   getBettingLevelValue,
-} from "./virtual-dollar-engine";
+} from "../types/virtual-dollar-engine";
 import {
   VirtualDollarFactory,
   GameSessionFactory,
@@ -17,7 +17,11 @@ import {
   PerformanceConfig,
   StateTransition,
   GameResult,
-} from "./factory-interfaces";
+} from "../types/factory-interfaces";
+import {
+  getObjectPoolManager,
+  isObjectPoolingEnabled,
+} from "../utils/object-pool";
 
 /**
  * Performance tracking utility for timing operations
@@ -65,85 +69,85 @@ class PerformanceTracker {
   }
 }
 
-// DirectVirtualDollarFactory has been deprecated and removed - use UnifiedVirtualDollarFactory
-
 /**
- * DirectGameSessionFactory - Implementation using direct object creation
- * Creates game sessions directly without pooling, ideal for development and testing
+ * PooledVirtualDollarFactory - Implementation using object pooling for performance
+ * Utilizes the existing VirtualDollarPool for memory-efficient object management
  */
-export class DirectGameSessionFactory implements GameSessionFactory {
+export class PooledVirtualDollarFactory implements VirtualDollarFactory {
   private objectsCreated = 0;
   private objectsReleased = 0;
-  private gameCounter = 0;
   private performanceTracker: PerformanceTracker;
   private config: PerformanceConfig;
-  private emptyDollar: VirtualDollar;
+
+  // Internal state management (unified from both Factory and Manager)
+  private dollars: Map<string, VirtualDollar> = new Map();
+  private serialNumbers: Set<string> = new Set();
+  private pooledDollars: Set<string> = new Set();
+  private dollarsByPlayer: Map<string, Set<string>> = new Map();
+  private stateHistory: Map<string, StateTransition[]> = new Map();
 
   constructor(config: PerformanceConfig) {
     this.config = config;
     this.performanceTracker = new PerformanceTracker();
 
-    // Create empty dollar reference for uninitialized winner/loser
-    this.emptyDollar = {
-      id: "",
-      serialNumber: "",
-      currentScore: 0,
-      currentLevel: 1 as BettingLevel,
-      state: DollarState.CREATED,
-      ownerId: "",
-      runId: "",
-      createdAt: new Date(),
-      gameHistory: [],
-      gamesInThisRun: 0,
-      currentRunWinnings: 0,
-      isIndependentRun: true,
-      potValue: 0, // Empty dollar has no pot value
-    };
+    // Pre-warm pool if configured
+    if (config.prewarmCounts.virtualDollar > 0 && isObjectPoolingEnabled()) {
+      const poolManager = getObjectPoolManager();
+      poolManager.virtualDollarPool.prewarm(config.prewarmCounts.virtualDollar);
+    }
   }
 
-  create(
-    dollar1: VirtualDollar,
-    dollar2: VirtualDollar,
-    level: BettingLevel
-  ): GameSession {
+  create(playerId: string): VirtualDollar {
     const startTime = this.config.enablePerformanceMetrics
       ? performance.now()
       : 0;
 
-    // Validate parameters
-    if (!dollar1 || !dollar2) {
-      throw new Error(
-        "Invalid virtual dollar parameters: both dollars must be provided"
-      );
+    // Validate player ID
+    if (!playerId || playerId.trim() === "") {
+      throw new Error("Invalid player ID: cannot be empty or whitespace");
     }
-    if (level < 1 || level > 10) {
-      throw new Error("Invalid betting level: must be between 1 and 10");
+
+    if (!isObjectPoolingEnabled()) {
+      throw new Error(
+        "Object pooling is not enabled. Use DirectVirtualDollarFactory instead."
+      );
     }
 
     try {
-      this.gameCounter++;
-      const id = `game_${this.gameCounter}_${Date.now()}`;
-      // dailySeed will be set during game resolution
+      const poolManager = getObjectPoolManager();
+      const dollar = poolManager.virtualDollarPool.acquire();
 
-      // Create new GameSession directly - matching initializeSession pattern
-      const session: GameSession = {
+      // Generate unique identifiers
+      const id = this.generateUniqueId();
+      const serialNumber = this.generateSerialNumber();
+      const runId = this.generateRunId();
+
+      // Initialize the pooled object
+      poolManager.virtualDollarPool.initializeDollar(
+        dollar,
         id,
-        dollar1,
-        dollar2,
-        winner: this.emptyDollar, // Will be set during game resolution
-        loser: this.emptyDollar, // Will be set during game resolution
-        level,
-        platformFee: 0.2, // Standard 20c platform fee
-        timestamp: new Date(),
-        gameNumber: this.gameCounter,
-        dailySeed: this.getCurrentDailySeed(),
-        dollar1Score: 0, // Will be set during scoring
-        dollar2Score: 0, // Will be set during scoring
-        winnings: this.calculateWinnings(level),
-        isCompleted: false, // New games start as incomplete
-        duration: 0, // No duration until game is completed
-        randomSeed: this.generateDeterministicSeed(id),
-      };
+        serialNumber,
+        playerId,
+        runId
+      );
+
+      // Store dollar and track serial number for state management
+      this.dollars.set(dollar.id, dollar);
+      this.serialNumbers.add(serialNumber);
+
+      // Track by player
+      if (!this.dollarsByPlayer.has(playerId)) {
+        this.dollarsByPlayer.set(playerId, new Set());
+      }
+      this.dollarsByPlayer.get(playerId)!.add(dollar.id);
+
+      // Initialize state history
+      this.stateHistory.set(dollar.id, [
+        {
+          state: DollarState.CREATED,
+          timestamp: new Date(),
+        },
+      ]);
 
       this.objectsCreated++;
 
@@ -152,90 +156,130 @@ export class DirectGameSessionFactory implements GameSessionFactory {
         this.performanceTracker.recordCreation(startTime, endTime);
       }
 
-      return session;
+      return dollar;
     } catch (error) {
-      throw new Error(`Failed to create game session: ${error}`);
+      throw new Error(`Failed to create virtual dollar: ${error}`);
     }
   }
 
-  release(session: GameSession): void {
+  release(dollar: VirtualDollar): void {
     const startTime = this.config.enablePerformanceMetrics
       ? performance.now()
       : 0;
 
-    if (!session) {
+    if (!dollar) {
       return; // Handle null/undefined gracefully
     }
 
-    // For direct factory, release is just a counter increment
-    // No actual object pooling occurs
-    this.objectsReleased++;
+    if (!isObjectPoolingEnabled()) {
+      return; // Nothing to do if pooling is disabled
+    }
 
-    if (this.config.enablePerformanceMetrics) {
-      const endTime = performance.now();
-      this.performanceTracker.recordRelease(startTime, endTime);
+    try {
+      const poolManager = getObjectPoolManager();
+      poolManager.virtualDollarPool.release(dollar);
+
+      // Remove from state management tracking
+      this.dollars.delete(dollar.id);
+      this.serialNumbers.delete(dollar.serialNumber);
+      this.pooledDollars.delete(dollar.id);
+      this.stateHistory.delete(dollar.id);
+
+      // Remove from player tracking
+      const playerDollars = this.dollarsByPlayer.get(dollar.ownerId);
+      if (playerDollars) {
+        playerDollars.delete(dollar.id);
+        if (playerDollars.size === 0) {
+          this.dollarsByPlayer.delete(dollar.ownerId);
+        }
+      }
+
+      this.objectsReleased++;
+
+      if (this.config.enablePerformanceMetrics) {
+        const endTime = performance.now();
+        this.performanceTracker.recordRelease(startTime, endTime);
+      }
+    } catch (error) {
+      console.warn(
+        `Warning: Failed to release virtual dollar to pool: ${error}`
+      );
+      // Don't throw - release operations should be non-critical
     }
   }
 
-  createBatch(pairs: GamePair[]): GameSession[] {
-    if (!pairs || pairs.length === 0) {
+  createBatch(playerIds: string[]): VirtualDollar[] {
+    if (!playerIds || playerIds.length === 0) {
       return [];
     }
 
-    const sessions: GameSession[] = [];
+    const dollars: VirtualDollar[] = [];
 
     if (this.config.enableBatchOptimizations) {
-      // Batch-optimized creation with timing
+      // Batch-optimized creation
       const startTime = this.config.enablePerformanceMetrics
         ? performance.now()
         : 0;
 
-      for (const pair of pairs) {
-        try {
-          const session = this.create(pair.dollar1, pair.dollar2, pair.level);
-          sessions.push(session);
-        } catch (error) {
-          // Continue with other pairs if one fails
-          console.warn(`Failed to create game session: ${error}`);
+      try {
+        for (const playerId of playerIds) {
+          const dollar = this.create(playerId);
+          dollars.push(dollar);
         }
-      }
 
-      if (this.config.enablePerformanceMetrics && sessions.length > 0) {
-        const endTime = performance.now();
-        // Record as single batch operation
-        this.performanceTracker.recordCreation(startTime, endTime);
+        if (this.config.enablePerformanceMetrics) {
+          const endTime = performance.now();
+          // Record as single batch operation
+          this.performanceTracker.recordCreation(startTime, endTime);
+        }
+      } catch (error) {
+        // If batch fails, release any created objects
+        dollars.forEach((dollar) => this.release(dollar));
+        throw error;
       }
     } else {
       // Individual creation fallback
-      for (const pair of pairs) {
+      for (const playerId of playerIds) {
         try {
-          const session = this.create(pair.dollar1, pair.dollar2, pair.level);
-          sessions.push(session);
+          const dollar = this.create(playerId);
+          dollars.push(dollar);
         } catch (error) {
-          // Continue with other pairs if one fails
-          console.warn(`Failed to create game session: ${error}`);
+          // Continue with other players if one fails
+          console.warn(
+            `Failed to create virtual dollar for player ${playerId}: ${error}`
+          );
         }
       }
     }
 
-    return sessions;
+    return dollars;
   }
 
   getStatistics(): FactoryStatistics {
+    const poolManager = isObjectPoolingEnabled()
+      ? getObjectPoolManager()
+      : null;
+    const poolSize = poolManager ? poolManager.virtualDollarPool.size() : 0;
     const objectsInUse = Math.max(
       0,
       this.objectsCreated - this.objectsReleased
     );
 
+    // Calculate pool hit rate
+    const poolHitRate =
+      this.objectsCreated > 0 && poolSize > 0
+        ? Math.min(poolSize / this.objectsCreated, 1.0)
+        : 0;
+
     return {
       objectsCreated: this.objectsCreated,
       objectsReleased: this.objectsReleased,
       objectsInUse,
-      poolSize: 0, // Direct factory has no pool
-      poolHitRate: 0, // No pool means no hits
+      poolSize,
+      poolHitRate,
       averageCreationTime: this.performanceTracker.getAverageCreationTime(),
       averageReleaseTime: this.performanceTracker.getAverageReleaseTime(),
-      memoryUsageMB: objectsInUse * 0.002, // Rough estimate: 2KB per session
+      memoryUsageMB: objectsInUse * 0.001, // Rough estimate: 1KB per object
     };
   }
 
@@ -245,155 +289,29 @@ export class DirectGameSessionFactory implements GameSessionFactory {
   resetStatistics(): void {
     this.objectsCreated = 0;
     this.objectsReleased = 0;
-    this.gameCounter = 0;
     this.performanceTracker.reset();
   }
 
-  private calculateWinnings(level: BettingLevel): number {
-    // Winner receives bet amount × 1.8 in winnings (per game rules)
-    return getBettingLevelValue(level) * 1.8;
+  private generateUniqueId(): string {
+    return `vd_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  /**
-   * Generate current daily seed in YYYY-MM-DD format
-   */
-  private getCurrentDailySeed(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+  private generateRunId(): string {
+    return `run_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  /**
-   * Generate deterministic random seed from game ID
-   */
-  private generateDeterministicSeed(gameId: string): number {
-    // Simple hash function to convert string to number between 0 and 1
-    let hash = 0;
-    for (let i = 0; i < gameId.length; i++) {
-      const char = gameId.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    // Normalize to 0-1 range
-    return Math.abs(hash) / Math.pow(2, 31);
-  }
-}
-
-/**
- * Unified VirtualDollar Factory that combines state management and business logic
- * Replaces the split between VirtualDollarFactory and VirtualDollarManager
- * Provides single source of truth for VirtualDollar lifecycle and state
- */
-export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
-  // Internal state (unified from both Factory and Manager)
-  private dollars: Map<string, VirtualDollar> = new Map();
-  private serialNumbers: Set<string> = new Set();
-  private pooledDollars: Set<string> = new Set();
-  private dollarsByPlayer: Map<string, Set<string>> = new Map();
-  private stateHistory: Map<string, StateTransition[]> = new Map();
-  private performanceTracker: PerformanceTracker;
-
-  constructor(private config: PerformanceConfig) {
-    this.performanceTracker = new PerformanceTracker();
+  private generateSerialNumber(): string {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const firstLetter = letters[Math.floor(Math.random() * letters.length)];
+    const lastLetter = letters[Math.floor(Math.random() * letters.length)];
+    const digits = Math.floor(Math.random() * 100000000)
+      .toString()
+      .padStart(8, "0");
+    return `${firstLetter}${digits}${lastLetter}`;
   }
 
   // ===========================================
-  // FACTORY METHODS (Creation and Release)
-  // ===========================================
-
-  create(playerId: string): VirtualDollar {
-    const startTime = performance.now();
-
-    // Validate player ID
-    if (!playerId || playerId.trim() === "") {
-      throw new Error("Invalid player ID");
-    }
-
-    // Generate unique serial number with collision detection
-    let serialNumber: string;
-    let attempts = 0;
-    const maxAttempts = 1000;
-
-    do {
-      serialNumber = this.generateSerialNumber();
-      attempts++;
-      if (attempts > maxAttempts) {
-        throw new Error("Serial number collision detected");
-      }
-    } while (this.serialNumbers.has(serialNumber));
-
-    const dollar: VirtualDollar = {
-      id: this.generateUniqueId(),
-      serialNumber,
-      currentScore: 0,
-      currentLevel: 1,
-      state: DollarState.CREATED,
-      ownerId: playerId,
-      runId: this.generateRunId(),
-      createdAt: new Date(),
-      gameHistory: [],
-      gamesInThisRun: 0,
-      currentRunWinnings: 0,
-      isIndependentRun: true,
-      potValue: 1.0,
-    };
-
-    // Store dollar and track serial number
-    this.dollars.set(dollar.id, dollar);
-    this.serialNumbers.add(serialNumber);
-
-    // Track by player
-    if (!this.dollarsByPlayer.has(playerId)) {
-      this.dollarsByPlayer.set(playerId, new Set());
-    }
-    this.dollarsByPlayer.get(playerId)!.add(dollar.id);
-
-    // Initialize state history
-    this.stateHistory.set(dollar.id, [
-      {
-        state: DollarState.CREATED,
-        timestamp: new Date(),
-      },
-    ]);
-
-    const endTime = performance.now();
-    this.performanceTracker.recordCreation(startTime, endTime);
-
-    return dollar;
-  }
-
-  release(dollar: VirtualDollar): void {
-    const startTime = performance.now();
-    this.releaseDollar(dollar.id);
-    const endTime = performance.now();
-    this.performanceTracker.recordRelease(startTime, endTime);
-  }
-
-  createBatch(playerIds: string[]): VirtualDollar[] {
-    return playerIds.map((playerId) => this.create(playerId));
-  }
-
-  getStatistics(): FactoryStatistics {
-    const totalCreated = this.dollars.size;
-    const pooledCount = this.pooledDollars.size;
-    const inUseCount = totalCreated - pooledCount;
-
-    return {
-      objectsCreated: totalCreated,
-      objectsReleased: 0, // Not tracked in this implementation
-      objectsInUse: inUseCount,
-      poolSize: 0, // No pooling in unified factory
-      poolHitRate: 0,
-      averageCreationTime: this.performanceTracker.getAverageCreationTime(),
-      averageReleaseTime: this.performanceTracker.getAverageReleaseTime(),
-      memoryUsageMB: this.estimateMemoryUsage(),
-    };
-  }
-
-  // ===========================================
-  // STATE MANAGEMENT METHODS
+  // UNIFIED STATE MANAGEMENT METHODS
   // ===========================================
 
   getDollar(dollarId: string): VirtualDollar | null {
@@ -514,20 +432,8 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
       return;
     }
 
-    // Remove from tracking
-    this.dollars.delete(dollarId);
-    this.serialNumbers.delete(dollar.serialNumber);
-    this.pooledDollars.delete(dollarId);
-    this.stateHistory.delete(dollarId);
-
-    // Remove from player tracking
-    const playerDollars = this.dollarsByPlayer.get(dollar.ownerId);
-    if (playerDollars) {
-      playerDollars.delete(dollarId);
-      if (playerDollars.size === 0) {
-        this.dollarsByPlayer.delete(dollar.ownerId);
-      }
-    }
+    // Use the main release method which handles pooling
+    this.release(dollar);
   }
 
   cleanupCompletedDollars(): number {
@@ -575,7 +481,7 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
 
   eliminatePlayer(
     dollarId: string,
-    eliminationLevel: BettingLevel
+    _eliminationLevel: BettingLevel
   ): VirtualDollar {
     const dollar = this.getDollar(dollarId);
     if (!dollar) {
@@ -647,10 +553,6 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
     };
   }
 
-  // ===========================================
-  // ADDITIONAL BUSINESS LOGIC METHODS
-  // ===========================================
-
   addWinnings(dollarId: string, additionalWinnings: number): VirtualDollar {
     const dollar = this.getDollar(dollarId);
     if (!dollar) {
@@ -700,24 +602,6 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
   // PRIVATE HELPER METHODS
   // ===========================================
 
-  private generateSerialNumber(): string {
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const firstLetter = letters[Math.floor(Math.random() * letters.length)];
-    const lastLetter = letters[Math.floor(Math.random() * letters.length)];
-    const digits = Math.floor(Math.random() * 100000000)
-      .toString()
-      .padStart(8, "0");
-    return `${firstLetter}${digits}${lastLetter}`;
-  }
-
-  private generateUniqueId(): string {
-    return `vd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  private generateRunId(): string {
-    return `run_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
   private validateStateTransition(
     currentState: DollarState,
     newState: DollarState
@@ -756,12 +640,204 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
       this.pooledDollars.delete(dollarId);
     }
   }
+}
 
-  private estimateMemoryUsage(): number {
-    // Rough estimation: each VirtualDollar ~1KB, plus overhead
-    const dollarCount = this.dollars.size;
-    const baseMemory = dollarCount * 1024; // 1KB per dollar
-    const overhead = 1000; // 1KB overhead
-    return (baseMemory + overhead) / (1024 * 1024); // Convert to MB
+/**
+ * PooledGameSessionFactory - Implementation using object pooling for performance
+ * Utilizes the existing GameSessionPool for memory-efficient object management
+ */
+export class PooledGameSessionFactory implements GameSessionFactory {
+  private objectsCreated = 0;
+  private objectsReleased = 0;
+  private gameCounter = 0;
+  private performanceTracker: PerformanceTracker;
+  private config: PerformanceConfig;
+
+  constructor(config: PerformanceConfig) {
+    this.config = config;
+    this.performanceTracker = new PerformanceTracker();
+
+    // Pre-warm pool if configured
+    if (config.prewarmCounts.gameSession > 0 && isObjectPoolingEnabled()) {
+      const poolManager = getObjectPoolManager();
+      poolManager.gameSessionPool.prewarm(config.prewarmCounts.gameSession);
+    }
+  }
+
+  create(
+    dollar1: VirtualDollar,
+    dollar2: VirtualDollar,
+    level: BettingLevel
+  ): GameSession {
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
+
+    // Validate parameters
+    if (!dollar1 || !dollar2) {
+      throw new Error(
+        "Invalid virtual dollar parameters: both dollars must be provided"
+      );
+    }
+    if (level < 1 || level > 10) {
+      throw new Error("Invalid betting level: must be between 1 and 10");
+    }
+
+    if (!isObjectPoolingEnabled()) {
+      throw new Error(
+        "Object pooling is not enabled. Use DirectGameSessionFactory instead."
+      );
+    }
+
+    try {
+      const poolManager = getObjectPoolManager();
+      const session = poolManager.gameSessionPool.acquire();
+
+      this.gameCounter++;
+      const id = `game_${this.gameCounter}_${Date.now()}`;
+      const dailySeed = ""; // Will be set during game resolution
+
+      // Initialize the pooled session
+      poolManager.gameSessionPool.initializeSession(
+        session,
+        id,
+        dollar1,
+        dollar2,
+        level,
+        this.gameCounter,
+        dailySeed
+      );
+
+      // Set winnings based on level
+      session.winnings = this.calculateWinnings(level);
+
+      this.objectsCreated++;
+
+      if (this.config.enablePerformanceMetrics) {
+        const endTime = performance.now();
+        this.performanceTracker.recordCreation(startTime, endTime);
+      }
+
+      return session;
+    } catch (error) {
+      throw new Error(`Failed to create game session: ${error}`);
+    }
+  }
+
+  release(session: GameSession): void {
+    const startTime = this.config.enablePerformanceMetrics
+      ? performance.now()
+      : 0;
+
+    if (!session) {
+      return; // Handle null/undefined gracefully
+    }
+
+    if (!isObjectPoolingEnabled()) {
+      return; // Nothing to do if pooling is disabled
+    }
+
+    try {
+      const poolManager = getObjectPoolManager();
+      poolManager.gameSessionPool.release(session);
+
+      this.objectsReleased++;
+
+      if (this.config.enablePerformanceMetrics) {
+        const endTime = performance.now();
+        this.performanceTracker.recordRelease(startTime, endTime);
+      }
+    } catch (error) {
+      console.warn(`Warning: Failed to release game session to pool: ${error}`);
+      // Don't throw - release operations should be non-critical
+    }
+  }
+
+  createBatch(pairs: GamePair[]): GameSession[] {
+    if (!pairs || pairs.length === 0) {
+      return [];
+    }
+
+    const sessions: GameSession[] = [];
+
+    if (this.config.enableBatchOptimizations) {
+      // Batch-optimized creation
+      const startTime = this.config.enablePerformanceMetrics
+        ? performance.now()
+        : 0;
+
+      try {
+        for (const pair of pairs) {
+          const session = this.create(pair.dollar1, pair.dollar2, pair.level);
+          sessions.push(session);
+        }
+
+        if (this.config.enablePerformanceMetrics) {
+          const endTime = performance.now();
+          // Record as single batch operation
+          this.performanceTracker.recordCreation(startTime, endTime);
+        }
+      } catch (error) {
+        // If batch fails, release any created sessions
+        sessions.forEach((session) => this.release(session));
+        throw error;
+      }
+    } else {
+      // Individual creation fallback
+      for (const pair of pairs) {
+        try {
+          const session = this.create(pair.dollar1, pair.dollar2, pair.level);
+          sessions.push(session);
+        } catch (error) {
+          // Continue with other pairs if one fails
+          console.warn(`Failed to create game session: ${error}`);
+        }
+      }
+    }
+
+    return sessions;
+  }
+
+  getStatistics(): FactoryStatistics {
+    const poolManager = isObjectPoolingEnabled()
+      ? getObjectPoolManager()
+      : null;
+    const poolSize = poolManager ? poolManager.gameSessionPool.size() : 0;
+    const objectsInUse = Math.max(
+      0,
+      this.objectsCreated - this.objectsReleased
+    );
+
+    // Calculate pool hit rate
+    const poolHitRate =
+      this.objectsCreated > 0 && poolSize > 0
+        ? Math.min(poolSize / this.objectsCreated, 1.0)
+        : 0;
+
+    return {
+      objectsCreated: this.objectsCreated,
+      objectsReleased: this.objectsReleased,
+      objectsInUse,
+      poolSize,
+      poolHitRate,
+      averageCreationTime: this.performanceTracker.getAverageCreationTime(),
+      averageReleaseTime: this.performanceTracker.getAverageReleaseTime(),
+      memoryUsageMB: objectsInUse * 0.002, // Rough estimate: 2KB per session
+    };
+  }
+
+  /**
+   * Reset factory statistics (useful for testing)
+   */
+  resetStatistics(): void {
+    this.objectsCreated = 0;
+    this.objectsReleased = 0;
+    this.gameCounter = 0;
+    this.performanceTracker.reset();
+  }
+
+  private calculateWinnings(level: BettingLevel): number {
+    // Winner receives bet amount × 1.8 in winnings (per game rules)
+    return getBettingLevelValue(level) * 1.8;
   }
 }

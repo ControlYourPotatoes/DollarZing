@@ -19,8 +19,8 @@ import { MatchmakingEventHandler } from "./handlers/matchmaking-event-handler";
 import { EVENT_TYPES, GameResolvedEvent } from "./event-types";
 
 // Real business logic components (no mocking)
-import { GameMatchingEngine } from "../types/game-matching-engine";
-import { RevenueCalculator } from "../types/revenue-calculator";
+import { GameMatchingEngine } from "../core/game-matching-engine";
+import { RevenueCalculator } from "../core/revenue-calculator";
 import { IStrategyManager } from "./handlers/cash-out-decision-handler";
 import {
   VirtualDollar,
@@ -28,7 +28,7 @@ import {
   DollarState,
 } from "../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../types/factory-interfaces";
-import { UnifiedVirtualDollarFactory } from "../types/direct-factories";
+import { UnifiedVirtualDollarFactory } from "../test-utils";
 
 describe("Task 7.1: Event System Integration Tests", () => {
   let eventBus: EventBus;
@@ -63,9 +63,9 @@ describe("Task 7.1: Event System Integration Tests", () => {
     });
 
     // GameMatchingEngine requires dependencies - we'll create a minimal setup
-    const { ScoringEngine } = await import("../types/scoring-engine");
+    const { ScoringEngine } = await import("../core/scoring-engine");
     const { DirectGameSessionFactory } = await import(
-      "../types/direct-factories"
+      "../test-utils/direct-factories"
     );
     const scoringEngine = new ScoringEngine();
     const gameSessionFactory = new DirectGameSessionFactory({

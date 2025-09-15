@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
   UnifiedVirtualDollarFactory,
   DirectGameSessionFactory,
-} from "../src/types/direct-factories";
+} from "../src/test-utils";
 import {
   PooledVirtualDollarFactory,
   PooledGameSessionFactory,

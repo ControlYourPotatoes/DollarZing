@@ -2,13 +2,13 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { GameEngineSimulator } from "./game-engine-simulator";
 
 import { PlayerBalanceManager } from "../types/player-balance-manager";
-import { GameMatchingEngine } from "../types/game-matching-engine";
-import { PlayerRunManager } from "../types/player-run-manager"; //must be changed to new player manager engine/src/simulation/player-manager.ts
+import { GameMatchingEngine } from "../core/game-matching-engine";
+import { PlayerManager } from "./player-manager"; // Event-driven player manager
 import { VirtualDollarFactory } from "../types/factory-interfaces";
-import { RevenueCalculator } from "../types/revenue-calculator";
-import { ScoringEngine } from "../types/scoring-engine";
+import { RevenueCalculator } from "../core/revenue-calculator";
+import { ScoringEngine } from "../core/scoring-engine";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
-import { DirectGameSessionFactory } from "../types/direct-factories";
+import { DirectGameSessionFactory } from "../test-utils";
 import { DEFAULT_PERFORMANCE_CONFIG } from "../types/factory-interfaces";
 
 // Mock only external dependencies
@@ -26,8 +26,8 @@ describe("GameEngineSimulator", () => {
   let gameEngineSimulator: GameEngineSimulator;
   let mockPlayerBalanceManager: PlayerBalanceManager;
   let mockGameMatchingEngine: GameMatchingEngine;
-  let mockRunOrchestrator: PlayerRunManager;
-  let mockVirtualDollarManager: VirtualDollarManager;
+  let mockPlayerManager: PlayerManager;
+  let mockVirtualDollarFactory: VirtualDollarFactory;
   let mockRevenueCalculator: RevenueCalculator;
   let mockScoringEngine: ScoringEngine;
 
@@ -37,7 +37,12 @@ describe("GameEngineSimulator", () => {
 
     // Create real instances of core components
     mockPlayerBalanceManager = new PlayerBalanceManager();
-    mockVirtualDollarManager = new VirtualDollarManager();
+    const { UnifiedVirtualDollarFactory } = await import(
+      "../test-utils/direct-factories"
+    );
+    mockVirtualDollarFactory = new UnifiedVirtualDollarFactory(
+      DEFAULT_PERFORMANCE_CONFIG
+    );
     mockScoringEngine = new ScoringEngine();
 
     // Create game session factory
@@ -45,26 +50,26 @@ describe("GameEngineSimulator", () => {
       DEFAULT_PERFORMANCE_CONFIG
     );
 
+    const { EventBus } = await import("../events/event-bus");
+    const eventBus = new EventBus();
+
     mockGameMatchingEngine = new GameMatchingEngine(
-      mockVirtualDollarManager,
+      mockVirtualDollarFactory,
       mockScoringEngine,
-      gameSessionFactory
+      gameSessionFactory,
+      eventBus
     );
-    mockRunOrchestrator = new PlayerManager(
-      undefined, // ProgressionManager will be created internally
-      mockVirtualDollarManager,
-      0.1 // charity percentage
-    );
+    mockPlayerManager = new PlayerManager(eventBus, mockVirtualDollarFactory);
     mockRevenueCalculator = new RevenueCalculator();
 
     // Create GameEngineSimulator instance
     gameEngineSimulator = new GameEngineSimulator(
-      mockPlayerBalanceManager,
-      mockVirtualDollarManager,
       mockGameMatchingEngine,
-      mockRunOrchestrator,
+      mockVirtualDollarFactory,
       mockRevenueCalculator,
-      mockScoringEngine
+      null, // dayProcessor - will be injected
+      mockPlayerManager,
+      eventBus
     );
   });
 

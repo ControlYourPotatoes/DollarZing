@@ -15,7 +15,7 @@ import {
   PlayerBalanceManager,
   Player,
 } from "../src/types/virtual-dollar-engine";
-import { DirectGameSessionFactory } from "../src/types/direct-factories";
+import { DirectGameSessionFactory } from "../src/test-utils";
 import { DEFAULT_PERFORMANCE_CONFIG } from "../src/types/factory-interfaces";
 
 describe("GameMatchingEngine", () => {

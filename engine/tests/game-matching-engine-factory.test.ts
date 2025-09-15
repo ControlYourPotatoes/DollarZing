@@ -7,7 +7,7 @@ import { GameMatchingEngine } from "../src/types/game-matching-engine";
 import { VirtualDollarManager } from "../src/types/virtual-dollar-types";
 import { ScoringEngine } from "../src/types/scoring-engine";
 import { GameSessionFactory } from "../src/types/factory-interfaces";
-import { DirectGameSessionFactory } from "../src/types/direct-factories";
+import { DirectGameSessionFactory } from "../src/test-utils";
 import { PooledGameSessionFactory } from "../src/types/pooled-factories";
 import { PRODUCTION_PERFORMANCE_CONFIG } from "../src/types/factory-interfaces";
 import { DollarState } from "../src/types/virtual-dollar-engine";

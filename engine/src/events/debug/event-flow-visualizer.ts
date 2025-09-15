@@ -1,14 +1,14 @@
-import type { EventTrace } from "./event-debugger.js";
+import type { EventTrace } from "./event-debugger";
 
 export interface FlowNode {
   id: string;
   eventType: string;
   timestamp: number;
   status: "pending" | "processing" | "completed" | "failed";
-  duration?: number;
-  data?: any;
+  duration: number | undefined;
+  data: any | undefined;
   children: FlowNode[];
-  parent?: FlowNode;
+  parent: FlowNode | undefined;
   level: number;
 }
 
@@ -59,7 +59,7 @@ export class EventFlowVisualizer {
    */
   createFlowVisualization(
     traces: EventTrace[],
-    title = "Event Flow"
+    _title = "Event Flow"
   ): FlowVisualization {
     const nodes = this.buildFlowNodes(traces);
     const edges = this.buildFlowEdges(nodes);
@@ -107,6 +107,7 @@ export class EventFlowVisualizer {
           duration: trace.duration,
           data: trace.data,
           children: [],
+          parent: undefined,
           level,
         };
 
@@ -131,9 +132,7 @@ export class EventFlowVisualizer {
   /**
    * Build edges between nodes
    */
-  private buildFlowEdges(
-    nodes: FlowNode[]
-  ): Array<{
+  private buildFlowEdges(nodes: FlowNode[]): Array<{
     from: string;
     to: string;
     type: "triggers" | "follows" | "parallel";
@@ -440,7 +439,10 @@ export class EventFlowVisualizer {
   /**
    * Find all nodes that depend on the given node
    */
-  private findDependentNodes(node: FlowNode, allNodes: FlowNode[]): FlowNode[] {
+  private findDependentNodes(
+    node: FlowNode,
+    _allNodes: FlowNode[]
+  ): FlowNode[] {
     const dependent: FlowNode[] = [];
     const visited = new Set<string>();
 

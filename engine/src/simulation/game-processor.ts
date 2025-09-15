@@ -1,4 +1,4 @@
-import { GameMatchingEngine } from "../types/game-matching-engine";
+import { GameMatchingEngine } from "../core/game-matching-engine";
 import { EventBus } from "../events/event-bus";
 import { EVENT_TYPES, GameCreatedEvent } from "../events/event-types";
 

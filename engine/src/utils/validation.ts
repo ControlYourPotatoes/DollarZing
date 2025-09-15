@@ -1,7 +1,7 @@
 import {
   SimulationParameters,
   DatasetValidationResult,
-} from "./simulation-types";
+} from "../types/simulation-types";
 
 // Parameter validation (engine-specific, no government)
 export function validateSimulationParameters(

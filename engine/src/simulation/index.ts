@@ -13,7 +13,7 @@ import {
   FlowType,
   CashOutStrategy,
 } from "../types/simulation-types";
-import { validateSimulationParameters } from "../types/validation";
+import { validateSimulationParameters } from "../utils/validation";
 
 // Constants from legacy system
 const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];

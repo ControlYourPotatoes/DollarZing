@@ -13,7 +13,7 @@ import {
   ErrorEvent,
   EVENT_TYPES,
 } from "../event-types";
-import { RevenueCalculator } from "../../types/revenue-calculator";
+import { RevenueCalculator } from "../../core/revenue-calculator";
 import { GameSession, VirtualDollar, DollarState, BettingLevel } from "../../types/virtual-dollar-engine";
 
 /**

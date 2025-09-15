@@ -15,7 +15,7 @@ import {
 } from "../event-types";
 import { BettingLevel, DollarState } from "../../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../../types/factory-interfaces";
-import { GameMatchingEngine } from "../../types/game-matching-engine";
+import { GameMatchingEngine } from "../../core/game-matching-engine";
 
 export class PlayerProgressionHandler {
   private gameResolvedSubscription: EventSubscription | null = null;

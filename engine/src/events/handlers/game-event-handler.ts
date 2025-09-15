@@ -4,8 +4,8 @@
  */
 
 import { EventBus, EventSubscription } from "../event-bus";
-import { GameMatchingEngine } from "../../types/game-matching-engine";
-import { RevenueCalculator } from "../../types/revenue-calculator";
+import { GameMatchingEngine } from "../../core/game-matching-engine";
+import { RevenueCalculator } from "../../core/revenue-calculator";
 import {
   GameCreatedEvent,
   GameResolvedEvent,

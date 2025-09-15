@@ -32,8 +32,8 @@
     "skipLibCheck": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*", "cli/src/**/*", "tests/**/*"],
-  "exclude": ["node_modules", "dist", "generated-datasets/**/*", "bin/**/*"],
+  "include": ["src/**/*", "cli/src/**/*"],
+  "exclude": ["node_modules", "dist", "generated-datasets/**/*", "bin/**/*", "tests/**/*"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

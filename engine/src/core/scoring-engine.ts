@@ -2,7 +2,7 @@
 // Handles deterministic scoring based on serial numbers + daily seeds
 // Provides score comparison functionality for game resolution
 
-import { ValidationResult } from './virtual-dollar-engine';
+import { ValidationResult } from '../types/virtual-dollar-engine';
 
 // Score comparison result interface
 export interface ScoreResult {

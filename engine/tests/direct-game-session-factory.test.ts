@@ -3,7 +3,7 @@
 // Validates direct object creation without pooling for development/testing scenarios
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { DirectGameSessionFactory } from "../src/types/direct-factories";
+import { DirectGameSessionFactory } from "../src/test-utils";
 import {
   GameSessionFactory,
   DEFAULT_PERFORMANCE_CONFIG,

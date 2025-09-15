@@ -4,7 +4,7 @@
  */
 
 import { EventBus, EventSubscription } from "../event-bus";
-import { GameMatchingEngine } from "../../types/game-matching-engine";
+import { GameMatchingEngine } from "../../core/game-matching-engine";
 import { VirtualDollarFactory } from "../../types/factory-interfaces";
 import { GameSessionFactory } from "../../types/factory-interfaces";
 // ScoringEngine removed - not used in matchmaking, only in game resolution
