@@ -23,21 +23,26 @@ const TimelineScrubber = ({ data, activeIndex, onChange, isPlaying, onPlayToggle
   const controlRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [direction, setDirection] = useState<'forward' | 'backward' | null>(null);
+  const [tickPulse, setTickPulse] = useState(0);
+  const [tickShift, setTickShift] = useState(0);
+  const [tickOffset, setTickOffset] = useState(0);
   const directionTimeoutRef = useRef<number>();
   const previousIndexRef = useRef(activeIndex);
 
-  const updateFromClientX = useCallback(
-    (clientX: number) => {
-      const surface = controlRef.current;
-      if (!surface || data.length === 0) {
-        return;
-      }
-      const rect = surface.getBoundingClientRect();
-      const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
-      const index = Math.round(ratio * (data.length - 1));
-      onChange(index);
+  const gestureStartRef = useRef<number | null>(null);
+
+  const stepTo = useCallback(
+    (delta: number) => {
+      if (delta === 0) return;
+      const target = Math.min(Math.max(activeIndex + delta, 0), data.length - 1);
+      if (target === activeIndex) return;
+      const dir = delta > 0 ? 'forward' : 'backward';
+      setDirection(dir);
+      setTickPulse((prev) => prev + 1);
+      setTickOffset((prev) => prev + (delta > 0 ? 1 : -1));
+      onChange(target);
     },
-    [data.length, onChange],
+    [activeIndex, data.length, onChange],
   );
 
   const handleDragStart = useCallback(
@@ -47,14 +52,25 @@ const TimelineScrubber = ({ data, activeIndex, onChange, isPlaying, onPlayToggle
       }
       event.preventDefault();
       setIsDragging(true);
-      updateFromClientX(event.clientX);
+      gestureStartRef.current = event.clientX;
+
+      const threshold = Math.max(controlRef.current?.offsetWidth ?? 0, 360) / 20;
 
       const handleMove = (moveEvent: PointerEvent) => {
-        updateFromClientX(moveEvent.clientX);
+        if (gestureStartRef.current === null) return;
+        const delta = moveEvent.clientX - gestureStartRef.current;
+        if (delta > threshold) {
+          gestureStartRef.current = moveEvent.clientX;
+          stepTo(1);
+        } else if (delta < -threshold) {
+          gestureStartRef.current = moveEvent.clientX;
+          stepTo(-1);
+        }
       };
 
       const handleUp = () => {
         setIsDragging(false);
+        gestureStartRef.current = null;
         document.removeEventListener('pointermove', handleMove);
         document.removeEventListener('pointerup', handleUp);
       };
@@ -62,13 +78,14 @@ const TimelineScrubber = ({ data, activeIndex, onChange, isPlaying, onPlayToggle
       document.addEventListener('pointermove', handleMove);
       document.addEventListener('pointerup', handleUp, { once: true });
     },
-    [updateFromClientX],
+    [stepTo],
   );
 
   useEffect(() => {
     const previous = previousIndexRef.current;
     if (previous !== activeIndex) {
       setDirection(activeIndex > previous ? 'forward' : 'backward');
+      setTickPulse((prev) => prev + 1);
       if (directionTimeoutRef.current) {
         window.clearTimeout(directionTimeoutRef.current);
       }
@@ -85,6 +102,16 @@ const TimelineScrubber = ({ data, activeIndex, onChange, isPlaying, onPlayToggle
     },
     [],
   );
+
+  useEffect(() => {
+    if (!direction) {
+      return;
+    }
+    const offset = direction === 'forward' ? -16 : 16;
+    setTickShift(offset);
+    const raf = window.requestAnimationFrame(() => setTickShift(0));
+    return () => window.cancelAnimationFrame(raf);
+  }, [direction, tickPulse]);
 
   const containerStyle = useMemo(() => {
     const accent = 'rgba(14,165,233,0.18)';
@@ -127,30 +154,33 @@ const TimelineScrubber = ({ data, activeIndex, onChange, isPlaying, onPlayToggle
         </div>
 
         <div className="relative">
-          <div
-            className="relative mt-4 h-5 text-[9px] uppercase tracking-[0.25em] text-slate-500 transition-transform duration-150"
-            style={{ transform: direction === 'forward' ? 'translateX(6px)' : direction === 'backward' ? 'translateX(-6px)' : 'translateX(0)' }}
-          >
-            {data.map((point, index) => {
-              const left = data.length > 1 ? (index / (data.length - 1)) * 100 : 0;
-              const showLabel = index === 0 || index === data.length - 1 || data.length <= 4;
-              return (
-                <span
-                  key={`tick-${point.id}`}
-                  className={`absolute flex w-12 -translate-x-1/2 flex-col items-center gap-1 transition-colors ${
-                    index === activeIndex ? 'text-sky-100' : 'text-slate-500'
-                  }`}
-                  style={{ left: `${left}%` }}
-                >
-                  <span
-                    className={`block h-3 w-[1px] ${
-                      index <= activeIndex ? 'bg-sky-400' : 'bg-slate-700'
+          <div className="relative mt-4 h-5 overflow-hidden">
+            <div
+              className="absolute inset-0 flex text-[9px] uppercase tracking-[0.25em] text-slate-500 transition-transform duration-250 ease-out"
+              style={{ transform: `translateX(${tickShift}px)` }}
+            >
+              {data.map((point, index) => {
+                const showLabel = index === 0 || index === data.length - 1 || data.length <= 4;
+                const active = index === activeIndex;
+                const tickIndex = tickOffset + index;
+                return (
+                  <div
+                    key={`tick-${point.id}-${tickOffset}`}
+                    className={`relative flex w-full max-w-[72px] flex-1 flex-col items-center gap-1 transition-colors ${
+                      active ? 'text-sky-100' : 'text-slate-500'
                     }`}
-                  />
-                  {showLabel ? <span className="text-[9px] tracking-[0.35em]">{point.label}</span> : null}
-                </span>
-              );
-            })}
+                    style={{ transform: `translateX(${tickIndex * 20}px)` }}
+                  >
+                    <span
+                      className={`block h-3 w-[1px] ${
+                        index <= activeIndex ? 'bg-sky-400' : 'bg-slate-700'
+                      }`}
+                    />
+                    {showLabel ? <span className="text-[9px] tracking-[0.35em]">{point.label}</span> : null}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
