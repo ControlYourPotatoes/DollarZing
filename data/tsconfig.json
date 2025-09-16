@@ -24,7 +24,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["jest"]
+    "types": ["node", "vitest/globals"]
   },
   "include": [
     "src/**/*"
