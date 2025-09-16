@@ -1,5 +1,4 @@
-import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
-import { formatCurrency } from '@/mock/prototypeData';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface TimelinePoint {
   id: string;
@@ -13,92 +12,146 @@ interface TimelineScrubberProps {
   data: TimelinePoint[];
   activeIndex: number;
   onChange: (index: number) => void;
+  isPlaying: boolean;
+  onPlayToggle: () => void;
 }
 
-const TimelineScrubber = ({ data, activeIndex, onChange }: TimelineScrubberProps) => {
+const TimelineScrubber = ({ data, activeIndex, onChange, isPlaying, onPlayToggle }: TimelineScrubberProps) => {
   const progress = data.length > 1 ? (activeIndex / (data.length - 1)) * 100 : 0;
-  const sliderBackground = `linear-gradient(90deg, rgba(14,165,233,0.7) 0%, rgba(14,165,233,0.7) ${progress}%, rgba(71,85,105,0.45) ${progress}%, rgba(51,65,85,0.45) 100%)`;
+  const current = data[activeIndex];
+  const next = data[(activeIndex + 1) % data.length];
+  const controlRef = useRef<HTMLDivElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [direction, setDirection] = useState<'forward' | 'backward' | null>(null);
+  const directionTimeoutRef = useRef<number>();
+  const previousIndexRef = useRef(activeIndex);
+
+  const updateFromClientX = useCallback(
+    (clientX: number) => {
+      const surface = controlRef.current;
+      if (!surface || data.length === 0) {
+        return;
+      }
+      const rect = surface.getBoundingClientRect();
+      const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+      const index = Math.round(ratio * (data.length - 1));
+      onChange(index);
+    },
+    [data.length, onChange],
+  );
+
+  const handleDragStart = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      if ((event.target as HTMLElement).closest('button')) {
+        return;
+      }
+      event.preventDefault();
+      setIsDragging(true);
+      updateFromClientX(event.clientX);
+
+      const handleMove = (moveEvent: PointerEvent) => {
+        updateFromClientX(moveEvent.clientX);
+      };
+
+      const handleUp = () => {
+        setIsDragging(false);
+        document.removeEventListener('pointermove', handleMove);
+        document.removeEventListener('pointerup', handleUp);
+      };
+
+      document.addEventListener('pointermove', handleMove);
+      document.addEventListener('pointerup', handleUp, { once: true });
+    },
+    [updateFromClientX],
+  );
+
+  useEffect(() => {
+    const previous = previousIndexRef.current;
+    if (previous !== activeIndex) {
+      setDirection(activeIndex > previous ? 'forward' : 'backward');
+      if (directionTimeoutRef.current) {
+        window.clearTimeout(directionTimeoutRef.current);
+      }
+      directionTimeoutRef.current = window.setTimeout(() => setDirection(null), 200);
+      previousIndexRef.current = activeIndex;
+    }
+  }, [activeIndex]);
+
+  useEffect(
+    () => () => {
+      if (directionTimeoutRef.current) {
+        window.clearTimeout(directionTimeoutRef.current);
+      }
+    },
+    [],
+  );
+
+  const containerStyle = useMemo(() => {
+    const accent = 'rgba(14,165,233,0.18)';
+    const base = 'rgba(15,23,42,0.92)';
+    return {
+      background: `linear-gradient(90deg, ${accent} ${progress}%, ${base} ${progress}%)`,
+    };
+  }, [progress]);
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-sky-900/10">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-widest text-slate-500">Timeline</p>
-          <h2 className="text-xl font-semibold text-slate-100">Parameter Interpolation Preview</h2>
-          <p className="text-sm text-slate-400">Scrub through the mocked anchor snapshots to see how distribution metrics morph.</p>
-        </div>
-        <div className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200">
-          {data[activeIndex]?.label}
-        </div>
-      </div>
-
-      <div className="h-44 w-full">
-        <ResponsiveContainer>
-          <AreaChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis dataKey="label" stroke="#64748b" tickLine={false} />
-            <YAxis stroke="#64748b" tickLine={false} tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-            <Tooltip
-              contentStyle={{ backgroundColor: 'rgba(15,23,42,0.92)', borderRadius: '0.75rem', border: '1px solid rgba(148,163,184,0.4)', color: '#e2e8f0' }}
-              formatter={(value: number, key: string) => {
-                if (key === 'netPayouts') return [formatCurrency(value), 'Player Payouts'];
-                if (key === 'totalCharity') return [formatCurrency(value), 'Charity'];
-                if (key === 'totalFees') return [formatCurrency(value), 'Fees'];
-                return [value, key];
-              }}
-            />
-            <ReferenceLine x={data[activeIndex]?.label} stroke="#f97316" strokeDasharray="6 6" />
-            <Area type="monotone" dataKey="netPayouts" stroke="#34d399" fillOpacity={0.3} fill="#34d399" />
-            <Area type="monotone" dataKey="totalCharity" stroke="#a855f7" fillOpacity={0.15} fill="#a855f7" />
-            <Area type="monotone" dataKey="totalFees" stroke="#38bdf8" fillOpacity={0.2} fill="#38bdf8" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
-          {data.map((point, index) => (
+    <div className="pointer-events-none fixed bottom-6 left-1/2 z-40 w-full max-w-3xl -translate-x-1/2 px-4">
+      <div
+        ref={controlRef}
+        className={`pointer-events-auto flex cursor-grab flex-col gap-3 rounded-2xl border border-slate-800 p-4 shadow-2xl shadow-sky-900/20 backdrop-blur ${
+          isDragging ? 'cursor-grabbing ring-1 ring-sky-400/60' : ''
+        }`}
+        style={containerStyle}
+        onPointerDown={handleDragStart}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <button
-              key={point.id}
               type="button"
-              onClick={() => onChange(index)}
-              className={`rounded-full px-3 py-1 text-xs font-semibold tracking-widest transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                index === activeIndex
-                  ? 'bg-sky-500 text-slate-950 focus-visible:outline-sky-300'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 focus-visible:outline-slate-600'
+              onClick={onPlayToggle}
+              className={`flex size-10 items-center justify-center rounded-full border border-slate-700 text-sm font-semibold transition ${
+                isPlaying ? 'bg-sky-500 text-slate-950' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
               }`}
             >
-              {point.label}
+              {isPlaying ? '❚❚' : '▶'}
             </button>
-          ))}
-        </div>
-        <span className="text-xs uppercase tracking-widest text-slate-500">
-          {activeIndex + 1} / {data.length}
-        </span>
-      </div>
-
-      <div className="mt-4">
-        <input
-          className="h-2 w-full cursor-pointer appearance-none rounded-full border border-slate-800 accent-sky-400"
-          type="range"
-          min={0}
-          max={data.length - 1}
-          step={1}
-          value={activeIndex}
-          onChange={(event) => onChange(Number(event.target.value))}
-          style={{ background: sliderBackground }}
-        />
-        <div className="mt-3 flex items-start justify-between gap-2 text-[10px] uppercase tracking-widest text-slate-500">
-          {data.map((point, index) => (
-            <div key={`tick-${point.id}`} className="flex flex-1 flex-col items-center gap-1">
-              <span
-                className={`h-3 w-[2px] rounded-full ${
-                  index <= activeIndex ? 'bg-sky-400' : 'bg-slate-700'
-                }`}
-              />
-              <span className={`${index === activeIndex ? 'text-sky-300' : ''}`}>{point.label}</span>
+            <div className="space-y-1">
+              <p className="text-xs uppercase tracking-widest text-slate-500">Current Snapshot</p>
+              <p className="text-lg font-semibold text-slate-100">{current?.label ?? '—'}</p>
             </div>
-          ))}
+          </div>
+          <div className="space-y-1 text-right">
+            <p className="text-xs uppercase tracking-widest text-slate-500">Next</p>
+            <p className="text-sm font-semibold text-slate-300">{next?.label ?? '—'}</p>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div
+            className="relative mt-4 h-5 text-[9px] uppercase tracking-[0.25em] text-slate-500 transition-transform duration-150"
+            style={{ transform: direction === 'forward' ? 'translateX(6px)' : direction === 'backward' ? 'translateX(-6px)' : 'translateX(0)' }}
+          >
+            {data.map((point, index) => {
+              const left = data.length > 1 ? (index / (data.length - 1)) * 100 : 0;
+              const showLabel = index === 0 || index === data.length - 1 || data.length <= 4;
+              return (
+                <span
+                  key={`tick-${point.id}`}
+                  className={`absolute flex w-12 -translate-x-1/2 flex-col items-center gap-1 transition-colors ${
+                    index === activeIndex ? 'text-sky-100' : 'text-slate-500'
+                  }`}
+                  style={{ left: `${left}%` }}
+                >
+                  <span
+                    className={`block h-3 w-[1px] ${
+                      index <= activeIndex ? 'bg-sky-400' : 'bg-slate-700'
+                    }`}
+                  />
+                  {showLabel ? <span className="text-[9px] tracking-[0.35em]">{point.label}</span> : null}
+                </span>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

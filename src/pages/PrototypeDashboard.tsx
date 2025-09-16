@@ -14,10 +14,22 @@ const PrototypeDashboard = () => {
   );
 
   const [snapshotIndex, setSnapshotIndex] = useState(scenario.timeSeries.length - 1);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     setSnapshotIndex(scenario.timeSeries.length - 1);
+    setIsPlaying(false);
   }, [scenario]);
+
+  useEffect(() => {
+    if (!isPlaying || scenario.timeSeries.length <= 1) {
+      return;
+    }
+    const id = window.setInterval(() => {
+      setSnapshotIndex((prev) => (prev + 1) % scenario.timeSeries.length);
+    }, 2000);
+    return () => window.clearInterval(id);
+  }, [isPlaying, scenario.timeSeries.length]);
 
   const snapshot = scenario.timeSeries[snapshotIndex];
   const timelineData = scenario.timeSeries.map((point) => ({
@@ -32,8 +44,20 @@ const PrototypeDashboard = () => {
     scenario.timeSeries.map((point) => point.survivalHeatmap[levelIndex] ?? 0),
   );
 
+  const handleSnapshotChange = (index: number) => {
+    setSnapshotIndex(index);
+    setIsPlaying(false);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
+    <div className="min-h-screen bg-slate-950 px-6 py-10 pb-32 text-slate-100">
+      <TimelineScrubber
+        data={timelineData}
+        activeIndex={snapshotIndex}
+        onChange={handleSnapshotChange}
+        isPlaying={isPlaying}
+        onPlayToggle={() => setIsPlaying((prev) => !prev)}
+      />
       <div className="mx-auto max-w-6xl space-y-9">
         <header className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -78,8 +102,6 @@ const PrototypeDashboard = () => {
             </div>
           </div>
         </header>
-
-        <TimelineScrubber data={timelineData} activeIndex={snapshotIndex} onChange={setSnapshotIndex} />
 
         <section className="grid grid-cols-1 gap-6">
           <article className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-sky-900/10">
