@@ -35,6 +35,17 @@ export type {
 
 // New component-integration simulator
 export { GameEngineSimulator } from "./simulation/game-engine-simulator";
+export {
+  createSimulationProfile,
+  buildRuntimeOptions,
+  DEFAULT_RUNTIME_OPTIONS,
+  DEFAULT_SIMULATION_PROFILE_NAME,
+} from "./simulation/simulation-profiles";
+export type {
+  SimulationProfile,
+  SimulationRuntimeOptions,
+  SimulationProfileOverrides,
+} from "./simulation/simulation-profiles";
 
 // Factory implementations (production - use these)
 export {

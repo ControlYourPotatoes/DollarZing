@@ -14,6 +14,14 @@ import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-han
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
 import { MatchmakingEventHandler } from "../events/handlers/matchmaking-event-handler";
 import { PooledGameSessionFactory } from "../factories";
+import {
+  DEFAULT_RUNTIME_OPTIONS,
+  DEFAULT_SIMULATION_PROFILE_NAME,
+  SimulationProfile,
+  SimulationRuntimeOptions,
+  buildRuntimeOptions,
+  isSimulationProfile,
+} from "./simulation-profiles";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -145,6 +153,10 @@ export class GameEngineSimulator {
   private isRunning: boolean = false;
   private startTime: number = 0;
   private simulationAborted: boolean = false;
+  private runtimeOptions: SimulationRuntimeOptions = {
+    ...DEFAULT_RUNTIME_OPTIONS,
+  };
+  private activeProfileName: string = DEFAULT_SIMULATION_PROFILE_NAME;
 
   // Event system
   private eventBus: EventBus;
@@ -240,7 +252,7 @@ export class GameEngineSimulator {
    * Execute complete simulation with progress tracking
    */
   async executeSimulation(
-    config: SimulationConfig,
+    configOrProfile: SimulationConfig | SimulationProfile,
     progressCallback?: (progress: SimulationProgress) => void,
     cancellationToken?: { cancelled: boolean }
   ): Promise<SimulationResults> {
@@ -248,8 +260,13 @@ export class GameEngineSimulator {
       throw new Error("Simulation is already running");
     }
 
+    const { config, runtime, profileName } =
+      this.normalizeSimulationInput(configOrProfile);
+
     this.validateConfiguration(config);
     this.config = config;
+    this.runtimeOptions = runtime;
+    this.activeProfileName = profileName ?? DEFAULT_SIMULATION_PROFILE_NAME;
     this.isRunning = true;
     this.simulationAborted = false;
     this.startTime = performance.now();
@@ -682,5 +699,42 @@ export class GameEngineSimulator {
       }
     });
     this.eventHandlers = [];
+  }
+
+  getRuntimeOptions(): SimulationRuntimeOptions {
+    return { ...this.runtimeOptions };
+  }
+
+  getActiveProfileName(): string {
+    return this.activeProfileName;
+  }
+
+  private normalizeSimulationInput(
+    input: SimulationConfig | SimulationProfile
+  ): {
+    config: SimulationConfig;
+    runtime: SimulationRuntimeOptions;
+    profileName?: string;
+  } {
+    if (isSimulationProfile(input)) {
+      const base = {
+        config: input.config,
+        runtime: buildRuntimeOptions(input.runtime),
+      };
+
+      return input.name
+        ? {
+            ...base,
+            profileName: input.name,
+          }
+        : base;
+    }
+
+    const base = {
+      config: input,
+      runtime: { ...DEFAULT_RUNTIME_OPTIONS },
+    };
+
+    return base;
   }
 }
