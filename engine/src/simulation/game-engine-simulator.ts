@@ -684,6 +684,7 @@ export class GameEngineSimulator {
       processDecision: (context: any) => ({
         finalLevel: context.currentLevel,
         totalWinnings: context.totalWinnings,
+        cashOutAmount: context.totalWinnings,
         completed: true,
       }),
     };

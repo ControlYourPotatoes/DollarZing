@@ -10,6 +10,7 @@
 2. Reuse the new simulator factory helpers to avoid duplicating component wiring and to guarantee pooling/debug defaults that match dev/prod expectations.
 3. Document the JSON payload shape and metadata so front-end consumption and git storage stay deterministic.
 4. Prepare the pipeline for future persistence decisions without blocking current local-file workflows.
+5. Provide a convenient CLI entry point (`dollarzing simulate`) for multi-day smoke tests before generating datasets.
 
 ## Proposed Architecture Updates
 - **Simulator Assembly**: Replace the legacy `createGameEngineSimulator` helper inside `dataset-orchestrator.ts` with calls to `createProductionSimulator`/`createDevelopmentSimulator` (depending on factory preset). This removes direct dependency on internal constructors and centralises pooling/env toggles.
@@ -40,7 +41,8 @@
    - Add size calculation and optional compression flag (future).
 4. **CLI Enhancements**
    - Update help text to mention simulator profiles and new output scheme.
-   - Provide a `--profile <dev|prod>` flag to choose between the development or production simulator assembly.
+   - Provide a `--profile <dev|prod>` flag to choose between the development or production simulator assembly (complete via `dollarzing simulate`).
+   - Surface debug toggles (`--debug-dashboard/--no-debug-dashboard`) so developers can capture sanity metrics during dataset batches.
 5. **Testing**
    - Add unit tests for the writer (snapshot JSON shape).
    - Introduce integration test that runs a single combination and verifies files are created under a temp directory.

@@ -337,16 +337,6 @@ export class GameMatchingEngine {
       this.activeGames.delete(gameId);
       this.completedGames.set(gameId, game);
 
-      // Release game session back to factory
-      try {
-        this.gameSessionFactory.release(game);
-      } catch (error) {
-        console.warn(
-          `Warning: Failed to release game session to factory: ${error}`
-        );
-        // Don't throw - release operations should be non-critical
-      }
-
       // Remove from in-game tracking
       this.dollarsInGame.delete(winner.id);
       this.dollarsInGame.delete(loser.id);
@@ -367,6 +357,23 @@ export class GameMatchingEngine {
         winnings: 0,
         error: `Game resolution failed: ${error}`,
       };
+    }
+  }
+
+  finalizeGameSession(gameId: string): void {
+    const game = this.completedGames.get(gameId);
+    if (!game) {
+      return;
+    }
+
+    this.completedGames.delete(gameId);
+
+    try {
+      this.gameSessionFactory.release(game);
+    } catch (error) {
+      console.warn(
+        `Warning: Failed to release game session during cleanup: ${error}`
+      );
     }
   }
 

@@ -86,7 +86,20 @@ export class GameEventHandler {
       // Fetch the updated game session with winner/loser data
       const gameSession = this.gameMatchingEngine.getGameSession(event.gameId);
 
-      if (!gameSession || !gameSession.winner || !gameSession.loser) {
+      if (!gameSession) {
+        await this.emitGameResolutionError(
+          event.gameId,
+          `Game session ${event.gameId} missing after resolution`
+        );
+        return;
+      }
+
+      const winnerDollar =
+        resolutionResult.winner ?? gameSession.winner ?? gameSession.dollar1;
+      const loserDollar =
+        resolutionResult.loser ?? gameSession.loser ?? gameSession.dollar2;
+
+      if (!winnerDollar?.id || !loserDollar?.id) {
         await this.emitGameResolutionError(
           event.gameId,
           `Game session ${event.gameId} missing winner/loser data after resolution`
@@ -102,12 +115,12 @@ export class GameEventHandler {
         type: EVENT_TYPES.GAME_RESOLVED,
         timestamp: new Date(),
         gameId: event.gameId,
-        winnerId: gameSession.winner.ownerId,
-        loserId: gameSession.loser.ownerId,
-        winnerLevel: gameSession.winner.currentLevel,
-        loserLevel: gameSession.loser.currentLevel,
-        winnerDollarId: gameSession.winner.id,
-        loserDollarId: gameSession.loser.id,
+        winnerId: winnerDollar.ownerId,
+        loserId: loserDollar.ownerId,
+        winnerLevel: winnerDollar.currentLevel,
+        loserLevel: loserDollar.currentLevel,
+        winnerDollarId: winnerDollar.id,
+        loserDollarId: loserDollar.id,
         winnings,
         gameResult: "WIN",
       };
@@ -116,6 +129,9 @@ export class GameEventHandler {
 
       // Process revenue tracking
       await this.processGameRevenue(gameSession, winnings);
+
+      // Release session after handlers complete
+      this.gameMatchingEngine.finalizeGameSession(event.gameId);
     } catch (error) {
       await this.emitGameResolutionError(
         event.gameId,
@@ -123,6 +139,7 @@ export class GameEventHandler {
           error instanceof Error ? error.message : String(error)
         }`
       );
+      this.gameMatchingEngine.finalizeGameSession(event.gameId);
     }
   }
 

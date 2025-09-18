@@ -6,21 +6,17 @@ import {
   type SimulationProfileOverrides,
   type SimulationResults,
   type SimulationRuntimeOptions,
-} from "@engine/index";
-import type { SimulationProgress } from "@engine/simulation/game-engine-simulator";
-import type { SimulatorFactoryOptions } from "@engine/simulation/simulator-factories";
+} from "../../../../src/index";
+import type { SimulationProgress } from "../../../../src/simulation/game-engine-simulator";
+import type { SimulatorFactoryOptions } from "../../../../src/simulation/simulator-factories";
 import {
   setupDevelopmentDebugging,
   setupProductionMonitoring,
   checkSystemHealth,
-} from "@engine/events/debug/index";
-import type { EventDebugInterface } from "@engine/events/debug/index";
+} from "../../../../src/events/debug/index";
+import type { EventDebugInterface } from "../../../../src/events/debug/index";
 
-export interface StrategyDistribution {
-  [CashOutStrategy.CONSERVATIVE]?: number;
-  [CashOutStrategy.BALANCED]?: number;
-  [CashOutStrategy.AGGRESSIVE]?: number;
-}
+export type StrategyDistribution = Partial<Record<CashOutStrategy, number>>;
 
 export interface SimulationRunConfig {
   profile: "development" | "production";

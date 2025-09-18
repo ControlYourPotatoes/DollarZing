@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { EventDebugInterface } from "@engine/events/debug/index";
+import type { EventDebugInterface } from "../src/events/debug";
 
 const executeSimulationMock = vi.fn(async () => ({
   success: true,

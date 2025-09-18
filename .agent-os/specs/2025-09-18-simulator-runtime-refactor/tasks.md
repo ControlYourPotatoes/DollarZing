@@ -26,7 +26,7 @@
   - [x] 4.3 Emit sanity dashboard metrics from CLI output
   - [x] 4.4 Verify all tests pass
 
-- [ ] 5. Expand integration coverage and documentation
-  - [ ] 5.1 Write integration tests for multi-day simulations exercising new pipeline
-  - [ ] 5.2 Update developer documentation and spec references
-  - [ ] 5.3 Verify all tests pass
+- [x] 5. Expand integration coverage and documentation
+  - [x] 5.1 Write integration tests for multi-day simulations exercising new pipeline
+  - [x] 5.2 Update developer documentation and spec references
+  - [x] 5.3 Verify all tests pass
