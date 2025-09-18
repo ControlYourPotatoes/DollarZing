@@ -3,66 +3,11 @@
 
 import { Command } from "commander";
 import {
-  GameEngineSimulator,
-  type SimulationConfig,
-  type SimulationProgress,
-  CashOutStrategy,
-  GameMatchingEngine,
-  PooledVirtualDollarFactory,
-  RevenueCalculator,
-  ScoringEngine,
-  DirectGameSessionFactory,
-  DEFAULT_PERFORMANCE_CONFIG,
-  EventBus,
-} from "../../../src/index";
-import { DayProcessor } from "../../../src/simulation/day-processor";
-import { PlayerManager } from "../../../src/simulation/player-manager";
-
-/**
- * Create GameEngineSimulator with direct component initialization
- * This creates all necessary components for a working simulation
- */
-function createTestGameSimulator(): GameEngineSimulator {
-  // Initialize EventBus first
-  const eventBus = new EventBus();
-
-  // Create core components with object pooling enabled
-  const scoringEngine = new ScoringEngine();
-  const poolingConfig = {
-    ...DEFAULT_PERFORMANCE_CONFIG,
-    enableObjectPooling: true,
-  };
-  const virtualDollarFactory = new PooledVirtualDollarFactory(poolingConfig);
-  const gameSessionFactory = new DirectGameSessionFactory(poolingConfig);
-  const revenueCalculator = new RevenueCalculator();
-
-  // Create game matching engine with EventBus
-  const gameMatchingEngine = new GameMatchingEngine(
-    virtualDollarFactory,
-    scoringEngine,
-    gameSessionFactory,
-    eventBus
-  );
-
-  // Create real simulation components
-  const playerManager = new PlayerManager(eventBus, virtualDollarFactory);
-  const dayProcessor = new DayProcessor(
-    gameMatchingEngine,
-    playerManager,
-    virtualDollarFactory,
-    eventBus
-  );
-
-  // Create GameEngineSimulator with all components
-  return new GameEngineSimulator(
-    gameMatchingEngine,
-    virtualDollarFactory,
-    revenueCalculator,
-    dayProcessor,
-    playerManager,
-    eventBus
-  );
-}
+  DEFAULT_STRATEGY_DISTRIBUTION,
+  runSimulation,
+  printSimulationSummary,
+  type SimulationRunConfig,
+} from "./shared/simulation-runner.js";
 
 /**
  * Create the test-game command
@@ -134,149 +79,28 @@ async function executeTestGame(options: any): Promise<void> {
   }
 
   console.log("🚀 Starting simulation...");
-  const startTime = performance.now();
-
-  // Create simulation configuration
-  const config: SimulationConfig = {
-    durationDays: days,
-    initialPlayerCount: players,
-    dailySeed: seed,
-    charityPercentage: charityPercentage / 100,
-    playerStrategies: {
-      [CashOutStrategy.CONSERVATIVE]: 0.4,
-      [CashOutStrategy.BALANCED]: 0.4,
-      [CashOutStrategy.AGGRESSIVE]: 0.2,
-    },
-    initialDonationAmount: 25,
-    maxSimulationTimeMs: 60000, // 1 minute timeout
-    enableProgressReporting: verbose,
-    // Add growth model for S-curve player adoption
-    growthModel: {
-      adoptionRate: 0.1, // Market adoption rate
-      baseMarket: 10000, // Base market size
-      midpointDay: Math.floor(days / 2), // Midpoint at half duration
-      steepnessFactor: 20, // Standard steepness
-    },
+  const simulationConfig: SimulationRunConfig = {
+    profile: "development",
+    days,
+    players,
+    charityRate: charityPercentage / 100,
+    seed,
+    verbose,
+    noPooling: false,
+    dollarsPerPlayer: 1,
+    initialDonation: 25,
+    strategies: DEFAULT_STRATEGY_DISTRIBUTION,
+    maxSimulationTimeMs: 60000,
+    attachDebugger: false,
+    debugDashboard: false,
   };
 
-  // Create GameEngineSimulator using the orchestrator factory pattern
-  const simulator = createTestGameSimulator();
+  const outcome = await runSimulation(simulationConfig);
 
-  // Progress callback for verbose mode
-  const progressCallback = verbose
-    ? (progress: SimulationProgress) => {
-        console.log(
-          `Day ${progress.currentDay}/${progress.totalDays} (${(
-            progress.completionPercentage * 100
-          ).toFixed(1)}%) - Games: ${progress.gamesCompleted}, Pool: ${
-            progress.dollarsInPool
-          }`
-        );
-      }
-    : undefined;
-
-  // Execute simulation
-  const results = await simulator.executeSimulation(config, progressCallback);
-
-  const endTime = performance.now();
-  const duration = Math.round(endTime - startTime);
-
-  // Display results
-  console.log("");
-  console.log("📈 Results Summary:");
-  console.log("==================");
-
-  if (results.success) {
-    console.log("✅ Simulation completed successfully");
-    console.log(`⏱️  Duration: ${duration}ms`);
-    console.log("");
-
-    console.log("👥 Players:");
-    console.log(`  Total: ${results.playerStats.totalPlayers}`);
-    console.log(`  Active: ${results.playerStats.activePlayers}`);
-    console.log(`  Retired: ${results.playerStats.retiredPlayers}`);
-    console.log("");
-
-    console.log("🎮 Games:");
-    console.log(`  Total: ${results.gameStats.totalGames}`);
-    console.log(
-      `  Per Day: ${results.gameStats.averageGamesPerDay.toFixed(1)}`
-    );
-    console.log(`  Virtual Dollars: ${results.gameStats.totalVirtualDollars}`);
-    console.log(`  Jackpots Won: ${results.gameStats.jackpotsWon}`);
-    console.log("");
-
-    console.log("💰 Revenue:");
-    console.log(
-      `  Platform: $${results.revenueStats.totalPlatformRevenue.toFixed(2)}`
-    );
-    console.log(
-      `  Charity: $${results.revenueStats.totalCharityContributions.toFixed(
-        2
-      )} (${(results.revenueStats.charityPercentage * 100).toFixed(1)}%)`
-    );
-    console.log(
-      `  Player Payouts: $${results.revenueStats.totalPlayerPayouts.toFixed(2)}`
-    );
-    console.log(
-      `  Per Game: $${results.revenueStats.revenuePerGame.toFixed(2)}`
-    );
-
-    if (verbose) {
-      console.log("");
-      console.log("📊 Detailed Statistics:");
-      console.log(
-        `  Average Games per Player: ${results.playerStats.averageGamesPerPlayer.toFixed(
-          1
-        )}`
-      );
-      console.log(
-        `  Player Retirement Rate: ${(
-          results.playerStats.playerRetirementRate * 100
-        ).toFixed(1)}%`
-      );
-      console.log(
-        `  Average Run Length: ${results.gameStats.averageRunLength.toFixed(
-          1
-        )} games`
-      );
-      console.log(`  Completed Runs: ${results.gameStats.completedRuns}`);
-      console.log(`  Active Runs: ${results.gameStats.activeRuns}`);
-
-      console.log("");
-      console.log("💵 Fund Distribution:");
-      console.log(
-        `  Donation Funds: $${results.playerStats.totalDonationsFunds.toFixed(
-          2
-        )}`
-      );
-      console.log(
-        `  Winnings Funds: $${results.playerStats.totalWinningsFunds.toFixed(
-          2
-        )}`
-      );
-      console.log(
-        `  Progression Funds: $${results.playerStats.totalProgressionFunds.toFixed(
-          2
-        )}`
-      );
-    }
-
-    console.log("");
-    console.log("🎉 Test game completed successfully!");
-
-    // Quick validation checks
-    if (results.gameStats.totalGames === 0) {
-      console.log("⚠️  Warning: No games were played");
-    }
-    if (results.revenueStats.totalPlatformRevenue < 0) {
-      console.log("❌ Error: Negative platform revenue detected");
-    }
-  } else {
-    console.log("❌ Simulation failed");
-    console.log(`Error: ${results.error}`);
-    console.log(`Duration: ${duration}ms`);
-  }
+  printSimulationSummary(outcome, {
+    verbose,
+    successMessage: "🎉 Test game completed successfully!",
+  });
 }
 
 /**

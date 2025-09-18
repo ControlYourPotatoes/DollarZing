@@ -5,6 +5,7 @@
 import { Command } from "commander";
 import { createSimpleTestCommand } from "./commands/simple-test.js";
 import { createTestGameCommand } from "./commands/test-game.js";
+import { createSimulateCommand } from "./commands/simulate.js";
 
 /**
  * Main CLI program
@@ -20,6 +21,7 @@ function createMainProgram(): Command {
   // Add commands
   program.addCommand(createSimpleTestCommand());
   program.addCommand(createTestGameCommand());
+  program.addCommand(createSimulateCommand());
 
   // Default action when no command is provided
   program.action(() => {
@@ -30,6 +32,9 @@ function createMainProgram(): Command {
     console.log("  simple-test    - Simple test to verify CLI is working");
     console.log(
       "  test-game      - Run a single game simulation for testing and debugging"
+    );
+    console.log(
+      "  simulate       - Run configurable multi-day simulations"
     );
     console.log("");
     console.log("Usage examples:");
