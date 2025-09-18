@@ -114,6 +114,7 @@ export class EventDebugInterface {
       this.debugger.detach();
       this.logger.info("SYSTEM", "EventDebugInterface detached from EventBus");
       this.eventBus = undefined;
+      this.stopPeriodicReporting();
     }
   }
 
@@ -407,6 +408,13 @@ export class EventDebugInterface {
         );
       }
     }, this.config.reportInterval);
+  }
+
+  private stopPeriodicReporting(): void {
+    if (this.reportInterval) {
+      clearInterval(this.reportInterval);
+      this.reportInterval = undefined;
+    }
   }
 
   /**
