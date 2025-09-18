@@ -1,6 +1,6 @@
 import { GameMatchingEngine } from "../core/game-matching-engine";
 import { PlayerManager } from "./player-manager";
-import { PooledVirtualDollarFactory } from "../factories";
+import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { DollarState } from "../types/virtual-dollar-engine";
 import { EventBus } from "../events/event-bus";
 import {
@@ -28,7 +28,7 @@ export class DayProcessor {
   constructor(
     private gameMatchingEngine: GameMatchingEngine,
     private playerManager: PlayerManager,
-    private dollarManager: PooledVirtualDollarFactory,
+    private dollarManager: VirtualDollarFactory,
     private eventBus: EventBus
   ) {
     this.setupEventSubscriptions();

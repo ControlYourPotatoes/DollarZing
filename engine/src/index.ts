@@ -46,6 +46,15 @@ export type {
   SimulationRuntimeOptions,
   SimulationProfileOverrides,
 } from "./simulation/simulation-profiles";
+export {
+  createDevelopmentSimulator,
+  createProductionSimulator,
+} from "./simulation/simulator-factories";
+export type {
+  SimulatorAssembly,
+  SimulatorComponents,
+  SimulatorFactoryOptions,
+} from "./simulation/simulator-factories";
 
 // Factory implementations (production - use these)
 export {

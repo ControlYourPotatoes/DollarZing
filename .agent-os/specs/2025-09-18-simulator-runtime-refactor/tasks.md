@@ -8,11 +8,11 @@
   - [x] 1.3 Update GameEngineSimulator to consume profiles and runtime options
   - [x] 1.4 Verify all tests pass
 
-- [ ] 2. Add simulator factory helpers with default pooling behaviour
-  - [ ] 2.1 Write tests for dev/prod factory helpers and pooling opt-out logic
-  - [ ] 2.2 Implement factory functions enabling pooling by default
-  - [ ] 2.3 Expose opt-out switches for pooling and environment overrides
-  - [ ] 2.4 Verify all tests pass
+- [x] 2. Add simulator factory helpers with default pooling behaviour
+  - [x] 2.1 Write tests for dev/prod factory helpers and pooling opt-out logic
+  - [x] 2.2 Implement factory functions enabling pooling by default
+  - [x] 2.3 Expose opt-out switches for pooling and environment overrides
+  - [x] 2.4 Verify all tests pass
 
 - [ ] 3. Create modular `simulate` CLI command
   - [ ] 3.1 Write CLI tests covering new command flags and delegation

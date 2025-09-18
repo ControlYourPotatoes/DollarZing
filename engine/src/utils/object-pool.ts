@@ -310,13 +310,6 @@ export class ObjectPoolManager {
 }
 
 /**
- * Configuration for object pooling
- */
-const ENABLE_OBJECT_POOLING =
-  process.env.NODE_ENV === "production" ||
-  process.env.ENABLE_POOLING === "true";
-
-/**
  * Utility function to get the singleton object pool manager
  */
 export function getObjectPoolManager(): ObjectPoolManager {
@@ -327,5 +320,8 @@ export function getObjectPoolManager(): ObjectPoolManager {
  * Check if object pooling is enabled
  */
 export function isObjectPoolingEnabled(): boolean {
-  return ENABLE_OBJECT_POOLING;
+  return (
+    process.env.NODE_ENV === "production" ||
+    process.env.ENABLE_POOLING === "true"
+  );
 }
