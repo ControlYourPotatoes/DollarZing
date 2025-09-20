@@ -30,3 +30,5 @@ npx ts-node --esm --experimentalSpecifierResolution=node \
 The extra --experimentalSpecifierResolution=node flag lets ts-node resolve those ../cli/src/... imports the way our build step does.
 
 Either approach will produce the shorter 3‑month dataset for the first matrix combination.
+
+node dist/scripts/run-orchestrator.js   --days 90   --combo 15,low,10   --no-events
