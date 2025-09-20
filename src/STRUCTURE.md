@@ -15,6 +15,10 @@ be updated as components migrate out of the prototype directory.
 - `src/features/financial-flow/`
   - Contains the Financial Distribution Workflow diagram implementation and helpers
     for workflow nodes, links, and layered progress arcs.
+  - `components/` exposes the production `FinancialWorkflowDiagram` with Framer
+    Motion transitions, playback-aware hover state, and summary metadata.
+  - `primitives/` contains reusable SVG building blocks for workflow nodes and
+    cubic-curve connectors.
 - `src/features/distribution-charts/`
   - Provides the financial distribution and accumulation chart components that consume
     the shared snapshot selectors.

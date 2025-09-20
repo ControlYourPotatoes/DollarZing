@@ -80,16 +80,7 @@ export function normalizePresentationSnapshot(
   );
 
   const timelineSeries = days.reduce(
-    (
-      acc,
-      day
-    ): {
-      revenue: number[];
-      charity: number[];
-      fees: number[];
-      payouts: number[];
-      players: number[];
-    } => {
+    (acc, day) => {
       acc.revenue.push(roundToTwoDecimals(day.timelineTick.cumulativeRevenue));
       acc.charity.push(roundToTwoDecimals(day.timelineTick.cumulativeCharity));
       acc.fees.push(roundToTwoDecimals(day.timelineTick.cumulativeFees));
@@ -97,7 +88,13 @@ export function normalizePresentationSnapshot(
       acc.players.push(day.timelineTick.cumulativePlayers);
       return acc;
     },
-    { revenue: [], charity: [], fees: [], payouts: [], players: [] }
+    {
+      revenue: [] as number[],
+      charity: [] as number[],
+      fees: [] as number[],
+      payouts: [] as number[],
+      players: [] as number[],
+    }
   );
 
   return {
@@ -123,4 +120,3 @@ export function assertSnapshotMatchesScenario(
     );
   }
 }
-

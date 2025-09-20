@@ -28,7 +28,7 @@ function dedupeAndSort(values: number[]): number[] {
 
 export function buildScenarioIndex(input: unknown): ScenarioIndex {
   try {
-    const manifest = validatePresentationManifest(input);
+    const manifest: PresentationManifest = validatePresentationManifest(input);
 
     const byId = new Map<string, PresentationManifestEntry>();
     const byCoordinateKey = new Map<string, PresentationManifestEntry>();
@@ -153,4 +153,3 @@ export function computeCoordinateKey(
     charityShare,
   });
 }
-

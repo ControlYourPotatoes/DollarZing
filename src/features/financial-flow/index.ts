@@ -1,4 +1,4 @@
-// Placeholder exports for the financial distribution workflow feature.
-// Implementation files will live alongside this barrel.
-
-export {};
+export { FinancialWorkflowDiagram } from "./components/FinancialWorkflowDiagram";
+export { useWorkflowData } from "./hooks/useWorkflowData";
+export { WorkflowNode } from "./primitives/WorkflowNode";
+export { WorkflowLink } from "./primitives/WorkflowLink";

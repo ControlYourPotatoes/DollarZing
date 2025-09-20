@@ -24,10 +24,10 @@
   - [x] 3.2 Implement playback controls and keyboard shortcuts within SVG UX constraints
   - [x] 3.3 Ensure connected charts react smoothly to timeline updates (animation + performance)
 
-- [ ] 4. Rebuild Financial Distribution Workflow component
-  - [ ] 4.1 Extract SVG primitives for nodes, connectors, and layered progress arcs
-  - [ ] 4.2 Bind snapshot aggregates to workflow visualization and hover interactions
-  - [ ] 4.3 Integrate Framer Motion (or equivalent) for node/link transitions
+- [x] 4. Rebuild Financial Distribution Workflow component
+  - [x] 4.1 Extract SVG primitives for nodes, connectors, and layered progress arcs
+  - [x] 4.2 Bind snapshot aggregates to workflow visualization and hover interactions
+  - [x] 4.3 Integrate Framer Motion (or equivalent) for node/link transitions
 
 - [ ] 5. Align supporting charts and documentation
   - [ ] 5.1 Update financial distribution chart to consume shared selectors

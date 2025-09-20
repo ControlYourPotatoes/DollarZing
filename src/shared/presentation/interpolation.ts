@@ -7,7 +7,6 @@ import {
 } from "./types";
 import {
   findNearestCoordinate,
-  computeCoordinateKey,
   findScenarioByCoordinates,
 } from "./scenario-index";
 
@@ -205,4 +204,3 @@ export function describeInterpolation(result: InterpolationResult): string {
     .join(", ");
   return `Interpolated anchors for (${requested.adoptionRate}, ${requested.cashOutStrategy}, ${requested.charityShare}): ${parts}`;
 }
-

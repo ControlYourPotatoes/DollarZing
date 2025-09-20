@@ -1,21 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
-import useSimulationStore from '../store/SimulationStore';
-import BaseChart from '@/components/BaseChart';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import useSimulationStore from "../../store/SimulationStore";
+import AdjustedChart from "@/components/AdjustedChart";
 
-const BaselineView: React.FC = () => {
-  const { gameState1 } = useSimulationStore();
-  const [selectedTab, setSelectedTab] = useState('overview');
+const AdjustedView: React.FC = () => {
+  const { gameState2 } = useSimulationStore();
+  const [selectedTab, setSelectedTab] = useState("overview");
 
   const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
-  const formatCurrency = (num: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+  const formatCurrency = (num: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(num);
 
   useEffect(() => {
-    console.log('BaselineView: gameState1 updated', gameState1);
-  }, [gameState1]);
+    console.log("AdjustedView: gameState2 updated", gameState2);
+  }, [gameState2]);
 
   const calculateGrowth = (current: number, previous: number) => {
     if (previous === undefined || previous === null) return null;
@@ -26,10 +30,11 @@ const BaselineView: React.FC = () => {
 
   const KeyMetric = ({ label, value, previousValue, metricType }) => {
     const growth = calculateGrowth(value, previousValue);
-    const formattedGrowth = growth !== null ? growth.toFixed(2) : 'N/A';
+    const formattedGrowth = growth !== null ? growth.toFixed(2) : "N/A";
 
-    console.log(`${label}: Current = ${value}, Previous = ${previousValue}, Growth = ${formattedGrowth}`);
-
+    console.log(
+      `${label}: Current = ${value}, Previous = ${previousValue}, Growth = ${formattedGrowth}`
+    );
 
     return (
       <div className="flex flex-col items-center p-4 bg-gray-200 rounded-lg shadow w-fit">
@@ -40,7 +45,9 @@ const BaselineView: React.FC = () => {
           transition={{ duration: 0.5 }}
         >
           <p className="text-3xl font-bold text-blue-500">
-            {metricType === 'currency' ? formatCurrency(value) : formatNumber(value)}
+            {metricType === "currency"
+              ? formatCurrency(value)
+              : formatNumber(value)}
           </p>
           {growth !== null && (
             <div className="flex justify-center mt-2">
@@ -62,78 +69,84 @@ const BaselineView: React.FC = () => {
   };
 
   const getPreviousValue = (key: string) => {
-    const prevDay = gameState1.chartData[gameState1.chartData.length - 2];
+    const prevDay = gameState2.chartData[gameState2.chartData.length - 2];
     return prevDay ? prevDay[key] : undefined;
   };
 
   return (
     <Card className="w-full px-6">
       <CardHeader>
-        <CardTitle className='text-xl text-center'>Baseline Simulation - Day {gameState1.day}</CardTitle>
+        <CardTitle className="text-xl text-center">
+          Adjusted Simulation - Day {gameState2.day}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-grow justify-center gap-4 mb-6">
-        <KeyMetric 
-            label="Active Players" 
-            value={gameState1.activePlayers}
-            previousValue={getPreviousValue('activePlayers')}
+          <KeyMetric
+            label="Active Players"
+            value={gameState2.activePlayers}
+            previousValue={getPreviousValue("activePlayers")}
             metricType="number"
           />
-          <KeyMetric 
-            label="Total Charity" 
-            value={gameState1.totalCharity}
-            previousValue={getPreviousValue('charityContributions')}
+          <KeyMetric
+            label="Total Charity"
+            value={gameState2.totalCharity}
+            previousValue={getPreviousValue("charityContributions")}
             metricType="currency"
           />
-          <KeyMetric 
-            label="Platform Earnings" 
-            value={gameState1.platformEarnings}
-            previousValue={getPreviousValue('platformEarnings')}
+          <KeyMetric
+            label="Platform Earnings"
+            value={gameState2.platformEarnings}
+            previousValue={getPreviousValue("platformEarnings")}
             metricType="currency"
           />
           <KeyMetric
             label="Government Earnings"
-            value={gameState1.governmentEarnings}
-            previousValue={getPreviousValue('governmentEarnings')}
+            value={gameState2.governmentEarnings}
+            previousValue={getPreviousValue("governmentEarnings")}
             metricType="currency"
           />
-          <KeyMetric 
-            label="Total Games" 
-            value={gameState1.totalGamesPlayed}
-            previousValue={getPreviousValue('gamesPlayed')}
+          <KeyMetric
+            label="Total Games"
+            value={gameState2.totalGamesPlayed}
+            previousValue={getPreviousValue("gamesPlayed")}
             metricType="number"
           />
         </div>
-        
-        <Tabs defaultValue="overview" onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="flex p-1 rounded-lg">
-            <TabsTrigger 
-              value="overview" 
+
+        <Tabs
+          defaultValue="overview"
+          onValueChange={setSelectedTab}
+          className="w-full"
+        >
+          <TabsList className="grid w-1/3 grid-cols-3 p-1 rounded-lg">
+            <TabsTrigger
+              value="overview"
               className="text-lg font-semibold bg-slate-300 data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-md"
             >
               Overview
             </TabsTrigger>
-            <TabsTrigger 
-              value="players" 
+            <TabsTrigger
+              value="players"
               className="text-lg font-semibold bg-slate-300 data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-md"
             >
               Players
             </TabsTrigger>
-            <TabsTrigger 
-              value="financials" 
+            <TabsTrigger
+              value="financials"
               className="text-lg font-semibold bg-slate-300 data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-md"
             >
               Financials
             </TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
-            <BaseChart selectedTab={selectedTab} />
+            <AdjustedChart selectedTab={selectedTab} />
           </TabsContent>
           <TabsContent value="players">
-            <BaseChart selectedTab={selectedTab} />
+            <AdjustedChart selectedTab={selectedTab} />
           </TabsContent>
           <TabsContent value="financials">
-            <BaseChart selectedTab={selectedTab} />
+            <AdjustedChart selectedTab={selectedTab} />
           </TabsContent>
         </Tabs>
       </CardContent>
@@ -141,4 +154,4 @@ const BaselineView: React.FC = () => {
   );
 };
 
-export default BaselineView;
+export default AdjustedView;

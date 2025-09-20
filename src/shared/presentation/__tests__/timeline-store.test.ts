@@ -35,18 +35,15 @@ const SAMPLE_MANIFEST = [
 ];
 
 const resetStore = () =>
-  usePresentationTimelineStore.setState(
-    {
-      scenarios: {},
-      manifest: undefined,
-      activeScenarioId: undefined,
-      activeDayIndex: 0,
-      isPlaying: false,
-      playbackSpeed: 1,
-      lastUpdatedAt: undefined,
-    },
-    true
-  );
+  usePresentationTimelineStore.setState({
+    scenarios: {},
+    manifest: undefined,
+    activeScenarioId: undefined,
+    activeDayIndex: 0,
+    isPlaying: false,
+    playbackSpeed: 1,
+    lastUpdatedAt: undefined,
+  });
 
 beforeEach(() => {
   resetStore();

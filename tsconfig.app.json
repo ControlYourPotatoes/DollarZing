@@ -7,9 +7,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
 
     /* Bundler mode */
@@ -37,10 +35,11 @@
     "src/components/NavBar.tsx",
     "src/components/SimulationEngine.tsx",
     "src/components/ComparisonChart.tsx",
-    "src/pages/AdjustedView.tsx",
-    "src/pages/BaselineView.tsx",
-    "src/pages/ComparisonView.tsx",
-    "src/pages/SimulationPage.tsx",
-    "src/test-utils"
+    "src/legacy/pages/AdjustedView.tsx",
+    "src/legacy/pages/BaselineView.tsx",
+    "src/legacy/pages/ComparisonView.tsx",
+    "src/legacy/pages/SimulationPage.tsx",
+    "src/test-utils",
+    "src/legacy"
   ]
 }

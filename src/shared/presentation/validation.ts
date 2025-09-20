@@ -39,12 +39,6 @@ function assertArray<T>(value: unknown, message: string): asserts value is T[] {
   }
 }
 
-function assertBoolean(value: unknown, message: string): asserts value is boolean {
-  if (typeof value !== "boolean") {
-    throw new ValidationError(message);
-  }
-}
-
 function validateDistributionPoint(
   point: unknown,
   path: string
