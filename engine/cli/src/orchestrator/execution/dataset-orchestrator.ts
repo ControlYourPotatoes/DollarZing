@@ -1,18 +1,12 @@
 // Dataset Orchestrator for Game Engine Integration
 // Provides abstraction layer between orchestrator parameters and game engine configuration
 
+import { promises as fs } from "fs";
 import {
-  GameEngineSimulator,
   SimulationConfig,
   SimulationResults,
   SimulationProgress,
   CashOutStrategy,
-  GameMatchingEngine,
-  PooledVirtualDollarFactory,
-  RevenueCalculator,
-  ScoringEngine,
-  DirectGameSessionFactory,
-  DEFAULT_PERFORMANCE_CONFIG,
   EventBus,
   EVENT_TYPES,
   DatasetGenerationStartedEvent,
@@ -21,6 +15,8 @@ import {
   DatasetValidationEvent,
   ParameterValidationEvent,
   QualityAssuranceEvent,
+  createProductionSimulator,
+  type SimulatorAssembly,
 } from "@/index";
 import type {
   ParameterCombination,
@@ -29,88 +25,13 @@ import type {
 } from "../core/types";
 import { validateParameterCombination } from "../parameters/validation";
 import { generateDirectoryName, generateFilePaths } from "../parameters/matrix";
+import { generateDailyAggregates } from "@/index";
+import type {
+  EventDebugInterface,
+  EventTrace,
+} from "../../../../src/events/debug/index";
 
-/**
- * Create event-driven GameEngineSimulator with dependency injection
- * Uses event bus for all component communication
- */
-export function createGameEngineSimulator(
-  _config: SimulationConfig,
-  eventBus?: EventBus
-): GameEngineSimulator {
-  // Initialize EventBus first
-  const sharedEventBus = eventBus || new EventBus();
-
-  // Create core components with EventBus integration
-  const scoringEngine = new ScoringEngine();
-
-  // Use UnifiedVirtualDollarFactory with performance config
-  const virtualDollarFactory = new PooledVirtualDollarFactory(
-    DEFAULT_PERFORMANCE_CONFIG
-  );
-
-  // Create game session factory
-  const gameSessionFactory = new DirectGameSessionFactory(
-    DEFAULT_PERFORMANCE_CONFIG
-  );
-
-  // Create game matching engine with EventBus
-  const gameMatchingEngine = new GameMatchingEngine(
-    virtualDollarFactory,
-    scoringEngine,
-    gameSessionFactory,
-    sharedEventBus
-  );
-
-  // Create revenue calculator
-  const revenueCalculator = new RevenueCalculator();
-
-  // Import simulation components with event-driven architecture
-
-  const {
-    PlayerManager,
-  } = require("../../../../src/simulation/player-manager");
-  const { DayProcessor } = require("../../../../src/simulation/day-processor");
-
-  // Create player balance manager
-
-  // Create lightweight run orchestrator for compatibility
-  const runOrchestrator = {
-    initializePlayer: () => {},
-    getActivePlayerCount: () => 0,
-    getPlayerStrategy: () => "BALANCED" as any,
-    getAllActiveRuns: () => [],
-    processGameResult: () => null,
-    createNewRun: (request: any) =>
-      virtualDollarFactory.create(request.playerId),
-    autoCreateRuns: () => [],
-  };
-
-  // Create player manager with event bus integration
-  const playerManager = new PlayerManager(
-    runOrchestrator,
-    sharedEventBus
-  );
-
-  // Create day processor with event bus integration
-  const dayProcessor = new DayProcessor(
-    gameMatchingEngine,
-    playerManager,
-    virtualDollarFactory,
-    sharedEventBus
-  );
-
-  // Create GameEngineSimulator with pure event-driven architecture
-  // All components communicate through the EventBus
-  return new GameEngineSimulator(
-    gameMatchingEngine,
-    virtualDollarFactory,
-    revenueCalculator,
-    dayProcessor,
-    playerManager,
-    sharedEventBus
-  );
-}
+type DebugSessionResult = ReturnType<EventDebugInterface["endSession"]>;
 
 /**
  * Configuration mapping between orchestrator parameters and simulation settings
@@ -149,7 +70,11 @@ export interface AdapterGenerationResult {
     directory: string;
     datasetFile: string;
     metadataFile: string;
+    snapshotsFile: string;
+    eventsFile: string;
   };
+  snapshotCount?: number;
+  eventCount?: number;
 }
 
 /**
@@ -245,129 +170,187 @@ export class DatasetOrchestrator {
       // Create simulation configuration
       const simulationConfig = this.createSimulationConfig(combination);
 
-      // Create GameEngineSimulator with EventBus
-      const simulator = createGameEngineSimulator(
-        simulationConfig,
-        this.eventBus as EventBus
+      // Assemble simulator using factory integration
+      const assembly = this.createSimulatorAssembly(
+        parameterId,
+        simulationConfig
       );
+      const { simulator, profile } = assembly;
 
       if (this.orchestratorConfig.verbose) {
         console.log(
-          `Created GameEngineSimulator for combination ${generateDirectoryName(
+          `Prepared simulator profile ${profile.name} for combination ${generateDirectoryName(
             combination
           )}`
         );
       }
 
-      // Create enhanced progress wrapper that emits events
-      const wrappedCallback =
-        progressCallback || this.eventBus
-          ? (progress: SimulationProgress) => {
-              // Call original callback if provided
-              if (progressCallback) {
-                progressCallback(combination, progress);
-              }
+      const debugInterface = assembly.debugInterface;
+      let debugSession: DebugSessionResult | null = null;
 
-              // Emit progress event if EventBus available
-              if (this.eventBus) {
-                this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_PROGRESS, {
-                  type: EVENT_TYPES.DATASET_GENERATION_PROGRESS,
-                  timestamp: new Date(),
-                  parameterId,
-                  currentDay: progress.currentDay,
-                  totalDays: progress.totalDays,
-                  progressPercentage:
-                    (progress.currentDay / progress.totalDays) * 100,
-                  gamesProcessed: progress.gamesCompleted || 0,
-                  playersActive: progress.playersActive || 0,
-                } as DatasetGenerationProgressEvent);
-              }
-            }
-          : undefined;
-
-      // Run simulation
-      const simulationResults = await simulator.executeSimulation(
-        simulationConfig,
-        wrappedCallback
-      );
-
-      // Validate simulation results and emit validation event
-      const validation = this.validateSimulationResults(simulationResults);
-      if (this.eventBus) {
-        await this.eventBus.emit(EVENT_TYPES.DATASET_VALIDATION, {
-          type: EVENT_TYPES.DATASET_VALIDATION,
-          timestamp: new Date(),
-          parameterId,
-          isValid: validation.isValid,
-          errors: validation.errors,
-          qualityMetrics: {
-            totalGames: simulationResults.gameStats?.totalGames || 0,
-            totalPlayers: simulationResults.playerStats?.totalPlayers || 0,
-            revenueConsistency:
-              (simulationResults.revenueStats?.totalPlatformRevenue || 0) >= 0,
-          },
-        } as DatasetValidationEvent);
+      if (debugInterface) {
+        debugInterface.startSession(`dataset-${parameterId}`);
       }
 
-      // Perform quality assurance checks
-      await this.performQualityAssurance(parameterId, simulationResults);
+      try {
+        // Create enhanced progress wrapper that emits events
+        const wrappedCallback =
+          progressCallback || this.eventBus
+            ? (progress: SimulationProgress) => {
+                // Call original callback if provided
+                if (progressCallback) {
+                  progressCallback(combination, progress);
+                }
 
-      // Check for simulation success
-      if (!simulationResults.success) {
-        const result: AdapterGenerationResult = {
+                // Emit progress event if EventBus available
+                if (this.eventBus) {
+                  this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_PROGRESS, {
+                    type: EVENT_TYPES.DATASET_GENERATION_PROGRESS,
+                    timestamp: new Date(),
+                    parameterId,
+                    currentDay: progress.currentDay,
+                    totalDays: progress.totalDays,
+                    progressPercentage:
+                      (progress.currentDay / progress.totalDays) * 100,
+                    gamesProcessed: progress.gamesCompleted || 0,
+                    playersActive: progress.playersActive || 0,
+                  } as DatasetGenerationProgressEvent);
+                }
+              }
+            : undefined;
+
+        // Run simulation
+        const simulationResults = await simulator.executeSimulation(
+          simulationConfig,
+          wrappedCallback
+        );
+
+        // Validate simulation results and emit validation event
+        const validation = this.validateSimulationResults(simulationResults);
+        if (this.eventBus) {
+          await this.eventBus.emit(EVENT_TYPES.DATASET_VALIDATION, {
+            type: EVENT_TYPES.DATASET_VALIDATION,
+            timestamp: new Date(),
+            parameterId,
+            isValid: validation.isValid,
+            errors: validation.errors,
+            qualityMetrics: {
+              totalGames: simulationResults.gameStats?.totalGames || 0,
+              totalPlayers: simulationResults.playerStats?.totalPlayers || 0,
+              revenueConsistency:
+                (simulationResults.revenueStats?.totalPlatformRevenue || 0) >= 0,
+            },
+          } as DatasetValidationEvent);
+        }
+
+        // Perform quality assurance checks
+        await this.performQualityAssurance(parameterId, simulationResults);
+
+        // Check for simulation success
+        if (!simulationResults.success) {
+          const generationTimeMs = performance.now() - startTime;
+          const failureResult: AdapterGenerationResult = {
+            combination,
+            success: false,
+            error:
+              simulationResults.error ||
+              "Simulation failed without specific error",
+            simulationResults,
+            generationTimeMs,
+          };
+
+          if (this.eventBus) {
+            await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+              type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+              timestamp: new Date(),
+              parameterId,
+              success: false,
+              durationMs: generationTimeMs,
+              recordCount: 0,
+              error: failureResult.error,
+            } as DatasetGenerationCompletedEvent);
+          }
+
+          return failureResult;
+        }
+
+        const generationTimeMs = performance.now() - startTime;
+        const outputPaths = generateFilePaths(
+          this.orchestratorConfig.outputDirectory,
+          combination
+        );
+        const recordCount = this.calculateRecordCount(simulationResults);
+        const dailySnapshots =
+          simulationResults.dailyAggregates ??
+          generateDailyAggregates(simulationResults);
+        debugSession = debugInterface?.endSession() ?? null;
+        const eventTraces = debugSession?.traces ?? [];
+
+        const datasetJson = serializeForJson(simulationResults);
+        const snapshotsJson = serializeForJson(dailySnapshots);
+        const eventsContent = formatEventTracesAsNdjson(eventTraces);
+        const datasetSizeBytes = Buffer.byteLength(datasetJson, "utf8");
+        const metadata = this.createDatasetMetadata(
           combination,
-          success: false,
-          error:
-            simulationResults.error ||
-            "Simulation failed without specific error",
           simulationResults,
-          generationTimeMs: performance.now() - startTime,
+          generationTimeMs,
+          datasetSizeBytes,
+          {
+            simulatorProfileName: profile.name,
+            poolingEnabled: assembly.poolingEnabled,
+            snapshotCount: dailySnapshots.length,
+            eventCount: eventTraces.length,
+            artifactPaths: {
+              dataset: outputPaths.datasetFile,
+              metadata: outputPaths.metadataFile,
+              dailySnapshots: outputPaths.snapshotsFile,
+              events: outputPaths.eventsFile,
+            },
+          }
+        );
+        const metadataJson = serializeForJson(metadata);
+
+        if (!this.orchestratorConfig.dryRun) {
+          await this.ensureDirectory(outputPaths.directory);
+          await Promise.all([
+            fs.writeFile(outputPaths.datasetFile, datasetJson, "utf8"),
+            fs.writeFile(outputPaths.metadataFile, metadataJson, "utf8"),
+            fs.writeFile(outputPaths.snapshotsFile, snapshotsJson, "utf8"),
+            fs.writeFile(outputPaths.eventsFile, eventsContent, "utf8"),
+          ]);
+        }
+
+        const successResult: AdapterGenerationResult = {
+          combination,
+          success: true,
+          simulationResults,
+          generationTimeMs,
+          outputPaths,
+          snapshotCount: dailySnapshots.length,
+          eventCount: eventTraces.length,
         };
 
-        // Emit completion event with failure
         if (this.eventBus) {
           await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
             type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
             timestamp: new Date(),
             parameterId,
-            success: false,
-            durationMs: result.generationTimeMs,
-            recordCount: 0,
-            error: result.error,
+            success: true,
+            durationMs: generationTimeMs,
+            recordCount,
+            outputPaths,
           } as DatasetGenerationCompletedEvent);
         }
 
-        return result;
+        return successResult;
+      } finally {
+        if (debugInterface) {
+          if (!debugSession) {
+            debugSession = debugInterface.endSession();
+          }
+          debugInterface.detach();
+        }
       }
-
-      // Generate output paths
-      const outputPaths = generateFilePaths(
-        this.orchestratorConfig.outputDirectory,
-        combination
-      );
-
-      const result: AdapterGenerationResult = {
-        combination,
-        success: true,
-        simulationResults,
-        generationTimeMs: performance.now() - startTime,
-        outputPaths,
-      };
-
-      // Emit successful completion event
-      if (this.eventBus) {
-        await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
-          type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-          timestamp: new Date(),
-          parameterId,
-          success: true,
-          durationMs: result.generationTimeMs,
-          recordCount: this.calculateRecordCount(simulationResults),
-          outputPaths,
-        } as DatasetGenerationCompletedEvent);
-      }
-
-      return result;
     } catch (error) {
       const result: AdapterGenerationResult = {
         combination,
@@ -449,6 +432,61 @@ export class DatasetOrchestrator {
   }
 
   /**
+   * Build simulator assembly using production factory defaults
+   */
+  private createSimulatorAssembly(
+    parameterId: string,
+    simulationConfig: SimulationConfig
+  ): SimulatorAssembly {
+    const simulationEventBus = this.eventBus ?? new EventBus();
+
+    return createProductionSimulator({
+      eventBus: simulationEventBus,
+      profileOverrides: {
+        name: `anchor-${parameterId}`,
+        config: {
+          durationDays: simulationConfig.durationDays,
+          initialPlayerCount: simulationConfig.initialPlayerCount,
+          dailySeed: simulationConfig.dailySeed,
+          charityPercentage: simulationConfig.charityPercentage,
+          playerStrategies: simulationConfig.playerStrategies,
+          initialDonationAmount: simulationConfig.initialDonationAmount,
+          maxSimulationTimeMs: simulationConfig.maxSimulationTimeMs,
+          enableProgressReporting: simulationConfig.enableProgressReporting,
+          growthModel: simulationConfig.growthModel,
+        },
+        runtime: {
+          collectDailySnapshots: true,
+        },
+      },
+      debug: {
+        enableEventTracing: true,
+        config: {
+          debugger: {
+            enabled: true,
+            includeData: true,
+            maxTraces: 10000,
+            logLevel: this.orchestratorConfig.verbose ? "info" : "warn",
+            enablePerformanceTracking: false,
+            enableEventFlowVisualization: false,
+          },
+          logger: {
+            enabled: false,
+          },
+          performanceMonitor: {
+            enabled: false,
+          },
+          autoStartMonitoring: false,
+        },
+      },
+    });
+  }
+
+  private async ensureDirectory(path: string): Promise<void> {
+    await fs.mkdir(path, { recursive: true });
+  }
+
+  /**
    * Generate deterministic seed from parameter combination
    */
   private generateSeed(combination: ParameterCombination): string {
@@ -509,12 +547,24 @@ export class DatasetOrchestrator {
     combination: ParameterCombination,
     simulationResults: SimulationResults,
     generationTimeMs: number,
-    datasetSizeBytes: number
+    datasetSizeBytes: number,
+    extras?: {
+      simulatorProfileName: string;
+      poolingEnabled: boolean;
+      snapshotCount: number;
+      eventCount: number;
+      artifactPaths: {
+        dataset: string;
+        metadata: string;
+        dailySnapshots: string;
+        events: string;
+      };
+    }
   ): DatasetMetadata {
     // Calculate record count from simulation results
     const recordCount = this.calculateRecordCount(simulationResults);
 
-    return {
+    const metadata: DatasetMetadata = {
       generationTimestamp: simulationResults.completedAt,
       parameters: combination,
       generationTimeMs,
@@ -523,6 +573,27 @@ export class DatasetOrchestrator {
       version: "1.0.0",
       generatorVersion: "orchestrator-v1.0.0",
     };
+
+    if (extras) {
+      metadata.runtime = {
+        simulatorProfileName: extras.simulatorProfileName,
+        poolingEnabled: extras.poolingEnabled,
+      };
+
+      metadata.artifacts = {
+        dataset: extras.artifactPaths.dataset,
+        metadata: extras.artifactPaths.metadata,
+        dailySnapshots: extras.artifactPaths.dailySnapshots,
+        events: extras.artifactPaths.events,
+      };
+
+      metadata.aggregates = {
+        dailySnapshotCount: extras.snapshotCount,
+        eventTraceCount: extras.eventCount,
+      };
+    }
+
+    return metadata;
   }
 
   /**
@@ -667,4 +738,77 @@ export class DatasetOrchestrator {
       },
     } as QualityAssuranceEvent);
   }
+}
+
+function serializeForJson(value: unknown): string {
+  return JSON.stringify(value, (_key, val) => sanitizeForJson(val), 2);
+}
+
+function sanitizeForJson(
+  value: unknown,
+  seen: WeakSet<object> = new WeakSet()
+): unknown {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "bigint") {
+    return Number(value);
+  }
+
+  if (typeof value === "number" && !Number.isFinite(value)) {
+    return 0;
+  }
+
+  if (value && typeof value === "object") {
+    if (Array.isArray(value)) {
+      if (seen.has(value)) {
+        return undefined;
+      }
+      seen.add(value);
+      const result = value.map((entry) => sanitizeForJson(entry, seen));
+      seen.delete(value);
+      return result;
+    }
+
+    if (seen.has(value)) {
+      return undefined;
+    }
+
+    seen.add(value);
+    const result: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value)) {
+      if (typeof entry === "function" || entry === undefined) {
+        continue;
+      }
+      result[key] = sanitizeForJson(entry, seen);
+    }
+    seen.delete(value);
+    return result;
+  }
+
+  return value;
+}
+
+function formatEventTracesAsNdjson(traces: EventTrace[]): string {
+  if (traces.length === 0) {
+    return "";
+  }
+
+  return traces
+    .map((trace) =>
+      JSON.stringify({
+        id: trace.id,
+        type: trace.eventType,
+        timestamp: new Date(trace.timestamp).toISOString(),
+        durationMs: trace.duration ?? null,
+        status: trace.status,
+        source: trace.source ?? null,
+        correlationId: trace.correlationId ?? null,
+        parentEventId: trace.parentEventId ?? null,
+        children: trace.children ?? [],
+        data: sanitizeForJson(trace.data),
+      })
+    )
+    .join("\n");
 }

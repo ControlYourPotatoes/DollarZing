@@ -50,8 +50,10 @@ export function generateFilePaths(outputDirectory: string, combination: Paramete
   
   return {
     directory: basePath,
-    datasetFile: `${basePath}/dataset.json`,
-    metadataFile: `${basePath}/metadata.json`
+    datasetFile: `${basePath}/generated-datasets/dataset.json`,
+    metadataFile: `${basePath}/generated-datasets/metadata.json`,
+    snapshotsFile: `${basePath}/generated-datasets/daily-snapshots.json`,
+    eventsFile: `${basePath}/generated-datasets/events.ndjson`
   };
 }
 

@@ -23,6 +23,10 @@ import {
   buildRuntimeOptions,
   isSimulationProfile,
 } from "./simulation-profiles";
+import {
+  generateDailyAggregates,
+  type DailyAggregateSnapshot,
+} from "./post-processing/daily-aggregator";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -128,6 +132,7 @@ export interface SimulationResults {
   revenueStats: RevenueStatistics;
   gameStats: GameStatistics;
   dailyResults: DailyResult[];
+  dailyAggregates?: DailyAggregateSnapshot[];
   completedAt: Date;
 }
 
@@ -332,6 +337,7 @@ export class GameEngineSimulator {
         revenueStats: this.getEmptyRevenueStats(),
         gameStats: this.getEmptyGameStats(),
         dailyResults: [],
+        dailyAggregates: [],
         completedAt: new Date(),
       };
 
@@ -426,7 +432,7 @@ export class GameEngineSimulator {
     // Generate final results
     const simulationDurationMs = performance.now() - this.startTime;
 
-    const results = {
+    const results: SimulationResults = {
       success: true,
       simulationDurationMs,
       config: this.config,
@@ -441,6 +447,10 @@ export class GameEngineSimulator {
       dailyResults,
       completedAt: new Date(),
     };
+
+    if (this.runtimeOptions.collectDailySnapshots) {
+      results.dailyAggregates = generateDailyAggregates(results);
+    }
 
     // Emit SIMULATION_COMPLETED event
     await this.eventBus.emit("SIMULATION_COMPLETED", {

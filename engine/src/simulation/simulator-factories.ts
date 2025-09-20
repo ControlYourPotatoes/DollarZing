@@ -8,6 +8,11 @@ import {
   type SimulationRuntimeOptions,
 } from "./simulation-profiles";
 import { EventBus } from "../events/event-bus";
+import {
+  createDebugInterface,
+  type DebugInterfaceConfig,
+  type EventDebugInterface,
+} from "../events/debug/index";
 import { GameMatchingEngine } from "../core/game-matching-engine";
 import { ScoringEngine } from "../core/scoring-engine";
 import { RevenueCalculator } from "../core/revenue-calculator";
@@ -47,6 +52,7 @@ export interface SimulatorAssembly {
   eventBus: EventBus;
   components: SimulatorComponents;
   poolingEnabled: boolean;
+  debugInterface?: EventDebugInterface;
 }
 
 export interface SimulatorFactoryOptions {
@@ -55,11 +61,26 @@ export interface SimulatorFactoryOptions {
   enablePooling?: boolean;
   disablePooling?: boolean;
   performanceOverrides?: Partial<PerformanceConfig>;
+  debug?: SimulatorDebugOptions;
+}
+
+export interface SimulatorDebugOptions {
+  enableEventTracing: boolean;
+  config?: Partial<DebugInterfaceConfig>;
+  autoStartSession?: boolean;
+  sessionName?: string;
 }
 
 interface RuntimeDefaults {
   poolingDefault: boolean;
-  runtime: Pick<SimulationRuntimeOptions, "attachDebugger" | "enableSanityMetrics" | "virtualDollarsPerPlayer">;
+  runtime: Pick<
+    SimulationRuntimeOptions,
+    | "attachDebugger"
+    | "enableSanityMetrics"
+    | "virtualDollarsPerPlayer"
+    | "collectDailySnapshots"
+    | "collectEventTraces"
+  >;
 }
 
 export function createDevelopmentSimulator(
@@ -72,6 +93,8 @@ export function createDevelopmentSimulator(
         attachDebugger: true,
         enableSanityMetrics: true,
         virtualDollarsPerPlayer: 1,
+        collectDailySnapshots: false,
+        collectEventTraces: false,
       },
     },
     options,
@@ -89,6 +112,8 @@ export function createProductionSimulator(
         attachDebugger: false,
         enableSanityMetrics: false,
         virtualDollarsPerPlayer: 1,
+        collectDailySnapshots: false,
+        collectEventTraces: false,
       },
     },
     options,
@@ -106,6 +131,19 @@ function assembleSimulator(
 
   const profile = createProfile(defaults, poolingEnabled, options.profileOverrides);
   const eventBus = options.eventBus ?? new EventBus();
+  const debugInterface =
+    options.debug?.enableEventTracing === true
+      ? createDebugInterface(options.debug.config)
+      : undefined;
+
+  if (debugInterface) {
+    debugInterface.attachToEventBus(eventBus);
+    if (options.debug?.autoStartSession) {
+      debugInterface.startSession(
+        options.debug.sessionName ?? "simulator-debug-session"
+      );
+    }
+  }
 
   const { virtualDollarFactory, gameSessionFactory } = createFactories(
     poolingEnabled,
@@ -152,6 +190,7 @@ function assembleSimulator(
       playerManager,
       dayProcessor,
     },
+    ...(debugInterface ? { debugInterface } : {}),
   };
 }
 
@@ -177,11 +216,21 @@ function createProfile(
   poolingEnabled: boolean,
   overrides?: SimulationProfileOverrides
 ): SimulationProfile {
+  const runtimeOverrides = overrides?.runtime ?? {};
   const runtime: SimulationRuntimeOptions = {
-    attachDebugger: defaults.runtime.attachDebugger,
-    enableSanityMetrics: defaults.runtime.enableSanityMetrics,
-    virtualDollarsPerPlayer: defaults.runtime.virtualDollarsPerPlayer,
-    ...(overrides?.runtime ?? {}),
+    attachDebugger:
+      runtimeOverrides.attachDebugger ?? defaults.runtime.attachDebugger,
+    enableSanityMetrics:
+      runtimeOverrides.enableSanityMetrics ?? defaults.runtime.enableSanityMetrics,
+    virtualDollarsPerPlayer:
+      runtimeOverrides.virtualDollarsPerPlayer ??
+      defaults.runtime.virtualDollarsPerPlayer,
+    collectDailySnapshots:
+      runtimeOverrides.collectDailySnapshots ??
+      defaults.runtime.collectDailySnapshots,
+    collectEventTraces:
+      runtimeOverrides.collectEventTraces ??
+      defaults.runtime.collectEventTraces,
     enablePooling: poolingEnabled,
   };
 

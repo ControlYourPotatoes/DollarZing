@@ -8,6 +8,8 @@ export interface SimulationRuntimeOptions {
   attachDebugger: boolean;
   virtualDollarsPerPlayer: number;
   enableSanityMetrics: boolean;
+  collectDailySnapshots: boolean;
+  collectEventTraces: boolean;
 }
 
 export interface SimulationProfile {
@@ -48,6 +50,8 @@ export const DEFAULT_RUNTIME_OPTIONS: SimulationRuntimeOptions = {
   attachDebugger: false,
   virtualDollarsPerPlayer: 1,
   enableSanityMetrics: true,
+  collectDailySnapshots: false,
+  collectEventTraces: false,
 };
 
 /**
@@ -87,6 +91,12 @@ export function buildRuntimeOptions(
     enableSanityMetrics:
       overrides.enableSanityMetrics ??
       DEFAULT_RUNTIME_OPTIONS.enableSanityMetrics,
+    collectDailySnapshots:
+      overrides.collectDailySnapshots ??
+      DEFAULT_RUNTIME_OPTIONS.collectDailySnapshots,
+    collectEventTraces:
+      overrides.collectEventTraces ??
+      DEFAULT_RUNTIME_OPTIONS.collectEventTraces,
   };
 }
 

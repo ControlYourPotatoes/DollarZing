@@ -104,6 +104,7 @@ export function createMockDatasetResults(
         simulationCompleted: true,
       },
       dailyResults: [],
+      dailyAggregates: [],
       completedAt: new Date(),
     };
 
@@ -123,10 +124,15 @@ export function createMockDatasetResults(
     }
 
     if (datasetResult.outputPath) {
+      const directory = `test/anchor-datasets/${generateDirectoryName(
+        combination
+      )}`;
       result.outputPaths = {
-        directory: `test/anchor-datasets/${generateDirectoryName(combination)}`,
+        directory,
         datasetFile: datasetResult.outputPath,
         metadataFile: datasetResult.metadataPath || "",
+        snapshotsFile: `${directory}/daily-snapshots.json`,
+        eventsFile: `${directory}/events.ndjson`,
       };
     }
 

@@ -94,6 +94,20 @@ export interface DatasetMetadata {
   recordCount: number;
   version: string;
   generatorVersion: string;
+  runtime?: {
+    simulatorProfileName: string;
+    poolingEnabled: boolean;
+  };
+  artifacts?: {
+    dataset: string;
+    metadata: string;
+    dailySnapshots: string;
+    events: string;
+  };
+  aggregates?: {
+    dailySnapshotCount: number;
+    eventTraceCount: number;
+  };
 }
 
 // File naming utilities (used by output organization)
