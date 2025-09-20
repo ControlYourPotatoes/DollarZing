@@ -30,3 +30,25 @@
   - [x] 5.1 Write integration tests for multi-day simulations exercising new pipeline
   - [x] 5.2 Update developer documentation and spec references
   - [x] 5.3 Verify all tests pass
+
+
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_5350_1758349275988
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-89-77 (vd_1758349274575_cqvppzntd) at level 4
+[PlayerProgressionHandler] Loser player-new-89-50 eliminated at Level 4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_5351_1758349276012
+[RevenueTrackingHandler] Processed cash-out revenue: 14.4 for player player-new-89-77
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-89-77 (vd_1758349274575_cqvppzntd) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-89-50 (vd_1758349274575_pqpw3b9yb) at level 4
+[PlayerProgressionHandler] Loser player-new-89-79 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_5321_1758349275303
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-89-80
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-89-7 (vd_1758349274574_kows3ois3) at level 2
+    growth-15_risk-low_charity-10: day 90/90 (100.0%)
+  ⚠ Failed: Maximum call stack size exceeded
+
+✅ Finished 0/1 combinations in 88.2s
+Output directory: /workspace/engine/engine/generated-datasets
+
+⚠ Failures:
+  - growth-15_risk-low_charity-10: Maximum call stack size exceeded
+> 
