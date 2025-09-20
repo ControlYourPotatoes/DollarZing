@@ -92,6 +92,7 @@ export function createMockDatasetResults(
         totalGames: 4000,
         averageGamesPerDay: 11.0,
         totalVirtualDollars: 8000,
+        totalRunsCreated: 8000,
         completedRuns: 1200,
         activeRuns: 400,
         jackpotsWon: 15,

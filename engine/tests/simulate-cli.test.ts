@@ -42,6 +42,7 @@ vi.mock("../cli/src/commands/shared/simulation-runner.js", () => {
           totalGames: 0,
           averageGamesPerDay: 0,
           totalVirtualDollars: 0,
+          totalRunsCreated: 0,
           completedRuns: 0,
           activeRuns: 0,
           jackpotsWon: 0,

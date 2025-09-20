@@ -1,0 +1,2220 @@
+[RevenueTrackingHandler] Revenue calculator integration validated
+DEBUG: [DayProcessor] ===== PROCESSING DAY 0 =====
+DEBUG: Day 0, Adding 90 new players via event-driven growth
+[PlayerProgressionHandler] Loser player-new-0-5 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_3_1758247039839
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-4
+[PlayerProgressionHandler] Loser player-new-0-7 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_4_1758247039839
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-6
+[PlayerProgressionHandler] Loser player-new-0-9 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-8 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_5_1758247039839
+[PlayerProgressionHandler] Loser player-new-0-10 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-11 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_6_1758247039842
+[PlayerProgressionHandler] Loser player-new-0-3 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_2_1758247039838
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-8 (vd_1758247039839_5dygph80w) at level 2
+[PlayerProgressionHandler] Loser player-new-0-16 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-8 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-0-11 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_9_1758247039847
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-17
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_10_1758247039848
+[PlayerProgressionHandler] Loser player-new-0-18 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-19 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_11_1758247039848
+[PlayerProgressionHandler] Loser player-new-0-0 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_1_1758247039838
+[PlayerProgressionHandler] Loser player-new-0-23 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_13_1758247039850
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-22
+[PlayerProgressionHandler] Loser player-new-0-25 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-24 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_14_1758247039850
+[PlayerProgressionHandler] Loser player-new-0-28 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_16_1758247039852
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-29
+[PlayerProgressionHandler] Loser player-new-0-31 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-24 (vd_1758247039850_mjh7gatnc) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_17_1758247039853
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-30
+[PlayerProgressionHandler] Loser player-new-0-32 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-33 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_18_1758247039855
+[PlayerProgressionHandler] Loser player-new-0-35 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_20_1758247039855
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-34
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-11 (vd_1758247039840_9wcb7z8kg) at level 3
+[PlayerProgressionHandler] Loser player-new-0-38 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-39 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_22_1758247039856
+[PlayerProgressionHandler] Loser player-new-0-41 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-26 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_23_1758247039858
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-40
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_15_1758247039852
+[PlayerProgressionHandler] Loser player-new-0-43 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-27
+[PlayerProgressionHandler] Winner player-new-0-42 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_24_1758247039859
+[PlayerProgressionHandler] Loser player-new-0-44 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_25_1758247039860
+[PlayerProgressionHandler] Loser player-new-0-13 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-45
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_7_1758247039845
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-12
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-39 (vd_1758247039856_4odrvccpg) at level 2
+[PlayerProgressionHandler] Loser player-new-0-39 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-0-20 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-33 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_28_1758247039861
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_12_1758247039850
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-21
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-42 (vd_1758247039858_9zo785v2n) at level 2
+[PlayerProgressionHandler] Loser player-new-0-52 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-19 (vd_1758247039848_zeagoyc06) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_30_1758247039863
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-53
+[PlayerProgressionHandler] Loser player-new-0-54 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-33 (vd_1758247039854_8hyjd8cr3) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_31_1758247039863
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-55
+[PlayerProgressionHandler] Loser player-new-0-56 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_32_1758247039865
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-57
+[PlayerProgressionHandler] Loser player-new-0-59 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-58 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_34_1758247039866
+[PlayerProgressionHandler] Loser player-new-0-61 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_35_1758247039866
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-60
+[PlayerProgressionHandler] Loser player-new-0-63 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_36_1758247039867
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-62
+[PlayerProgressionHandler] Loser player-new-0-65 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-11 (vd_1758247039840_9wcb7z8kg) at level 3
+[PlayerProgressionHandler] Winner player-new-0-64 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_37_1758247039868
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-58 (vd_1758247039865_kmc2qfgnm) at level 2
+[PlayerProgressionHandler] Loser player-new-0-68 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_39_1758247039870
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-69
+[PlayerProgressionHandler] Loser player-new-0-58 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-0-42 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-0-70 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_40_1758247039870
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_41_1758247039871
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-71
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-64 (vd_1758247039867_w1o6h8084) at level 2
+[PlayerProgressionHandler] Loser player-new-0-33 eliminated at Level 3
+[PlayerProgressionHandler] Loser player-new-0-73 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-11 advanced from Level 3 to Level 4, winnings: 14.4
+[PlayerProgressionHandler] Winner player-new-0-72 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_33_1758247039865
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_42_1758247039872
+[PlayerProgressionHandler] Loser player-new-0-75 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_43_1758247039873
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-74
+[PlayerProgressionHandler] Loser player-new-0-77 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_44_1758247039874
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-76
+[PlayerProgressionHandler] Loser player-new-0-78 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-79 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_45_1758247039876
+[PlayerProgressionHandler] Loser player-new-0-66 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-47 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-46 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-72 (vd_1758247039871_jhxzzwex5) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_38_1758247039869
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_26_1758247039860
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-67
+[PlayerProgressionHandler] Loser player-new-0-37 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-86 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-36 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-0-87 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_21_1758247039856
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_50_1758247039881
+[PlayerProgressionHandler] Loser player-new-0-89 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_51_1758247039882
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-88
+[PlayerProgressionHandler] Loser player-new-0-1 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_52_1758247039883
+[PlayerProgressionHandler] Loser player-new-0-46 eliminated at Level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-0
+[PlayerProgressionHandler] Loser player-new-0-3 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-79 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Winner player-new-0-2 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_53_1758247039884
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_54_1758247039884
+[PlayerProgressionHandler] Loser player-new-0-4 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_55_1758247039884
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-5
+[PlayerProgressionHandler] Loser player-new-0-7 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-87 (vd_1758247039881_iv2c91cjo) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_56_1758247039884
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-11 (vd_1758247039840_9wcb7z8kg) at level 4
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-6
+[PlayerProgressionHandler] Loser player-new-0-11 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-10 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_58_1758247039885
+[PlayerProgressionHandler] Loser player-new-0-12 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-13 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-2 (vd_1758247039882_omul8mptn) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_59_1758247039886
+[PlayerProgressionHandler] Loser player-new-0-84 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-14 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-85 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-0-15 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_49_1758247039880
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_61_1758247039887
+[PlayerProgressionHandler] Loser player-new-0-17 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_62_1758247039888
+[PlayerProgressionHandler] Loser player-new-0-42 eliminated at Level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-79 (vd_1758247039876_da1vl949q) at level 3
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-16
+[PlayerProgressionHandler] Winner player-new-0-79 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_64_1758247039890
+[PlayerProgressionHandler] Loser player-new-0-51 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-50 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_29_1758247039861
+[PlayerProgressionHandler] Loser player-new-0-21 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-20 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_65_1758247039890
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-10 (vd_1758247039882_wgvum9cw3) at level 2
+[PlayerProgressionHandler] Loser player-new-0-24 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-25 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_67_1758247039892
+[PlayerProgressionHandler] Loser player-new-0-72 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-13 (vd_1758247039882_kheca05dh) at level 2
+[PlayerProgressionHandler] Loser player-new-0-27 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_48_1758247039879
+[PlayerProgressionHandler] Winner player-new-0-26 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-0-64
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-85 (vd_1758247039880_m9l36x3gb) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-15 (vd_1758247039882_76qqe2oos) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_68_1758247039893
+[PlayerProgressionHandler] Loser player-new-0-29 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-13 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-0-28 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_70_1758247039894
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_71_1758247039896
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-0-85
+[PlayerProgressionHandler] Loser player-new-0-30 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-31 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-20 (vd_1758247039882_lpfpeubqe) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-50 (vd_1758247039861_4uhfs5vmi) at level 2
+[PlayerProgressionHandler] Loser player-new-0-79 eliminated at Level 4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_72_1758247039896
+[PlayerProgressionHandler] Winner player-new-0-11 advanced from Level 4 to Level 5, winnings: 28.8
+[PlayerProgressionHandler] Loser player-new-0-15 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-46 (vd_1758247039860_iz91vc8ga) at level 2
+[PlayerProgressionHandler] Winner player-new-0-50 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_74_1758247039898
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-25 (vd_1758247039882_jml80ibn) at level 2
+[PlayerProgressionHandler] Loser player-new-0-36 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_76_1758247039899
+[PlayerProgressionHandler] Loser player-new-0-34 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-87 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Winner player-new-0-35 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_60_1758247039886
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_75_1758247039898
+[PlayerProgressionHandler] Loser player-new-0-36 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_77_1758247039899
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-37
+[PlayerProgressionHandler] Loser player-new-0-38 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-41 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-25 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-0-39 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-0-20 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_79_1758247039901
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_80_1758247039902
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-28 (vd_1758247039882_rjzdarfpy) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_78_1758247039901
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-40
+[PlayerProgressionHandler] Loser player-new-0-19 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_63_1758247039889
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-18
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-36 (vd_1758247039856_datg23ddi) at level 2
+[PlayerProgressionHandler] Loser player-new-0-43 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-50 (vd_1758247039861_4uhfs5vmi) at level 3
+[PlayerProgressionHandler] Winner player-new-0-42 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_82_1758247039904
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-87 (vd_1758247039881_iv2c91cjo) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-35 (vd_1758247039882_c4eqy2l40) at level 2
+[PlayerProgressionHandler] Loser player-new-0-45 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-44 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-0-2 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-0-10 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_83_1758247039905
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_69_1758247039893
+[PlayerProgressionHandler] Loser player-new-0-50 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-0-87 advanced from Level 3 to Level 4, winnings: 14.4
+[PlayerProgressionHandler] Loser player-new-0-47 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_86_1758247039908
+[PlayerProgressionHandler] Winner player-new-0-46 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-0-49 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_84_1758247039908
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_27_1758247039861
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-48
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-39 (vd_1758247039882_4h5jdvoq4) at level 2
+[PlayerProgressionHandler] Loser player-new-0-49 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_87_1758247039909
+[PlayerProgressionHandler] Loser player-new-0-51 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-48
+[PlayerProgressionHandler] Winner player-new-0-50 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_88_1758247039910
+[PlayerProgressionHandler] Loser player-new-0-52 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_89_1758247039912
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-53
+[PlayerProgressionHandler] Loser player-new-0-55 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-54 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_90_1758247039913
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-33 (vd_1758247039854_8hyjd8cr3) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-10 (vd_1758247039882_wgvum9cw3) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-44 (vd_1758247039882_sfy5bhgn0) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-46 (vd_1758247039882_83sml2chj) at level 2
+[PlayerProgressionHandler] Loser player-new-0-56 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-19 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_91_1758247039914
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-79 (vd_1758247039876_da1vl949q) at level 4
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-57
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_19_1758247039855
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-0-24
+[PlayerProgressionHandler] Loser player-new-0-9 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-61 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_57_1758247039885
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_95_1758247039918
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-8
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-60
+[PlayerProgressionHandler] Loser player-new-0-44 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-0-62 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-46 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-50 (vd_1758247039882_li5x81hhb) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_96_1758247039919
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_97_1758247039919
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-63
+[PlayerProgressionHandler] Loser player-new-0-65 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-64 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_98_1758247039920
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-54 (vd_1758247039882_w5h6eohgu) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-79 (vd_1758247039876_da1vl949q) at level 4
+[PlayerProgressionHandler] Loser player-new-0-66 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_99_1758247039921
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-67
+[PlayerProgressionHandler] Loser player-new-0-68 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_100_1758247039922
+[PlayerProgressionHandler] Loser player-new-0-14 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-69
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-20 (vd_1758247039882_lpfpeubqe) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_8_1758247039846
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-15
+[PlayerProgressionHandler] Loser player-new-0-71 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_101_1758247039923
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-70
+[PlayerProgressionHandler] Loser player-new-0-73 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-72 advanced from Level 1 to Level 2, winnings: 3.6
+DEBUG: Day 0 - Pool stats - Total: 49, Available: 11
+DEBUG: Day 0 - Matchmaking will be handled by MatchmakingEventHandler through events
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_103_1758247039924
+[PlayerProgressionHandler] Loser player-new-0-74 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_104_1758247039925
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-46 (vd_1758247039882_83sml2chj) at level 3
+[PlayerProgressionHandler] Loser player-new-0-26 eliminated at Level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-75
+[PlayerProgressionHandler] Winner player-new-0-28 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-11 (vd_1758247039840_9wcb7z8kg) at level 5
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_81_1758247039904
+[PlayerProgressionHandler] Loser player-new-0-82 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-64 (vd_1758247039882_g16qwigie) at level 2
+[PlayerProgressionHandler] Loser player-new-0-76 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-83 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_47_1758247039878
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_105_1758247039926
+[PlayerProgressionHandler] Loser player-new-0-39 eliminated at Level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-77
+[PlayerProgressionHandler] Loser player-new-0-79 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-42 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Winner player-new-0-78 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-87 (vd_1758247039881_iv2c91cjo) at level 4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_92_1758247039914
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_106_1758247039928
+[PlayerProgressionHandler] Loser player-new-0-81 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_107_1758247039929
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-80
+[PlayerProgressionHandler] Loser player-new-0-35 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-0-31 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-0-82 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_85_1758247039908
+[PlayerProgressionHandler] Winner player-new-0-83 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_108_1758247039929
+[PlayerProgressionHandler] Loser player-new-0-84 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-85 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-72 (vd_1758247039882_5k5902ggt) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_109_1758247039930
+[PlayerProgressionHandler] Loser player-new-0-22 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-0-86 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-23 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-0-87 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_66_1758247039891
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_110_1758247039931
+[PlayerProgressionHandler] Loser player-new-0-88 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-28 (vd_1758247039882_rjzdarfpy) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_111_1758247039932
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-89
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-42 (vd_1758247039882_mcze5dozu) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-78 (vd_1758247039882_ipq86rjkw) at level 2
+[PlayerProgressionHandler] Loser player-new-0-54 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-0-28 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-0-50 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_102_1758247039923
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_113_1758247039934
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-0-46
+[PlayerProgressionHandler] Loser player-new-0-83 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-31 (vd_1758247039882_w8xh61dn0) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-31 (vd_1758247039882_w8xh61dn0) at level 3
+[PlayerProgressionHandler] Winner player-new-0-78 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_114_1758247039937
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-83 (vd_1758247039882_a91jryz2f) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-85 (vd_1758247039882_doi8hyt43) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-87 (vd_1758247039882_e0r020xre) at level 2
+[PlayerProgressionHandler] Loser player-new-0-42 eliminated at Level 3
+[PlayerProgressionHandler] Loser player-new-0-33 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-31 advanced from Level 3 to Level 4, winnings: 14.4
+[PlayerProgressionHandler] Winner player-new-0-32 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_115_1758247039939
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_73_1758247039897
+[PlayerProgressionHandler] Loser player-new-0-85 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-0-87 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-0-20 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-0-23 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Winner player-new-0-10 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_116_1758247039940
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_117_1758247039941
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_94_1758247039916
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-0-83
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-26 (vd_1758247039882_h2wfd3n96) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-50 (vd_1758247039882_li5x81hhb) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-78 (vd_1758247039882_ipq86rjkw) at level 3
+[PlayerProgressionHandler] Loser player-new-0-64 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_112_1758247039932
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-0-72
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-31 (vd_1758247039882_w8xh61dn0) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-32 (vd_1758247039882_lcd2g2fsj) at level 2
+[PlayerProgressionHandler] Loser player-new-0-58 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-23 (vd_1758247039882_kvlxz85n9) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-10 (vd_1758247039882_wgvum9cw3) at level 4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_93_1758247039915
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-0-59
+[PlayerProgressionHandler] Loser player-new-0-87 eliminated at Level 4
+[PlayerProgressionHandler] Winner player-new-0-31 advanced from Level 4 to Level 5, winnings: 28.8
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_119_1758247039946
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-83 (vd_1758247039878_3skzxi05d) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-31 (vd_1758247039882_w8xh61dn0) at level 5
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-42 (vd_1758247039882_mcze5dozu) at level 3
+[PlayerProgressionHandler] Loser player-new-0-11 eliminated at Level 5
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_120_1758247039951
+[RevenueTrackingHandler] Processed cash-out revenue: 28.8 for player player-new-0-31
+[PlayerProgressionHandler] Loser player-new-0-81 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-0-80 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_46_1758247039877
+[PlayerProgressionHandler] Loser player-new-0-50 eliminated at Level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_118_1758247039944
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-0-78
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-23 (vd_1758247039882_kvlxz85n9) at level 3
+[PlayerProgressionHandler] Loser player-new-0-32 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_121_1758247039953
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-0-80
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-80 (vd_1758247039877_3983x8mav) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-42 (vd_1758247039858_9zo785v2n) at level 3
+DEBUG: [DayProcessor] ===== PROCESSING DAY 1 =====
+DEBUG: Day 1, Adding 75 new players via event-driven growth
+[PlayerProgressionHandler] Loser player-new-1-4 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_124_1758247039957
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-5
+[PlayerProgressionHandler] Loser player-new-1-7 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-6 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_125_1758247039957
+[PlayerProgressionHandler] Loser player-new-1-9 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_126_1758247039957
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-8
+[PlayerProgressionHandler] Loser player-new-1-12 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-13 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_128_1758247039957
+[PlayerProgressionHandler] Loser player-new-1-1 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-0 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_122_1758247039957
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-6 (vd_1758247039957_b9ugav52z) at level 2
+[PlayerProgressionHandler] Loser player-new-1-17 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-16 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_130_1758247039958
+[PlayerProgressionHandler] Loser player-new-1-18 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_131_1758247039960
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-19
+[PlayerProgressionHandler] Loser player-new-1-21 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-23 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_132_1758247039960
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_133_1758247039960
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-20
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-22
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-0 (vd_1758247039957_1yxw8o25k) at level 2
+[PlayerProgressionHandler] Loser player-new-1-25 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-24 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_135_1758247039961
+[PlayerProgressionHandler] Loser player-new-1-29 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-15 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-28 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-1-31 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_137_1758247039962
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_129_1758247039958
+[PlayerProgressionHandler] Winner player-new-1-30 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-14
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_139_1758247039962
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-24 (vd_1758247039960_0srqoamuf) at level 2
+[PlayerProgressionHandler] Loser player-new-1-35 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-34 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_141_1758247039964
+[PlayerProgressionHandler] Loser player-new-1-36 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_142_1758247039965
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-37
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-30 (vd_1758247039962_5eoeufjuy) at level 2
+[PlayerProgressionHandler] Loser player-new-1-41 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-24 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-1-28 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_144_1758247039965
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-40
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_146_1758247039967
+[PlayerProgressionHandler] Loser player-new-1-47 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-13 (vd_1758247039957_1ulycwqf1) at level 2
+[PlayerProgressionHandler] Loser player-new-1-34 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-1-30 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_148_1758247039968
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-46
+[PlayerProgressionHandler] Loser player-new-1-49 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_149_1758247039968
+[PlayerProgressionHandler] Loser player-new-1-32 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_150_1758247039969
+[PlayerProgressionHandler] Winner player-new-1-33 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-48
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_140_1758247039963
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-16 (vd_1758247039958_slybkidl6) at level 2
+[PlayerProgressionHandler] Loser player-new-1-53 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_152_1758247039970
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-52
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-33 (vd_1758247039963_4w23fb6g4) at level 2
+[PlayerProgressionHandler] Loser player-new-1-59 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-61 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_156_1758247039971
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-58
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_157_1758247039972
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-34 (vd_1758247039963_nzwhxnsnr) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-60
+[PlayerProgressionHandler] Loser player-new-1-11 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_127_1758247039957
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-10
+[PlayerProgressionHandler] Loser player-new-1-63 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_158_1758247039974
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-62
+[PlayerProgressionHandler] Loser player-new-1-64 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_159_1758247039974
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-65
+[PlayerProgressionHandler] Loser player-new-1-67 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-50 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-51 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_160_1758247039975
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_151_1758247039969
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-66
+[PlayerProgressionHandler] Loser player-new-1-2 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-3 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_123_1758247039957
+[PlayerProgressionHandler] Loser player-new-1-54 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-71 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-70 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_154_1758247039971
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-55
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_162_1758247039975
+[PlayerProgressionHandler] Loser player-new-1-16 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-1-72 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-57 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-0 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_138_1758247039962
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_163_1758247039977
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_155_1758247039971
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-73
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-56
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-51 (vd_1758247039969_zgho0goo0) at level 2
+[PlayerProgressionHandler] Loser player-new-1-1 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-2 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_165_1758247039978
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-3 (vd_1758247039957_00vknsc5s) at level 2
+[PlayerProgressionHandler] Loser player-new-1-6 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_167_1758247039979
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-70 (vd_1758247039975_b3lh5tx9n) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-5
+[PlayerProgressionHandler] Loser player-new-1-7 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-51 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-1-8 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-1-33 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_169_1758247039980
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_168_1758247039980
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-0 (vd_1758247039957_1yxw8o25k) at level 3
+[PlayerProgressionHandler] Loser player-new-1-9 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-10 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_170_1758247039980
+[PlayerProgressionHandler] Loser player-new-1-12 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-28 (vd_1758247039962_n3jvd4ro4) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_171_1758247039981
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-11
+[PlayerProgressionHandler] Loser player-new-1-42 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-43 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_145_1758247039967
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-2 (vd_1758247039977_gszufgftw) at level 2
+[PlayerProgressionHandler] Loser player-new-1-13 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-0 eliminated at Level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_173_1758247039982
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-14
+[PlayerProgressionHandler] Loser player-new-1-16 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_174_1758247039983
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-1-30
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_175_1758247039983
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-15
+[PlayerProgressionHandler] Loser player-new-1-17 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-18 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_176_1758247039984
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-8 (vd_1758247039977_o22rcyqcu) at level 2
+[PlayerProgressionHandler] Loser player-new-1-20 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-33 (vd_1758247039963_4w23fb6g4) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_177_1758247039984
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-19
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-10 (vd_1758247039977_z4s7iwgml) at level 2
+[PlayerProgressionHandler] Loser player-new-1-22 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_178_1758247039985
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-21
+[PlayerProgressionHandler] Loser player-new-1-3 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-8 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-1-2 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-1-24 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-23 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_166_1758247039978
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_179_1758247039986
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_180_1758247039986
+[PlayerProgressionHandler] Loser player-new-1-68 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-26 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_161_1758247039975
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_181_1758247039988
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-69
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-25
+[PlayerProgressionHandler] Loser player-new-1-27 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-26 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-28 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-1-27 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_182_1758247039988
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_136_1758247039961
+[PlayerProgressionHandler] Loser player-new-1-43 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-1-38 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-39 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_183_1758247039989
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-1-10
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_143_1758247039965
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-18 (vd_1758247039977_woutl932h) at level 2
+[PlayerProgressionHandler] Loser player-new-1-32 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_185_1758247039991
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-31
+[PlayerProgressionHandler] Loser player-new-1-70 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-1-33 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-3 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Winner player-new-1-34 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-23 (vd_1758247039977_cmj5tpljm) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_172_1758247039981
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_186_1758247039992
+[PlayerProgressionHandler] Loser player-new-1-37 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_188_1758247039993
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-38
+[PlayerProgressionHandler] Loser player-new-1-40 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-2 eliminated at Level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-28 (vd_1758247039977_mr00tz6s9) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-27 (vd_1758247039961_kigexdo8a) at level 2
+[PlayerProgressionHandler] Winner player-new-1-33 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_189_1758247039994
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_190_1758247039995
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-39
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-39 (vd_1758247039965_e6dz4rsnc) at level 2
+[PlayerProgressionHandler] Loser player-new-1-42 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_192_1758247039996
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-41
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-3 (vd_1758247039957_00vknsc5s) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-34 (vd_1758247039977_uw721ipma) at level 2
+[PlayerProgressionHandler] Loser player-new-1-46 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_195_1758247039998
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-45
+[PlayerProgressionHandler] Loser player-new-1-49 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-50 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_197_1758247040000
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-33 (vd_1758247039963_4w23fb6g4) at level 4
+[PlayerProgressionHandler] Loser player-new-1-28 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-0-23 advanced from Level 3 to Level 4, winnings: 14.4
+[PlayerProgressionHandler] Loser player-new-1-34 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_153_1758247039970
+[PlayerProgressionHandler] Loser player-new-1-52 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_198_1758247040001
+[PlayerProgressionHandler] Winner player-new-1-51 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-1-39
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_199_1758247040001
+[PlayerProgressionHandler] Loser player-new-1-53 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_200_1758247040001
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-54
+[PlayerProgressionHandler] Loser player-new-1-56 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-74 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-0 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_201_1758247040003
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-55
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_164_1758247039977
+[PlayerProgressionHandler] Loser player-new-1-6 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-2 (vd_1758247039977_gszufgftw) at level 3
+[PlayerProgressionHandler] Loser player-new-1-58 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-13 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Winner player-new-1-57 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_134_1758247039960
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_203_1758247040004
+[PlayerProgressionHandler] Loser player-new-1-59 eliminated at Level 1
+DEBUG: Day 1 - Pool stats - Total: 45, Available: 9
+DEBUG: Day 1 - Matchmaking will be handled by MatchmakingEventHandler through events
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_204_1758247040005
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-60
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-50 (vd_1758247039977_2n34czgiz) at level 2
+[PlayerProgressionHandler] Loser player-new-1-62 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-61 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-51 (vd_1758247039977_jlebv25gf) at level 2
+[PlayerProgressionHandler] Loser player-new-1-64 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_205_1758247040005
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_206_1758247040006
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-63
+[PlayerProgressionHandler] Loser player-new-1-65 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_207_1758247040007
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-66
+[PlayerProgressionHandler] Loser player-new-1-35 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-51 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-1-36 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-1-50 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-13 (vd_1758247039957_1ulycwqf1) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-0 (vd_1758247039977_hjrklyy9h) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_187_1758247039992
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_208_1758247040008
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-57 (vd_1758247039977_uodcon618) at level 2
+[PlayerProgressionHandler] Loser player-new-1-67 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-47 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-48 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-1-70 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-69 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_209_1758247040008
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_196_1758247039999
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-68
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_210_1758247040009
+[PlayerProgressionHandler] Loser player-new-1-71 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-72 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_211_1758247040009
+[PlayerProgressionHandler] Loser player-new-1-74 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-1-13 eliminated at Level 3
+[PlayerProgressionHandler] Loser player-new-1-57 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-1-3 advanced from Level 3 to Level 4, winnings: 14.4
+[PlayerProgressionHandler] Winner player-new-1-0 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_213_1758247040011
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_214_1758247040011
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-61 (vd_1758247039977_nxtpqwvct) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_212_1758247040011
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-73
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-36 (vd_1758247039977_xzf1gmodh) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-50 (vd_1758247039977_2n34czgiz) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-48 (vd_1758247039977_208d83uxb) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-69 (vd_1758247039977_pv2xphem9) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-72 (vd_1758247039977_541aaf2ac) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-3 (vd_1758247039957_00vknsc5s) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-0 (vd_1758247039977_hjrklyy9h) at level 3
+[PlayerProgressionHandler] Loser player-new-1-69 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_216_1758247040017
+[PlayerProgressionHandler] Loser player-new-1-3 eliminated at Level 4
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-1-48
+[PlayerProgressionHandler] Loser player-new-1-50 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-0-23 advanced from Level 4 to Level 5, winnings: 28.8
+[PlayerProgressionHandler] Winner player-new-1-0 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_217_1758247040019
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_218_1758247040019
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-23 (vd_1758247039882_kvlxz85n9) at level 5
+[PlayerProgressionHandler] Loser player-new-1-18 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_191_1758247039995
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-1-23
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-0-23 (vd_1758247039882_kvlxz85n9) at level 5
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-0 (vd_1758247039977_hjrklyy9h) at level 4
+[PlayerProgressionHandler] Loser player-new-1-27 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-1-28 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_194_1758247039997
+[PlayerProgressionHandler] Loser player-new-1-44 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-45 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-1-30 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_147_1758247039968
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_184_1758247039989
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-1-29
+[PlayerProgressionHandler] Loser player-new-0-10 eliminated at Level 4
+[PlayerProgressionHandler] Winner player-new-1-33 advanced from Level 4 to Level 5, winnings: 28.8
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_202_1758247040003
+[PlayerProgressionHandler] Loser player-new-1-36 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_215_1758247040015
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-1-61
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-33 (vd_1758247039963_4w23fb6g4) at level 5
+[PlayerProgressionHandler] Loser player-new-1-45 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-1-72 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-43 (vd_1758247039967_rafb71gzd) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_219_1758247040024
+[PlayerProgressionHandler] Loser player-new-0-23 eliminated at Level 5
+[PlayerProgressionHandler] Winner player-new-1-33 advanced from Level 5 to Level 6, winnings: 57.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_220_1758247040025
+[PlayerProgressionHandler] Loser player-new-1-44 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-43 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-72 (vd_1758247039977_541aaf2ac) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_193_1758247039997
+[PlayerProgressionHandler] Loser player-new-1-72 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-1-28 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_221_1758247040026
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-33 (vd_1758247039963_4w23fb6g4) at level 6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-43 (vd_1758247039977_lzs0nxrdr) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-28 (vd_1758247039977_mr00tz6s9) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-28 (vd_1758247039977_mr00tz6s9) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-45 (vd_1758247039968_c8l6jshk3) at level 2
+[PlayerProgressionHandler] Loser player-new-1-0 eliminated at Level 4
+[PlayerProgressionHandler] Winner player-new-1-28 advanced from Level 4 to Level 5, winnings: 28.8
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_222_1758247040028
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-30 (vd_1758247039962_5eoeufjuy) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-28 (vd_1758247039977_mr00tz6s9) at level 5
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-28 (vd_1758247039962_n3jvd4ro4) at level 3
+DEBUG: [DayProcessor] ===== PROCESSING DAY 2 =====
+DEBUG: Day 2, Adding 62 new players via event-driven growth
+[PlayerProgressionHandler] Loser player-new-2-0 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_223_1758247040030
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-1
+[PlayerProgressionHandler] Loser player-new-2-2 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-3 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_224_1758247040031
+[PlayerProgressionHandler] Loser player-new-2-5 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-4 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_225_1758247040031
+[PlayerProgressionHandler] Loser player-new-2-6 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-7 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_226_1758247040031
+[PlayerProgressionHandler] Loser player-new-2-8 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-9 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_227_1758247040031
+[PlayerProgressionHandler] Loser player-new-2-11 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_228_1758247040031
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-10
+[PlayerProgressionHandler] Loser player-new-2-12 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_229_1758247040031
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-13
+[PlayerProgressionHandler] Loser player-new-2-14 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_230_1758247040031
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-15
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-9 (vd_1758247040031_77j5qr9hw) at level 2
+[PlayerProgressionHandler] Loser player-new-2-19 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-18 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_233_1758247040032
+[PlayerProgressionHandler] Loser player-new-2-20 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_235_1758247040033
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-21
+[PlayerProgressionHandler] Loser player-new-2-26 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_238_1758247040035
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-27
+[PlayerProgressionHandler] Loser player-new-2-29 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_239_1758247040036
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-28
+[PlayerProgressionHandler] Loser player-new-2-30 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_240_1758247040036
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-31
+[PlayerProgressionHandler] Loser player-new-2-34 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-35 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_243_1758247040037
+[PlayerProgressionHandler] Loser player-new-2-39 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_245_1758247040037
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-38
+[PlayerProgressionHandler] Loser player-new-2-40 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_246_1758247040038
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-41
+[PlayerProgressionHandler] Loser player-new-2-44 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_248_1758247040040
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-45
+[PlayerProgressionHandler] Loser player-new-2-46 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_249_1758247040040
+[PlayerProgressionHandler] Loser player-new-2-32 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-47
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_242_1758247040036
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-33
+[PlayerProgressionHandler] Loser player-new-2-49 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-48 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_250_1758247040040
+[PlayerProgressionHandler] Loser player-new-2-51 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_251_1758247040040
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-50
+[PlayerProgressionHandler] Loser player-new-2-36 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_244_1758247040037
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-37
+[PlayerProgressionHandler] Loser player-new-2-54 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-55 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_253_1758247040041
+[PlayerProgressionHandler] Loser player-new-2-57 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-56 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_254_1758247040042
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-48 (vd_1758247040040_riwx07600) at level 2
+[PlayerProgressionHandler] Loser player-new-2-43 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-42 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-18 (vd_1758247040032_adcqspk7c) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-35 (vd_1758247040037_aul7aigvq) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_247_1758247040039
+[PlayerProgressionHandler] Loser player-new-2-0 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-48 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-35 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_257_1758247040044
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_258_1758247040044
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-1
+[PlayerProgressionHandler] Loser player-new-2-3 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_259_1758247040044
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-2
+[PlayerProgressionHandler] Loser player-new-2-4 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-5 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_260_1758247040045
+[PlayerProgressionHandler] Loser player-new-2-6 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_261_1758247040045
+[PlayerProgressionHandler] Loser player-new-2-25 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-7
+[PlayerProgressionHandler] Loser player-new-2-9 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_237_1758247040035
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-24
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_262_1758247040046
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-42 (vd_1758247040038_07fxj8pth) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-8
+[PlayerProgressionHandler] Loser player-new-2-56 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-2-11 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-55 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_263_1758247040046
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_264_1758247040046
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-10
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-35 (vd_1758247040037_aul7aigvq) at level 3
+[PlayerProgressionHandler] Loser player-new-2-13 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_265_1758247040047
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-12
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-4 (vd_1758247040031_09wfjx614) at level 2
+[PlayerProgressionHandler] Loser player-new-2-17 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-18 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-9 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-2-3 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-2-18 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-59 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-1-43 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Winner player-new-2-58 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_267_1758247040048
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_241_1758247040036
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-5 (vd_1758247040043_6izppk3f8) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-16
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_231_1758247040032
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_268_1758247040049
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_255_1758247040042
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-19
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-7 (vd_1758247040031_oj6v8mev1) at level 2
+[PlayerProgressionHandler] Loser player-new-2-21 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-20 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_269_1758247040049
+[PlayerProgressionHandler] Loser player-new-2-22 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-23 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_271_1758247040055
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-55 (vd_1758247040041_9a1esvbjm) at level 3
+[PlayerProgressionHandler] Loser player-new-2-25 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-24 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-55 (vd_1758247040041_9a1esvbjm) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_272_1758247040057
+[PlayerProgressionHandler] Loser player-new-2-26 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_273_1758247040059
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-27
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-56 (vd_1758247040042_o46nbycp4) at level 2
+[PlayerProgressionHandler] Loser player-new-2-28 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-29 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_275_1758247040060
+[PlayerProgressionHandler] Loser player-new-2-31 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_276_1758247040060
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-43 (vd_1758247039977_lzs0nxrdr) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-58 (vd_1758247040042_3yk2nm646) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-30
+[PlayerProgressionHandler] Loser player-new-2-33 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-32 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_277_1758247040061
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-20 (vd_1758247040043_5j86n3heo) at level 2
+[PlayerProgressionHandler] Loser player-new-2-60 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-35 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-61 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-2-34 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-23 (vd_1758247040043_fpq5uj3se) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_256_1758247040044
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_278_1758247040061
+[PlayerProgressionHandler] Loser player-new-1-43 eliminated at Level 3
+[PlayerProgressionHandler] Loser player-new-2-36 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-24 (vd_1758247040043_6byvohp67) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_280_1758247040064
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_279_1758247040064
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-2-9
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-37
+[PlayerProgressionHandler] Loser player-new-2-39 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_282_1758247040065
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-38
+[PlayerProgressionHandler] Loser player-new-2-40 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-41 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_283_1758247040066
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-29 (vd_1758247040043_3pmxdpy6v) at level 2
+[PlayerProgressionHandler] Loser player-new-2-42 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-45 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_285_1758247040067
+[PlayerProgressionHandler] Winner player-new-2-44 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-43
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_286_1758247040067
+DEBUG: Day 2 - Pool stats - Total: 53, Available: 13
+DEBUG: Day 2 - Matchmaking will be handled by MatchmakingEventHandler through events
+[PlayerProgressionHandler] Loser player-new-2-52 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-42 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-32 (vd_1758247040043_1dqf09zwy) at level 2
+[PlayerProgressionHandler] Winner player-new-2-53 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-2-46 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_252_1758247040041
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_270_1758247040055
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-2-5
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_287_1758247040068
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-47
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-61 (vd_1758247040042_fikri98jx) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-34 (vd_1758247040043_pebzwf1xo) at level 2
+[PlayerProgressionHandler] Loser player-new-2-48 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-32 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-49 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_288_1758247040069
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_289_1758247040069
+[PlayerProgressionHandler] Loser player-new-2-50 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-2-29
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_290_1758247040069
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-51
+[PlayerProgressionHandler] Loser player-new-2-52 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-53 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-41 (vd_1758247040043_4faxgszqk) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_292_1758247040070
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-9 (vd_1758247040031_77j5qr9hw) at level 3
+[PlayerProgressionHandler] Loser player-new-2-55 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_293_1758247040071
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-54
+[PlayerProgressionHandler] Loser player-new-2-57 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-56 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-44 (vd_1758247040043_xttxk0pzz) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_294_1758247040073
+[PlayerProgressionHandler] Loser player-new-2-59 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-58 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-53 (vd_1758247040041_cn0kibumc) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_295_1758247040075
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-49 (vd_1758247040043_xs228rn7z) at level 2
+[PlayerProgressionHandler] Loser player-new-2-60 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-58 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-20 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_296_1758247040075
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-61
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_281_1758247040065
+[PlayerProgressionHandler] Loser player-new-2-22 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-2-35 eliminated at Level 3
+[PlayerProgressionHandler] Loser player-new-2-23 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-55 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_236_1758247040034
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_274_1758247040060
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_284_1758247040066
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-23
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-2-24
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-53 (vd_1758247040043_0zuwhf5yb) at level 2
+[PlayerProgressionHandler] Loser player-new-2-53 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-49 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_298_1758247040079
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-56 (vd_1758247040043_dbacxay7y) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-58 (vd_1758247040043_kkl4733tc) at level 2
+[PlayerProgressionHandler] Loser player-new-2-56 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_299_1758247040082
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-20 (vd_1758247040043_5j86n3heo) at level 3
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-2-53
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-49 (vd_1758247040043_xs228rn7z) at level 3
+[PlayerProgressionHandler] Loser player-new-2-7 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-4 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_234_1758247040033
+[PlayerProgressionHandler] Loser player-new-2-41 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-2-20 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-2-44 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_297_1758247040076
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_300_1758247040086
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-2-49
+[PlayerProgressionHandler] Loser player-new-2-34 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-61 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_291_1758247040070
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-44 (vd_1758247040043_xttxk0pzz) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-55 (vd_1758247040041_9a1esvbjm) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-61 (vd_1758247040042_fikri98jx) at level 3
+[PlayerProgressionHandler] Loser player-new-2-44 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-2-4 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_301_1758247040088
+[PlayerProgressionHandler] Loser player-new-2-15 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-2-14 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_266_1758247040048
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-4 (vd_1758247040031_09wfjx614) at level 4
+[PlayerProgressionHandler] Loser player-new-2-55 eliminated at Level 4
+[PlayerProgressionHandler] Winner player-new-2-4 advanced from Level 4 to Level 5, winnings: 28.8
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_302_1758247040090
+[PlayerProgressionHandler] Loser player-new-2-58 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-2-14 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_303_1758247040091
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-4 (vd_1758247040031_09wfjx614) at level 5
+[PlayerProgressionHandler] Loser player-new-1-28 eliminated at Level 5
+[PlayerProgressionHandler] Winner player-new-2-4 advanced from Level 5 to Level 6, winnings: 57.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_304_1758247040091
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-4 (vd_1758247040031_09wfjx614) at level 6
+[PlayerProgressionHandler] Loser player-new-2-4 eliminated at Level 6
+[PlayerProgressionHandler] Winner player-new-1-33 advanced from Level 6 to Level 7, winnings: 115.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_306_1758247040093
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-1-33 (vd_1758247039963_4w23fb6g4) at level 7
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-4 (vd_1758247040031_09wfjx614) at level 6
+[PlayerProgressionHandler] Loser player-new-2-14 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-2-61 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_305_1758247040092
+[PlayerProgressionHandler] Loser player-new-2-17 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_232_1758247040032
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-2-16
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-61 (vd_1758247040042_fikri98jx) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-3 (vd_1758247040030_hpg53nqre) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-14 (vd_1758247040043_snk5bgqel) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-2-14 (vd_1758247040043_snk5bgqel) at level 3
+DEBUG: [DayProcessor] ===== PROCESSING DAY 3 =====
+DEBUG: Day 3, Adding 52 new players via event-driven growth
+[PlayerProgressionHandler] Loser player-new-3-5 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_309_1758247040097
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-4
+[PlayerProgressionHandler] Loser player-new-3-7 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-6 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_310_1758247040097
+[PlayerProgressionHandler] Loser player-new-3-9 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_311_1758247040098
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-8
+[PlayerProgressionHandler] Loser player-new-3-13 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-12 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_313_1758247040098
+[PlayerProgressionHandler] Loser player-new-3-1 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_307_1758247040097
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-6 (vd_1758247040097_e368pyqvk) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-0
+[PlayerProgressionHandler] Loser player-new-3-16 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-17 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_315_1758247040099
+[PlayerProgressionHandler] Loser player-new-3-18 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-19 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_316_1758247040100
+[PlayerProgressionHandler] Loser player-new-3-20 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-3-23 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-22 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_317_1758247040101
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_318_1758247040101
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-21
+[PlayerProgressionHandler] Loser player-new-3-24 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-25 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_320_1758247040102
+[PlayerProgressionHandler] Loser player-new-3-27 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_321_1758247040103
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-26
+[PlayerProgressionHandler] Loser player-new-3-28 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-3-30 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_322_1758247040103
+[PlayerProgressionHandler] Winner player-new-3-31 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-29
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_323_1758247040104
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-22 (vd_1758247040101_x0psjyzfu) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-25 (vd_1758247040101_r9de5oecu) at level 2
+[PlayerProgressionHandler] Loser player-new-3-34 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-35 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_326_1758247040106
+[PlayerProgressionHandler] Loser player-new-3-37 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-3-25 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-3-36 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_327_1758247040107
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_328_1758247040107
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-3-22
+[PlayerProgressionHandler] Loser player-new-3-15 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-14 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-3-39 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-38 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_314_1758247040098
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_329_1758247040108
+[PlayerProgressionHandler] Loser player-new-3-41 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-40 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-3-12 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-3-6 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_330_1758247040108
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_319_1758247040101
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-35 (vd_1758247040106_a13p35f0y) at level 2
+[PlayerProgressionHandler] Loser player-new-3-43 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-42 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_331_1758247040110
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-36 (vd_1758247040106_ecnpiiwhl) at level 2
+[PlayerProgressionHandler] Loser player-new-3-35 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-12 (vd_1758247040098_e9fovmjzr) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_333_1758247040111
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-3-31
+[PlayerProgressionHandler] Loser player-new-3-47 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_334_1758247040111
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-46
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-14 (vd_1758247040098_n3g5pypl9) at level 2
+[PlayerProgressionHandler] Loser player-new-3-51 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-40 (vd_1758247040108_jzsqnuj2j) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_336_1758247040113
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-6 (vd_1758247040097_e368pyqvk) at level 3
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-50
+[PlayerProgressionHandler] Loser player-new-3-0 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_338_1758247040116
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-1
+[PlayerProgressionHandler] Loser player-new-3-3 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-3-38 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-3-2 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-3-40 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_339_1758247040116
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_340_1758247040116
+[PlayerProgressionHandler] Loser player-new-3-5 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-4 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_341_1758247040117
+[PlayerProgressionHandler] Loser player-new-3-6 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-7 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_342_1758247040118
+[PlayerProgressionHandler] Loser player-new-3-9 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_343_1758247040118
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-8
+[PlayerProgressionHandler] Loser player-new-3-32 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-33 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-3-10 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-11 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_325_1758247040105
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_344_1758247040118
+[PlayerProgressionHandler] Loser player-new-3-10 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_312_1758247040098
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-11
+[PlayerProgressionHandler] Loser player-new-3-15 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-14 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_346_1758247040120
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-2 (vd_1758247040113_vzoj16xn7) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-40 (vd_1758247040108_jzsqnuj2j) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-4 (vd_1758247040113_k1bkettv0) at level 2
+[PlayerProgressionHandler] Loser player-new-3-19 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-3-48 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-49 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_348_1758247040121
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-38 (vd_1758247040107_v80at8jk4) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-18
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_335_1758247040112
+[PlayerProgressionHandler] Loser player-new-3-21 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-7 (vd_1758247040114_19qly3oeo) at level 2
+[PlayerProgressionHandler] Winner player-new-3-20 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-3-40 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-3-6 advanced from Level 3 to Level 4, winnings: 14.4
+[PlayerProgressionHandler] Loser player-new-3-22 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_349_1758247040122
+[PlayerProgressionHandler] Winner player-new-3-23 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_350_1758247040123
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_352_1758247040123
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-11 (vd_1758247040114_elb5iy4wh) at level 2
+[PlayerProgressionHandler] Loser player-new-3-7 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-3-2 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-4 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-3-27 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_354_1758247040125
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_308_1758247040097
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_355_1758247040125
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-26
+[PlayerProgressionHandler] Loser player-new-3-44 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-3-29 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-45 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-3-28 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_332_1758247040110
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_356_1758247040125
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-14 (vd_1758247040114_ytkhym2co) at level 2
+[PlayerProgressionHandler] Loser player-new-3-11 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-3-31 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_357_1758247040126
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_358_1758247040126
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-3-33
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-30
+[PlayerProgressionHandler] Loser player-new-3-33 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-32 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_359_1758247040127
+[PlayerProgressionHandler] Loser player-new-3-35 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-20 (vd_1758247040114_cuvs16wch) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-23 (vd_1758247040114_vbebc16cd) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_360_1758247040128
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-34
+[PlayerProgressionHandler] Loser player-new-3-49 eliminated at Level 2
+DEBUG: Day 3 - Pool stats - Total: 43, Available: 9
+DEBUG: Day 3 - Matchmaking will be handled by MatchmakingEventHandler through events
+[PlayerProgressionHandler] Winner player-new-3-14 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_362_1758247040130
+[PlayerProgressionHandler] Loser player-new-3-36 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_361_1758247040129
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-37
+[PlayerProgressionHandler] Loser player-new-3-39 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-38 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-42 (vd_1758247040109_5ok15en8a) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_363_1758247040131
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-45 (vd_1758247040110_j9xvx90i0) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-28 (vd_1758247040114_pn4m1qirh) at level 2
+[PlayerProgressionHandler] Loser player-new-3-41 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-40 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-3-43 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-42 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_366_1758247040133
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_367_1758247040135
+[PlayerProgressionHandler] Loser player-new-3-42 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-3-2 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_351_1758247040123
+[PlayerProgressionHandler] Loser player-new-3-45 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-3-45 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-32 (vd_1758247040114_4hwaod1su) at level 2
+[PlayerProgressionHandler] Winner player-new-3-28 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_368_1758247040136
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_369_1758247040137
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-44
+[PlayerProgressionHandler] Loser player-new-3-19 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-3-46 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-3-17 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_324_1758247040104
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_370_1758247040137
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-33 (vd_1758247040105_ws280960c) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-47
+[PlayerProgressionHandler] Loser player-new-3-48 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-14 (vd_1758247040114_ytkhym2co) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_371_1758247040139
+[PlayerProgressionHandler] Loser player-new-3-50 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-49
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_372_1758247040140
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-51
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-38 (vd_1758247040114_v0f0u4bjr) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-40 (vd_1758247040114_ack9rreiz) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-42 (vd_1758247040114_xlt51wj7x) at level 2
+[PlayerProgressionHandler] Loser player-new-3-38 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-31 (vd_1758247040104_imt5o8po2) at level 2
+[PlayerProgressionHandler] Winner player-new-3-32 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-3-40 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-28 (vd_1758247040114_pn4m1qirh) at level 3
+[PlayerProgressionHandler] Winner player-new-3-42 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_374_1758247040144
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_375_1758247040145
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-17 (vd_1758247040099_soo8c0y10) at level 3
+[PlayerProgressionHandler] Loser player-new-3-25 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-3-6 eliminated at Level 4
+[PlayerProgressionHandler] Winner player-new-3-24 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_353_1758247040124
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_364_1758247040132
+[RevenueTrackingHandler] Processed cash-out revenue: 14.4 for player player-new-2-61
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-19 (vd_1758247040100_j195jaazj) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-32 (vd_1758247040114_4hwaod1su) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-42 (vd_1758247040114_xlt51wj7x) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-6 (vd_1758247040097_e368pyqvk) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-4 (vd_1758247040113_k1bkettv0) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-24 (vd_1758247040114_r9nf786f1) at level 2
+[PlayerProgressionHandler] Loser player-new-3-17 eliminated at Level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_377_1758247040155
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-17 (vd_1758247040099_soo8c0y10) at level 3
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-3-32
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-49 (vd_1758247040111_ouvgkgqvp) at level 2
+[PlayerProgressionHandler] Loser player-new-3-28 eliminated at Level 3
+[PlayerProgressionHandler] Loser player-new-3-12 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_376_1758247040150
+[PlayerProgressionHandler] Winner player-new-3-13 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-3-2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_345_1758247040119
+[PlayerProgressionHandler] Loser player-new-3-14 eliminated at Level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_373_1758247040142
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-3-4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-13 (vd_1758247040114_m3cob5e18) at level 2
+[PlayerProgressionHandler] Loser player-new-3-20 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-2 (vd_1758247040113_vzoj16xn7) at level 3
+[PlayerProgressionHandler] Loser player-new-3-24 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-3-13 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_365_1758247040133
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-3-23
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_378_1758247040161
+[PlayerProgressionHandler] Loser player-new-3-14 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-3-36 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_337_1758247040115
+[PlayerProgressionHandler] Loser player-new-3-13 eliminated at Level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_379_1758247040163
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-3-42
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-36 (vd_1758247040106_ecnpiiwhl) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-3-13 (vd_1758247040114_m3cob5e18) at level 3
+[PlayerProgressionHandler] Loser player-new-3-16 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_347_1758247040120
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-3-17
+DEBUG: [DayProcessor] ===== PROCESSING DAY 4 =====
+DEBUG: Day 4, Adding 45 new players via event-driven growth
+[PlayerProgressionHandler] Loser player-new-4-5 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_382_1758247040166
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-4
+[PlayerProgressionHandler] Loser player-new-4-6 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_383_1758247040166
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-7
+[PlayerProgressionHandler] Loser player-new-4-9 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_384_1758247040166
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-8
+[PlayerProgressionHandler] Loser player-new-4-13 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_386_1758247040166
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-12
+[PlayerProgressionHandler] Loser player-new-4-14 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-15 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-4-0 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_387_1758247040166
+[PlayerProgressionHandler] Winner player-new-4-1 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_380_1758247040166
+[PlayerProgressionHandler] Loser player-new-4-17 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-16 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_388_1758247040167
+[PlayerProgressionHandler] Loser player-new-4-20 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_390_1758247040168
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-21
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-15 (vd_1758247040166_a9yibx905) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-16 (vd_1758247040166_w79r7kfoh) at level 2
+[PlayerProgressionHandler] Loser player-new-4-24 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_392_1758247040169
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-25
+[PlayerProgressionHandler] Loser player-new-4-26 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-27 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_394_1758247040170
+[PlayerProgressionHandler] Loser player-new-4-28 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_395_1758247040171
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-29
+[PlayerProgressionHandler] Loser player-new-4-33 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-32 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_397_1758247040172
+[PlayerProgressionHandler] Loser player-new-4-34 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_398_1758247040172
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-35
+[PlayerProgressionHandler] Loser player-new-4-36 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_399_1758247040173
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-37
+[PlayerProgressionHandler] Loser player-new-4-38 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-39 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_400_1758247040173
+[PlayerProgressionHandler] Loser player-new-4-40 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-41 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_402_1758247040174
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-32 (vd_1758247040171_md7vyt84e) at level 2
+[PlayerProgressionHandler] Loser player-new-4-42 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-4-1 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-4-15 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_403_1758247040175
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_393_1758247040170
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-43
+[PlayerProgressionHandler] Loser player-new-4-44 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-0 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_404_1758247040175
+[PlayerProgressionHandler] Loser player-new-4-1 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-2 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_405_1758247040176
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-39 (vd_1758247040173_utwkwcxmv) at level 2
+[PlayerProgressionHandler] Loser player-new-4-4 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_406_1758247040176
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-3
+[PlayerProgressionHandler] Loser player-new-4-10 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-4-8 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_385_1758247040166
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-11
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_408_1758247040177
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-7
+[PlayerProgressionHandler] Loser player-new-4-32 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-4-10 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-9 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-15 (vd_1758247040166_a9yibx905) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_409_1758247040178
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-4-39
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_410_1758247040178
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-0 (vd_1758247040175_x9oieeb7i) at level 2
+[PlayerProgressionHandler] Loser player-new-4-11 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_411_1758247040179
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-12
+[PlayerProgressionHandler] Loser player-new-4-14 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-13 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_412_1758247040179
+[PlayerProgressionHandler] Loser player-new-4-30 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-31 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_396_1758247040171
+[PlayerProgressionHandler] Loser player-new-4-16 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-4-16 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-15 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_401_1758247040174
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_414_1758247040180
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-4-27
+[PlayerProgressionHandler] Loser player-new-4-0 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-4-41 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-4-18 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-4-2 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-3 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_415_1758247040181
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_416_1758247040181
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_381_1758247040166
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-17
+[PlayerProgressionHandler] Loser player-new-4-19 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_417_1758247040182
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-20
+[PlayerProgressionHandler] Loser player-new-4-19 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-4-21 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_389_1758247040168
+[PlayerProgressionHandler] Winner player-new-4-22 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-18
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_418_1758247040182
+[PlayerProgressionHandler] Loser player-new-4-24 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-23 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_419_1758247040182
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-13 (vd_1758247040175_tqbcfgibg) at level 2
+[PlayerProgressionHandler] Loser player-new-4-26 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-4-2 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_420_1758247040184
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_421_1758247040185
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-25
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-4-9
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-31 (vd_1758247040171_i248kmf4r) at level 2
+[PlayerProgressionHandler] Loser player-new-4-28 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-15 (vd_1758247040175_biyc0tijl) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_422_1758247040185
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-41 (vd_1758247040174_xju34ejfj) at level 3
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-27
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-3 (vd_1758247040166_zh9zkh6p8) at level 2
+DEBUG: Day 4 - Pool stats - Total: 34, Available: 6
+DEBUG: Day 4 - Matchmaking will be handled by MatchmakingEventHandler through events
+[PlayerProgressionHandler] Loser player-new-4-29 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-4-31 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-4-13 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_423_1758247040186
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-30
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_424_1758247040187
+[PlayerProgressionHandler] Loser player-new-4-31 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-32 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_425_1758247040187
+[PlayerProgressionHandler] Loser player-new-4-34 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-33 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_426_1758247040188
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-2 (vd_1758247040175_2gyu3t4jf) at level 2
+[PlayerProgressionHandler] Loser player-new-4-3 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-4-36 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-15 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-3-36 eliminated at Level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-23 (vd_1758247040175_1s181awvn) at level 2
+[PlayerProgressionHandler] Winner player-new-4-35 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_427_1758247040189
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_428_1758247040189
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_413_1758247040180
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-4-15
+[PlayerProgressionHandler] Loser player-new-4-37 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-38 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_429_1758247040191
+[PlayerProgressionHandler] Loser player-new-4-22 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-23 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-4-39 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_391_1758247040168
+[PlayerProgressionHandler] Winner player-new-4-40 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_430_1758247040192
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-13 (vd_1758247040175_tqbcfgibg) at level 3
+[PlayerProgressionHandler] Loser player-new-4-41 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-4-43 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-4-44 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_432_1758247040193
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-42
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_433_1758247040194
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-32 (vd_1758247040175_f1gu94unt) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-33 (vd_1758247040175_nqa4dos0a) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-27 (vd_1758247040170_qimcpjnd7) at level 2
+[PlayerProgressionHandler] Loser player-new-4-41 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-4-13 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_434_1758247040196
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-15 (vd_1758247040175_biyc0tijl) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-35 (vd_1758247040175_y2ehqln1e) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-38 (vd_1758247040175_kr31pprjy) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-40 (vd_1758247040175_ocwe49hr9) at level 2
+[PlayerProgressionHandler] Loser player-new-4-35 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-4-38 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_436_1758247040201
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-44 (vd_1758247040175_rmxpmj6an) at level 2
+[PlayerProgressionHandler] Loser player-new-4-23 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-4-40 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_437_1758247040202
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-13 (vd_1758247040175_tqbcfgibg) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-1 (vd_1758247040166_24xqsx8c9) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-38 (vd_1758247040175_kr31pprjy) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-41 (vd_1758247040174_xju34ejfj) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-40 (vd_1758247040175_ocwe49hr9) at level 3
+[PlayerProgressionHandler] Loser player-new-4-38 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-4-15 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_438_1758247040205
+[PlayerProgressionHandler] Loser player-new-4-6 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_407_1758247040177
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-4-5
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-15 (vd_1758247040175_biyc0tijl) at level 4
+[PlayerProgressionHandler] Loser player-new-4-33 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-4-32 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_435_1758247040198
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-23 (vd_1758247040168_37yo1a09f) at level 2
+[PlayerProgressionHandler] Loser player-new-4-15 eliminated at Level 4
+[PlayerProgressionHandler] Winner player-new-4-13 advanced from Level 4 to Level 5, winnings: 28.8
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_439_1758247040207
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-9 (vd_1758247040175_v43h3rtac) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-13 (vd_1758247040175_tqbcfgibg) at level 5
+[PlayerProgressionHandler] Loser player-new-4-32 eliminated at Level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_440_1758247040209
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-4-40
+[PlayerProgressionHandler] Loser player-new-4-22 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-4-23 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_431_1758247040192
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-32 (vd_1758247040175_f1gu94unt) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-23 (vd_1758247040175_1s181awvn) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-22 (vd_1758247040175_ggapyqzsb) at level 2
+DEBUG: [DayProcessor] ===== PROCESSING DAY 5 =====
+DEBUG: Day 5, Adding 38 new players via event-driven growth
+[PlayerProgressionHandler] Loser player-new-5-8 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_445_1758247040212
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-9
+[PlayerProgressionHandler] Loser player-new-5-11 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-10 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_446_1758247040212
+[PlayerProgressionHandler] Loser player-new-5-13 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-12 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_447_1758247040212
+[PlayerProgressionHandler] Loser player-new-5-15 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_448_1758247040212
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-14
+[PlayerProgressionHandler] Loser player-new-5-16 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_449_1758247040212
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-17
+[PlayerProgressionHandler] Loser player-new-5-18 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-19 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_450_1758247040212
+[PlayerProgressionHandler] Loser player-new-5-21 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_451_1758247040212
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-20
+[PlayerProgressionHandler] Loser player-new-5-5 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-4 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_443_1758247040212
+[PlayerProgressionHandler] Loser player-new-5-24 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-25 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-5-6 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-7 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_453_1758247040213
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_444_1758247040212
+[PlayerProgressionHandler] Loser player-new-5-27 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-26 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_455_1758247040214
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-19 (vd_1758247040212_dqa7s5jz7) at level 2
+[PlayerProgressionHandler] Loser player-new-5-32 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-5-12 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-5-33 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-5-19 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_458_1758247040216
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_459_1758247040216
+[PlayerProgressionHandler] Loser player-new-5-35 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-7 (vd_1758247040212_li697xksl) at level 2
+[PlayerProgressionHandler] Winner player-new-5-34 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_460_1758247040216
+[PlayerProgressionHandler] Loser player-new-5-37 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-5-0 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-1 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_461_1758247040217
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_462_1758247040218
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-26 (vd_1758247040214_w9igob2z9) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-36
+[PlayerProgressionHandler] Loser player-new-5-25 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-5-5 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-26 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Winner player-new-5-4 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_465_1758247040220
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_466_1758247040220
+[PlayerProgressionHandler] Loser player-new-5-6 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-7 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-33 (vd_1758247040216_9lifyrif3) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-19 (vd_1758247040212_dqa7s5jz7) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_467_1758247040221
+[PlayerProgressionHandler] Loser player-new-5-9 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-5-10 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_468_1758247040221
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-8
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_469_1758247040221
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-11
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-34 (vd_1758247040216_f27apfuua) at level 2
+[PlayerProgressionHandler] Loser player-new-5-13 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_470_1758247040223
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-12
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-1 (vd_1758247040218_v034jxdby) at level 2
+[PlayerProgressionHandler] Loser player-new-5-15 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-5-34 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-5-14 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-5-33 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_472_1758247040223
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_473_1758247040223
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-26 (vd_1758247040214_w9igob2z9) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-4 (vd_1758247040218_7sjz7qvy3) at level 2
+[PlayerProgressionHandler] Loser player-new-5-17 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-10 (vd_1758247040212_cn0c7uj7o) at level 2
+[PlayerProgressionHandler] Loser player-new-5-22 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-5-18 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_474_1758247040224
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-16
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_452_1758247040213
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_475_1758247040225
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-23
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-19
+DEBUG: Day 5 - Pool stats - Total: 52, Available: 12
+DEBUG: Day 5 - Matchmaking will be handled by MatchmakingEventHandler through events
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-7 (vd_1758247040218_gda5equdi) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-12 (vd_1758247040212_35aqixs6x) at level 2
+[PlayerProgressionHandler] Loser player-new-5-1 eliminated at Level 2
+[PlayerProgressionHandler] Loser player-new-5-22 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-4 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_477_1758247040227
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_478_1758247040227
+[PlayerProgressionHandler] Loser player-new-5-25 eliminated at Level 1
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-23
+[PlayerProgressionHandler] Winner player-new-5-24 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_479_1758247040228
+[PlayerProgressionHandler] Loser player-new-5-27 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-26 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_480_1758247040228
+[PlayerProgressionHandler] Loser player-new-5-28 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-5-31 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-14 (vd_1758247040218_bytehqh67) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-33 (vd_1758247040216_9lifyrif3) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_481_1758247040229
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-29
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_457_1758247040215
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-30
+[PlayerProgressionHandler] Loser player-new-5-30 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_482_1758247040229
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-31
+[PlayerProgressionHandler] Loser player-new-5-26 eliminated at Level 3
+[PlayerProgressionHandler] Loser player-new-5-7 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-4 (vd_1758247040212_r1gv78hu6) at level 2
+[PlayerProgressionHandler] Winner player-new-5-33 advanced from Level 3 to Level 4, winnings: 14.4
+[PlayerProgressionHandler] Loser player-new-5-35 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_484_1758247040231
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_485_1758247040231
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-5-14
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_486_1758247040231
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-34
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-4 (vd_1758247040218_7sjz7qvy3) at level 3
+[PlayerProgressionHandler] Loser player-new-5-37 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-36 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_487_1758247040233
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-24 (vd_1758247040218_n8pz2ivug) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-26 (vd_1758247040218_2yrcry3q6) at level 2
+[PlayerProgressionHandler] Loser player-new-5-3 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-2 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Loser player-new-5-7 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_464_1758247040220
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_463_1758247040219
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-5-4
+[PlayerProgressionHandler] Loser player-new-5-20 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_476_1758247040226
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-21
+[PlayerProgressionHandler] Loser player-new-5-24 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_488_1758247040236
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-5-26
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-33 (vd_1758247040216_9lifyrif3) at level 4
+[PlayerProgressionHandler] Loser player-new-5-19 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-4-23 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_471_1758247040223
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-36 (vd_1758247040218_nr46kuuow) at level 2
+[PlayerProgressionHandler] Loser player-new-5-28 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_456_1758247040214
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-29
+[PlayerProgressionHandler] Loser player-new-5-3 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-2 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_442_1758247040212
+[PlayerProgressionHandler] Loser player-new-5-33 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_483_1758247040230
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-5-32
+[PlayerProgressionHandler] Loser player-new-5-36 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-5-2 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_489_1758247040242
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-23 (vd_1758247040175_1s181awvn) at level 4
+[PlayerProgressionHandler] Loser player-new-5-33 eliminated at Level 4
+[PlayerProgressionHandler] Winner player-new-4-23 advanced from Level 4 to Level 5, winnings: 28.8
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_490_1758247040244
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-2 (vd_1758247040212_8gtvpfsie) at level 2
+[PlayerProgressionHandler] Loser player-new-4-44 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-5-10 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_454_1758247040213
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-2 (vd_1758247040218_d7xoaltgb) at level 3
+[PlayerProgressionHandler] Loser player-new-5-2 eliminated at Level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_491_1758247040246
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-5-4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-23 (vd_1758247040175_1s181awvn) at level 5
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-10 (vd_1758247040212_cn0c7uj7o) at level 3
+[PlayerProgressionHandler] Loser player-new-4-13 eliminated at Level 5
+[PlayerProgressionHandler] Winner player-new-4-23 advanced from Level 5 to Level 6, winnings: 57.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_492_1758247040247
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-2 (vd_1758247040218_d7xoaltgb) at level 3
+[PlayerProgressionHandler] Loser player-new-5-0 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-1 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_441_1758247040212
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-4-23 (vd_1758247040175_1s181awvn) at level 6
+[PlayerProgressionHandler] Loser player-new-5-1 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-25 (vd_1758247040213_82eqgqlxh) at level 2
+[PlayerProgressionHandler] Winner player-new-5-2 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_493_1758247040250
+[PlayerProgressionHandler] Loser player-new-5-10 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-5-2 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_494_1758247040251
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-2 (vd_1758247040212_8gtvpfsie) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-2 (vd_1758247040212_8gtvpfsie) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-1 (vd_1758247040212_abi4yvoic) at level 2
+DEBUG: [DayProcessor] ===== PROCESSING DAY 6 =====
+DEBUG: Day 6, Adding 33 new players via event-driven growth
+[PlayerProgressionHandler] Loser player-new-6-0 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_495_1758247040253
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-1
+[PlayerProgressionHandler] Loser player-new-6-3 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-2 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_496_1758247040254
+[PlayerProgressionHandler] Loser player-new-6-5 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-4 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_497_1758247040254
+[PlayerProgressionHandler] Loser player-new-6-7 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_498_1758247040254
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-6
+[PlayerProgressionHandler] Loser player-new-6-8 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_499_1758247040254
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-9
+[PlayerProgressionHandler] Loser player-new-6-13 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_501_1758247040254
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-12
+[PlayerProgressionHandler] Loser player-new-6-14 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-15 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_502_1758247040255
+[PlayerProgressionHandler] Loser player-new-6-17 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-16 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_503_1758247040255
+[PlayerProgressionHandler] Loser player-new-6-4 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_504_1758247040256
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-6-2
+[PlayerProgressionHandler] Loser player-new-6-23 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-22 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_507_1758247040257
+[PlayerProgressionHandler] Loser player-new-6-24 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-25 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_508_1758247040257
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-15 (vd_1758247040254_ne5e1ugwt) at level 2
+[PlayerProgressionHandler] Loser player-new-6-27 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_509_1758247040258
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-26
+[PlayerProgressionHandler] Loser player-new-6-29 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-28 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_510_1758247040258
+[PlayerProgressionHandler] Loser player-new-6-16 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_512_1758247040259
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-6-15
+[PlayerProgressionHandler] Loser player-new-6-32 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-0 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_513_1758247040260
+[PlayerProgressionHandler] Loser player-new-6-2 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-22 (vd_1758247040257_d4bbyi875) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_514_1758247040261
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-1
+[PlayerProgressionHandler] Loser player-new-6-4 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-3 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_515_1758247040261
+[PlayerProgressionHandler] Loser player-new-6-7 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-6-22 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-6-8 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Winner player-new-6-25 advanced from Level 2 to Level 3, winnings: 7.2
+[PlayerProgressionHandler] Loser player-new-6-21 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_517_1758247040262
+[PlayerProgressionHandler] Winner player-new-6-20 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_518_1758247040262
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_506_1758247040256
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-28 (vd_1758247040258_qfm5qvemv) at level 2
+[PlayerProgressionHandler] Loser player-new-6-10 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-9 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_519_1758247040262
+[PlayerProgressionHandler] Loser player-new-6-11 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_520_1758247040263
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-12
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-0 (vd_1758247040260_rpnfiqtfk) at level 2
+[PlayerProgressionHandler] Loser player-new-6-14 eliminated at Level 1
+DEBUG: Day 6 - Pool stats - Total: 44, Available: 12
+DEBUG: Day 6 - Matchmaking will be handled by MatchmakingEventHandler through events
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_521_1758247040264
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-13
+[PlayerProgressionHandler] Loser player-new-6-16 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-15 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_522_1758247040264
+[PlayerProgressionHandler] Loser player-new-6-18 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-3 (vd_1758247040260_tij03jepj) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_523_1758247040264
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-17
+[PlayerProgressionHandler] Loser player-new-6-20 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_525_1758247040265
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-19
+[PlayerProgressionHandler] Loser player-new-6-19 eliminated at Level 1
+[PlayerProgressionHandler] Loser player-new-6-22 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_505_1758247040256
+[PlayerProgressionHandler] Winner player-new-6-21 advanced from Level 1 to Level 2, winnings: 3.6
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-8 (vd_1758247040260_61lrpckwb) at level 2
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-18
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-25 (vd_1758247040257_wvyd6uyon) at level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_526_1758247040266
+[PlayerProgressionHandler] Loser player-new-6-24 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-9 (vd_1758247040260_5p8gxj4f4) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_527_1758247040266
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-23
+[PlayerProgressionHandler] Loser player-new-6-26 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-25 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_528_1758247040266
+[PlayerProgressionHandler] Loser player-new-6-27 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-28 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_530_1758247040268
+[PlayerProgressionHandler] Loser player-new-6-20 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-6-9 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_531_1758247040269
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-15 (vd_1758247040260_cbzm5vmoi) at level 2
+[PlayerProgressionHandler] Loser player-new-6-30 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-6-29 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_532_1758247040269
+[PlayerProgressionHandler] Loser player-new-6-32 eliminated at Level 1
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-16 (vd_1758247040255_ifprv30n5) at level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_533_1758247040269
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-31
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-21 (vd_1758247040260_6ux66fc99) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-4 (vd_1758247040254_kswh0f1j0) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-25 (vd_1758247040260_g4dxtjxar) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-28 (vd_1758247040260_wbpmkp092) at level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-9 (vd_1758247040260_5p8gxj4f4) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-29 (vd_1758247040260_kbi7koc9s) at level 2
+[PlayerProgressionHandler] Loser player-new-6-28 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-6-25 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_535_1758247040276
+[PlayerProgressionHandler] Loser player-new-6-25 eliminated at Level 3
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_536_1758247040276
+[RevenueTrackingHandler] Processed cash-out revenue: 7.2 for player player-new-6-9
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-2 (vd_1758247040254_90bt81af7) at level 2
+[PlayerProgressionHandler] Loser player-new-6-8 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-6-3 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_529_1758247040267
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-25 (vd_1758247040260_g4dxtjxar) at level 3
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-20 (vd_1758247040256_6mk40s3ag) at level 2
+[PlayerProgressionHandler] Loser player-new-6-28 eliminated at Level 2
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-3 (vd_1758247040260_tij03jepj) at level 3
+[PlayerProgressionHandler] Winner player-new-6-0 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_524_1758247040265
+[PlayerProgressionHandler] Loser player-new-6-25 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-6-3 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_537_1758247040281
+[PlayerProgressionHandler] Loser player-new-6-10 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_500_1758247040254
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-11
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-0 (vd_1758247040260_rpnfiqtfk) at level 3
+[PlayerProgressionHandler] Loser player-new-6-21 eliminated at Level 2
+[PlayerProgressionHandler] Winner player-new-6-15 advanced from Level 2 to Level 3, winnings: 7.2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_534_1758247040274
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-3 (vd_1758247040260_tij03jepj) at level 4
+[PlayerProgressionHandler] Loser player-new-6-3 eliminated at Level 4
+[PlayerProgressionHandler] Loser player-new-6-6 eliminated at Level 1
+[PlayerProgressionHandler] Winner player-new-5-2 advanced from Level 4 to Level 5, winnings: 28.8
+[PlayerProgressionHandler] Winner player-new-6-5 advanced from Level 1 to Level 2, winnings: 3.6
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_538_1758247040282
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_516_1758247040261
+[PlayerProgressionHandler] Loser player-new-6-0 eliminated at Level 3
+[PlayerProgressionHandler] Winner player-new-6-15 advanced from Level 3 to Level 4, winnings: 14.4
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_539_1758247040284
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-5 (vd_1758247040260_7bcnqng6v) at level 2
+[PlayerProgressionHandler] Loser player-new-6-29 eliminated at Level 2
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_540_1758247040285
+[RevenueTrackingHandler] Processed cash-out revenue: 3.6 for player player-new-6-5
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-15 (vd_1758247040260_cbzm5vmoi) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-5-2 (vd_1758247040212_8gtvpfsie) at level 5
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-15 (vd_1758247040260_cbzm5vmoi) at level 4
+[PlayerProgressionHandler] Re-pooled advanced winner player-new-6-25 (vd_1758247040257_wvyd6uyon) at level 3
+[PlayerProgressionHandler] Loser player-new-6-30 eliminated at Level 1
+[RevenueTrackingHandler] Processed game revenue: 0.2 for game game_511_1758247040259
+[RevenueTrackingHandler] Processed cash-out revenue: 1.8 for player player-new-6-31
+{
+  "success": true,
+  "simulationDurationMs": 452.4566220000006,
+  "config": {
+    "durationDays": 7,
+    "initialPlayerCount": 80,
+    "dailySeed": "anchor-001",
+    "charityPercentage": 0.2,
+    "playerStrategies": {
+      "conservative": 0.4,
+      "balanced": 0.4,
+      "aggressive": 0.2
+    },
+    "initialDonationAmount": 25,
+    "maxSimulationTimeMs": 180000,
+    "enableProgressReporting": false,
+    "growthModel": {
+      "adoptionRate": 0.1,
+      "baseMarket": 10000,
+      "midpointDay": 4,
+      "steepnessFactor": 20
+    }
+  },
+  "summary": {
+    "totalDays": 7,
+    "totalPlayers": 80,
+    "simulationCompleted": true
+  },
+  "playerStats": {
+    "totalPlayers": 80,
+    "activePlayers": 4,
+    "retiredPlayers": 76,
+    "totalDonationsFunds": 0,
+    "totalWinningsFunds": 512.5499999999979,
+    "totalProgressionFunds": 0,
+    "averageGamesPerPlayer": 13.5,
+    "playerRetirementRate": 0.95
+  },
+  "revenueStats": {
+    "totalPlatformRevenue": 215.99999999999628,
+    "totalCharityContributions": 90.45,
+    "totalPlayerPayouts": 512.5499999999979,
+    "revenuePerGame": 0.19999999999999654,
+    "charityPercentage": 0.2,
+    "averageRevenuePerDay": 30.857142857142325
+  },
+  "gameStats": {
+    "totalGames": 1080,
+    "averageGamesPerDay": 154.28571428571428,
+    "totalVirtualDollars": 4,
+    "totalRunsCreated": 790,
+    "completedRuns": 0,
+    "activeRuns": 4,
+    "jackpotsWon": 0,
+    "averageRunLength": 270
+  },
+  "dailyResults": [
+    {
+      "day": 1,
+      "playerStatistics": {
+        "totalPlayers": 80,
+        "activePlayers": 2,
+        "retiredPlayers": 78,
+        "totalDonationsFunds": 0,
+        "totalWinningsFunds": 128.52000000000007,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 3.025,
+        "playerRetirementRate": 0.975
+      },
+      "gameStatistics": {
+        "totalGames": 242,
+        "averageGamesPerDay": 34.57142857142857,
+        "totalVirtualDollars": 2,
+        "totalRunsCreated": 180,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 121
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 48.40000000000015,
+        "totalCharityContributions": 22.679999999999986,
+        "totalPlayerPayouts": 128.52000000000007,
+        "revenuePerGame": 0.20000000000000062,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 6.914285714285735
+      }
+    },
+    {
+      "day": 2,
+      "playerStatistics": {
+        "totalPlayers": 80,
+        "activePlayers": 3,
+        "retiredPlayers": 77,
+        "totalDonationsFunds": 0,
+        "totalWinningsFunds": 214.20000000000013,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 5.55,
+        "playerRetirementRate": 0.9625
+      },
+      "gameStatistics": {
+        "totalGames": 444,
+        "averageGamesPerDay": 63.42857142857143,
+        "totalVirtualDollars": 3,
+        "totalRunsCreated": 330,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 148
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 88.80000000000072,
+        "totalCharityContributions": 37.80000000000001,
+        "totalPlayerPayouts": 214.20000000000013,
+        "revenuePerGame": 0.20000000000000162,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 12.685714285714388
+      }
+    },
+    {
+      "day": 3,
+      "playerStatistics": {
+        "totalPlayers": 80,
+        "activePlayers": 2,
+        "retiredPlayers": 78,
+        "totalDonationsFunds": 0,
+        "totalWinningsFunds": 292.2299999999999,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 7.65,
+        "playerRetirementRate": 0.975
+      },
+      "gameStatistics": {
+        "totalGames": 612,
+        "averageGamesPerDay": 87.42857142857143,
+        "totalVirtualDollars": 2,
+        "totalRunsCreated": 454,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 306
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 122.4000000000012,
+        "totalCharityContributions": 51.570000000000114,
+        "totalPlayerPayouts": 292.2299999999999,
+        "revenuePerGame": 0.20000000000000195,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 17.485714285714458
+      }
+    },
+    {
+      "day": 4,
+      "playerStatistics": {
+        "totalPlayers": 80,
+        "activePlayers": 2,
+        "retiredPlayers": 78,
+        "totalDonationsFunds": 0,
+        "totalWinningsFunds": 374.84999999999934,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 9.475,
+        "playerRetirementRate": 0.975
+      },
+      "gameStatistics": {
+        "totalGames": 758,
+        "averageGamesPerDay": 108.28571428571429,
+        "totalVirtualDollars": 2,
+        "totalRunsCreated": 558,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 379
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 151.59999999999994,
+        "totalCharityContributions": 66.15000000000018,
+        "totalPlayerPayouts": 374.84999999999934,
+        "revenuePerGame": 0.19999999999999993,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 21.657142857142848
+      }
+    },
+    {
+      "day": 5,
+      "playerStatistics": {
+        "totalPlayers": 80,
+        "activePlayers": 4,
+        "retiredPlayers": 76,
+        "totalDonationsFunds": 0,
+        "totalWinningsFunds": 429.92999999999876,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 11,
+        "playerRetirementRate": 0.95
+      },
+      "gameStatistics": {
+        "totalGames": 880,
+        "averageGamesPerDay": 125.71428571428571,
+        "totalVirtualDollars": 4,
+        "totalRunsCreated": 648,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 220
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 175.99999999999855,
+        "totalCharityContributions": 75.8700000000001,
+        "totalPlayerPayouts": 429.92999999999876,
+        "revenuePerGame": 0.19999999999999835,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 25.142857142856936
+      }
+    },
+    {
+      "day": 6,
+      "playerStatistics": {
+        "totalPlayers": 80,
+        "activePlayers": 3,
+        "retiredPlayers": 77,
+        "totalDonationsFunds": 0,
+        "totalWinningsFunds": 474.29999999999825,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 12.35,
+        "playerRetirementRate": 0.9625
+      },
+      "gameStatistics": {
+        "totalGames": 988,
+        "averageGamesPerDay": 141.14285714285714,
+        "totalVirtualDollars": 3,
+        "totalRunsCreated": 724,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 329.3333333333333
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 197.59999999999732,
+        "totalCharityContributions": 83.70000000000005,
+        "totalPlayerPayouts": 474.29999999999825,
+        "revenuePerGame": 0.1999999999999973,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 28.228571428571048
+      }
+    },
+    {
+      "day": 7,
+      "playerStatistics": {
+        "totalPlayers": 80,
+        "activePlayers": 4,
+        "retiredPlayers": 76,
+        "totalDonationsFunds": 0,
+        "totalWinningsFunds": 512.5499999999979,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 13.5,
+        "playerRetirementRate": 0.95
+      },
+      "gameStatistics": {
+        "totalGames": 1080,
+        "averageGamesPerDay": 154.28571428571428,
+        "totalVirtualDollars": 4,
+        "totalRunsCreated": 790,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 270
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 215.99999999999628,
+        "totalCharityContributions": 90.45,
+        "totalPlayerPayouts": 512.5499999999979,
+        "revenuePerGame": 0.19999999999999654,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 30.857142857142325
+      }
+    }
+  ],
+  "completedAt": "2025-09-19T01:57:20.288Z"
+}

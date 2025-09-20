@@ -536,6 +536,13 @@ export class GameMatchingEngine {
   }
 
   /**
+   * Mark a virtual dollar as currently engaged in a game
+   */
+  markDollarInGame(dollarId: string): void {
+    this.dollarsInGame.add(dollarId);
+  }
+
+  /**
    * Get max concurrent games
    */
   getMaxConcurrentGames(): number {

@@ -79,15 +79,20 @@ export async function runSimulation(
     ? createProgressLogger()
     : undefined;
 
-  const results = await assembly.simulator.executeSimulation(
-    assembly.profile.config,
-    progressCallback
-  );
+  let debugSummary: DebugSanitySummary | undefined;
+  const results = await assembly.simulator
+    .executeSimulation(assembly.profile.config, progressCallback)
+    .finally(() => {
+      if (debugInterface) {
+        try {
+          debugSummary = collectDebugSummary(debugInterface);
+        } finally {
+          debugInterface.detach();
+        }
+      }
+    });
 
   const durationMs = performance.now() - startTime;
-  const debugSummary = debugInterface
-    ? collectDebugSummary(debugInterface)
-    : undefined;
 
   const outcome: SimulationRunOutcome = {
     results,

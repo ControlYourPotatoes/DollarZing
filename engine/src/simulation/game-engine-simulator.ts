@@ -6,7 +6,7 @@ import { GameMatchingEngine } from "../core/game-matching-engine";
 import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { RevenueCalculator } from "../core/revenue-calculator";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
-import { EventBus } from "../events/event-bus";
+import { EventBus, EventSubscription } from "../events/event-bus";
 import { GameEventHandler } from "../events/handlers/game-event-handler";
 import { PlayerProgressionHandler } from "../events/handlers/player-progression-handler";
 import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-handler";
@@ -14,6 +14,7 @@ import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-han
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
 import { MatchmakingEventHandler } from "../events/handlers/matchmaking-event-handler";
 import { PooledGameSessionFactory } from "../factories";
+import { EVENT_TYPES, NewRunCreatedEvent } from "../events/event-types";
 import {
   DEFAULT_RUNTIME_OPTIONS,
   DEFAULT_SIMULATION_PROFILE_NAME,
@@ -93,6 +94,7 @@ export interface GameStatistics {
   totalGames: number;
   averageGamesPerDay: number;
   totalVirtualDollars: number;
+  totalRunsCreated: number;
   completedRuns: number;
   activeRuns: number;
   jackpotsWon: number;
@@ -161,6 +163,10 @@ export class GameEngineSimulator {
   // Event system
   private eventBus: EventBus;
   private eventHandlers: any[] = [];
+  private runMetrics = {
+    totalRunsCreated: 0,
+  };
+  private runCreatedSubscription: EventSubscription | null = null;
 
   constructor(
     gameMatchingEngine: GameMatchingEngine,
@@ -205,6 +211,23 @@ export class GameEngineSimulator {
       ),
       new RevenueTrackingHandler(this.eventBus, revenueCalculator),
     ];
+
+    this.runCreatedSubscription = this.eventBus.on<NewRunCreatedEvent>(
+      EVENT_TYPES.NEW_RUN_CREATED,
+      this.handleRunCreated.bind(this)
+    );
+  }
+
+  private handleRunCreated(_event: NewRunCreatedEvent): void {
+    if (!this.isRunning) {
+      return;
+    }
+
+    this.runMetrics.totalRunsCreated += 1;
+  }
+
+  private resetRunMetrics(): void {
+    this.runMetrics.totalRunsCreated = 0;
   }
 
   /**
@@ -267,6 +290,7 @@ export class GameEngineSimulator {
     this.config = config;
     this.runtimeOptions = runtime;
     this.activeProfileName = profileName ?? DEFAULT_SIMULATION_PROFILE_NAME;
+    this.resetRunMetrics();
     this.isRunning = true;
     this.simulationAborted = false;
     this.startTime = performance.now();
@@ -538,6 +562,7 @@ export class GameEngineSimulator {
 
     const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
     const totalVirtualDollars = poolStats.totalDollarsInPool;
+    const totalRunsCreated = this.runMetrics.totalRunsCreated;
 
     // In event-driven architecture, we don't have direct access to completed runs
     // This would be tracked via RUN_COMPLETED events in a proper implementation
@@ -545,6 +570,7 @@ export class GameEngineSimulator {
       totalGames,
       averageGamesPerDay,
       totalVirtualDollars,
+      totalRunsCreated,
       completedRuns: 0, // Would need event tracking
       activeRuns: poolStats.totalDollarsInPool,
       jackpotsWon: 0, // Would need event tracking
@@ -615,6 +641,7 @@ export class GameEngineSimulator {
       totalGames: 0,
       averageGamesPerDay: 0,
       totalVirtualDollars: 0,
+      totalRunsCreated: 0,
       completedRuns: 0,
       activeRuns: 0,
       jackpotsWon: 0,
@@ -700,6 +727,10 @@ export class GameEngineSimulator {
       }
     });
     this.eventHandlers = [];
+    if (this.runCreatedSubscription) {
+      this.runCreatedSubscription.unsubscribe();
+      this.runCreatedSubscription = null;
+    }
   }
 
   getRuntimeOptions(): SimulationRuntimeOptions {

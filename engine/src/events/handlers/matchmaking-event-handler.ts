@@ -148,7 +148,9 @@ export class MatchmakingEventHandler {
         // Sort by creation time (FIFO)
         const availableDollars = levelDollars
           .filter(
-            (dollar) => !this.gameMatchingEngine.isDollarInGame(dollar.id)
+            (dollar) =>
+              dollar.state === DollarState.POOLED &&
+              !this.gameMatchingEngine.isDollarInGame(dollar.id)
           )
           .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
@@ -164,36 +166,49 @@ export class MatchmakingEventHandler {
           const dollar2 = availableDollars[i + 1];
 
           // Create game session
-          const game = this.createGameSession(dollar1, dollar2, bettingLevel);
+          try {
+            const game = this.createGameSession(
+              dollar1,
+              dollar2,
+              bettingLevel
+            );
 
-          // Mark dollars as in-game
-          this.virtualDollarFactory.updateDollarState(
-            dollar1.id,
-            DollarState.IN_GAME
-          );
-          this.virtualDollarFactory.updateDollarState(
-            dollar2.id,
-            DollarState.IN_GAME
-          );
+            // Mark dollars as in-game
+            this.virtualDollarFactory.updateDollarState(
+              dollar1.id,
+              DollarState.IN_GAME
+            );
+            this.virtualDollarFactory.updateDollarState(
+              dollar2.id,
+              DollarState.IN_GAME
+            );
+            this.gameMatchingEngine.markDollarInGame(dollar1.id);
+            this.gameMatchingEngine.markDollarInGame(dollar2.id);
 
-          // Remove from pool
-          await this.gameMatchingEngine.removeFromPool(dollar1.id);
-          await this.gameMatchingEngine.removeFromPool(dollar2.id);
+            // Remove from pool
+            await this.gameMatchingEngine.removeFromPool(dollar1.id);
+            await this.gameMatchingEngine.removeFromPool(dollar2.id);
 
-          // Track active game
-          this.gameMatchingEngine.addActiveGame(game);
+            // Track active game
+            this.gameMatchingEngine.addActiveGame(game);
 
-          // Emit match found event
-          await this.emitMatchFound(
-            dollar1,
-            dollar2,
-            bettingLevel,
-            i + 1,
-            i + 2
-          );
+            // Emit match found event
+            await this.emitMatchFound(
+              dollar1,
+              dollar2,
+              bettingLevel,
+              i + 1,
+              i + 2
+            );
 
-          // Emit game created event
-          await this.emitGameCreated(game, dollar1, dollar2);
+            // Emit game created event
+            await this.emitGameCreated(game, dollar1, dollar2);
+          } catch (error) {
+            console.error(
+              `[MatchmakingEventHandler] Failed to create or register game at level ${level}:`,
+              error
+            );
+          }
         }
 
         // Handle remaining odd player

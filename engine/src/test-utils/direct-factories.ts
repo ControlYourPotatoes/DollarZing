@@ -564,7 +564,7 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
 
     // Update level and winnings
     dollar.currentLevel = newLevel;
-    dollar.currentRunWinnings += additionalWinnings;
+    dollar.currentRunWinnings = additionalWinnings;
     dollar.gamesInThisRun += 1;
 
     // Update state to WON
@@ -681,10 +681,8 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
   }
 
   calculateLevelWinnings(level: BettingLevel): number {
-    // Simple calculation: base winnings * level multiplier
-    const baseWinnings = 50;
-    const levelMultiplier = Math.pow(1.5, level - 1);
-    return Math.floor(baseWinnings * levelMultiplier);
+    const bettingAmount = getBettingLevelValue(level);
+    return bettingAmount * 1.8;
   }
 
   getPlayerState(dollarId: string): Readonly<VirtualDollar> | null {
