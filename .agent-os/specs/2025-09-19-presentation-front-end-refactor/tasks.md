@@ -1,0 +1,35 @@
+# Spec Tasks
+
+## Tasks
+
+- [ ] 0. Confirm simulation snapshot aggregator output is available for presentation data pipeline
+  - [ ] 0.1 Validate snapshot JSON schema against expected front-end contract
+  - [ ] 0.2 Generate sample dataset for timeline + workflow components
+  - [ ] 0.3 Verify scenario manifest enumerates parameter coordinates for all anchor datasets
+
+- [ ] 1. Establish presentation project structure
+  - [ ] 1.1 Create feature folders for timeline, financial-flow, and distribution charts
+  - [ ] 1.2 Add shared UI primitives and hooks under `src/shared`
+  - [ ] 1.3 Draft `STRUCTURE.md` documenting new layout and module responsibilities
+
+- [ ] 2. Implement shared snapshot data layer
+  - [ ] 2.1 Build snapshot loader/normalizer module with TypeScript contracts
+  - [ ] 2.2 Seed global timeline store (active index, playback state, derived aggregates)
+  - [ ] 2.3 Write smoke tests covering snapshot parsing and selectors
+  - [ ] 2.4 Implement scenario manifest loader and parameter indexing utilities
+  - [ ] 2.5 Add interpolation helper to map arbitrary parameter requests to nearest anchors or blended datasets
+
+- [ ] 3. Refactor timeline scrubber
+  - [ ] 3.1 Connect SvgTimeline to shared store (play/pause, scrub shift, labels)
+  - [ ] 3.2 Implement playback controls and keyboard shortcuts within SVG UX constraints
+  - [ ] 3.3 Ensure connected charts react smoothly to timeline updates (animation + performance)
+
+- [ ] 4. Rebuild Financial Distribution Workflow component
+  - [ ] 4.1 Extract SVG primitives for nodes, connectors, and layered progress arcs
+  - [ ] 4.2 Bind snapshot aggregates to workflow visualization and hover interactions
+  - [ ] 4.3 Integrate Framer Motion (or equivalent) for node/link transitions
+
+- [ ] 5. Align supporting charts and documentation
+  - [ ] 5.1 Update financial distribution chart to consume shared selectors
+  - [ ] 5.2 Remove deprecated real-time sim wiring and unused prototype code
+  - [ ] 5.3 Finalize docs (component APIs, data contracts, presentation workflow, interpolation usage)

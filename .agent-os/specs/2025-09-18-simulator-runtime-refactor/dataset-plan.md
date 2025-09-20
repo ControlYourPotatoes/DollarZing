@@ -52,3 +52,27 @@
 - Explore parameter-mapper extraction later if configuration mapping grows more complex; not required for initial pipeline update.
 - Consider optional JSON schema validation for output to guarantee front-end compatibility.
 - Investigate concurrent run safety (may require encapsulating simulator assembly per worker or spawning isolated Node processes).
+
+
+You are maintaining the simulation pipeline that currently emits raw event logs (e.g., anchor-001). Front-end refactors now require a pre-aggregated daily snapshot feed.
+
+Goal:
+1. Extend the pipeline to emit a JSON structure per simulated day with:
+   - date (ISO string)
+   - totals: revenue, charity, fees, player counts
+   - workflowNodes[]: id, label, aggregates, layer breakdowns needed for the Financial Distribution Workflow component
+   - timelineTicks[]: id, label, cumulative metrics for the SVG timeline scrubber
+   - charts: any series already derived for the financial distribution/accumulation charts
+2. Append these snapshots alongside the existing log output (do not remove current logs yet).
+3. Provide a TypeScript-friendly schema definition (JSON Schema or TS type) and sample file so the UI repo can consume it directly.
+4. Document where the new aggregates live and how to regenerate them.
+
+Constraints:
+- Keep the change minimally invasive; reuse existing aggregation logic where possible.
+- Ensure generation stays performant for up to 365 days of data.
+- Update any pipeline config/tests impacted by the new artifact.
+
+Deliverables:
+- Code changes implementing the aggregator.
+- Sample snapshot JSON matching the schema.
+- README/notes describing regeneration steps and data contract.
