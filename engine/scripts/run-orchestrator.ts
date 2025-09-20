@@ -19,6 +19,7 @@ interface RunnerOptions {
   outputDirectory: string;
   collectSnapshots: boolean;
   collectEvents: boolean;
+  collectPresentation: boolean;
   verbose: boolean;
   days?: number;
   combination?: ParameterCombination;
@@ -50,6 +51,7 @@ function parseArgs(argv: string[]): RunnerOptions {
     outputDirectory,
     collectSnapshots: !args.has("--no-snapshots"),
     collectEvents: !args.has("--no-events"),
+    collectPresentation: !args.has("--no-presentation"),
     verbose: args.has("--verbose"),
   };
 
@@ -101,7 +103,7 @@ function parseCombination(input: string): ParameterCombination {
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   if (argv.includes("--help") || argv.includes("-h")) {
-    console.log(`Usage: ts-node --esm scripts/run-orchestrator.ts [options]\n\nOptions:\n  -o, --output <dir>        Output directory (default: engine/generated-datasets)\n      --days <n>            Override simulation length in days (e.g. 90)\n      --combo <g,r,c>       Run a single combination (e.g. 15,low,10)\n      --no-snapshots        Skip writing daily snapshot aggregates\n      --no-events           Skip writing event trace logs\n      --verbose             Enable verbose logging\n      --help                Show this help message\n`);
+    console.log(`Usage: ts-node --esm scripts/run-orchestrator.ts [options]\n\nOptions:\n  -o, --output <dir>        Output directory (default: engine/generated-datasets)\n      --days <n>            Override simulation length in days (e.g. 90)\n      --combo <g,r,c>       Run a single combination (e.g. 15,low,10)\n      --no-snapshots        Skip writing daily snapshot aggregates\n      --no-events           Skip writing event trace logs\n      --no-presentation     Skip writing presentation snapshots\n      --verbose             Enable verbose logging\n      --help                Show this help message\n`);
     process.exit(0);
   }
 
@@ -112,6 +114,7 @@ async function main(): Promise<void> {
     verbose: options.verbose,
     collectDailySnapshots: options.collectSnapshots,
     collectEventTraces: options.collectEvents,
+    collectPresentationSnapshots: options.collectPresentation,
   });
 
   if (options.verbose) {

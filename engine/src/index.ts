@@ -65,6 +65,24 @@ export type {
   TimelineTick,
   ChartSeriesPoint,
 } from "./simulation/post-processing/daily-aggregator";
+export {
+  buildPresentationSnapshotFile,
+  mapParametersToScenario,
+} from "./simulation/post-processing/presentation-aggregator";
+export type {
+  PresentationSnapshotFile,
+  PresentationSnapshot,
+  PresentationScenarioParameters,
+  PresentationScenarioCoordinates,
+} from "./simulation/post-processing/presentation-aggregator";
+export {
+  upsertPresentationManifest,
+  createManifestEntry,
+} from "./simulation/post-processing/presentation-manifest";
+export type {
+  PresentationManifest,
+  PresentationManifestEntry,
+} from "./simulation/post-processing/presentation-manifest";
 
 // Factory implementations (production - use these)
 export {

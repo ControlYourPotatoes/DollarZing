@@ -18,7 +18,8 @@ export function createCliProgram(): Command {
     .option('-o, --output <dir>', 'Output directory for generated datasets', 'engine/generated-datasets')
     .option('--no-metadata', 'Disable metadata file generation')
     .option('--no-snapshots', 'Skip writing daily snapshot aggregates')
-    .option('--no-events', 'Skip writing event trace logs');
+    .option('--no-events', 'Skip writing event trace logs')
+    .option('--no-presentation', 'Skip writing presentation snapshots');
 
   // Processing configuration  
   program
@@ -73,7 +74,8 @@ export function parseCliArguments(argv: string[]): OrchestratorConfig {
       verbose: options.verbose || false,
       dryRun: options.dryRun || false,
       collectDailySnapshots: options.snapshots !== false,
-      collectEventTraces: options.events !== false
+      collectEventTraces: options.events !== false,
+      collectPresentationSnapshots: options.presentation !== false
     };
     
     // Validate the resulting configuration
@@ -163,6 +165,7 @@ export function displayConfiguration(config: OrchestratorConfig): void {
   console.log(`  Dry Run: ${config.dryRun ? 'Yes' : 'No'}`);
   console.log(`  Daily Snapshots: ${config.collectDailySnapshots ? 'Included' : 'Skipped'}`);
   console.log(`  Event Traces: ${config.collectEventTraces ? 'Included' : 'Skipped'}`);
+  console.log(`  Presentation Snapshots: ${config.collectPresentationSnapshots ? 'Included' : 'Skipped'}`);
   console.log('');
 }
 

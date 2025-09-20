@@ -18,7 +18,8 @@ export function createDefaultOrchestratorConfig(overrides?: OrchestratorConfigOv
     verbose: false,
     dryRun: false,
     collectDailySnapshots: true,
-    collectEventTraces: true
+    collectEventTraces: true,
+    collectPresentationSnapshots: true
   };
   
   const config = { ...defaults, ...overrides };

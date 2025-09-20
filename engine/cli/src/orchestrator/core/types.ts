@@ -42,6 +42,7 @@ export interface OrchestratorConfig {
   dryRun: boolean;
   collectDailySnapshots: boolean;
   collectEventTraces: boolean;
+  collectPresentationSnapshots: boolean;
 }
 
 // Partial configuration for customization
@@ -105,10 +106,12 @@ export interface DatasetMetadata {
     metadata: string;
     dailySnapshots: string;
     events: string;
+    presentation?: string;
   };
   aggregates?: {
     dailySnapshotCount: number;
     eventTraceCount: number;
+    presentationSnapshotCount?: number;
   };
 }
 
@@ -118,6 +121,7 @@ export interface DatasetArtifactPaths {
   metadataFile: string;
   snapshotsFile: string;
   eventsFile: string;
+  presentationFile: string;
 }
 
 // File naming utilities (used by output organization)

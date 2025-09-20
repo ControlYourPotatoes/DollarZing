@@ -3,10 +3,13 @@ import { fileURLToPath } from 'url';
 import {
   createProductionSimulator,
   generateDailyAggregates,
+  buildPresentationSnapshotFile,
+  mapParametersToScenario,
 } from '../src/index';
 import {
   serializeSimulationResults,
   serializeDailySnapshots,
+  serializePresentationSnapshots,
   formatEventTracesAsNdjson,
   writeDatasetArtifacts,
 } from '../cli/src/orchestrator/execution/dataset-writer';
@@ -42,6 +45,15 @@ assembly.debugInterface?.detach();
 const eventTraces = debugSession?.traces ?? [];
 const dailySnapshots =
   results.dailyAggregates ?? generateDailyAggregates(results);
+const presentationSnapshot = buildPresentationSnapshotFile({
+  scenarioId: 'anchor-001',
+  dailySnapshots,
+  ...mapParametersToScenario({
+    growthRate: 15,
+    riskLevel: 'low',
+    charityPercentage: 10,
+  }),
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -61,6 +73,7 @@ const artifactPaths: DatasetArtifactPaths = {
   metadataFile: join(outputDir, 'metadata.json'),
   snapshotsFile: join(outputDir, 'daily-snapshots.json'),
   eventsFile: join(outputDir, 'events.ndjson'),
+  presentationFile: join(outputDir, 'presentation-snapshots.json'),
 };
 
 const artifactContent: DatasetArtifactContent = {
@@ -75,6 +88,10 @@ if (eventsNdjson) {
   artifactContent.eventsNdjson = eventsNdjson;
 }
 
+artifactContent.presentationJson = serializePresentationSnapshots(
+  presentationSnapshot
+);
+
 await writeDatasetArtifacts(artifactPaths, artifactContent);
 
 console.log(`Dataset saved to ${artifactPaths.datasetFile}`);
@@ -85,3 +102,4 @@ if (eventsNdjson) {
 } else {
   console.log('Event trace log skipped (no events recorded).');
 }
+console.log(`Presentation snapshots saved to ${artifactPaths.presentationFile}`);

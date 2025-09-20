@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import type { DatasetMetadata, DatasetArtifactPaths } from "../core/types";
 import type { SimulationResults } from "@/index";
 import type { DailyAggregateSnapshot } from "@/index";
+import type { PresentationSnapshotFile } from "@/index";
 import type { EventTrace } from "../../../../src/events/debug/event-debugger";
 
 export interface DatasetArtifactContent {
@@ -9,6 +10,7 @@ export interface DatasetArtifactContent {
   metadataJson?: string;
   snapshotsJson?: string;
   eventsNdjson?: string;
+  presentationJson?: string;
 }
 
 export function serializeSimulationResults(
@@ -23,6 +25,12 @@ export function serializeDatasetMetadata(metadata: DatasetMetadata): string {
 
 export function serializeDailySnapshots(
   snapshots: DailyAggregateSnapshot[]
+): string {
+  return serializeForJson(snapshots);
+}
+
+export function serializePresentationSnapshots(
+  snapshots: PresentationSnapshotFile
 ): string {
   return serializeForJson(snapshots);
 }
@@ -78,6 +86,10 @@ export async function writeDatasetArtifacts(
 
   if (content.eventsNdjson !== undefined && content.eventsNdjson.length > 0) {
     writes.push(fs.writeFile(paths.eventsFile, content.eventsNdjson, "utf8"));
+  }
+
+  if (content.presentationJson !== undefined) {
+    writes.push(fs.writeFile(paths.presentationFile, content.presentationJson, "utf8"));
   }
 
   await Promise.all(writes);

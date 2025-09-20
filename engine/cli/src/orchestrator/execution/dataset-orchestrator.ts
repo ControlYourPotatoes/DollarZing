@@ -1,6 +1,8 @@
 // Dataset Orchestrator for Game Engine Integration
 // Provides abstraction layer between orchestrator parameters and game engine configuration
 
+import { join } from "path";
+
 import {
   SimulationConfig,
   SimulationResults,
@@ -17,6 +19,12 @@ import {
   createProductionSimulator,
   type SimulatorAssembly,
   type DailyAggregateSnapshot,
+  generateDailyAggregates,
+  buildPresentationSnapshotFile,
+  mapParametersToScenario,
+  type PresentationSnapshotFile,
+  createManifestEntry,
+  upsertPresentationManifest,
 } from "@/index";
 import type {
   ParameterCombination,
@@ -26,7 +34,6 @@ import type {
 } from "../core/types";
 import { validateParameterCombination } from "../parameters/validation";
 import { generateDirectoryName, generateFilePaths } from "../parameters/matrix";
-import { generateDailyAggregates } from "@/index";
 import type {
   EventDebugInterface,
   EventTrace,
@@ -35,6 +42,7 @@ import {
   serializeSimulationResults,
   serializeDatasetMetadata,
   serializeDailySnapshots,
+  serializePresentationSnapshots,
   formatEventTracesAsNdjson,
   writeDatasetArtifacts,
   type DatasetArtifactContent,
@@ -177,6 +185,10 @@ export class DatasetOrchestrator {
       const shouldCollectSnapshots =
         this.orchestratorConfig.collectDailySnapshots;
       const shouldCollectEvents = this.orchestratorConfig.collectEventTraces;
+      const shouldCollectPresentation =
+        this.orchestratorConfig.collectPresentationSnapshots;
+      const requireDailySnapshots =
+        shouldCollectSnapshots || shouldCollectPresentation;
 
       const assembly = this.createSimulatorAssembly(
         parameterId,
@@ -284,15 +296,24 @@ export class DatasetOrchestrator {
         }
 
         const generationTimeMs = performance.now() - startTime;
+        const scenarioSlug = generateDirectoryName(combination);
         const outputPaths = generateFilePaths(
           this.orchestratorConfig.outputDirectory,
           combination
         );
         const recordCount = this.calculateRecordCount(simulationResults);
-        const dailySnapshots: DailyAggregateSnapshot[] = shouldCollectSnapshots
+        const dailySnapshots: DailyAggregateSnapshot[] = requireDailySnapshots
           ? simulationResults.dailyAggregates ??
             generateDailyAggregates(simulationResults)
           : [];
+        const presentationSnapshot: PresentationSnapshotFile | undefined =
+          shouldCollectPresentation
+            ? buildPresentationSnapshotFile({
+                scenarioId: scenarioSlug,
+                dailySnapshots,
+                ...mapParametersToScenario(combination),
+              })
+            : undefined;
         debugSession = debugInterface?.endSession() ?? null;
         const eventTraces: EventTrace[] = shouldCollectEvents
           ? ((debugSession?.traces ?? []) as EventTrace[])
@@ -313,6 +334,7 @@ export class DatasetOrchestrator {
               poolingEnabled: assembly.poolingEnabled,
               snapshotCount: dailySnapshots.length,
               eventCount: eventTraces.length,
+              presentationCount: presentationSnapshot?.days.length ?? 0,
               artifactPaths: outputPaths,
             }
           );
@@ -324,6 +346,9 @@ export class DatasetOrchestrator {
           : undefined;
         const eventsContent = shouldCollectEvents
           ? formatEventTracesAsNdjson(eventTraces)
+          : undefined;
+        const presentationJson = shouldCollectPresentation && presentationSnapshot
+          ? serializePresentationSnapshots(presentationSnapshot)
           : undefined;
 
         const artifactContent: DatasetArtifactContent = {
@@ -342,11 +367,28 @@ export class DatasetOrchestrator {
           artifactContent.eventsNdjson = eventsContent;
         }
 
+        if (presentationJson !== undefined) {
+          artifactContent.presentationJson = presentationJson;
+        }
+
         await writeDatasetArtifacts(
           outputPaths,
           artifactContent,
           { dryRun: this.orchestratorConfig.dryRun }
         );
+
+        if (shouldCollectPresentation && presentationSnapshot) {
+          const manifestPath = join(
+            this.orchestratorConfig.outputDirectory,
+            "anchor-datasets",
+            "presentation-manifest.json"
+          );
+          const relativePath = `anchor-datasets/${scenarioSlug}/presentation-snapshots.json`;
+          await upsertPresentationManifest(
+            manifestPath,
+            createManifestEntry(scenarioSlug, presentationSnapshot, relativePath)
+          );
+        }
 
         const successResult: AdapterGenerationResult = {
           combination,
@@ -584,6 +626,7 @@ export class DatasetOrchestrator {
       poolingEnabled: boolean;
       snapshotCount: number;
       eventCount: number;
+       presentationCount: number;
       artifactPaths: DatasetArtifactPaths;
     }
   ): DatasetMetadata {
@@ -611,11 +654,17 @@ export class DatasetOrchestrator {
         metadata: extras.artifactPaths.metadataFile,
         dailySnapshots: extras.artifactPaths.snapshotsFile,
         events: extras.artifactPaths.eventsFile,
+        ...(extras.presentationCount > 0
+          ? { presentation: extras.artifactPaths.presentationFile }
+          : {}),
       };
 
       metadata.aggregates = {
         dailySnapshotCount: extras.snapshotCount,
         eventTraceCount: extras.eventCount,
+        ...(extras.presentationCount > 0
+          ? { presentationSnapshotCount: extras.presentationCount }
+          : {}),
       };
     }
 

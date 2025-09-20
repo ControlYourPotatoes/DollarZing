@@ -133,6 +133,7 @@ export function createMockDatasetResults(
         metadataFile: datasetResult.metadataPath || "",
         snapshotsFile: `${directory}/daily-snapshots.json`,
         eventsFile: `${directory}/events.ndjson`,
+        presentationFile: `${directory}/presentation-snapshots.json`,
       };
     }
 

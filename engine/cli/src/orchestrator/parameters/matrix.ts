@@ -57,7 +57,8 @@ export function generateFilePaths(
     datasetFile: `${basePath}/dataset.json`,
     metadataFile: `${basePath}/metadata.json`,
     snapshotsFile: `${basePath}/daily-snapshots.json`,
-    eventsFile: `${basePath}/events.ndjson`
+    eventsFile: `${basePath}/events.ndjson`,
+    presentationFile: `${basePath}/presentation-snapshots.json`
   };
 }
 
