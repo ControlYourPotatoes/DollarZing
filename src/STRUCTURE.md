@@ -22,6 +22,9 @@ be updated as components migrate out of the prototype directory.
 - `src/shared/hooks/`
   - Cross-feature hooks such as the global timeline store, playback helpers, and
     snapshot selectors. Hooks should be typed against the presentation data contract.
+- `src/shared/presentation/`
+  - Snapshot schema validators, loaders, interpolation helpers, and normalization
+    utilities used by the timeline store and feature modules.
 - `src/shared/index.ts`
   - (Future) Optional barrel aggregating shared exports for convenience.
 
