@@ -22,6 +22,7 @@ import {
   generateDirectoryName,
 } from "../parameters/matrix";
 import { validateParameterCombination } from "../parameters/validation";
+import { EventBus } from "@/index";
 
 /**
  * Configuration for game engine execution
@@ -118,8 +119,6 @@ export class GameEngineExecutor {
   constructor(config: ExecutorConfig) {
     this.config = config;
 
-    // Import EventBus for event-driven orchestration
-    const { EventBus } = require("../../../index");
     const eventBus = new EventBus();
 
     // Create DatasetOrchestrator with EventBus integration
@@ -505,8 +504,6 @@ export class GameEngineExecutor {
 
     // Recreate adapter if orchestrator config changed
     if (updates.orchestratorConfig) {
-      // Import EventBus for event-driven orchestration
-      const { EventBus } = require("../../../index");
       const eventBus = new EventBus();
 
       this.adapter = new DatasetOrchestrator(

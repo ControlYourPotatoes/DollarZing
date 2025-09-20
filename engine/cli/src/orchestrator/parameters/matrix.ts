@@ -5,7 +5,8 @@ import type {
   ParameterCombination,
   GrowthRateLevel,
   RiskLevel,
-  CharityPercentageLevel
+  CharityPercentageLevel,
+  DatasetArtifactPaths
 } from '../core/types';
 import { validateParameterCombination } from './validation';
 
@@ -44,16 +45,19 @@ export function generateDirectoryName(combination: ParameterCombination): string
 }
 
 // Generate file paths for a parameter combination
-export function generateFilePaths(outputDirectory: string, combination: ParameterCombination) {
+export function generateFilePaths(
+  outputDirectory: string,
+  combination: ParameterCombination
+): DatasetArtifactPaths {
   const dirName = generateDirectoryName(combination);
   const basePath = `${outputDirectory}/anchor-datasets/${dirName}`;
   
   return {
     directory: basePath,
-    datasetFile: `${basePath}/generated-datasets/dataset.json`,
-    metadataFile: `${basePath}/generated-datasets/metadata.json`,
-    snapshotsFile: `${basePath}/generated-datasets/daily-snapshots.json`,
-    eventsFile: `${basePath}/generated-datasets/events.ndjson`
+    datasetFile: `${basePath}/dataset.json`,
+    metadataFile: `${basePath}/metadata.json`,
+    snapshotsFile: `${basePath}/daily-snapshots.json`,
+    eventsFile: `${basePath}/events.ndjson`
   };
 }
 

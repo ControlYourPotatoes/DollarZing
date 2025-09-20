@@ -16,7 +16,9 @@ export function createCliProgram(): Command {
   // Output configuration
   program
     .option('-o, --output <dir>', 'Output directory for generated datasets', 'engine/generated-datasets')
-    .option('--no-metadata', 'Disable metadata file generation');
+    .option('--no-metadata', 'Disable metadata file generation')
+    .option('--no-snapshots', 'Skip writing daily snapshot aggregates')
+    .option('--no-events', 'Skip writing event trace logs');
 
   // Processing configuration  
   program
@@ -69,7 +71,9 @@ export function parseCliArguments(argv: string[]): OrchestratorConfig {
       enableProgressReporting: options.progress !== false, // Default true unless --no-progress
       enableValidation: options.validation !== false, // Default true unless --no-validation
       verbose: options.verbose || false,
-      dryRun: options.dryRun || false
+      dryRun: options.dryRun || false,
+      collectDailySnapshots: options.snapshots !== false,
+      collectEventTraces: options.events !== false
     };
     
     // Validate the resulting configuration
@@ -157,6 +161,8 @@ export function displayConfiguration(config: OrchestratorConfig): void {
   console.log(`  Validation: ${config.enableValidation ? 'Enabled' : 'Disabled'}`);
   console.log(`  Verbose: ${config.verbose ? 'Enabled' : 'Disabled'}`);
   console.log(`  Dry Run: ${config.dryRun ? 'Yes' : 'No'}`);
+  console.log(`  Daily Snapshots: ${config.collectDailySnapshots ? 'Included' : 'Skipped'}`);
+  console.log(`  Event Traces: ${config.collectEventTraces ? 'Included' : 'Skipped'}`);
   console.log('');
 }
 

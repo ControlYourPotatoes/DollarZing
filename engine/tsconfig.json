@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2018",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "module": "ESNext",
     "moduleResolution": "Node",
     "downlevelIteration": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
     "allowImportingTsExtensions": false,
     "allowSyntheticDefaultImports": true,
@@ -30,10 +34,23 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node", "vitest/globals"]
+    "types": [
+      "node",
+      "vitest/globals"
+    ]
   },
-  "include": ["src/**/*", "cli/src/**/*"],
-  "exclude": ["node_modules", "dist", "generated-datasets/**/*", "bin/**/*", "tests/**/*"],
+  "include": [
+    "src/**/*",
+    "cli/src/**/*",
+    "scripts/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "generated-datasets/**/*",
+    "bin/**/*",
+    "tests/**/*"
+  ],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

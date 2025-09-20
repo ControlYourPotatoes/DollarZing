@@ -1,7 +1,6 @@
 // Dataset Orchestrator for Game Engine Integration
 // Provides abstraction layer between orchestrator parameters and game engine configuration
 
-import { promises as fs } from "fs";
 import {
   SimulationConfig,
   SimulationResults,
@@ -17,11 +16,13 @@ import {
   QualityAssuranceEvent,
   createProductionSimulator,
   type SimulatorAssembly,
+  type DailyAggregateSnapshot,
 } from "@/index";
 import type {
   ParameterCombination,
   OrchestratorConfig,
   DatasetMetadata,
+  DatasetArtifactPaths,
 } from "../core/types";
 import { validateParameterCombination } from "../parameters/validation";
 import { generateDirectoryName, generateFilePaths } from "../parameters/matrix";
@@ -30,6 +31,14 @@ import type {
   EventDebugInterface,
   EventTrace,
 } from "../../../../src/events/debug/index";
+import {
+  serializeSimulationResults,
+  serializeDatasetMetadata,
+  serializeDailySnapshots,
+  formatEventTracesAsNdjson,
+  writeDatasetArtifacts,
+  type DatasetArtifactContent,
+} from "./dataset-writer";
 
 type DebugSessionResult = ReturnType<EventDebugInterface["endSession"]>;
 
@@ -66,13 +75,7 @@ export interface AdapterGenerationResult {
   error?: string;
   simulationResults?: SimulationResults;
   generationTimeMs: number;
-  outputPaths?: {
-    directory: string;
-    datasetFile: string;
-    metadataFile: string;
-    snapshotsFile: string;
-    eventsFile: string;
-  };
+  outputPaths?: DatasetArtifactPaths;
   snapshotCount?: number;
   eventCount?: number;
 }
@@ -171,9 +174,15 @@ export class DatasetOrchestrator {
       const simulationConfig = this.createSimulationConfig(combination);
 
       // Assemble simulator using factory integration
+      const shouldCollectSnapshots =
+        this.orchestratorConfig.collectDailySnapshots;
+      const shouldCollectEvents = this.orchestratorConfig.collectEventTraces;
+
       const assembly = this.createSimulatorAssembly(
         parameterId,
-        simulationConfig
+        simulationConfig,
+        shouldCollectSnapshots,
+        shouldCollectEvents
       );
       const { simulator, profile } = assembly;
 
@@ -185,7 +194,7 @@ export class DatasetOrchestrator {
         );
       }
 
-      const debugInterface = assembly.debugInterface;
+      const debugInterface = shouldCollectEvents ? assembly.debugInterface : undefined;
       let debugSession: DebugSessionResult | null = null;
 
       if (debugInterface) {
@@ -280,45 +289,64 @@ export class DatasetOrchestrator {
           combination
         );
         const recordCount = this.calculateRecordCount(simulationResults);
-        const dailySnapshots =
-          simulationResults.dailyAggregates ??
-          generateDailyAggregates(simulationResults);
+        const dailySnapshots: DailyAggregateSnapshot[] = shouldCollectSnapshots
+          ? simulationResults.dailyAggregates ??
+            generateDailyAggregates(simulationResults)
+          : [];
         debugSession = debugInterface?.endSession() ?? null;
-        const eventTraces = debugSession?.traces ?? [];
+        const eventTraces: EventTrace[] = shouldCollectEvents
+          ? ((debugSession?.traces ?? []) as EventTrace[])
+          : [];
 
-        const datasetJson = serializeForJson(simulationResults);
-        const snapshotsJson = serializeForJson(dailySnapshots);
-        const eventsContent = formatEventTracesAsNdjson(eventTraces);
+        const datasetJson = serializeSimulationResults(simulationResults);
         const datasetSizeBytes = Buffer.byteLength(datasetJson, "utf8");
-        const metadata = this.createDatasetMetadata(
-          combination,
-          simulationResults,
-          generationTimeMs,
-          datasetSizeBytes,
-          {
-            simulatorProfileName: profile.name,
-            poolingEnabled: assembly.poolingEnabled,
-            snapshotCount: dailySnapshots.length,
-            eventCount: eventTraces.length,
-            artifactPaths: {
-              dataset: outputPaths.datasetFile,
-              metadata: outputPaths.metadataFile,
-              dailySnapshots: outputPaths.snapshotsFile,
-              events: outputPaths.eventsFile,
-            },
-          }
-        );
-        const metadataJson = serializeForJson(metadata);
 
-        if (!this.orchestratorConfig.dryRun) {
-          await this.ensureDirectory(outputPaths.directory);
-          await Promise.all([
-            fs.writeFile(outputPaths.datasetFile, datasetJson, "utf8"),
-            fs.writeFile(outputPaths.metadataFile, metadataJson, "utf8"),
-            fs.writeFile(outputPaths.snapshotsFile, snapshotsJson, "utf8"),
-            fs.writeFile(outputPaths.eventsFile, eventsContent, "utf8"),
-          ]);
+        let metadataJson: string | undefined;
+        if (this.orchestratorConfig.generateMetadata) {
+          const metadata = this.createDatasetMetadata(
+            combination,
+            simulationResults,
+            generationTimeMs,
+            datasetSizeBytes,
+            {
+              simulatorProfileName: profile.name,
+              poolingEnabled: assembly.poolingEnabled,
+              snapshotCount: dailySnapshots.length,
+              eventCount: eventTraces.length,
+              artifactPaths: outputPaths,
+            }
+          );
+          metadataJson = serializeDatasetMetadata(metadata);
         }
+
+        const snapshotsJson = shouldCollectSnapshots
+          ? serializeDailySnapshots(dailySnapshots)
+          : undefined;
+        const eventsContent = shouldCollectEvents
+          ? formatEventTracesAsNdjson(eventTraces)
+          : undefined;
+
+        const artifactContent: DatasetArtifactContent = {
+          datasetJson,
+        };
+
+        if (metadataJson !== undefined) {
+          artifactContent.metadataJson = metadataJson;
+        }
+
+        if (snapshotsJson !== undefined) {
+          artifactContent.snapshotsJson = snapshotsJson;
+        }
+
+        if (eventsContent !== undefined && eventsContent.length > 0) {
+          artifactContent.eventsNdjson = eventsContent;
+        }
+
+        await writeDatasetArtifacts(
+          outputPaths,
+          artifactContent,
+          { dryRun: this.orchestratorConfig.dryRun }
+        );
 
         const successResult: AdapterGenerationResult = {
           combination,
@@ -436,7 +464,9 @@ export class DatasetOrchestrator {
    */
   private createSimulatorAssembly(
     parameterId: string,
-    simulationConfig: SimulationConfig
+    simulationConfig: SimulationConfig,
+    collectDailySnapshots: boolean,
+    collectEventTraces: boolean
   ): SimulatorAssembly {
     const simulationEventBus = this.eventBus ?? new EventBus();
 
@@ -456,34 +486,35 @@ export class DatasetOrchestrator {
           growthModel: simulationConfig.growthModel,
         },
         runtime: {
-          collectDailySnapshots: true,
+          collectDailySnapshots,
+          collectEventTraces,
         },
       },
-      debug: {
-        enableEventTracing: true,
-        config: {
-          debugger: {
-            enabled: true,
-            includeData: true,
-            maxTraces: 10000,
-            logLevel: this.orchestratorConfig.verbose ? "info" : "warn",
-            enablePerformanceTracking: false,
-            enableEventFlowVisualization: false,
-          },
-          logger: {
-            enabled: false,
-          },
-          performanceMonitor: {
-            enabled: false,
-          },
-          autoStartMonitoring: false,
-        },
-      },
+      ...(collectEventTraces
+        ? {
+            debug: {
+              enableEventTracing: true,
+              config: {
+                debugger: {
+                  enabled: true,
+                  includeData: true,
+                  maxTraces: 10000,
+                  logLevel: this.orchestratorConfig.verbose ? "info" : "warn",
+                  enablePerformanceTracking: false,
+                  enableEventFlowVisualization: false,
+                },
+                logger: {
+                  enabled: false,
+                },
+                performanceMonitor: {
+                  enabled: false,
+                },
+                autoStartMonitoring: false,
+              },
+            },
+          }
+        : {}),
     });
-  }
-
-  private async ensureDirectory(path: string): Promise<void> {
-    await fs.mkdir(path, { recursive: true });
   }
 
   /**
@@ -553,12 +584,7 @@ export class DatasetOrchestrator {
       poolingEnabled: boolean;
       snapshotCount: number;
       eventCount: number;
-      artifactPaths: {
-        dataset: string;
-        metadata: string;
-        dailySnapshots: string;
-        events: string;
-      };
+      artifactPaths: DatasetArtifactPaths;
     }
   ): DatasetMetadata {
     // Calculate record count from simulation results
@@ -581,10 +607,10 @@ export class DatasetOrchestrator {
       };
 
       metadata.artifacts = {
-        dataset: extras.artifactPaths.dataset,
-        metadata: extras.artifactPaths.metadata,
-        dailySnapshots: extras.artifactPaths.dailySnapshots,
-        events: extras.artifactPaths.events,
+        dataset: extras.artifactPaths.datasetFile,
+        metadata: extras.artifactPaths.metadataFile,
+        dailySnapshots: extras.artifactPaths.snapshotsFile,
+        events: extras.artifactPaths.eventsFile,
       };
 
       metadata.aggregates = {
@@ -738,77 +764,4 @@ export class DatasetOrchestrator {
       },
     } as QualityAssuranceEvent);
   }
-}
-
-function serializeForJson(value: unknown): string {
-  return JSON.stringify(value, (_key, val) => sanitizeForJson(val), 2);
-}
-
-function sanitizeForJson(
-  value: unknown,
-  seen: WeakSet<object> = new WeakSet()
-): unknown {
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
-
-  if (typeof value === "bigint") {
-    return Number(value);
-  }
-
-  if (typeof value === "number" && !Number.isFinite(value)) {
-    return 0;
-  }
-
-  if (value && typeof value === "object") {
-    if (Array.isArray(value)) {
-      if (seen.has(value)) {
-        return undefined;
-      }
-      seen.add(value);
-      const result = value.map((entry) => sanitizeForJson(entry, seen));
-      seen.delete(value);
-      return result;
-    }
-
-    if (seen.has(value)) {
-      return undefined;
-    }
-
-    seen.add(value);
-    const result: Record<string, unknown> = {};
-    for (const [key, entry] of Object.entries(value)) {
-      if (typeof entry === "function" || entry === undefined) {
-        continue;
-      }
-      result[key] = sanitizeForJson(entry, seen);
-    }
-    seen.delete(value);
-    return result;
-  }
-
-  return value;
-}
-
-function formatEventTracesAsNdjson(traces: EventTrace[]): string {
-  if (traces.length === 0) {
-    return "";
-  }
-
-  return traces
-    .map((trace) =>
-      JSON.stringify({
-        id: trace.id,
-        type: trace.eventType,
-        timestamp: new Date(trace.timestamp).toISOString(),
-        durationMs: trace.duration ?? null,
-        status: trace.status,
-        source: trace.source ?? null,
-        correlationId: trace.correlationId ?? null,
-        parentEventId: trace.parentEventId ?? null,
-        children: trace.children ?? [],
-        data: sanitizeForJson(trace.data),
-      })
-    )
-    .join("\n");
 }

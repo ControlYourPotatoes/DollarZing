@@ -1,10 +1,17 @@
-import { promises as fs } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import {
   createProductionSimulator,
   generateDailyAggregates,
 } from '../src/index';
+import {
+  serializeSimulationResults,
+  serializeDailySnapshots,
+  formatEventTracesAsNdjson,
+  writeDatasetArtifacts,
+} from '../cli/src/orchestrator/execution/dataset-writer';
+import type { DatasetArtifactContent } from '../cli/src/orchestrator/execution/dataset-writer';
+import type { DatasetArtifactPaths } from '../cli/src/orchestrator/core/types';
 
 const assembly = createProductionSimulator({
   profileOverrides: {
@@ -40,41 +47,41 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const outputDir = resolve(__dirname, '../generated-datasets/anchor-001');
 
-await fs.mkdir(outputDir, { recursive: true });
+const datasetJson = serializeSimulationResults(results);
+const snapshotsJson =
+  dailySnapshots.length > 0
+    ? serializeDailySnapshots(dailySnapshots)
+    : undefined;
+const eventsNdjson =
+  eventTraces.length > 0 ? formatEventTracesAsNdjson(eventTraces) : undefined;
 
-const datasetPath = join(outputDir, 'dataset.json');
-const snapshotsPath = join(outputDir, 'daily-snapshots.json');
-const eventsPath = join(outputDir, 'events.ndjson');
+const artifactPaths: DatasetArtifactPaths = {
+  directory: outputDir,
+  datasetFile: join(outputDir, 'dataset.json'),
+  metadataFile: join(outputDir, 'metadata.json'),
+  snapshotsFile: join(outputDir, 'daily-snapshots.json'),
+  eventsFile: join(outputDir, 'events.ndjson'),
+};
 
-await Promise.all([
-  fs.writeFile(datasetPath, JSON.stringify(results, null, 2), 'utf8'),
-  fs.writeFile(snapshotsPath, JSON.stringify(dailySnapshots, null, 2), 'utf8'),
-  fs.writeFile(eventsPath, formatEventTracesAsNdjson(eventTraces), 'utf8'),
-]);
+const artifactContent: DatasetArtifactContent = {
+  datasetJson,
+};
 
-console.log(`Dataset saved to ${datasetPath}`);
-console.log(`Daily aggregates saved to ${snapshotsPath}`);
-console.log(`Event trace log saved to ${eventsPath}`);
+if (snapshotsJson) {
+  artifactContent.snapshotsJson = snapshotsJson;
+}
 
-function formatEventTracesAsNdjson(traces: any[]): string {
-  if (!traces.length) {
-    return '';
-  }
+if (eventsNdjson) {
+  artifactContent.eventsNdjson = eventsNdjson;
+}
 
-  return traces
-    .map((trace) =>
-      JSON.stringify({
-        id: trace.id,
-        type: trace.eventType,
-        timestamp: new Date(trace.timestamp ?? Date.now()).toISOString(),
-        durationMs: trace.duration ?? null,
-        status: trace.status ?? null,
-        source: trace.source ?? null,
-        correlationId: trace.correlationId ?? null,
-        parentEventId: trace.parentEventId ?? null,
-        children: trace.children ?? [],
-        data: trace.data ?? null,
-      })
-    )
-    .join('\n');
+await writeDatasetArtifacts(artifactPaths, artifactContent);
+
+console.log(`Dataset saved to ${artifactPaths.datasetFile}`);
+console.log(`Daily aggregates saved to ${artifactPaths.snapshotsFile}`);
+console.log('Metadata file skipped (not generated in this sample).');
+if (eventsNdjson) {
+  console.log(`Event trace log saved to ${artifactPaths.eventsFile}`);
+} else {
+  console.log('Event trace log skipped (no events recorded).');
 }

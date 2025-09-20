@@ -16,7 +16,9 @@ export function createDefaultOrchestratorConfig(overrides?: OrchestratorConfigOv
     enableProgressReporting: true,
     enableValidation: true,
     verbose: false,
-    dryRun: false
+    dryRun: false,
+    collectDailySnapshots: true,
+    collectEventTraces: true
   };
   
   const config = { ...defaults, ...overrides };

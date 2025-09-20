@@ -54,7 +54,17 @@ export type {
   SimulatorAssembly,
   SimulatorComponents,
   SimulatorFactoryOptions,
+  SimulatorDebugOptions,
 } from "./simulation/simulator-factories";
+export {
+  generateDailyAggregates,
+} from "./simulation/post-processing/daily-aggregator";
+export type {
+  DailyAggregateSnapshot,
+  WorkflowNode,
+  TimelineTick,
+  ChartSeriesPoint,
+} from "./simulation/post-processing/daily-aggregator";
 
 // Factory implementations (production - use these)
 export {

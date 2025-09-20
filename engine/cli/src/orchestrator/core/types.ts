@@ -36,10 +36,12 @@ export interface OrchestratorConfig {
   // Reporting configuration
   enableProgressReporting: boolean;
   enableValidation: boolean;
-  
+ 
   // CLI configuration
   verbose: boolean;
   dryRun: boolean;
+  collectDailySnapshots: boolean;
+  collectEventTraces: boolean;
 }
 
 // Partial configuration for customization
@@ -108,6 +110,14 @@ export interface DatasetMetadata {
     dailySnapshotCount: number;
     eventTraceCount: number;
   };
+}
+
+export interface DatasetArtifactPaths {
+  directory: string;
+  datasetFile: string;
+  metadataFile: string;
+  snapshotsFile: string;
+  eventsFile: string;
 }
 
 // File naming utilities (used by output organization)

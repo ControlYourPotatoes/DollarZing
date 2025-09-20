@@ -8,8 +8,8 @@
     "dollarzing": "./bin/dollarzing"
   },
   "scripts": {
-    "build": "npm run clean && npm run type-check && esbuild src/index.ts cli/src/index.ts --bundle --platform=node --format=esm --external:commander --external:node:* --outdir=dist --out-extension:.js=.js",
-    "build:engine": "npm run clean && npm run type-check:engine && esbuild src/index.ts cli/src/index.ts --bundle --platform=node --format=esm --external:commander --external:node:* --outdir=dist --out-extension:.js=.js",
+    "build": "npm run clean && npm run type-check && esbuild src/index.ts cli/src/index.ts scripts/dump-anchor.ts scripts/run-orchestrator.ts --bundle --platform=node --format=esm --external:commander --external:node:* --outdir=dist --out-extension:.js=.js",
+    "build:engine": "npm run clean && npm run type-check:engine && esbuild src/index.ts cli/src/index.ts scripts/dump-anchor.ts scripts/run-orchestrator.ts --bundle --platform=node --format=esm --external:commander --external:node:* --outdir=dist --out-extension:.js=.js",
     "type-check": "tsc --noEmit",
     "type-check:engine": "tsc --noEmit --project tsconfig.engine.json",
     "dev": "npm run build && npm run test-game",
@@ -21,7 +21,8 @@
     "test-game": "npm run cli test-game",
     "simple-test": "npm run cli simple-test",
     "simulate": "npm run cli simulate -- --no-debug-dashboard",
-    "simulate:quick": "npm run simulate -- --days 3 --players 50 --no-debug-dashboard"
+    "simulate:quick": "npm run simulate -- --days 3 --players 50 --no-debug-dashboard",
+    "anchors": "node dist/scripts/run-orchestrator.js"
   },
   "dependencies": {
     "@types/node": "^22.0.0",
