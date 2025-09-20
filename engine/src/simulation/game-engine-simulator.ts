@@ -168,6 +168,8 @@ export class GameEngineSimulator {
   // Event system
   private eventBus: EventBus;
   private eventHandlers: any[] = [];
+  private revenueTrackingHandler!: RevenueTrackingHandler;
+  private playerProgressionHandler: PlayerProgressionHandler | null = null;
   private runMetrics = {
     totalRunsCreated: 0,
   };
@@ -196,6 +198,14 @@ export class GameEngineSimulator {
     };
 
     // Initialize basic event handler system (strategy-dependent handlers created in executeSimulation)
+    this.revenueTrackingHandler = new RevenueTrackingHandler(
+      this.eventBus,
+      revenueCalculator,
+      {
+        loggingEnabled: false,
+      }
+    );
+
     this.eventHandlers = [
       new GameEventHandler(
         this.eventBus,
@@ -214,7 +224,7 @@ export class GameEngineSimulator {
           enablePerformanceMetrics: false,
         })
       ),
-      new RevenueTrackingHandler(this.eventBus, revenueCalculator),
+      this.revenueTrackingHandler,
     ];
 
     this.runCreatedSubscription = this.eventBus.on<NewRunCreatedEvent>(
@@ -233,6 +243,22 @@ export class GameEngineSimulator {
 
   private resetRunMetrics(): void {
     this.runMetrics.totalRunsCreated = 0;
+  }
+
+  private updateLoggingPreferences(loggingEnabled: boolean): void {
+    if (this.revenueTrackingHandler) {
+      this.revenueTrackingHandler.updateConfiguration({ loggingEnabled });
+    }
+
+    if (this.playerProgressionHandler) {
+      this.playerProgressionHandler.setLoggingEnabled(loggingEnabled);
+    }
+
+    const dayProcessor = this.components.dayProcessor as {
+      setLoggingEnabled?: (enabled: boolean) => void;
+    };
+
+    dayProcessor?.setLoggingEnabled?.(loggingEnabled);
   }
 
   /**
@@ -294,6 +320,7 @@ export class GameEngineSimulator {
     this.validateConfiguration(config);
     this.config = config;
     this.runtimeOptions = runtime;
+    this.updateLoggingPreferences(runtime.collectEventTraces);
     this.activeProfileName = profileName ?? DEFAULT_SIMULATION_PROFILE_NAME;
     this.resetRunMetrics();
     this.isRunning = true;
@@ -311,12 +338,15 @@ export class GameEngineSimulator {
     this.eventHandlers.push(cashOutDecisionHandler);
 
     // Create PlayerProgressionHandler with VirtualDollarFactory for event-driven progression
-    const playerProgressionHandler = new PlayerProgressionHandler(
+    const loggingEnabled = this.runtimeOptions.collectEventTraces;
+    this.playerProgressionHandler = new PlayerProgressionHandler(
       this.eventBus,
       this.components.virtualDollarFactory,
-      this.components.gameMatchingEngine
+      this.components.gameMatchingEngine,
+      { loggingEnabled }
     );
-    this.eventHandlers.push(playerProgressionHandler);
+    this.eventHandlers.push(this.playerProgressionHandler);
+    this.updateLoggingPreferences(loggingEnabled);
 
     try {
       return await this.runSimulation(progressCallback, cancellationToken);
@@ -737,6 +767,7 @@ export class GameEngineSimulator {
       }
     });
     this.eventHandlers = [];
+    this.playerProgressionHandler = null;
     if (this.runCreatedSubscription) {
       this.runCreatedSubscription.unsubscribe();
       this.runCreatedSubscription = null;

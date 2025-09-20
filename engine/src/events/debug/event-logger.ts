@@ -1,4 +1,5 @@
 import type { SimulationEvent } from "../event-types";
+import { deepClone } from "../../utils/deep-clone";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -405,12 +406,13 @@ export class EventLogger {
    * Sanitize data for logging (remove sensitive info)
    */
   private sanitizeData(data: any): any {
-    if (!data) return data;
+    if (data === null || data === undefined) {
+      return data;
+    }
 
     try {
-      const sanitized = JSON.parse(JSON.stringify(data));
+      const cloned = deepClone(data);
 
-      // Remove potentially sensitive data recursively
       const sanitizeObject = (obj: any): any => {
         if (obj && typeof obj === "object") {
           if (Array.isArray(obj)) {
@@ -436,7 +438,7 @@ export class EventLogger {
         return obj;
       };
 
-      return sanitizeObject(sanitized);
+      return sanitizeObject(cloned);
     } catch (error) {
       return {
         sanitization_error: "Failed to sanitize data",

@@ -58,6 +58,7 @@ export interface RevenueTrackingConfig {
   enableTransactionLogging: boolean;
   maxTransactionHistory: number;
   enableRealtimeUpdates: boolean;
+  loggingEnabled: boolean;
 }
 
 /**
@@ -79,6 +80,7 @@ export class RevenueTrackingHandler {
       enableTransactionLogging: true,
       maxTransactionHistory: 10000,
       enableRealtimeUpdates: true,
+      loggingEnabled: config?.loggingEnabled ?? true,
       ...config,
     };
 
@@ -167,9 +169,11 @@ export class RevenueTrackingHandler {
         await this.emitRevenueUpdate();
       }
 
-      console.log(
-        `[RevenueTrackingHandler] Processed game revenue: ${gameRevenue} for game ${event.gameId}`
-      );
+      if (this.config.loggingEnabled) {
+        console.log(
+          `[RevenueTrackingHandler] Processed game revenue: ${gameRevenue} for game ${event.gameId}`
+        );
+      }
     } catch (error) {
       console.error(
         `[RevenueTrackingHandler] Error processing game revenue:`,
@@ -248,9 +252,11 @@ export class RevenueTrackingHandler {
         await this.emitRevenueUpdate();
       }
 
-      console.log(
-        `[RevenueTrackingHandler] Processed cash-out revenue: ${event.cashOutAmount} for player ${event.playerId}`
-      );
+      if (this.config.loggingEnabled) {
+        console.log(
+          `[RevenueTrackingHandler] Processed cash-out revenue: ${event.cashOutAmount} for player ${event.playerId}`
+        );
+      }
     } catch (error) {
       console.error(
         `[RevenueTrackingHandler] Error processing cash-out revenue:`,
@@ -454,9 +460,11 @@ export class RevenueTrackingHandler {
         throw new Error("Revenue calculator returned invalid revenue stream");
       }
 
-      console.log(
-        "[RevenueTrackingHandler] Revenue calculator integration validated"
-      );
+      if (this.config.loggingEnabled) {
+        console.log(
+          "[RevenueTrackingHandler] Revenue calculator integration validated"
+        );
+      }
     } catch (error) {
       console.error(
         "[RevenueTrackingHandler] Revenue calculator integration failed:",
@@ -617,6 +625,8 @@ export class RevenueTrackingHandler {
       this.cashOutCompletedSubscription = null;
     }
 
-    console.log("[RevenueTrackingHandler] Disposed - cleaned up subscriptions");
+    if (this.config.loggingEnabled) {
+      console.log("[RevenueTrackingHandler] Disposed - cleaned up subscriptions");
+    }
   }
 }

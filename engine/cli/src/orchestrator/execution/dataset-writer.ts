@@ -99,52 +99,93 @@ function serializeForJson(value: unknown): string {
   return JSON.stringify(sanitizeRoot(value), null, 2);
 }
 
+type SanitizerFrame =
+  | {
+      phase: "enter";
+      parent: Record<string, unknown> | unknown[] | { result: unknown };
+      key: string | number;
+      value: unknown;
+    }
+  | { phase: "exit"; value: object };
+
 function sanitizeRoot(value: unknown): unknown {
   const seen = new WeakSet<object>();
-  return sanitizeValue(value, seen);
-}
+  const rootHolder: { result: unknown } = { result: undefined };
+  const stack: SanitizerFrame[] = [
+    { phase: "enter", parent: rootHolder, key: "result", value },
+  ];
 
-function sanitizeValue(
-  value: unknown,
-  seen: WeakSet<object>
-): unknown {
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
+  while (stack.length > 0) {
+    const frame = stack.pop()!;
 
-  if (typeof value === "bigint") {
-    return Number(value);
-  }
-
-  if (typeof value === "number" && !Number.isFinite(value)) {
-    return 0;
-  }
-
-  if (Array.isArray(value)) {
-    if (seen.has(value)) {
-      return undefined;
+    if (frame.phase === "exit") {
+      seen.delete(frame.value);
+      continue;
     }
-    seen.add(value as object);
-    const result = value.map((entry) => sanitizeValue(entry, seen));
-    seen.delete(value as object);
-    return result;
-  }
 
-  if (value && typeof value === "object") {
-    if (seen.has(value)) {
-      return undefined;
+    const { parent, key, value: current } = frame;
+
+    if (current instanceof Date) {
+      (parent as any)[key] = current.toISOString();
+      continue;
     }
-    seen.add(value);
-    const result: Record<string, unknown> = {};
-    for (const [key, entry] of Object.entries(value)) {
-      if (typeof entry === "function" || entry === undefined) {
+
+    if (typeof current === "bigint") {
+      (parent as any)[key] = Number(current);
+      continue;
+    }
+
+    if (typeof current === "number" && !Number.isFinite(current)) {
+      (parent as any)[key] = 0;
+      continue;
+    }
+
+    if (Array.isArray(current)) {
+      if (seen.has(current)) {
+        (parent as any)[key] = undefined;
         continue;
       }
-      result[key] = sanitizeValue(entry, seen);
+
+      const clone: unknown[] = new Array(current.length);
+      (parent as any)[key] = clone;
+      seen.add(current);
+      stack.push({ phase: "exit", value: current });
+
+      for (let i = current.length - 1; i >= 0; i -= 1) {
+        stack.push({ phase: "enter", parent: clone, key: i, value: current[i] });
+      }
+      continue;
     }
-    seen.delete(value);
-    return result;
+
+    if (current && typeof current === "object") {
+      if (seen.has(current)) {
+        (parent as any)[key] = undefined;
+        continue;
+      }
+
+      const clone: Record<string, unknown> = {};
+      (parent as any)[key] = clone;
+      seen.add(current);
+      stack.push({ phase: "exit", value: current });
+
+      const entries = Object.entries(current as Record<string, unknown>);
+      for (let i = entries.length - 1; i >= 0; i -= 1) {
+        const [childKey, childValue] = entries[i];
+        if (typeof childValue === "function" || childValue === undefined) {
+          continue;
+        }
+        stack.push({
+          phase: "enter",
+          parent: clone,
+          key: childKey,
+          value: childValue,
+        });
+      }
+      continue;
+    }
+
+    (parent as any)[key] = current;
   }
 
-  return value;
+  return rootHolder.result;
 }

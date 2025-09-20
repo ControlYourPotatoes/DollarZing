@@ -164,7 +164,8 @@ function assembleSimulator(
     gameMatchingEngine,
     playerManager,
     virtualDollarFactory,
-    eventBus
+    eventBus,
+    { loggingEnabled: false }
   );
 
   const simulator = new GameEngineSimulator(

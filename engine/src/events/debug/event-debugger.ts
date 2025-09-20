@@ -1,5 +1,6 @@
 import { EventBus, EventHandler } from "../event-bus";
 import { EVENT_TYPES, type SimulationEvent } from "../event-types";
+import { deepClone } from "../../utils/deep-clone";
 
 export interface EventTrace {
   id: string;
@@ -426,14 +427,17 @@ export class EventDebugger {
    * Sanitize event data for logging
    */
   private sanitizeData(data: any): any {
-    if (!data) return {};
+    if (data === null || data === undefined) {
+      return data;
+    }
 
     try {
-      const sanitized = JSON.parse(JSON.stringify(data));
-      // Remove potentially sensitive data
-      if (sanitized.password) delete sanitized.password;
-      if (sanitized.secret) delete sanitized.secret;
-      if (sanitized.token) delete sanitized.token;
+      const sanitized = deepClone(data);
+      if (sanitized && typeof sanitized === "object") {
+        delete (sanitized as Record<string, unknown>).password;
+        delete (sanitized as Record<string, unknown>).secret;
+        delete (sanitized as Record<string, unknown>).token;
+      }
       return sanitized;
     } catch (error) {
       return { error: "Failed to sanitize data" };

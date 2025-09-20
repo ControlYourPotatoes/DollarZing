@@ -29,11 +29,19 @@ export class DayProcessor {
     private gameMatchingEngine: GameMatchingEngine,
     private playerManager: PlayerManager,
     private dollarManager: VirtualDollarFactory,
-    private eventBus: EventBus
+    private eventBus: EventBus,
+    options?: { loggingEnabled?: boolean }
   ) {
+    this.loggingEnabled = options?.loggingEnabled ?? false;
     this.setupEventSubscriptions();
     // Suppress unused variable warning - playerManager is kept for future use
     void this.playerManager;
+  }
+
+  private loggingEnabled: boolean;
+
+  setLoggingEnabled(enabled: boolean): void {
+    this.loggingEnabled = enabled;
   }
 
   /**
@@ -72,7 +80,9 @@ export class DayProcessor {
     config: DayProcessingConfig,
     simulationConfig: SimulationConfig
   ): Promise<void> {
-    console.log(`DEBUG: [DayProcessor] ===== PROCESSING DAY ${day} =====`);
+    if (this.loggingEnabled) {
+      console.log(`DEBUG: [DayProcessor] ===== PROCESSING DAY ${day} =====`);
+    }
 
     // Emit day started event
     const initialPoolStats = this.gameMatchingEngine.getPoolStatistics();
@@ -92,17 +102,21 @@ export class DayProcessor {
     const maxGamesPerDay = Math.max(25, config.initialPlayerCount * 2);
 
     const poolStats = this.gameMatchingEngine.getPoolStatistics();
-    console.log(
-      `DEBUG: Day ${day} - Pool stats - Total: ${poolStats.totalDollarsInPool}, Available: ${poolStats.availableForMatching}`
-    );
+    if (this.loggingEnabled) {
+      console.log(
+        `DEBUG: Day ${day} - Pool stats - Total: ${poolStats.totalDollarsInPool}, Available: ${poolStats.availableForMatching}`
+      );
+    }
 
     // Event-driven architecture: MatchmakingEventHandler will automatically
     // attempt matchmaking when POOL_ADDED and POOL_UPDATED events are emitted
     // The daily loop is no longer needed as matchmaking happens reactively
     
-    console.log(
-      `DEBUG: Day ${day} - Matchmaking will be handled by MatchmakingEventHandler through events`
-    );
+    if (this.loggingEnabled) {
+      console.log(
+        `DEBUG: Day ${day} - Matchmaking will be handled by MatchmakingEventHandler through events`
+      );
+    }
     
     // Small delay to allow event processing
     await new Promise((resolve) => setTimeout(resolve, 10));
@@ -131,12 +145,14 @@ export class DayProcessor {
    * 4. DayProcessor.handleNewRunCreated() adds runs to pool
    */
   async addNewRunsToPool(): Promise<void> {
-    console.warn(
-      `DEBUG: addNewRunsToPool called - this is deprecated in favor of event-driven approach`
-    );
-    console.warn(
-      `DEBUG: New runs should be created by PlayerManager listening to DAY_STARTED events`
-    );
+    if (this.loggingEnabled) {
+      console.warn(
+        `DEBUG: addNewRunsToPool called - this is deprecated in favor of event-driven approach`
+      );
+      console.warn(
+        `DEBUG: New runs should be created by PlayerManager listening to DAY_STARTED events`
+      );
+    }
     // Deprecated - new runs are now handled via DAY_STARTED → PlayerManager → NEW_RUN_CREATED events
   }
 
@@ -146,9 +162,11 @@ export class DayProcessor {
    * Game resolution is now handled by the GameMatchingEngine directly
    */
   async resolveGames(_games: any[], _dailySeed: string): Promise<void> {
-    console.warn(
-      `DEBUG: resolveGames called - this method is deprecated in favor of event-driven approach`
-    );
+    if (this.loggingEnabled) {
+      console.warn(
+        `DEBUG: resolveGames called - this method is deprecated in favor of event-driven approach`
+      );
+    }
     // Game resolution is now handled by the GameMatchingEngine directly
     // and results are processed through GAME_RESOLVED events
   }

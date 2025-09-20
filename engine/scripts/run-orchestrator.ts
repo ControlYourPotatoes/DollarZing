@@ -31,7 +31,7 @@ function parseArgs(argv: string[]): RunnerOptions {
   const outputDirectory =
     outputIndex !== -1 && argv[outputIndex + 1]
       ? argv[outputIndex + 1]
-      : "engine/generated-datasets";
+      : "generated-datasets";
 
   const daysIndex = argv.findIndex((arg) => arg === "--days");
   const days =
@@ -103,7 +103,7 @@ function parseCombination(input: string): ParameterCombination {
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   if (argv.includes("--help") || argv.includes("-h")) {
-    console.log(`Usage: ts-node --esm scripts/run-orchestrator.ts [options]\n\nOptions:\n  -o, --output <dir>        Output directory (default: engine/generated-datasets)\n      --days <n>            Override simulation length in days (e.g. 90)\n      --combo <g,r,c>       Run a single combination (e.g. 15,low,10)\n      --no-snapshots        Skip writing daily snapshot aggregates\n      --no-events           Skip writing event trace logs\n      --no-presentation     Skip writing presentation snapshots\n      --verbose             Enable verbose logging\n      --help                Show this help message\n`);
+    console.log(`Usage: ts-node --esm scripts/run-orchestrator.ts [options]\n\nOptions:\n  -o, --output <dir>        Output directory (default: generated-datasets)\n      --days <n>            Override simulation length in days (e.g. 90)\n      --combo <g,r,c>       Run a single combination (e.g. 15,low,10)\n      --no-snapshots        Skip writing daily snapshot aggregates\n      --no-events           Skip writing event trace logs\n      --no-presentation     Skip writing presentation snapshots\n      --verbose             Enable verbose logging\n      --help                Show this help message\n`);
     process.exit(0);
   }
 
