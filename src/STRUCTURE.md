@@ -7,6 +7,10 @@ be updated as components migrate out of the prototype directory.
 
 - `src/features/timeline/`
   - Houses the SVG timeline scrubber, playback controls, and related state wiring.
+  - Components under `components/` expose the production `SvgTimeline`,
+    `TimelineScrubber`, and playback controls wired to the shared timeline store.
+  - Hooks under `hooks/` provide autoplay, keyboard shortcuts, and selectors for
+    active day/scenario data.
   - Barrel file (`index.ts`) exposes public components/state hooks for consumers.
 - `src/features/financial-flow/`
   - Contains the Financial Distribution Workflow diagram implementation and helpers

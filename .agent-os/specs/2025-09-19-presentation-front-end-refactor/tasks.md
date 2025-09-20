@@ -19,10 +19,10 @@
   - [x] 2.4 Implement scenario manifest loader and parameter indexing utilities
   - [x] 2.5 Add interpolation helper to map arbitrary parameter requests to nearest anchors or blended datasets
 
-- [ ] 3. Refactor timeline scrubber
-  - [ ] 3.1 Connect SvgTimeline to shared store (play/pause, scrub shift, labels)
-  - [ ] 3.2 Implement playback controls and keyboard shortcuts within SVG UX constraints
-  - [ ] 3.3 Ensure connected charts react smoothly to timeline updates (animation + performance)
+- [x] 3. Refactor timeline scrubber
+  - [x] 3.1 Connect SvgTimeline to shared store (play/pause, scrub shift, labels)
+  - [x] 3.2 Implement playback controls and keyboard shortcuts within SVG UX constraints
+  - [x] 3.3 Ensure connected charts react smoothly to timeline updates (animation + performance)
 
 - [ ] 4. Rebuild Financial Distribution Workflow component
   - [ ] 4.1 Extract SVG primitives for nodes, connectors, and layered progress arcs
