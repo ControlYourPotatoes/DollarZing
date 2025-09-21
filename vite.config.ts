@@ -12,6 +12,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  server: {
+    host: "0.0.0.0",
+    port: 3000,
+    strictPort: true,
+    watch: {
+      usePolling: true,
+      interval: 200,
+    },
+  },
   base: '/DollarZing/',
   build: {
     assetsDir: 'assets',
