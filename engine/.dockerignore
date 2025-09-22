@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+**/node_modules
+npm-debug.log*
+yarn-error.log*
+.pnpm-store
+
+# Builds and coverage
+dist
+build
+coverage
+*.tsbuildinfo
+
+# Caches and misc
+.cache
+.DS_Store
+.eslintcache
+.vscode
+.idea
+
+# Large/generated content not needed in build
+generated-datasets
+
+# Logs
+*.log
+
+# Tests (exclude from build context)
+**/*.test.*
+**/__tests__/**

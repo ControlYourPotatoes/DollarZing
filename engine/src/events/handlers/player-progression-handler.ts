@@ -110,6 +110,19 @@ export class PlayerProgressionHandler {
     event: ContinuePlayEvent
   ): Promise<void> {
     try {
+      // Resolve a valid virtual dollar id (defensive in case event payload is missing it)
+      let vdId = event.virtualDollarId;
+      if (!vdId || typeof vdId !== "string" || vdId.length === 0) {
+        const activeRuns = this.virtualDollarFactory.getActiveRunsByPlayer(
+          event.playerId
+        );
+        vdId = activeRuns.length > 0 ? activeRuns[0].id : "";
+      }
+
+      if (!vdId) {
+        throw new Error("Missing virtualDollarId for winner progression");
+      }
+
       // Calculate progression using factory
       const newLevel = Math.min(10, event.nextLevel) as BettingLevel;
       const levelWinnings =
@@ -117,7 +130,7 @@ export class PlayerProgressionHandler {
 
       // Use factory to advance player - handles all validation and state management
       const updatedDollar = this.virtualDollarFactory.advancePlayerLevel(
-        event.virtualDollarId,
+        vdId,
         newLevel,
         levelWinnings
       );
@@ -198,6 +211,12 @@ export class PlayerProgressionHandler {
    */
   private async rePoolAdvancedWinner(virtualDollar: any): Promise<void> {
     try {
+      if (!virtualDollar || !virtualDollar.id) {
+        console.warn(
+          `[PlayerProgressionHandler] Skipping re-pool: missing virtual dollar id for player`
+        );
+        return;
+      }
       // Update state from WON to POOLED for re-matching
       this.virtualDollarFactory.updateDollarState(
         virtualDollar.id,

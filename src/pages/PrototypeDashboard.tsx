@@ -279,9 +279,7 @@ const PrototypeDashboard = () => {
           )}
         </header>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-sky-900/10">
-          <TimelineScrubber />
-        </section>
+        {/* Floating TimelineScrubber is rendered globally; remove embedded card */}
 
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
           <FinancialWorkflowDiagram />
@@ -331,6 +329,8 @@ const PrototypeDashboard = () => {
           </aside>
         </section>
       </div>
+      {/* Floating timeline scrubber */}
+      <TimelineScrubber />
     </div>
   );
 };

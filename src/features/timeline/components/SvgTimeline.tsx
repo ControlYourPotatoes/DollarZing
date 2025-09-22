@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getTimeScaleForIndex } from "@/shared/time-scales/config";
 
 export interface TimelineDatum {
   id: string;
   label: string;
   dayIndex: number;
   cumulativeRevenue: number;
+  date?: string;
 }
 
 export interface TimelineInteractionHandlers {
   onSelectIndex?: (index: number) => void;
   onHoverIndex?: (index: number | null) => void;
+  onStep?: (delta: number) => void; // signed step count: +forward, -backward
 }
 
 interface SvgTimelineProps extends TimelineInteractionHandlers {
@@ -20,11 +23,12 @@ interface SvgTimelineProps extends TimelineInteractionHandlers {
   spacing?: number;
   ariaLabel?: string;
   isPlaying?: boolean;
+  onStep?: (delta: number) => void;
 }
 
 const DEFAULT_WIDTH = 960;
-const DEFAULT_HEIGHT = 80;
-const DEFAULT_SPACING = 120;
+const DEFAULT_HEIGHT = 72;
+const DEFAULT_SPACING = 112;
 
 /**
  * Presentation timeline rendered with SVG ruler marks.
@@ -40,28 +44,75 @@ export function SvgTimeline({
   isPlaying = false,
   onSelectIndex,
   onHoverIndex,
+  onStep,
 }: SvgTimelineProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const dragStartXRef = useRef<number | null>(null);
+  const hasSteppedRef = useRef<boolean>(false);
 
   const clampedActiveIndex = useMemo(() => {
     if (data.length === 0) return 0;
     return Math.max(0, Math.min(activeIndex, data.length - 1));
   }, [activeIndex, data.length]);
 
-  const getPointX = useCallback(
-    (index: number) => {
-      if (data.length <= 1) return width / 2;
-      const svgCenter = width / 2;
-      return svgCenter + (index - clampedActiveIndex) * spacing;
-    },
-    [data.length, width, clampedActiveIndex, spacing]
-  );
-
+  // Absolute ruler positions; we pan the ruler underneath a fixed viewport
   const xPositions = useMemo(
-    () => data.map((_, index) => getPointX(index)),
-    [data, getPointX]
+    () => data.map((_, i) => i * spacing),
+    [data, spacing]
   );
+  const totalRulerWidth = useMemo(
+    () => (data.length > 0 ? (data.length - 1) * spacing : 0),
+    [data.length, spacing]
+  );
+  const viewMinX = useMemo(() => {
+    const centerX = clampedActiveIndex * spacing;
+    let min = Math.max(0, centerX - width / 2);
+    const maxMin = Math.max(0, totalRulerWidth - width);
+    if (min > maxMin) min = maxMin;
+    return min;
+  }, [clampedActiveIndex, spacing, width, totalRulerWidth]);
+
+  // Smoothly animate ruler pan between steps for a subtle ease
+  const [animatedMinX, setAnimatedMinX] = useState<number>(viewMinX);
+  const rafRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const startXRef = useRef<number>(viewMinX);
+
+  useEffect(() => {
+    // Cancel any in-flight animation
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    const durationMs = 180;
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+    startTimeRef.current = performance.now();
+    startXRef.current = animatedMinX;
+    const targetX = viewMinX;
+
+    const tick = (now: number) => {
+      const elapsed = now - startTimeRef.current;
+      const t = Math.min(1, elapsed / durationMs);
+      const eased = easeOutCubic(t);
+      const next = startXRef.current + (targetX - startXRef.current) * eased;
+      setAnimatedMinX(next);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+        setAnimatedMinX(targetX);
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMinX]);
 
   const findNearestIndex = useCallback(
     (clientX: number) => {
@@ -86,45 +137,100 @@ export function SvgTimeline({
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
       if (!isDragging) return;
-      const nextIndex = findNearestIndex(event.clientX);
-      onSelectIndex?.(nextIndex);
-      onHoverIndex?.(nextIndex);
+      // Hover preview (non-committal)
+      const hoverIndex = findNearestIndex(event.clientX);
+      onHoverIndex?.(hoverIndex);
+
+      // Stepped gesture: trigger at threshold once per drag
+      if (dragStartXRef.current == null || hasSteppedRef.current) return;
+      const dx = event.clientX - dragStartXRef.current;
+      const base = Math.max(24, Math.min(40, spacing * 0.35));
+      const absDx = Math.abs(dx);
+      if (absDx >= base) {
+        // Layered thresholds: 1x, 2x, 4x steps for larger drags
+        let steps = 1;
+        if (absDx >= base * 3) steps = 4;
+        else if (absDx >= base * 2) steps = 2;
+        const sign = dx < 0 ? 1 : -1; // left drag => forward (+), right => backward (-)
+        onStep?.(sign * steps);
+        hasSteppedRef.current = true;
+      }
     },
-    [findNearestIndex, isDragging, onSelectIndex, onHoverIndex]
+    [findNearestIndex, isDragging, onHoverIndex, onStep, spacing]
   );
 
   useEffect(() => {
     if (!isDragging) return;
-    const handlePointerUp = () => setIsDragging(false);
+    const handlePointerUp = (event: PointerEvent) => {
+      // If no step was triggered, treat as click-select
+      if (!hasSteppedRef.current) {
+        const index = findNearestIndex(event.clientX);
+        onSelectIndex?.(index);
+      }
+      setIsDragging(false);
+      dragStartXRef.current = null;
+      hasSteppedRef.current = false;
+      onHoverIndex?.(null);
+    };
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerup", handlePointerUp);
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
     };
-  }, [handlePointerMove, isDragging]);
+  }, [
+    handlePointerMove,
+    isDragging,
+    findNearestIndex,
+    onSelectIndex,
+    onHoverIndex,
+  ]);
 
   const marks = useMemo(() => {
-    const indentHeight = 10;
-    const activeIndentHeight = 18;
-    const indentWidth = 2;
-    const labelYOffset = height - 18;
+    const indentWidth = 1.5;
+    const labelYOffset = height - 16;
+    const scale = getTimeScaleForIndex(data.length, clampedActiveIndex);
+
+    const isMonthBoundary = (idx: number): boolean => {
+      const d = data[idx]?.date;
+      const p = idx > 0 ? data[idx - 1]?.date : undefined;
+      if (!d || !p) return false;
+      const cd = new Date(d);
+      const pd = new Date(p);
+      return cd.getMonth() !== pd.getMonth();
+    };
 
     return data.map((point, index) => {
       const x = xPositions[index];
       const isActive = index === clampedActiveIndex;
       const isPast = index < clampedActiveIndex;
 
-      const heightDelta = isActive ? activeIndentHeight : indentHeight;
-      const y = height - heightDelta;
-      const showLabel =
-        index === 0 || index === data.length - 1 || data.length <= 6 || isActive;
+      // Tick tiering
+      const month = isMonthBoundary(index);
+      const week = !month && (index + 1) % 7 === 0;
+      const day = !month && !week;
 
+      // Heights by tier and scale
+      const base = 7;
+      const monthH = 16;
+      const weekH = scale === "daily" ? 12 : 10;
+      const dayH = scale === "daily" ? 8 : scale === "weekly" ? 6 : 5;
+      const heightDelta = isActive
+        ? monthH
+        : month
+        ? monthH
+        : week
+        ? weekH
+        : dayH;
+      const y = height - heightDelta;
+
+      // Labels: show month boundaries and active label; suppress clutter on monthly
+      const showLabel = month || isActive;
       const fill = isActive
-        ? "var(--timeline-active, #0ea5e9)"
+        ? "var(--timeline-active)"
         : isPast
-        ? "var(--timeline-past, rgba(14,165,233,0.4))"
-        : "var(--timeline-future, rgba(148,163,184,0.35))";
+        ? "var(--timeline-past)"
+        : "var(--timeline-future)";
 
       return (
         <g
@@ -141,15 +247,15 @@ export function SvgTimeline({
             rx={1}
             ry={1}
             fill={fill}
-            style={{ transition: "height 160ms ease, fill 160ms ease" }}
+            style={{ transition: "height 140ms ease, fill 140ms ease" }}
           />
           {showLabel && (
             <text
               x={0}
               y={labelYOffset}
               textAnchor="middle"
-              fontSize={10}
-              fill={isActive ? "#ffffff" : "rgba(255,255,255,0.68)"}
+              fontSize={9}
+              fill={isActive ? "#e2e8f0" : "rgba(226,232,240,0.6)"}
             >
               {point.label}
             </text>
@@ -174,9 +280,10 @@ export function SvgTimeline({
       viewBox={`0 0 ${width} ${height}`}
       onPointerDown={(event) => {
         event.preventDefault();
-        const nextIndex = findNearestIndex(event.clientX);
-        onSelectIndex?.(nextIndex);
-        onHoverIndex?.(nextIndex);
+        dragStartXRef.current = event.clientX;
+        hasSteppedRef.current = false;
+        const hoverIndex = findNearestIndex(event.clientX);
+        onHoverIndex?.(hoverIndex);
         setIsDragging(true);
       }}
       onPointerLeave={() => {
@@ -194,27 +301,31 @@ export function SvgTimeline({
       }}
       style={{ cursor: isDragging ? "grabbing" : "grab" }}
     >
-      <rect
-        x={0}
-        y={height - 2}
-        width={width}
-        height={2}
-        fill="rgba(148,163,184,0.4)"
-      />
-      {marks}
+      {/* Sliding ruler group */}
+      <g transform={`translate(${-animatedMinX}, 0)`}>
+        <rect
+          x={animatedMinX}
+          y={height - 2}
+          width={width}
+          height={1.5}
+          fill="var(--timeline-base)"
+        />
+        {marks}
+      </g>
+      {/* Center indicator and pulsing play head */}
       {isPlaying && (
         <rect
-          x={width / 2 - 1}
-          y={height - 24}
-          width={2}
-          height={12}
-          fill="#22d3ee"
-          opacity={0.8}
+          x={width / 2 - 0.75}
+          y={height - 22}
+          width={1.5}
+          height={10}
+          fill="var(--timeline-active)"
+          opacity={0.65}
         >
           <animate
             attributeName="opacity"
-            values="0.2;0.8;0.2"
-            dur="1.2s"
+            values="0.25;0.65;0.25"
+            dur="1.4s"
             repeatCount="indefinite"
           />
         </rect>

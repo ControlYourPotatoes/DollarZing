@@ -49,6 +49,17 @@ export interface DailyAggregateSnapshot {
     activePlayers: number;
     totalPlayers: number;
   };
+  pool?: {
+    depositedToday: number; // runs created today
+    consumedToday: number; // games played today * 2 dollars
+    outstanding: number; // dollars currently in pool
+  };
+  cashouts?: {
+    countToday: number;
+    amountToday: number;
+    cumulativeAmount: number;
+    cumulativeCount: number;
+  };
   workflowNodes: WorkflowNode[];
   timelineTicks: TimelineTick[];
   charts: {
@@ -64,6 +75,9 @@ interface RevenueAccumulator {
   charity: number;
   playerPayouts: number;
   games: number;
+  runs: number;
+  cashoutsAmount: number;
+  cashoutsCount: number;
 }
 
 const BASE_SNAPSHOT_DATE = Date.UTC(2025, 0, 1);
@@ -77,6 +91,9 @@ export function generateDailyAggregates(
     charity: 0,
     playerPayouts: 0,
     games: 0,
+    runs: 0,
+    cashoutsAmount: 0,
+    cashoutsCount: 0,
   };
 
   if (!results.dailyResults || results.dailyResults.length === 0) {
@@ -97,7 +114,9 @@ export function generateDailyAggregates(
     const cumulativePayouts = revenueStats
       ? revenueStats.totalPlayerPayouts
       : accumulator.playerPayouts;
-    const cumulativeGames = gameStats ? gameStats.totalGames : accumulator.games;
+    const cumulativeGames = gameStats
+      ? gameStats.totalGames
+      : accumulator.games;
 
     const dailyPlatformFees = clampToZero(
       cumulativePlatform - accumulator.platformFees
@@ -108,6 +127,22 @@ export function generateDailyAggregates(
     );
     const dailyRevenue = dailyPlatformFees + dailyCharity + dailyPayouts;
     const dailyGames = clampToZero(cumulativeGames - accumulator.games);
+    const cumulativeRuns =
+      (gameStats && (gameStats.totalRunsCreated ?? 0)) || 0;
+    const dailyRuns = clampToZero(cumulativeRuns - accumulator.runs);
+
+    const cumulativeCashoutsAmount = revenueStats
+      ? revenueStats.totalCashOuts ?? 0
+      : accumulator.cashoutsAmount;
+    const cumulativeCashoutsCount = revenueStats
+      ? revenueStats.cashOutCount ?? 0
+      : accumulator.cashoutsCount;
+    const dailyCashoutsAmount = clampToZero(
+      cumulativeCashoutsAmount - accumulator.cashoutsAmount
+    );
+    const dailyCashoutsCount = clampToZero(
+      cumulativeCashoutsCount - accumulator.cashoutsCount
+    );
 
     const cumulativeRevenue =
       cumulativePlatform + cumulativeCharity + cumulativePayouts;
@@ -160,6 +195,17 @@ export function generateDailyAggregates(
       day: dayIndex,
       date: buildSnapshotDate(dayIndex),
       totals,
+      pool: {
+        depositedToday: dailyRuns,
+        consumedToday: dailyGames * 2,
+        outstanding: gameStats?.totalVirtualDollars ?? 0,
+      },
+      cashouts: {
+        countToday: dailyCashoutsCount,
+        amountToday: roundToCents(dailyCashoutsAmount),
+        cumulativeAmount: roundToCents(cumulativeCashoutsAmount),
+        cumulativeCount: cumulativeCashoutsCount,
+      },
       workflowNodes,
       timelineTicks: [timelineTick],
       charts,
@@ -169,6 +215,9 @@ export function generateDailyAggregates(
     accumulator.charity = cumulativeCharity;
     accumulator.playerPayouts = cumulativePayouts;
     accumulator.games = cumulativeGames;
+    accumulator.runs = cumulativeRuns;
+    accumulator.cashoutsAmount = cumulativeCashoutsAmount;
+    accumulator.cashoutsCount = cumulativeCashoutsCount;
   }
 
   return aggregates;

@@ -89,6 +89,8 @@ export interface RevenueStatistics {
   revenuePerGame: number;
   charityPercentage: number;
   averageRevenuePerDay: number;
+  totalCashOuts: number;
+  cashOutCount: number;
 }
 
 /**
@@ -529,7 +531,14 @@ export class GameEngineSimulator {
    * Get total players from event-driven state
    */
   private getTotalPlayersFromRevenueCalc(): number {
-    // In event-driven architecture, use pool statistics as proxy for active players
+    // Prefer PlayerManager registry for accurate totals; fallback to pool
+    const playerManager = this.components.playerManager as {
+      getTotalPlayerCount?: () => number;
+    };
+    const totalFromRegistry = playerManager?.getTotalPlayerCount?.();
+    if (typeof totalFromRegistry === "number" && totalFromRegistry > 0) {
+      return totalFromRegistry;
+    }
     const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
     return Math.max(
       this.config.initialPlayerCount,
@@ -541,10 +550,17 @@ export class GameEngineSimulator {
    * Get player statistics from event-driven state
    */
   private getPlayerStatisticsFromState(): PlayerStatistics {
-    // In pure event-driven architecture, get stats from event handlers
+    // Get totals from PlayerManager when available
     const totalPlayers = this.getTotalPlayersFromRevenueCalc();
+    const pm = this.components.playerManager as {
+      getActivePlayerCount?: () => number;
+    };
+    const activeFromRegistry = pm?.getActivePlayerCount?.();
     const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
-    const activePlayers = poolStats.totalDollarsInPool;
+    const activePlayers =
+      typeof activeFromRegistry === "number" && activeFromRegistry >= 0
+        ? activeFromRegistry
+        : poolStats.totalDollarsInPool;
     const retiredPlayers = Math.max(0, totalPlayers - activePlayers);
 
     // Get financial data from RevenueCalculator (managed by RevenueTrackingHandler)
@@ -575,6 +591,8 @@ export class GameEngineSimulator {
     const totalRevenue = revenueCalc.getPlatformRevenue();
     const totalCharity = revenueCalc.getCharityContributions();
     const totalPayouts = revenueCalc.getPlayerWinnings();
+    const totalCashOuts = revenueCalc.getTotalCashOuts();
+    const cashOutCount = revenueCalc.getCashOutCount();
     const totalGames = revenueCalc.getTotalGames();
 
     const revenuePerGame = totalGames > 0 ? totalRevenue / totalGames : 0;
@@ -589,6 +607,8 @@ export class GameEngineSimulator {
       revenuePerGame,
       charityPercentage: this.config.charityPercentage,
       averageRevenuePerDay,
+      totalCashOuts,
+      cashOutCount,
     };
   }
 
@@ -673,6 +693,8 @@ export class GameEngineSimulator {
       revenuePerGame: 0,
       charityPercentage: this.config?.charityPercentage || 0,
       averageRevenuePerDay: 0,
+      totalCashOuts: 0,
+      cashOutCount: 0,
     };
   }
 

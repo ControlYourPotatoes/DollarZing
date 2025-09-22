@@ -324,6 +324,11 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
       throw new Error(`Dollar with ID ${dollarId} not found`);
     }
 
+    // Idempotent transition: if already in desired state, no-op
+    if (dollar.state === newState) {
+      return dollar;
+    }
+
     // Validate state transition
     this.validateStateTransition(dollar.state, newState);
 
@@ -621,12 +626,17 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
 
     // Define valid transitions - more permissive for testing and edge cases
     const validTransitions: Record<DollarState, DollarState[]> = {
-      [DollarState.CREATED]: [DollarState.POOLED, DollarState.LOST], // Allow direct elimination
-      [DollarState.POOLED]: [DollarState.IN_GAME, DollarState.WON], // Allow direct win from pool
+      [DollarState.CREATED]: [
+        DollarState.POOLED,
+        DollarState.IN_GAME,
+        DollarState.WON,
+        DollarState.LOST,
+      ],
+      [DollarState.POOLED]: [DollarState.IN_GAME, DollarState.WON],
       [DollarState.IN_GAME]: [DollarState.WON, DollarState.LOST],
       [DollarState.WON]: [DollarState.POOLED, DollarState.CASHED_OUT],
-      [DollarState.LOST]: [], // Final state
-      [DollarState.CASHED_OUT]: [], // Final state
+      [DollarState.LOST]: [],
+      [DollarState.CASHED_OUT]: [],
     };
 
     if (!validTransitions[currentState].includes(newState)) {

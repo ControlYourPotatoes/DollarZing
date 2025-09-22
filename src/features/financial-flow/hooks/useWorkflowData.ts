@@ -6,7 +6,10 @@ import {
   PresentationWorkflowLink,
   PresentationWorkflowNode,
 } from "@/shared/presentation";
-import { useActiveTimelineDay, useActiveTimelineScenario } from "@/features/timeline";
+import {
+  useActiveTimelineDay,
+  useActiveTimelineScenario,
+} from "@/features/timeline";
 
 interface PositionedNode extends PresentationWorkflowNode {
   x: number;
@@ -29,15 +32,15 @@ export interface WorkflowLayoutResult {
   highlightedIds: string[];
 }
 
-const DEFAULT_NODE_RADIUS = 46;
-const DEFAULT_NODE_GAP_Y = 100;
-const DEFAULT_NODE_GAP_X = 220;
+const DEFAULT_NODE_RADIUS = 42;
+const DEFAULT_NODE_GAP_Y = 110;
+const DEFAULT_NODE_GAP_X = 260;
 
 const DEFAULT_LAYOUT: Record<string, { x: number; y: number }> = {
-  total: { x: 80, y: 110 },
-  platform: { x: 320, y: 40 },
-  charity: { x: 320, y: 110 },
-  players: { x: 320, y: 180 },
+  total: { x: 80, y: 120 },
+  platform: { x: 400, y: 60 },
+  charity: { x: 400, y: 120 },
+  players: { x: 400, y: 180 },
 };
 
 function resolvePosition(
@@ -47,7 +50,7 @@ function resolvePosition(
   if (nodeId in DEFAULT_LAYOUT) {
     return DEFAULT_LAYOUT[nodeId];
   }
-  const column = Math.floor(index / 3) + 1;
+  const column = Math.floor(index / 3) + 2; // push unknowns further right
   const row = index % 3;
   return {
     x: DEFAULT_NODE_GAP_X * column,
@@ -64,23 +67,84 @@ export function useWorkflowData(): WorkflowLayoutResult {
       return { scenario, day, nodes: [], links: [], highlightedIds: [] };
     }
 
-    const positionedNodes: PositionedNode[] = day.financialWorkflow.nodes.map(
-      (node, index) => {
-        const { x, y } = resolvePosition(node.id, index);
-        return {
-          ...node,
-          x,
-          y,
-          radius: DEFAULT_NODE_RADIUS,
-        };
+    // Derive canonical nodes/links if missing from snapshot
+    const sourceNodes = [...day.financialWorkflow.nodes];
+    const sourceLinks = [...day.financialWorkflow.links];
+
+    const haveTotal = sourceNodes.some((n) => n.id === "total");
+    const havePlatform = sourceNodes.some((n) => n.id === "platform");
+    const haveCharity = sourceNodes.some((n) => n.id === "charity");
+    const havePlayers = sourceNodes.some((n) => n.id === "players");
+
+    // Use daily aggregates as fallback values
+    const totalValue = Math.max(0, day.summary.dailyRevenue || 0);
+    const platformValue = Math.max(0, day.summary.dailyFees || 0);
+    const charityValue = Math.max(0, day.summary.dailyCharity || 0);
+    const playersValue = Math.max(0, day.summary.dailyPayouts || 0);
+
+    if (!haveTotal) {
+      sourceNodes.push({
+        id: "total",
+        label: "Total",
+        aggregateValue: totalValue,
+      });
+    }
+    if (!havePlatform) {
+      sourceNodes.push({
+        id: "platform",
+        label: "Platform Fees",
+        aggregateValue: platformValue,
+      });
+    }
+    if (!haveCharity) {
+      sourceNodes.push({
+        id: "charity",
+        label: "Charity",
+        aggregateValue: charityValue,
+      });
+    }
+    if (!havePlayers) {
+      sourceNodes.push({
+        id: "players",
+        label: "Player Payouts",
+        aggregateValue: playersValue,
+      });
+    }
+
+    const ensureLink = (
+      id: string,
+      source: string,
+      target: string,
+      value: number
+    ) => {
+      if (value <= 0) return;
+      const exists = sourceLinks.some(
+        (l) => l.source === source && l.target === target
+      );
+      if (!exists) {
+        sourceLinks.push({ id, source, target, value });
       }
-    );
+    };
+
+    ensureLink("flow-platform", "total", "platform", platformValue);
+    ensureLink("flow-charity", "total", "charity", charityValue);
+    ensureLink("flow-players", "total", "players", playersValue);
+
+    const positionedNodes: PositionedNode[] = sourceNodes.map((node, index) => {
+      const { x, y } = resolvePosition(node.id, index);
+      return {
+        ...node,
+        x,
+        y,
+        radius: DEFAULT_NODE_RADIUS,
+      };
+    });
 
     const nodeById = new Map<string, PositionedNode>(
       positionedNodes.map((node) => [node.id, node])
     );
 
-    const positionedLinks: PositionedLink[] = day.financialWorkflow.links
+    const positionedLinks: PositionedLink[] = sourceLinks
       .map((link) => {
         const source = nodeById.get(link.source);
         const target = nodeById.get(link.target);
@@ -106,4 +170,3 @@ export function useWorkflowData(): WorkflowLayoutResult {
     };
   }, [day, scenario]);
 }
-

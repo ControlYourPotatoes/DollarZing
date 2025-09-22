@@ -78,6 +78,18 @@ export interface PresentationSnapshot {
     distributionSeries: PresentationDistributionPoint[];
     accumulationSeries: PresentationAccumulationPoint[];
   };
+  // Optional engine-provided blocks
+  pool?: {
+    depositedToday: number;
+    consumedToday: number;
+    outstanding: number;
+  };
+  cashouts?: {
+    countToday: number;
+    amountToday: number;
+    cumulativeAmount?: number;
+    cumulativeCount?: number;
+  };
 }
 
 export interface PresentationSnapshotFile {
@@ -107,11 +119,13 @@ export interface PresentationManifestEntry {
 
 export type PresentationManifest = PresentationManifestEntry[];
 
-export interface NormalizedDistributionPoint extends PresentationDistributionPoint {
+export interface NormalizedDistributionPoint
+  extends PresentationDistributionPoint {
   percentage: number;
 }
 
-export interface NormalizedAccumulationPoint extends PresentationAccumulationPoint {}
+export interface NormalizedAccumulationPoint
+  extends PresentationAccumulationPoint {}
 
 export interface NormalizedPresentationDay {
   dayIndex: number;
@@ -126,6 +140,8 @@ export interface NormalizedPresentationDay {
     accumulationSeries: NormalizedAccumulationPoint[];
     accumulationMap: Record<string, number>;
   };
+  pool?: PresentationSnapshot["pool"];
+  cashouts?: PresentationSnapshot["cashouts"];
 }
 
 export interface NormalizedPresentationScenario {
@@ -168,4 +184,3 @@ export interface InterpolationResult {
   exactMatch: boolean;
   requested: PresentationScenarioCoordinates;
 }
-

@@ -1,10 +1,22 @@
 import { useEffect } from "react";
 
 import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
+import {
+  getStepForScale,
+  getTimeScaleForIndex,
+} from "@/shared/time-scales/config";
 
 export function useTimelineKeyboardShortcuts(enabled = true): void {
   const stepDay = usePresentationTimelineStore((state) => state.stepDay);
-  const setPlaybackState = usePresentationTimelineStore((state) => state.setPlaybackState);
+  const getActiveScenario = usePresentationTimelineStore(
+    (state) => state.getActiveScenario
+  );
+  const activeIndex = usePresentationTimelineStore(
+    (state) => state.activeDayIndex
+  );
+  const setPlaybackState = usePresentationTimelineStore(
+    (state) => state.setPlaybackState
+  );
   const isPlaying = usePresentationTimelineStore((state) => state.isPlaying);
 
   useEffect(() => {
@@ -13,7 +25,10 @@ export function useTimelineKeyboardShortcuts(enabled = true): void {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
         return;
       }
 
@@ -26,12 +41,28 @@ export function useTimelineKeyboardShortcuts(enabled = true): void {
         }
         case "ArrowRight": {
           event.preventDefault();
-          stepDay(1);
+          {
+            const scenario = getActiveScenario?.();
+            const scale = scenario
+              ? getTimeScaleForIndex(scenario.duration, activeIndex)
+              : "daily";
+            const step = getStepForScale(scale);
+            // Right should move backward per user feedback (reverse)
+            stepDay(-step);
+          }
           break;
         }
         case "ArrowLeft": {
           event.preventDefault();
-          stepDay(-1);
+          {
+            const scenario = getActiveScenario?.();
+            const scale = scenario
+              ? getTimeScaleForIndex(scenario.duration, activeIndex)
+              : "daily";
+            const step = getStepForScale(scale);
+            // Left should move forward per user feedback
+            stepDay(step);
+          }
           break;
         }
         default:
@@ -43,4 +74,3 @@ export function useTimelineKeyboardShortcuts(enabled = true): void {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [enabled, isPlaying, setPlaybackState, stepDay]);
 }
-

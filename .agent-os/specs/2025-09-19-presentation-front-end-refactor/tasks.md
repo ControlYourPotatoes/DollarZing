@@ -33,3 +33,6 @@
   - [ ] 5.1 Update financial distribution chart to consume shared selectors
   - [ ] 5.2 Remove deprecated real-time sim wiring and unused prototype code
   - [ ] 5.3 Finalize docs (component APIs, data contracts, presentation workflow, interpolation usage)
+
+#User notes:
+- Controls feel funky

@@ -204,3 +204,36 @@
 
 - In scope (v1): Per‑cohort DAU targeting, weekly allowance budgets, explicit reactivation of inactive/retired players, donation calculation, new metrics and presentation wiring.
 - Optional (defer unless needed): Day‑of‑week spend shaping, promo events, loyalty coefficients that lift DAU/allowances/reactivation. Mapping supports these fields; keep disabled by default to maintain focus.
+
+---
+
+## Next Steps
+
+1. Engine wiring (v1)
+   - Implement per‑cohort DAU targeting in `PlayerManager` and reactivation fill using weekly→daily reactivation probability.
+   - Ensure `DayProcessor` emits `DAY_STARTED` and pools `NEW_RUN_CREATED`; `MatchmakingEventHandler` handles pairing.
+   - Confirm `RevenueTrackingHandler` tracks per‑game fees and cashouts; donations only on cashout.
+2. Dataset outputs
+   - Persist pool and cashout blocks via daily aggregator (added) and keep `revenueStats.totalCashOuts/cashOutCount` in results.
+3. Orchestrator presets
+   - Finalize which preset (Conservative/Base/Aggressive) maps to each growth tier; freeze default `donation_rate`.
+4. Front‑end
+   - Update normalizer/selectors to read: `revenueStats.totalCashOuts`, `revenueStats.cashOutCount`, snapshots `pool` and `cashouts`.
+5. QA
+   - Add tests for DAU adherence, pool accounting (consumedToday == games\*2), and donation = cashout × rate.
+
+## Acceptance Criteria
+
+- Reactivation and DAU
+  - Per-cohort daily actives track DAU targets within ±2% over 30 days (fixed seed).
+  - Reactivations come from retired stock using `reactivation_weekly/7` before inactive fills.
+- Pool integrity
+  - Daily: `pool.consumedToday` equals games played × 2; `pool.outstanding` never negative and is consistent across days.
+- Revenue and donations
+  - `donations.amountFromCashoutsToday ≈ totalCashOutsToday × donation_rate` (≤ $0.01 delta).
+  - Cumulative platform fee equals total games × per-game fee.
+- Dataset & presentation
+  - `dataset.json` includes `revenueStats.totalCashOuts` and `revenueStats.cashOutCount`.
+  - `presentation-snapshots.json` includes `pool` and `cashouts` blocks per day.
+- Front‑end
+  - New selectors expose pool utilization, cashouts, donations, ARPDAU, reactivations without regressions.
