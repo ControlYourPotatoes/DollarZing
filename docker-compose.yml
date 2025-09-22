@@ -31,6 +31,7 @@ services:
       - ./src:/app/src
       - ./public:/app/public
       - ./data:/app/data
+      - ./engine/generated-datasets:/app/public/engine/generated-datasets:ro
       - /app/node_modules
       - dollarzing-data:/data/datasets
     environment:
@@ -38,6 +39,8 @@ services:
       - CHOKIDAR_USEPOLLING=1
       - VITE_API_URL=http://localhost:3001
       - VITE_DEV_MODE=true
+      - VITE_PRESENTATION_MANIFEST_URL=/engine/generated-datasets/anchor-datasets/presentation-manifest.json
+      - VITE_PRESENTATION_BASE_URL=/engine/generated-datasets/
     depends_on:
       - engine
     networks:

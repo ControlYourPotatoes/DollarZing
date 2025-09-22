@@ -49,11 +49,15 @@ services:
     build:
       context: .
       target: production
+      args:
+        - VITE_PRESENTATION_MANIFEST_URL=/engine/generated-datasets/anchor-datasets/presentation-manifest.json
+        - VITE_PRESENTATION_BASE_URL=/engine/generated-datasets/
     container_name: dollarzing-frontend-prod
     ports:
       - "80:80"
     volumes:
       - dollarzing-data:/data/datasets
+      - ./engine/generated-datasets:/usr/share/nginx/html/engine/generated-datasets:ro
     environment:
       - NODE_ENV=production
     depends_on:
