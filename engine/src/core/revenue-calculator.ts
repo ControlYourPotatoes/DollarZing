@@ -5,8 +5,8 @@ import {
   RevenueStream,
   GameSession,
   ValidationResult,
-  createEmptyRevenueStream
-} from '../types/virtual-dollar-engine';
+  createEmptyRevenueStream,
+} from "../types/virtual-dollar-engine";
 
 /**
  * Revenue Calculator - Manages all revenue streams and financial calculations
@@ -15,7 +15,7 @@ import {
 export class RevenueCalculator {
   private revenueStream: RevenueStream;
   private gameTransactionHistory: GameSession[] = [];
-  private platformFeePerPlayer = 0.10; // 10 cents per player
+  private platformFeePerPlayer = 0.1; // 10 cents per player
   private totalPlayersPerGame = 2; // Always 2 players in 1v1 games
   private cashOutCount = 0; // Track cash-out count separately
 
@@ -37,35 +37,38 @@ export class RevenueCalculator {
       }
 
       // Calculate platform fee (20c per game)
-      const platformFeeForGame = this.platformFeePerPlayer * this.totalPlayersPerGame;
-      
+      const platformFeeForGame =
+        this.platformFeePerPlayer * this.totalPlayersPerGame;
+
       // Update revenue stream
       this.revenueStream.platformClickRevenue += platformFeeForGame;
       this.revenueStream.totalClickFees += platformFeeForGame;
       this.revenueStream.totalGames++;
-      
+
       // Track the game
       this.gameTransactionHistory.push(gameSession);
-      
+
       // Validate the fee was added correctly
       if (gameSession.platformFee !== platformFeeForGame) {
         return {
           isValid: false,
-          errors: [`Game platform fee mismatch: expected ${platformFeeForGame}, got ${gameSession.platformFee}`],
-          warnings: []
+          errors: [
+            `Game platform fee mismatch: expected ${platformFeeForGame}, got ${gameSession.platformFee}`,
+          ],
+          warnings: [],
         };
       }
 
       return {
         isValid: true,
         errors: [],
-        warnings: []
+        warnings: [],
       };
     } catch (error) {
       return {
         isValid: false,
         errors: [`Error processing game revenue: ${error}`],
-        warnings: []
+        warnings: [],
       };
     }
   }
@@ -74,7 +77,11 @@ export class RevenueCalculator {
    * Process cash-out with charity deduction
    * Charity is calculated from currentProgression only
    */
-  processCashOut(progressionAmount: number): { playerAmount: number; charityAmount: number; validation: ValidationResult } {
+  processCashOut(progressionAmount: number): {
+    playerAmount: number;
+    charityAmount: number;
+    validation: ValidationResult;
+  } {
     try {
       // Validate inputs
       if (progressionAmount < 0) {
@@ -83,9 +90,9 @@ export class RevenueCalculator {
           charityAmount: 0,
           validation: {
             isValid: false,
-            errors: ['Progression amount cannot be negative'],
-            warnings: []
-          }
+            errors: ["Progression amount cannot be negative"],
+            warnings: [],
+          },
         };
       }
 
@@ -96,13 +103,14 @@ export class RevenueCalculator {
           validation: {
             isValid: true,
             errors: [],
-            warnings: ['Cash-out amount is zero']
-          }
+            warnings: ["Cash-out amount is zero"],
+          },
         };
       }
 
       // Calculate charity from currentProgression only
-      const charityAmount = progressionAmount * this.revenueStream.charityPercentage;
+      const charityAmount =
+        progressionAmount * this.revenueStream.charityPercentage;
       const playerAmount = progressionAmount - charityAmount;
 
       // Update revenue stream
@@ -112,9 +120,10 @@ export class RevenueCalculator {
       this.cashOutCount++;
 
       // Recalculate average cash-out amount
-      this.revenueStream.averageCashOutAmount = this.cashOutCount > 0 
-        ? this.revenueStream.totalCashOuts / this.cashOutCount 
-        : 0;
+      this.revenueStream.averageCashOutAmount =
+        this.cashOutCount > 0
+          ? this.revenueStream.totalCashOuts / this.cashOutCount
+          : 0;
 
       return {
         playerAmount: this.roundToTwoCents(playerAmount),
@@ -122,8 +131,8 @@ export class RevenueCalculator {
         validation: {
           isValid: true,
           errors: [],
-          warnings: []
-        }
+          warnings: [],
+        },
       };
     } catch (error) {
       return {
@@ -132,8 +141,8 @@ export class RevenueCalculator {
         validation: {
           isValid: false,
           errors: [`Error processing cash-out: ${error}`],
-          warnings: []
-        }
+          warnings: [],
+        },
       };
     }
   }
@@ -143,21 +152,25 @@ export class RevenueCalculator {
    * Must be between 10% (0.10) and 100% (1.00)
    */
   setCharityPercentage(percentage: number): ValidationResult {
-    if (percentage < 0.10 || percentage > 1.00) {
+    if (percentage < 0.1 || percentage > 1.0) {
       return {
         isValid: false,
-        errors: ['Charity percentage must be between 0.10 (10%) and 1.00 (100%)'],
-        warnings: []
+        errors: [
+          "Charity percentage must be between 0.10 (10%) and 1.00 (100%)",
+        ],
+        warnings: [],
       };
     }
 
-    if (percentage > 0.50) {
+    if (percentage > 0.5) {
       const result = {
         isValid: true,
         errors: [],
-        warnings: [`Charity percentage ${(percentage * 100).toFixed(1)}% is quite high`]
+        warnings: [
+          `Charity percentage ${(percentage * 100).toFixed(1)}% is quite high`,
+        ],
       };
-      
+
       this.revenueStream.charityPercentage = percentage;
       return result;
     }
@@ -166,7 +179,7 @@ export class RevenueCalculator {
     return {
       isValid: true,
       errors: [],
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -206,6 +219,20 @@ export class RevenueCalculator {
   }
 
   /**
+   * Get total cash-out amount (before charity deduction)
+   */
+  getTotalCashOuts(): number {
+    return this.revenueStream.totalCashOuts;
+  }
+
+  /**
+   * Get total number of cash-out events processed
+   */
+  getCashOutCount(): number {
+    return this.cashOutCount;
+  }
+
+  /**
    * Get total games processed
    */
   getTotalGames(): number {
@@ -233,21 +260,28 @@ export class RevenueCalculator {
     validation: ValidationResult;
   } {
     try {
-      const totalVolume = this.revenueStream.platformClickRevenue + 
-                         this.revenueStream.charityContributions + 
-                         this.revenueStream.playerWinnings;
+      const totalVolume =
+        this.revenueStream.platformClickRevenue +
+        this.revenueStream.charityContributions +
+        this.revenueStream.playerWinnings;
 
-      const averageRevenuePerGame = this.revenueStream.totalGames > 0 
-        ? this.revenueStream.platformClickRevenue / this.revenueStream.totalGames 
-        : 0;
+      const averageRevenuePerGame =
+        this.revenueStream.totalGames > 0
+          ? this.revenueStream.platformClickRevenue /
+            this.revenueStream.totalGames
+          : 0;
 
-      const platformMargin = totalVolume > 0 
-        ? (this.revenueStream.platformClickRevenue / totalVolume) * 100 
-        : 0;
+      const platformMargin =
+        totalVolume > 0
+          ? (this.revenueStream.platformClickRevenue / totalVolume) * 100
+          : 0;
 
-      const charityImpact = this.revenueStream.totalCashOuts > 0 
-        ? (this.revenueStream.charityContributions / this.revenueStream.totalCashOuts) * 100 
-        : 0;
+      const charityImpact =
+        this.revenueStream.totalCashOuts > 0
+          ? (this.revenueStream.charityContributions /
+              this.revenueStream.totalCashOuts) *
+            100
+          : 0;
 
       return {
         summary: { ...this.revenueStream },
@@ -255,13 +289,13 @@ export class RevenueCalculator {
           averageRevenuePerGame: this.roundToTwoCents(averageRevenuePerGame),
           totalVolume: this.roundToTwoCents(totalVolume),
           platformMargin: this.roundToTwoDecimals(platformMargin),
-          charityImpact: this.roundToTwoDecimals(charityImpact)
+          charityImpact: this.roundToTwoDecimals(charityImpact),
         },
         validation: {
           isValid: true,
           errors: [],
-          warnings: []
-        }
+          warnings: [],
+        },
       };
     } catch (error) {
       return {
@@ -270,13 +304,13 @@ export class RevenueCalculator {
           averageRevenuePerGame: 0,
           totalVolume: 0,
           platformMargin: 0,
-          charityImpact: 0
+          charityImpact: 0,
         },
         validation: {
           isValid: false,
           errors: [`Error generating revenue report: ${error}`],
-          warnings: []
-        }
+          warnings: [],
+        },
       };
     }
   }
@@ -294,7 +328,7 @@ export class RevenueCalculator {
       return {
         isValid: false,
         errors: [`Error resetting revenue calculator: ${error}`],
-        warnings: []
+        warnings: [],
       };
     }
   }
@@ -308,37 +342,39 @@ export class RevenueCalculator {
 
     // Check required fields
     if (!gameSession.id) {
-      errors.push('Game session ID is required');
+      errors.push("Game session ID is required");
     }
 
     if (!gameSession.dollar1 || !gameSession.dollar2) {
-      errors.push('Game session must have two virtual dollars');
+      errors.push("Game session must have two virtual dollars");
     }
 
     if (!gameSession.winner || !gameSession.loser) {
-      errors.push('Game session must identify winner and loser');
+      errors.push("Game session must identify winner and loser");
     }
 
     // Validate platform fee
     const expectedFee = this.platformFeePerPlayer * this.totalPlayersPerGame;
     if (Math.abs(gameSession.platformFee - expectedFee) > 0.001) {
-      errors.push(`Platform fee should be ${expectedFee}, got ${gameSession.platformFee}`);
+      errors.push(
+        `Platform fee should be ${expectedFee}, got ${gameSession.platformFee}`
+      );
     }
 
     // Validate timestamps
     if (!gameSession.timestamp || gameSession.timestamp > new Date()) {
-      errors.push('Game session timestamp is invalid');
+      errors.push("Game session timestamp is invalid");
     }
 
     // Validate winnings
     if (gameSession.winnings < 0) {
-      errors.push('Game winnings cannot be negative');
+      errors.push("Game winnings cannot be negative");
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -364,32 +400,36 @@ export class RevenueCalculator {
     const warnings: string[] = [];
 
     if (amount < 0) {
-      errors.push('Amount cannot be negative');
+      errors.push("Amount cannot be negative");
     }
 
     if (!allowZero && amount === 0) {
-      errors.push('Amount cannot be zero');
+      errors.push("Amount cannot be zero");
     }
 
     if (amount > 10000) {
-      warnings.push('Amount is unusually high');
+      warnings.push("Amount is unusually high");
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
   /**
    * Get platform fee configuration
    */
-  getPlatformFeeConfiguration(): { perPlayer: number; perGame: number; totalPlayers: number } {
+  getPlatformFeeConfiguration(): {
+    perPlayer: number;
+    perGame: number;
+    totalPlayers: number;
+  } {
     return {
       perPlayer: this.platformFeePerPlayer,
       perGame: this.platformFeePerPlayer * this.totalPlayersPerGame,
-      totalPlayers: this.totalPlayersPerGame
+      totalPlayers: this.totalPlayersPerGame,
     };
   }
 }
