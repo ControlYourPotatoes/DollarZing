@@ -40,10 +40,12 @@ export function FinancialWorkflowDiagram({
         { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }
       )
     : { minX: 0, maxX: width, minY: 0, maxY: height };
-  const vbX = bounds.minX - padding;
-  const vbY = bounds.minY - padding;
-  const vbW = Math.max(width, bounds.maxX - bounds.minX + padding * 2);
-  const vbH = Math.max(height, bounds.maxY - bounds.minY + padding * 2);
+  const baseVbX = (Number.isFinite(bounds.minX) ? bounds.minX : 0) - padding;
+  const baseVbY = (Number.isFinite(bounds.minY) ? bounds.minY : 0) - padding;
+  const vbX = Math.min(0, baseVbX);
+  const vbY = Math.min(0, baseVbY);
+  const vbW = Math.max(width, bounds.maxX + padding - vbX);
+  const vbH = Math.max(height, bounds.maxY + padding - vbY);
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg">
@@ -62,7 +64,7 @@ export function FinancialWorkflowDiagram({
         role="img"
         aria-label="Financial distribution flow diagram"
         width="100%"
-        height={height}
+        height={Math.max(320, height)}
         viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}
         className="mx-auto block"
         preserveAspectRatio="xMidYMid meet"
@@ -76,6 +78,27 @@ export function FinancialWorkflowDiagram({
             </feMerge>
           </filter>
         </defs>
+        {/* Debug: draw crosshairs at node positions to verify clipping */}
+        {nodes.map((n) => (
+          <g key={`debug-${n.id}`} opacity={0.25}>
+            <line
+              x1={n.x - 8}
+              y1={n.y}
+              x2={n.x + 8}
+              y2={n.y}
+              stroke="#22d3ee"
+              strokeWidth={1}
+            />
+            <line
+              x1={n.x}
+              y1={n.y - 8}
+              x2={n.x}
+              y2={n.y + 8}
+              stroke="#22d3ee"
+              strokeWidth={1}
+            />
+          </g>
+        ))}
         {links.map((link) => (
           <WorkflowLink
             key={link.id}

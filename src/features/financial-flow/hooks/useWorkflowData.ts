@@ -6,6 +6,7 @@ import {
   PresentationWorkflowLink,
   PresentationWorkflowNode,
 } from "@/shared/presentation";
+import { layoutWorkflow } from "../layout/simpleLayout";
 import {
   useActiveTimelineDay,
   useActiveTimelineScenario,
@@ -32,30 +33,13 @@ export interface WorkflowLayoutResult {
   highlightedIds: string[];
 }
 
-const DEFAULT_NODE_RADIUS = 42;
-const DEFAULT_NODE_GAP_Y = 110;
-const DEFAULT_NODE_GAP_X = 260;
+const DEFAULT_NODE_RADIUS = 48;
 
-const DEFAULT_LAYOUT: Record<string, { x: number; y: number }> = {
-  total: { x: 80, y: 120 },
-  platform: { x: 400, y: 60 },
-  charity: { x: 400, y: 120 },
-  players: { x: 400, y: 180 },
-};
-
-function resolvePosition(
-  nodeId: string,
-  index: number
-): { x: number; y: number } {
-  if (nodeId in DEFAULT_LAYOUT) {
-    return DEFAULT_LAYOUT[nodeId];
-  }
-  const column = Math.floor(index / 3) + 2; // push unknowns further right
-  const row = index % 3;
-  return {
-    x: DEFAULT_NODE_GAP_X * column,
-    y: 40 + row * DEFAULT_NODE_GAP_Y,
-  };
+function computePositions(
+  nodes: PresentationWorkflowNode[],
+  links: PresentationWorkflowLink[]
+): Record<string, { x: number; y: number }> {
+  return layoutWorkflow(nodes, links);
 }
 
 export function useWorkflowData(): WorkflowLayoutResult {
@@ -130,12 +114,13 @@ export function useWorkflowData(): WorkflowLayoutResult {
     ensureLink("flow-charity", "total", "charity", charityValue);
     ensureLink("flow-players", "total", "players", playersValue);
 
-    const positionedNodes: PositionedNode[] = sourceNodes.map((node, index) => {
-      const { x, y } = resolvePosition(node.id, index);
+    const layoutPositions = computePositions(sourceNodes, sourceLinks);
+    const positionedNodes: PositionedNode[] = sourceNodes.map((node) => {
+      const pos = layoutPositions[node.id] || { x: 80, y: 60 };
       return {
         ...node,
-        x,
-        y,
+        x: pos.x,
+        y: pos.y,
         radius: DEFAULT_NODE_RADIUS,
       };
     });
