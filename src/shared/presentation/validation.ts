@@ -21,13 +21,19 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function assertNumber(value: unknown, message: string): asserts value is number {
+function assertNumber(
+  value: unknown,
+  message: string
+): asserts value is number {
   if (typeof value !== "number" || Number.isNaN(value)) {
     throw new ValidationError(message);
   }
 }
 
-function assertString(value: unknown, message: string): asserts value is string {
+function assertString(
+  value: unknown,
+  message: string
+): asserts value is string {
   if (typeof value !== "string" || value.length === 0) {
     throw new ValidationError(message);
   }
@@ -105,7 +111,10 @@ function validateWorkflowNode(
   };
 
   if (node.progress !== undefined) {
-    assertNumber(node.progress, `${path}.progress must be a number if provided`);
+    assertNumber(
+      node.progress,
+      `${path}.progress must be a number if provided`
+    );
     validated.progress = node.progress;
   }
 
@@ -137,7 +146,10 @@ function validateWorkflowLink(
   };
 }
 
-function validateSnapshot(snapshot: unknown, index: number): PresentationSnapshot {
+function validateSnapshot(
+  snapshot: unknown,
+  index: number
+): PresentationSnapshot {
   if (!isObject(snapshot)) {
     throw new ValidationError(`days[${index}] must be an object`);
   }
@@ -149,43 +161,98 @@ function validateSnapshot(snapshot: unknown, index: number): PresentationSnapsho
   if (!isObject(summary)) {
     throw new ValidationError(`days[${index}].summary must be an object`);
   }
-  assertNumber(summary.dailyRevenue, `days[${index}].summary.dailyRevenue must be a number`);
-  assertNumber(summary.dailyCharity, `days[${index}].summary.dailyCharity must be a number`);
-  assertNumber(summary.dailyFees, `days[${index}].summary.dailyFees must be a number`);
-  assertNumber(summary.dailyPayouts, `days[${index}].summary.dailyPayouts must be a number`);
-  assertNumber(summary.netChange, `days[${index}].summary.netChange must be a number`);
+  assertNumber(
+    summary.dailyRevenue,
+    `days[${index}].summary.dailyRevenue must be a number`
+  );
+  assertNumber(
+    summary.dailyCharity,
+    `days[${index}].summary.dailyCharity must be a number`
+  );
+  assertNumber(
+    summary.dailyFees,
+    `days[${index}].summary.dailyFees must be a number`
+  );
+  assertNumber(
+    summary.dailyPayouts,
+    `days[${index}].summary.dailyPayouts must be a number`
+  );
+  assertNumber(
+    summary.netChange,
+    `days[${index}].summary.netChange must be a number`
+  );
 
   const timeline = snapshot.timelineTick;
   if (!isObject(timeline)) {
     throw new ValidationError(`days[${index}].timelineTick must be an object`);
   }
-  assertString(timeline.label, `days[${index}].timelineTick.label must be a string`);
-  assertNumber(timeline.cumulativeRevenue, `days[${index}].timelineTick.cumulativeRevenue must be a number`);
-  assertNumber(timeline.cumulativePlayers, `days[${index}].timelineTick.cumulativePlayers must be a number`);
-  assertNumber(timeline.cumulativeFees, `days[${index}].timelineTick.cumulativeFees must be a number`);
-  assertNumber(timeline.cumulativeCharity, `days[${index}].timelineTick.cumulativeCharity must be a number`);
-  assertNumber(timeline.cumulativePayouts, `days[${index}].timelineTick.cumulativePayouts must be a number`);
+  assertString(
+    timeline.label,
+    `days[${index}].timelineTick.label must be a string`
+  );
+  assertNumber(
+    timeline.cumulativeRevenue,
+    `days[${index}].timelineTick.cumulativeRevenue must be a number`
+  );
+  assertNumber(
+    timeline.cumulativePlayers,
+    `days[${index}].timelineTick.cumulativePlayers must be a number`
+  );
+  assertNumber(
+    timeline.cumulativeFees,
+    `days[${index}].timelineTick.cumulativeFees must be a number`
+  );
+  assertNumber(
+    timeline.cumulativeCharity,
+    `days[${index}].timelineTick.cumulativeCharity must be a number`
+  );
+  assertNumber(
+    timeline.cumulativePayouts,
+    `days[${index}].timelineTick.cumulativePayouts must be a number`
+  );
 
   const financialWorkflow = snapshot.financialWorkflow;
   if (!isObject(financialWorkflow)) {
-    throw new ValidationError(`days[${index}].financialWorkflow must be an object`);
+    throw new ValidationError(
+      `days[${index}].financialWorkflow must be an object`
+    );
   }
-  assertArray(financialWorkflow.nodes, `days[${index}].financialWorkflow.nodes must be an array`);
-  assertArray(financialWorkflow.links, `days[${index}].financialWorkflow.links must be an array`);
-
-  const validatedNodes = financialWorkflow.nodes.map((node: unknown, nodeIdx: number) =>
-    validateWorkflowNode(node, `days[${index}].financialWorkflow.nodes[${nodeIdx}]`)
+  assertArray(
+    financialWorkflow.nodes,
+    `days[${index}].financialWorkflow.nodes must be an array`
   );
-  const validatedLinks = financialWorkflow.links.map((link: unknown, linkIdx: number) =>
-    validateWorkflowLink(link, `days[${index}].financialWorkflow.links[${linkIdx}]`)
+  assertArray(
+    financialWorkflow.links,
+    `days[${index}].financialWorkflow.links must be an array`
+  );
+
+  const validatedNodes = financialWorkflow.nodes.map(
+    (node: unknown, nodeIdx: number) =>
+      validateWorkflowNode(
+        node,
+        `days[${index}].financialWorkflow.nodes[${nodeIdx}]`
+      )
+  );
+  const validatedLinks = financialWorkflow.links.map(
+    (link: unknown, linkIdx: number) =>
+      validateWorkflowLink(
+        link,
+        `days[${index}].financialWorkflow.links[${linkIdx}]`
+      )
   );
 
   const charts = snapshot.charts;
   if (!isObject(charts)) {
     throw new ValidationError(`days[${index}].charts must be an object`);
   }
-  assertArray(charts.distributionSeries, `days[${index}].charts.distributionSeries must be an array`);
-  assertArray(charts.accumulationSeries, `days[${index}].charts.accumulationSeries must be an array`);
+  assertArray(
+    charts.distributionSeries,
+    `days[${index}].charts.distributionSeries must be an array`
+  );
+  assertArray(
+    charts.accumulationSeries,
+    `days[${index}].charts.accumulationSeries must be an array`
+  );
 
   const distributionSeries = charts.distributionSeries.map(
     (point: unknown, pointIdx: number) =>
@@ -201,6 +268,71 @@ function validateSnapshot(snapshot: unknown, index: number): PresentationSnapsho
         `days[${index}].charts.accumulationSeries[${pointIdx}]`
       )
   );
+
+  // Optional pool block
+  let pool: PresentationSnapshot["pool"] | undefined;
+  if ((snapshot as any).pool !== undefined) {
+    const p = (snapshot as any).pool;
+    if (!isObject(p)) {
+      throw new ValidationError(
+        `days[${index}].pool must be an object if provided`
+      );
+    }
+    assertNumber(
+      p.depositedToday,
+      `days[${index}].pool.depositedToday must be a number`
+    );
+    assertNumber(
+      p.consumedToday,
+      `days[${index}].pool.consumedToday must be a number`
+    );
+    assertNumber(
+      p.outstanding,
+      `days[${index}].pool.outstanding must be a number`
+    );
+    pool = {
+      depositedToday: p.depositedToday,
+      consumedToday: p.consumedToday,
+      outstanding: p.outstanding,
+    };
+  }
+
+  // Optional cashouts block
+  let cashouts: PresentationSnapshot["cashouts"] | undefined;
+  if ((snapshot as any).cashouts !== undefined) {
+    const c = (snapshot as any).cashouts;
+    if (!isObject(c)) {
+      throw new ValidationError(
+        `days[${index}].cashouts must be an object if provided`
+      );
+    }
+    assertNumber(
+      c.countToday,
+      `days[${index}].cashouts.countToday must be a number`
+    );
+    assertNumber(
+      c.amountToday,
+      `days[${index}].cashouts.amountToday must be a number`
+    );
+    if (c.cumulativeAmount !== undefined) {
+      assertNumber(
+        c.cumulativeAmount,
+        `days[${index}].cashouts.cumulativeAmount must be a number if provided`
+      );
+    }
+    if (c.cumulativeCount !== undefined) {
+      assertNumber(
+        c.cumulativeCount,
+        `days[${index}].cashouts.cumulativeCount must be a number if provided`
+      );
+    }
+    cashouts = {
+      countToday: c.countToday,
+      amountToday: c.amountToday,
+      cumulativeAmount: c.cumulativeAmount,
+      cumulativeCount: c.cumulativeCount,
+    };
+  }
 
   return {
     dayIndex: snapshot.dayIndex,
@@ -228,6 +360,8 @@ function validateSnapshot(snapshot: unknown, index: number): PresentationSnapsho
       distributionSeries,
       accumulationSeries,
     },
+    ...(pool ? { pool } : {}),
+    ...(cashouts ? { cashouts } : {}),
   };
 }
 
@@ -246,20 +380,35 @@ export function validatePresentationSnapshotFile(
   if (!isObject(parameters)) {
     throw new ValidationError("parameters must be an object");
   }
-  assertString(parameters.adoptionRate, "parameters.adoptionRate must be a string");
+  assertString(
+    parameters.adoptionRate,
+    "parameters.adoptionRate must be a string"
+  );
   assertString(
     parameters.cashOutStrategy,
     "parameters.cashOutStrategy must be a string"
   );
-  assertString(parameters.charityShare, "parameters.charityShare must be a string");
+  assertString(
+    parameters.charityShare,
+    "parameters.charityShare must be a string"
+  );
 
   const coordinates = input.coordinates;
   if (!isObject(coordinates)) {
     throw new ValidationError("coordinates must be an object");
   }
-  assertNumber(coordinates.adoptionRate, "coordinates.adoptionRate must be a number");
-  assertNumber(coordinates.cashOutStrategy, "coordinates.cashOutStrategy must be a number");
-  assertNumber(coordinates.charityShare, "coordinates.charityShare must be a number");
+  assertNumber(
+    coordinates.adoptionRate,
+    "coordinates.adoptionRate must be a number"
+  );
+  assertNumber(
+    coordinates.cashOutStrategy,
+    "coordinates.cashOutStrategy must be a number"
+  );
+  assertNumber(
+    coordinates.charityShare,
+    "coordinates.charityShare must be a number"
+  );
 
   const totals = input.totals;
   if (!isObject(totals)) {
@@ -267,10 +416,19 @@ export function validatePresentationSnapshotFile(
   }
   assertNumber(totals.players, "totals.players must be a number");
   assertNumber(totals.activePlayers, "totals.activePlayers must be a number");
-  assertNumber(totals.cumulativeRevenue, "totals.cumulativeRevenue must be a number");
-  assertNumber(totals.cumulativeCharity, "totals.cumulativeCharity must be a number");
+  assertNumber(
+    totals.cumulativeRevenue,
+    "totals.cumulativeRevenue must be a number"
+  );
+  assertNumber(
+    totals.cumulativeCharity,
+    "totals.cumulativeCharity must be a number"
+  );
   assertNumber(totals.cumulativeFees, "totals.cumulativeFees must be a number");
-  assertNumber(totals.cumulativePayouts, "totals.cumulativePayouts must be a number");
+  assertNumber(
+    totals.cumulativePayouts,
+    "totals.cumulativePayouts must be a number"
+  );
 
   assertArray(input.days, "days must be an array");
 
@@ -315,14 +473,22 @@ function validateManifestEntry(
     throw new ValidationError(`manifest[${index}] must be an object`);
   }
 
-  assertString(entry.scenarioId, `manifest[${index}].scenarioId must be a string`);
+  assertString(
+    entry.scenarioId,
+    `manifest[${index}].scenarioId must be a string`
+  );
   assertString(entry.path, `manifest[${index}].path must be a string`);
-  assertString(entry.generatedAt, `manifest[${index}].generatedAt must be a string`);
+  assertString(
+    entry.generatedAt,
+    `manifest[${index}].generatedAt must be a string`
+  );
   assertNumber(entry.days, `manifest[${index}].days must be a number`);
 
   const parameters = entry.parameters;
   if (!isObject(parameters)) {
-    throw new ValidationError(`manifest[${index}].parameters must be an object`);
+    throw new ValidationError(
+      `manifest[${index}].parameters must be an object`
+    );
   }
   assertString(
     parameters.adoptionRate,
@@ -339,7 +505,9 @@ function validateManifestEntry(
 
   const coordinates = entry.coordinates;
   if (!isObject(coordinates)) {
-    throw new ValidationError(`manifest[${index}].coordinates must be an object`);
+    throw new ValidationError(
+      `manifest[${index}].coordinates must be an object`
+    );
   }
   assertNumber(
     coordinates.adoptionRate,
