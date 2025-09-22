@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import manifestUrl from "../../engine/generated-datasets/anchor-datasets/presentation-manifest.json?url";
-
-const snapshotAssets = import.meta.glob(
-  "../../engine/generated-datasets/anchor-datasets/*/presentation-snapshots.json",
-  { eager: true, as: "url" }
-) as Record<string, string>;
-
 import {
   loadPresentationManifest,
   loadPresentationSnapshot,
@@ -16,40 +9,115 @@ import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelin
 import { TimelineScrubber, useActiveTimelineDay } from "@/features/timeline";
 import { FinancialWorkflowDiagram } from "@/features/financial-flow";
 
-const MANIFEST_URL = manifestUrl;
+// Optional runtime overrides to fetch manifest/snapshots from an external base or per-scenario URLs
+const {
+  VITE_PRESENTATION_BASE_URL,
+  VITE_PRESENTATION_MANIFEST_URL,
+  VITE_PRESENTATION_OVERRIDES,
+} = ((import.meta as any).env ?? {}) as Record<string, string | undefined>;
+
+// Respect Vite base (e.g., "/DollarZing/") so public assets resolve correctly in dev/prod
+const DEFAULT_PUBLIC_BASE =
+  (((import.meta as any).env ?? {}) as Record<string, string | undefined>)[
+    "BASE_URL"
+  ] || "/";
+const DEFAULT_DATASETS_BASE = `${DEFAULT_PUBLIC_BASE.replace(
+  /\/$/,
+  ""
+)}/engine/generated-datasets/`;
+
+function joinUrl(base: string, path: string): string {
+  const left = base.endsWith("/") ? base.slice(0, -1) : base;
+  const right = path.startsWith("/") ? path.slice(1) : path;
+  return `${left}/${right}`;
+}
+
+function resolvePublicPath(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  // Ensure URLs respect the dev/prod base path
+  return joinUrl(DEFAULT_PUBLIC_BASE, url);
+}
+
+const MANIFEST_CANDIDATES: string[] = [
+  VITE_PRESENTATION_MANIFEST_URL
+    ? resolvePublicPath(VITE_PRESENTATION_MANIFEST_URL)
+    : "",
+  joinUrl(DEFAULT_DATASETS_BASE, "anchor-datasets/presentation-manifest.json"),
+  joinUrl(DEFAULT_DATASETS_BASE, "presentation-manifest.json"),
+].filter(Boolean);
 
 function resolveSnapshotUrl(entry: PresentationManifestEntry): string {
-  const key = `../../engine/generated-datasets/${entry.path}`;
-  const assetUrl = snapshotAssets[key];
-  if (!assetUrl) {
-    throw new Error(`Snapshot asset not bundled for ${entry.scenarioId}`);
+  // Highest priority: explicit per-scenario override map (JSON string mapping scenarioId -> URL)
+  if (VITE_PRESENTATION_OVERRIDES) {
+    try {
+      const map = JSON.parse(VITE_PRESENTATION_OVERRIDES) as Record<
+        string,
+        string
+      >;
+      const override = map[entry.scenarioId];
+      if (override) return override;
+    } catch {
+      // Ignore malformed override map
+    }
   }
-  return assetUrl;
+
+  const candidates: string[] = [];
+  const base = VITE_PRESENTATION_BASE_URL
+    ? resolvePublicPath(VITE_PRESENTATION_BASE_URL)
+    : DEFAULT_DATASETS_BASE;
+  // 1) Use manifest-provided path under base
+  candidates.push(joinUrl(base, entry.path));
+  // 2) Fallback: derive from scenarioId
+  candidates.push(
+    joinUrl(
+      base,
+      `anchor-datasets/${entry.scenarioId}/presentation-snapshots.json`
+    )
+  );
+
+  // Return first candidate (the loader will actually fetch and handle errors)
+  return candidates[0];
 }
 
 const PrototypeDashboard = () => {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
-  const loadManifest = usePresentationTimelineStore((state) => state.loadManifest);
-  const upsertScenario = usePresentationTimelineStore((state) => state.upsertScenario);
-  const setActiveScenario = usePresentationTimelineStore((state) => state.setActiveScenario);
-  const setActiveDay = usePresentationTimelineStore((state) => state.setActiveDay);
+  const loadManifest = usePresentationTimelineStore(
+    (state) => state.loadManifest
+  );
+  const upsertScenario = usePresentationTimelineStore(
+    (state) => state.upsertScenario
+  );
+  const setActiveScenario = usePresentationTimelineStore(
+    (state) => state.setActiveScenario
+  );
+  const setActiveDay = usePresentationTimelineStore(
+    (state) => state.setActiveDay
+  );
   const manifestIndex = usePresentationTimelineStore((state) => state.manifest);
   const scenarios = usePresentationTimelineStore((state) => state.scenarios);
-  const activeScenarioId = usePresentationTimelineStore((state) => state.activeScenarioId);
+  const activeScenarioId = usePresentationTimelineStore(
+    (state) => state.activeScenarioId
+  );
 
   const activeDay = useActiveTimelineDay();
 
-  const manifestEntries = useMemo(() => manifestIndex?.manifest ?? [], [manifestIndex]);
-  const selectedScenarioId = activeScenarioId ?? manifestEntries[0]?.scenarioId ?? "";
+  const manifestEntries = useMemo(
+    () => manifestIndex?.manifest ?? [],
+    [manifestIndex]
+  );
+  const selectedScenarioId =
+    activeScenarioId ?? manifestEntries[0]?.scenarioId ?? "";
 
   const ensureScenarioLoaded = useCallback(
     async (entry: PresentationManifestEntry) => {
       if (scenarios[entry.scenarioId]) {
         return;
       }
-      const snapshot = await loadPresentationSnapshot(resolveSnapshotUrl(entry));
+      const snapshot = await loadPresentationSnapshot(
+        resolveSnapshotUrl(entry)
+      );
       upsertScenario(snapshot);
     },
     [scenarios, upsertScenario]
@@ -61,10 +129,19 @@ const PrototypeDashboard = () => {
       setStatus("loading");
       setError(null);
       try {
-        if (!MANIFEST_URL) {
-          throw new Error("Presentation manifest asset is unavailable");
+        let manifest: any = null;
+        let lastErr: unknown = null;
+        for (const url of MANIFEST_CANDIDATES) {
+          try {
+            manifest = await loadPresentationManifest(url);
+            break;
+          } catch (e) {
+            lastErr = e;
+          }
         }
-        const manifest = await loadPresentationManifest(MANIFEST_URL);
+        if (!manifest) {
+          throw lastErr || new Error("Unable to load presentation manifest");
+        }
         if (cancelled) return;
         const index = loadManifest(manifest);
         const firstEntry = index.manifest[0];
@@ -78,7 +155,11 @@ const PrototypeDashboard = () => {
       } catch (err) {
         if (cancelled) return;
         setStatus("error");
-        setError(err instanceof Error ? err.message : "Failed to load presentation data");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load presentation data"
+        );
       }
     }
 
@@ -112,15 +193,21 @@ const PrototypeDashboard = () => {
       },
       {
         label: "Cumulative Revenue",
-        value: `$${activeDay.timelineTick.cumulativeRevenue.toLocaleString(undefined, {
-          maximumFractionDigits: 0,
-        })}`,
+        value: `$${activeDay.timelineTick.cumulativeRevenue.toLocaleString(
+          undefined,
+          {
+            maximumFractionDigits: 0,
+          }
+        )}`,
       },
       {
         label: "Cumulative Charity",
-        value: `$${activeDay.timelineTick.cumulativeCharity.toLocaleString(undefined, {
-          maximumFractionDigits: 0,
-        })}`,
+        value: `$${activeDay.timelineTick.cumulativeCharity.toLocaleString(
+          undefined,
+          {
+            maximumFractionDigits: 0,
+          }
+        )}`,
       },
     ];
   }, [activeDay]);
@@ -131,14 +218,22 @@ const PrototypeDashboard = () => {
         <header className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-slate-500">DollarZing Presentation</p>
-              <h1 className="text-3xl font-semibold tracking-tight">Snapshot Playback Sandbox</h1>
+              <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
+                DollarZing Presentation
+              </p>
+              <h1 className="text-3xl font-semibold tracking-tight">
+                Snapshot Playback Sandbox
+              </h1>
               <p className="text-slate-400">
-                Timeline scrubber and financial workflow powered by pregenerated presentation snapshots.
+                Timeline scrubber and financial workflow powered by pregenerated
+                presentation snapshots.
               </p>
             </div>
             <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">
-              <label htmlFor="scenario" className="block text-xs uppercase tracking-widest text-slate-400">
+              <label
+                htmlFor="scenario"
+                className="block text-xs uppercase tracking-widest text-slate-400"
+              >
                 Scenario
               </label>
               <select
@@ -150,7 +245,9 @@ const PrototypeDashboard = () => {
               >
                 {manifestEntries.map((entry) => (
                   <option key={entry.scenarioId} value={entry.scenarioId}>
-                    {entry.parameters.adoptionRate.toUpperCase()} growth · {entry.parameters.cashOutStrategy} risk · {entry.parameters.charityShare}% charity
+                    {entry.parameters.adoptionRate.toUpperCase()} growth ·{" "}
+                    {entry.parameters.cashOutStrategy} risk ·{" "}
+                    {entry.parameters.charityShare}% charity
                   </option>
                 ))}
               </select>
@@ -164,8 +261,13 @@ const PrototypeDashboard = () => {
           ) : (
             <div className="grid grid-cols-1 gap-4 text-sm text-slate-300 sm:grid-cols-3">
               {stats?.map((stat) => (
-                <div key={stat.label} className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-                  <span className="text-xs uppercase tracking-widest text-slate-500">{stat.label}</span>
+                <div
+                  key={stat.label}
+                  className="rounded-xl border border-slate-800 bg-slate-900 p-4"
+                >
+                  <span className="text-xs uppercase tracking-widest text-slate-500">
+                    {stat.label}
+                  </span>
                   <p className="mt-2 text-2xl font-semibold">{stat.value}</p>
                 </div>
               )) ?? (
@@ -187,30 +289,44 @@ const PrototypeDashboard = () => {
             {activeDay ? (
               <div className="space-y-3">
                 <div>
-                  <h2 className="text-base font-semibold text-slate-100">Day {activeDay.dayIndex + 1}</h2>
-                  <p className="text-xs uppercase tracking-widest text-slate-500">{activeDay.label}</p>
+                  <h2 className="text-base font-semibold text-slate-100">
+                    Day {activeDay.dayIndex + 1}
+                  </h2>
+                  <p className="text-xs uppercase tracking-widest text-slate-500">
+                    {activeDay.label}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <p>
-                    <span className="text-slate-400">Daily Revenue:</span>{' '}
-                    ${activeDay.summary.dailyRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    <span className="text-slate-400">Daily Revenue:</span> $
+                    {activeDay.summary.dailyRevenue.toLocaleString(undefined, {
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p>
-                    <span className="text-slate-400">Daily Charity:</span>{' '}
-                    ${activeDay.summary.dailyCharity.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    <span className="text-slate-400">Daily Charity:</span> $
+                    {activeDay.summary.dailyCharity.toLocaleString(undefined, {
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p>
-                    <span className="text-slate-400">Daily Fees:</span>{' '}
-                    ${activeDay.summary.dailyFees.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    <span className="text-slate-400">Daily Fees:</span> $
+                    {activeDay.summary.dailyFees.toLocaleString(undefined, {
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p>
-                    <span className="text-slate-400">Player Payouts:</span>{' '}
-                    ${activeDay.summary.dailyPayouts.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    <span className="text-slate-400">Player Payouts:</span> $
+                    {activeDay.summary.dailyPayouts.toLocaleString(undefined, {
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                 </div>
               </div>
             ) : (
-              <p className="text-slate-500">Select a scenario to view per-day details.</p>
+              <p className="text-slate-500">
+                Select a scenario to view per-day details.
+              </p>
             )}
           </aside>
         </section>
