@@ -2,7 +2,7 @@ import { GameMatchingEngine } from "../core/game-matching-engine";
 import { PlayerManager } from "./player-manager";
 import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { DollarState } from "../types/virtual-dollar-engine";
-import { EventBus } from "../events/event-bus";
+import { EventBus, type EventSubscription } from "../events/event-bus";
 import {
   EVENT_TYPES,
   DayStartedEvent,
@@ -39,6 +39,7 @@ export class DayProcessor {
   }
 
   private loggingEnabled: boolean;
+  private newRunSubscription: EventSubscription | null = null;
 
   setLoggingEnabled(enabled: boolean): void {
     this.loggingEnabled = enabled;
@@ -48,7 +49,7 @@ export class DayProcessor {
    * Setup event subscriptions for event-driven processing
    */
   private setupEventSubscriptions(): void {
-    this.eventBus.on(
+    this.newRunSubscription = this.eventBus.on(
       EVENT_TYPES.NEW_RUN_CREATED,
       this.handleNewRunCreated.bind(this)
     );
@@ -58,17 +59,32 @@ export class DayProcessor {
    * Handle new run created event - add to pool
    */
   private async handleNewRunCreated(event: NewRunCreatedEvent): Promise<void> {
-    // Add the new run to the game matching engine pool
-    this.dollarManager.updateDollarState(
-      event.virtualDollarId,
-      DollarState.POOLED
-    );
-
-    // Get the virtual dollar from the manager
     const virtualDollar = this.dollarManager.getDollar(event.virtualDollarId);
-    if (virtualDollar) {
-      this.gameMatchingEngine.addToPool(virtualDollar);
+    if (!virtualDollar) {
+      console.warn(
+        `[DayProcessor] Ignoring NEW_RUN_CREATED for missing dollar ${event.virtualDollarId}`
+      );
+      return;
     }
+
+    if (virtualDollar.state !== DollarState.POOLED) {
+      this.dollarManager.updateDollarState(
+        event.virtualDollarId,
+        DollarState.POOLED
+      );
+    }
+
+    const addResult = await this.gameMatchingEngine.addToPool(virtualDollar);
+    if (!addResult.success) {
+      console.warn(
+        `[DayProcessor] Failed to add dollar ${event.virtualDollarId} to pool: ${addResult.error}`
+      );
+    }
+  }
+
+  dispose(): void {
+    this.newRunSubscription?.unsubscribe();
+    this.newRunSubscription = null;
   }
 
   /**

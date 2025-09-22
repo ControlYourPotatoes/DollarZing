@@ -3,7 +3,7 @@ import {
   VirtualDollar,
 } from "../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../types/factory-interfaces";
-import { EventBus } from "../events/event-bus";
+import { EventBus, type EventSubscription } from "../events/event-bus";
 import {
   EVENT_TYPES,
   DayStartedEvent,
@@ -60,11 +60,13 @@ export class PlayerManager {
     this.setupEventSubscriptions();
   }
 
+  private dayStartedSubscription: EventSubscription | null = null;
+
   /**
    * Setup event subscriptions for event-driven processing
    */
   private setupEventSubscriptions(): void {
-    this.eventBus.on<DayStartedEvent>(
+    this.dayStartedSubscription = this.eventBus.on<DayStartedEvent>(
       EVENT_TYPES.DAY_STARTED,
       this.handleDayStarted.bind(this),
       10 // High priority
@@ -362,5 +364,11 @@ export class PlayerManager {
         player.activeRunIds.splice(index, 1);
       }
     }
+  }
+
+  dispose(): void {
+    this.dayStartedSubscription?.unsubscribe();
+    this.dayStartedSubscription = null;
+    this.playerRegistry.clear();
   }
 }

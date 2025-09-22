@@ -19,7 +19,11 @@ import {
   ErrorEvent,
   EVENT_TYPES,
 } from "../event-types";
-import { BettingLevel, DollarState } from "../../types/virtual-dollar-engine";
+import {
+  BettingLevel,
+  DollarState,
+  type VirtualDollar,
+} from "../../types/virtual-dollar-engine";
 
 /**
  * MatchmakingEventHandler - Handles matchmaking logic through event-driven architecture
@@ -145,14 +149,34 @@ export class MatchmakingEventHandler {
           continue;
         }
 
-        // Sort by creation time (FIFO)
-        const availableDollars = levelDollars
-          .filter(
-            (dollar) =>
-              dollar.state === DollarState.POOLED &&
-              !this.gameMatchingEngine.isDollarInGame(dollar.id)
-          )
-          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        const availableDollars: VirtualDollar[] = [];
+        for (const dollar of levelDollars) {
+          if (!dollar) {
+            continue;
+          }
+
+          if (
+            dollar.state === DollarState.LOST ||
+            dollar.state === DollarState.CASHED_OUT
+          ) {
+            await this.evictFinalStateDollar(dollar, bettingLevel);
+            continue;
+          }
+
+          if (dollar.state !== DollarState.POOLED) {
+            continue;
+          }
+
+          if (this.gameMatchingEngine.isDollarInGame(dollar.id)) {
+            continue;
+          }
+
+          availableDollars.push(dollar);
+        }
+
+        availableDollars.sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+        );
 
         // Match pairs
         for (let i = 0; i < availableDollars.length - 1; i += 2) {
@@ -209,6 +233,7 @@ export class MatchmakingEventHandler {
               error
             );
           }
+
         }
 
         // Handle remaining odd player
@@ -321,6 +346,30 @@ export class MatchmakingEventHandler {
     };
 
     await this.eventBus.emit(EVENT_TYPES.MATCH_FOUND, event);
+  }
+
+  private async evictFinalStateDollar(
+    dollar: VirtualDollar,
+    level: BettingLevel
+  ): Promise<void> {
+    const removal = await this.gameMatchingEngine.removeFromPool(
+      dollar.id,
+      "ERROR"
+    );
+
+    if (!removal.success) {
+      console.warn(
+        `[MatchmakingEventHandler] Dropped stale dollar ${dollar.id} at level ${level}: ${removal.error ?? "removeFromPool failed"}`
+      );
+    }
+
+    try {
+      this.virtualDollarFactory.releaseDollar(dollar.id);
+    } catch (error) {
+      console.warn(
+        `[MatchmakingEventHandler] Failed to release stale dollar ${dollar.id}: ${error}`
+      );
+    }
   }
 
   /**

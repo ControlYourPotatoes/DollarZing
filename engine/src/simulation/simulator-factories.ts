@@ -53,6 +53,7 @@ export interface SimulatorAssembly {
   components: SimulatorComponents;
   poolingEnabled: boolean;
   debugInterface?: EventDebugInterface;
+  dispose: () => void;
 }
 
 export interface SimulatorFactoryOptions {
@@ -177,6 +178,13 @@ function assembleSimulator(
     eventBus
   );
 
+  const dispose = (): void => {
+    simulator.dispose();
+    dayProcessor.dispose();
+    playerManager.dispose();
+    eventBus.dispose();
+  };
+
   return {
     simulator,
     profile,
@@ -192,6 +200,7 @@ function assembleSimulator(
       dayProcessor,
     },
     ...(debugInterface ? { debugInterface } : {}),
+    dispose,
   };
 }
 

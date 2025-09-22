@@ -103,7 +103,7 @@ export type DatasetProgressCallback = (
 export class DatasetOrchestrator {
   private config: ParameterMappingConfig;
   private orchestratorConfig: OrchestratorConfig;
-  private eventBus: EventBus | undefined;
+  private sharedEventBus: EventBus | undefined;
 
   constructor(
     orchestratorConfig: OrchestratorConfig,
@@ -112,7 +112,7 @@ export class DatasetOrchestrator {
   ) {
     this.orchestratorConfig = orchestratorConfig;
     this.config = this.createMappingConfig(mappingConfig);
-    this.eventBus = eventBus;
+    this.sharedEventBus = eventBus;
   }
 
   /**
@@ -127,8 +127,8 @@ export class DatasetOrchestrator {
 
     try {
       // Emit dataset generation started event
-      if (this.eventBus) {
-        await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_STARTED, {
+      if (this.sharedEventBus) {
+        await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_STARTED, {
           type: EVENT_TYPES.DATASET_GENERATION_STARTED,
           timestamp: new Date(),
           parameterId,
@@ -139,8 +139,8 @@ export class DatasetOrchestrator {
 
       // Validate parameter combination and emit validation event
       const isValid = validateParameterCombination(combination);
-      if (this.eventBus) {
-        await this.eventBus.emit(EVENT_TYPES.PARAMETER_VALIDATION, {
+      if (this.sharedEventBus) {
+        await this.sharedEventBus.emit(EVENT_TYPES.PARAMETER_VALIDATION, {
           type: EVENT_TYPES.PARAMETER_VALIDATION,
           timestamp: new Date(),
           parameterId,
@@ -163,8 +163,8 @@ export class DatasetOrchestrator {
         };
 
         // Emit completion event with failure
-        if (this.eventBus) {
-          await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+        if (this.sharedEventBus) {
+          await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
             type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
             timestamp: new Date(),
             parameterId,
@@ -216,7 +216,7 @@ export class DatasetOrchestrator {
       try {
         // Create enhanced progress wrapper that emits events
         const wrappedCallback =
-          progressCallback || this.eventBus
+          progressCallback || this.sharedEventBus
             ? (progress: SimulationProgress) => {
                 // Call original callback if provided
                 if (progressCallback) {
@@ -224,18 +224,21 @@ export class DatasetOrchestrator {
                 }
 
                 // Emit progress event if EventBus available
-                if (this.eventBus) {
-                  this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_PROGRESS, {
-                    type: EVENT_TYPES.DATASET_GENERATION_PROGRESS,
-                    timestamp: new Date(),
-                    parameterId,
-                    currentDay: progress.currentDay,
-                    totalDays: progress.totalDays,
-                    progressPercentage:
-                      (progress.currentDay / progress.totalDays) * 100,
-                    gamesProcessed: progress.gamesCompleted || 0,
-                    playersActive: progress.playersActive || 0,
-                  } as DatasetGenerationProgressEvent);
+                if (this.sharedEventBus) {
+                  void this.sharedEventBus.emit(
+                    EVENT_TYPES.DATASET_GENERATION_PROGRESS,
+                    {
+                      type: EVENT_TYPES.DATASET_GENERATION_PROGRESS,
+                      timestamp: new Date(),
+                      parameterId,
+                      currentDay: progress.currentDay,
+                      totalDays: progress.totalDays,
+                      progressPercentage:
+                        (progress.currentDay / progress.totalDays) * 100,
+                      gamesProcessed: progress.gamesCompleted || 0,
+                      playersActive: progress.playersActive || 0,
+                    } as DatasetGenerationProgressEvent
+                  );
                 }
               }
             : undefined;
@@ -248,8 +251,8 @@ export class DatasetOrchestrator {
 
         // Validate simulation results and emit validation event
         const validation = this.validateSimulationResults(simulationResults);
-        if (this.eventBus) {
-          await this.eventBus.emit(EVENT_TYPES.DATASET_VALIDATION, {
+        if (this.sharedEventBus) {
+          await this.sharedEventBus.emit(EVENT_TYPES.DATASET_VALIDATION, {
             type: EVENT_TYPES.DATASET_VALIDATION,
             timestamp: new Date(),
             parameterId,
@@ -280,8 +283,8 @@ export class DatasetOrchestrator {
             generationTimeMs,
           };
 
-          if (this.eventBus) {
-            await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+          if (this.sharedEventBus) {
+            await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
               type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
               timestamp: new Date(),
               parameterId,
@@ -400,8 +403,8 @@ export class DatasetOrchestrator {
           eventCount: eventTraces.length,
         };
 
-        if (this.eventBus) {
-          await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+        if (this.sharedEventBus) {
+          await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
             type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
             timestamp: new Date(),
             parameterId,
@@ -420,6 +423,7 @@ export class DatasetOrchestrator {
           }
           debugInterface.detach();
         }
+        assembly.dispose();
       }
     } catch (error) {
       const result: AdapterGenerationResult = {
@@ -431,8 +435,8 @@ export class DatasetOrchestrator {
       };
 
       // Emit completion event with error
-      if (this.eventBus) {
-        await this.eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+      if (this.sharedEventBus) {
+        await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
           type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
           timestamp: new Date(),
           parameterId,
@@ -510,7 +514,7 @@ export class DatasetOrchestrator {
     collectDailySnapshots: boolean,
     collectEventTraces: boolean
   ): SimulatorAssembly {
-    const simulationEventBus = this.eventBus ?? new EventBus();
+    const simulationEventBus = new EventBus();
 
     return createProductionSimulator({
       eventBus: simulationEventBus,
@@ -746,7 +750,7 @@ export class DatasetOrchestrator {
     parameterId: string,
     simulationResults: SimulationResults
   ): Promise<void> {
-    if (!this.eventBus) return;
+    if (!this.sharedEventBus) return;
 
     // Data integrity check
     const dataIntegrityPassed =
@@ -754,7 +758,7 @@ export class DatasetOrchestrator {
       simulationResults.gameStats?.totalGames > 0 &&
       simulationResults.playerStats?.totalPlayers > 0;
 
-    await this.eventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
+    await this.sharedEventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
       type: EVENT_TYPES.QUALITY_ASSURANCE,
       timestamp: new Date(),
       parameterId,
@@ -773,7 +777,7 @@ export class DatasetOrchestrator {
     const performancePassed =
       simulationResults.simulationDurationMs < this.config.maxSimulationTimeMs;
 
-    await this.eventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
+    await this.sharedEventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
       type: EVENT_TYPES.QUALITY_ASSURANCE,
       timestamp: new Date(),
       parameterId,
@@ -795,7 +799,7 @@ export class DatasetOrchestrator {
         simulationResults.revenueStats.totalPlayerPayouts >= 0
       : false;
 
-    await this.eventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
+    await this.sharedEventBus.emit(EVENT_TYPES.QUALITY_ASSURANCE, {
       type: EVENT_TYPES.QUALITY_ASSURANCE,
       timestamp: new Date(),
       parameterId,
