@@ -15,6 +15,7 @@ export function getTimeScaleForIndex(
   index: number,
   thresholds: TimeScaleThresholds = DEFAULT_THRESHOLDS
 ): TimeScale {
+  void duration; // reserved for future use (e.g., adaptive thresholds)
   if (index <= thresholds.dailyUntil) return "daily";
   if (index <= thresholds.weeklyUntil) return "weekly";
   return "monthly";

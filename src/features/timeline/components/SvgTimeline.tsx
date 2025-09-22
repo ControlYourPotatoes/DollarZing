@@ -208,10 +208,8 @@ export function SvgTimeline({
       // Tick tiering
       const month = isMonthBoundary(index);
       const week = !month && (index + 1) % 7 === 0;
-      const day = !month && !week;
 
       // Heights by tier and scale
-      const base = 7;
       const monthH = 16;
       const weekH = scale === "daily" ? 12 : 10;
       const dayH = scale === "daily" ? 8 : scale === "weekly" ? 6 : 5;
