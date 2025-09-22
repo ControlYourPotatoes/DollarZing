@@ -3,39 +3,39 @@
     "day": 1,
     "date": "2025-01-01T00:00:00.000Z",
     "totals": {
-      "revenue": 12072,
-      "platformFees": 3014.4,
-      "charity": 1358.64,
-      "playerPayouts": 7698.96,
-      "gamesPlayed": 15072,
-      "activePlayers": 0,
-      "totalPlayers": 2000
+      "revenue": 11840.4,
+      "platformFees": 3020.4,
+      "charity": 1323,
+      "playerPayouts": 7497,
+      "gamesPlayed": 15102,
+      "activePlayers": 3,
+      "totalPlayers": 2099
     },
     "pool": {
-      "depositedToday": 10354,
-      "consumedToday": 30144,
+      "depositedToday": 10382,
+      "consumedToday": 30204,
       "outstanding": 3
     },
     "cashouts": {
-      "countToday": 2815,
-      "amountToday": 9057.6,
-      "cumulativeAmount": 9057.6,
-      "cumulativeCount": 2815
+      "countToday": 2827,
+      "amountToday": 8820,
+      "cumulativeAmount": 8820,
+      "cumulativeCount": 2827
     },
     "workflowNodes": [
       {
         "id": "platform",
         "label": "Platform Fees",
         "category": "platform",
-        "amount": 3014.4,
-        "cumulativeAmount": 3014.4,
-        "percentageOfTotal": 25,
+        "amount": 3020.4,
+        "cumulativeAmount": 3020.4,
+        "percentageOfTotal": 25.5,
         "layers": [
           {
             "id": "fees",
             "label": "Click Fees",
-            "amount": 3014.4,
-            "percentage": 25
+            "amount": 3020.4,
+            "percentage": 25.5
           }
         ]
       },
@@ -43,15 +43,15 @@
         "id": "charity",
         "label": "Charity",
         "category": "charity",
-        "amount": 1358.64,
-        "cumulativeAmount": 1358.64,
-        "percentageOfTotal": 11.3,
+        "amount": 1323,
+        "cumulativeAmount": 1323,
+        "percentageOfTotal": 11.2,
         "layers": [
           {
             "id": "donations",
             "label": "Donations",
-            "amount": 1358.64,
-            "percentage": 11.3
+            "amount": 1323,
+            "percentage": 11.2
           }
         ]
       },
@@ -59,15 +59,15 @@
         "id": "players",
         "label": "Player Payouts",
         "category": "players",
-        "amount": 7698.96,
-        "cumulativeAmount": 7698.96,
-        "percentageOfTotal": 63.8,
+        "amount": 7497,
+        "cumulativeAmount": 7497,
+        "percentageOfTotal": 63.3,
         "layers": [
           {
             "id": "winnings",
             "label": "Winnings",
-            "amount": 7698.96,
-            "percentage": 63.8
+            "amount": 7497,
+            "percentage": 63.3
           }
         ]
       }
@@ -77,36 +77,36 @@
         "id": "day-1",
         "label": "Day 1",
         "day": 1,
-        "cumulativePlatformFees": 3014.4,
-        "cumulativeCharity": 1358.64,
-        "cumulativePlayerPayouts": 7698.96,
-        "cumulativeRevenue": 12072,
-        "dailyPlatformFees": 3014.4,
-        "dailyCharity": 1358.64,
-        "dailyPlayerPayouts": 7698.96,
-        "dailyRevenue": 12072
+        "cumulativePlatformFees": 3020.4,
+        "cumulativeCharity": 1323,
+        "cumulativePlayerPayouts": 7497,
+        "cumulativeRevenue": 11840.4,
+        "dailyPlatformFees": 3020.4,
+        "dailyCharity": 1323,
+        "dailyPlayerPayouts": 7497,
+        "dailyRevenue": 11840.4
       }
     ],
     "charts": {
       "platformFees": {
         "day": 1,
-        "dailyValue": 3014.4,
-        "cumulativeValue": 3014.4
+        "dailyValue": 3020.4,
+        "cumulativeValue": 3020.4
       },
       "charity": {
         "day": 1,
-        "dailyValue": 1358.64,
-        "cumulativeValue": 1358.64
+        "dailyValue": 1323,
+        "cumulativeValue": 1323
       },
       "playerPayouts": {
         "day": 1,
-        "dailyValue": 7698.96,
-        "cumulativeValue": 7698.96
+        "dailyValue": 7497,
+        "cumulativeValue": 7497
       },
       "totalRevenue": {
         "day": 1,
-        "dailyValue": 12072,
-        "cumulativeValue": 12072
+        "dailyValue": 11840.4,
+        "cumulativeValue": 11840.4
       }
     }
   },
@@ -114,23 +114,23 @@
     "day": 2,
     "date": "2025-01-02T00:00:00.000Z",
     "totals": {
-      "revenue": 455.8,
-      "platformFees": 108.4,
-      "charity": 52.11,
-      "playerPayouts": 295.29,
-      "gamesPlayed": 542,
-      "activePlayers": 0,
-      "totalPlayers": 2000
+      "revenue": 403,
+      "platformFees": 102.4,
+      "charity": 45.09,
+      "playerPayouts": 255.51,
+      "gamesPlayed": 512,
+      "activePlayers": 3,
+      "totalPlayers": 2196
     },
     "pool": {
-      "depositedToday": 392,
-      "consumedToday": 1084,
-      "outstanding": 6
+      "depositedToday": 362,
+      "consumedToday": 1024,
+      "outstanding": 3
     },
     "cashouts": {
-      "countToday": 118,
-      "amountToday": 347.4,
-      "cumulativeAmount": 9405,
+      "countToday": 106,
+      "amountToday": 300.6,
+      "cumulativeAmount": 9120.6,
       "cumulativeCount": 2933
     },
     "workflowNodes": [
@@ -138,15 +138,15 @@
         "id": "platform",
         "label": "Platform Fees",
         "category": "platform",
-        "amount": 108.4,
+        "amount": 102.4,
         "cumulativeAmount": 3122.8,
-        "percentageOfTotal": 23.8,
+        "percentageOfTotal": 25.4,
         "layers": [
           {
             "id": "fees",
             "label": "Click Fees",
-            "amount": 108.4,
-            "percentage": 23.8
+            "amount": 102.4,
+            "percentage": 25.4
           }
         ]
       },
@@ -154,15 +154,15 @@
         "id": "charity",
         "label": "Charity",
         "category": "charity",
-        "amount": 52.11,
-        "cumulativeAmount": 1410.75,
-        "percentageOfTotal": 11.4,
+        "amount": 45.09,
+        "cumulativeAmount": 1368.09,
+        "percentageOfTotal": 11.2,
         "layers": [
           {
             "id": "donations",
             "label": "Donations",
-            "amount": 52.11,
-            "percentage": 11.4
+            "amount": 45.09,
+            "percentage": 11.2
           }
         ]
       },
@@ -170,15 +170,15 @@
         "id": "players",
         "label": "Player Payouts",
         "category": "players",
-        "amount": 295.29,
-        "cumulativeAmount": 7994.25,
-        "percentageOfTotal": 64.8,
+        "amount": 255.51,
+        "cumulativeAmount": 7752.51,
+        "percentageOfTotal": 63.4,
         "layers": [
           {
             "id": "winnings",
             "label": "Winnings",
-            "amount": 295.29,
-            "percentage": 64.8
+            "amount": 255.51,
+            "percentage": 63.4
           }
         ]
       }
@@ -189,35 +189,35 @@
         "label": "Day 2",
         "day": 2,
         "cumulativePlatformFees": 3122.8,
-        "cumulativeCharity": 1410.75,
-        "cumulativePlayerPayouts": 7994.25,
-        "cumulativeRevenue": 12527.8,
-        "dailyPlatformFees": 108.4,
-        "dailyCharity": 52.11,
-        "dailyPlayerPayouts": 295.29,
-        "dailyRevenue": 455.8
+        "cumulativeCharity": 1368.09,
+        "cumulativePlayerPayouts": 7752.51,
+        "cumulativeRevenue": 12243.4,
+        "dailyPlatformFees": 102.4,
+        "dailyCharity": 45.09,
+        "dailyPlayerPayouts": 255.51,
+        "dailyRevenue": 403
       }
     ],
     "charts": {
       "platformFees": {
         "day": 2,
-        "dailyValue": 108.4,
+        "dailyValue": 102.4,
         "cumulativeValue": 3122.8
       },
       "charity": {
         "day": 2,
-        "dailyValue": 52.11,
-        "cumulativeValue": 1410.75
+        "dailyValue": 45.09,
+        "cumulativeValue": 1368.09
       },
       "playerPayouts": {
         "day": 2,
-        "dailyValue": 295.29,
-        "cumulativeValue": 7994.25
+        "dailyValue": 255.51,
+        "cumulativeValue": 7752.51
       },
       "totalRevenue": {
         "day": 2,
-        "dailyValue": 455.8,
-        "cumulativeValue": 12527.8
+        "dailyValue": 403,
+        "cumulativeValue": 12243.4
       }
     }
   },
@@ -225,39 +225,39 @@
     "day": 3,
     "date": "2025-01-03T00:00:00.000Z",
     "totals": {
-      "revenue": 367.8,
-      "platformFees": 110.4,
-      "charity": 38.61,
-      "playerPayouts": 218.79,
-      "gamesPlayed": 552,
-      "activePlayers": 0,
-      "totalPlayers": 2000
+      "revenue": 375.4,
+      "platformFees": 92.8,
+      "charity": 42.39,
+      "playerPayouts": 240.21,
+      "gamesPlayed": 464,
+      "activePlayers": 6,
+      "totalPlayers": 2293
     },
     "pool": {
-      "depositedToday": 376,
-      "consumedToday": 1104,
-      "outstanding": 12
+      "depositedToday": 342,
+      "consumedToday": 928,
+      "outstanding": 6
     },
     "cashouts": {
-      "countToday": 94,
-      "amountToday": 257.4,
-      "cumulativeAmount": 9662.4,
-      "cumulativeCount": 3027
+      "countToday": 107,
+      "amountToday": 282.6,
+      "cumulativeAmount": 9403.2,
+      "cumulativeCount": 3040
     },
     "workflowNodes": [
       {
         "id": "platform",
         "label": "Platform Fees",
         "category": "platform",
-        "amount": 110.4,
-        "cumulativeAmount": 3233.2,
-        "percentageOfTotal": 30,
+        "amount": 92.8,
+        "cumulativeAmount": 3215.6,
+        "percentageOfTotal": 24.7,
         "layers": [
           {
             "id": "fees",
             "label": "Click Fees",
-            "amount": 110.4,
-            "percentage": 30
+            "amount": 92.8,
+            "percentage": 24.7
           }
         ]
       },
@@ -265,15 +265,15 @@
         "id": "charity",
         "label": "Charity",
         "category": "charity",
-        "amount": 38.61,
-        "cumulativeAmount": 1449.36,
-        "percentageOfTotal": 10.5,
+        "amount": 42.39,
+        "cumulativeAmount": 1410.48,
+        "percentageOfTotal": 11.3,
         "layers": [
           {
             "id": "donations",
             "label": "Donations",
-            "amount": 38.61,
-            "percentage": 10.5
+            "amount": 42.39,
+            "percentage": 11.3
           }
         ]
       },
@@ -281,15 +281,15 @@
         "id": "players",
         "label": "Player Payouts",
         "category": "players",
-        "amount": 218.79,
-        "cumulativeAmount": 8213.04,
-        "percentageOfTotal": 59.5,
+        "amount": 240.21,
+        "cumulativeAmount": 7992.72,
+        "percentageOfTotal": 64,
         "layers": [
           {
             "id": "winnings",
             "label": "Winnings",
-            "amount": 218.79,
-            "percentage": 59.5
+            "amount": 240.21,
+            "percentage": 64
           }
         ]
       }
@@ -299,36 +299,36 @@
         "id": "day-3",
         "label": "Day 3",
         "day": 3,
-        "cumulativePlatformFees": 3233.2,
-        "cumulativeCharity": 1449.36,
-        "cumulativePlayerPayouts": 8213.04,
-        "cumulativeRevenue": 12895.6,
-        "dailyPlatformFees": 110.4,
-        "dailyCharity": 38.61,
-        "dailyPlayerPayouts": 218.79,
-        "dailyRevenue": 367.8
+        "cumulativePlatformFees": 3215.6,
+        "cumulativeCharity": 1410.48,
+        "cumulativePlayerPayouts": 7992.72,
+        "cumulativeRevenue": 12618.8,
+        "dailyPlatformFees": 92.8,
+        "dailyCharity": 42.39,
+        "dailyPlayerPayouts": 240.21,
+        "dailyRevenue": 375.4
       }
     ],
     "charts": {
       "platformFees": {
         "day": 3,
-        "dailyValue": 110.4,
-        "cumulativeValue": 3233.2
+        "dailyValue": 92.8,
+        "cumulativeValue": 3215.6
       },
       "charity": {
         "day": 3,
-        "dailyValue": 38.61,
-        "cumulativeValue": 1449.36
+        "dailyValue": 42.39,
+        "cumulativeValue": 1410.48
       },
       "playerPayouts": {
         "day": 3,
-        "dailyValue": 218.79,
-        "cumulativeValue": 8213.04
+        "dailyValue": 240.21,
+        "cumulativeValue": 7992.72
       },
       "totalRevenue": {
         "day": 3,
-        "dailyValue": 367.8,
-        "cumulativeValue": 12895.6
+        "dailyValue": 375.4,
+        "cumulativeValue": 12618.8
       }
     }
   },
@@ -336,594 +336,39 @@
     "day": 4,
     "date": "2025-01-04T00:00:00.000Z",
     "totals": {
-      "revenue": 396.8,
-      "platformFees": 108.8,
-      "charity": 43.2,
-      "playerPayouts": 244.8,
-      "gamesPlayed": 544,
-      "activePlayers": 0,
-      "totalPlayers": 2000
-    },
-    "pool": {
-      "depositedToday": 390,
-      "consumedToday": 1088,
-      "outstanding": 20
-    },
-    "cashouts": {
-      "countToday": 110,
-      "amountToday": 288,
-      "cumulativeAmount": 9950.4,
-      "cumulativeCount": 3137
-    },
-    "workflowNodes": [
-      {
-        "id": "platform",
-        "label": "Platform Fees",
-        "category": "platform",
-        "amount": 108.8,
-        "cumulativeAmount": 3342,
-        "percentageOfTotal": 27.4,
-        "layers": [
-          {
-            "id": "fees",
-            "label": "Click Fees",
-            "amount": 108.8,
-            "percentage": 27.4
-          }
-        ]
-      },
-      {
-        "id": "charity",
-        "label": "Charity",
-        "category": "charity",
-        "amount": 43.2,
-        "cumulativeAmount": 1492.56,
-        "percentageOfTotal": 10.9,
-        "layers": [
-          {
-            "id": "donations",
-            "label": "Donations",
-            "amount": 43.2,
-            "percentage": 10.9
-          }
-        ]
-      },
-      {
-        "id": "players",
-        "label": "Player Payouts",
-        "category": "players",
-        "amount": 244.8,
-        "cumulativeAmount": 8457.84,
-        "percentageOfTotal": 61.7,
-        "layers": [
-          {
-            "id": "winnings",
-            "label": "Winnings",
-            "amount": 244.8,
-            "percentage": 61.7
-          }
-        ]
-      }
-    ],
-    "timelineTicks": [
-      {
-        "id": "day-4",
-        "label": "Day 4",
-        "day": 4,
-        "cumulativePlatformFees": 3342,
-        "cumulativeCharity": 1492.56,
-        "cumulativePlayerPayouts": 8457.84,
-        "cumulativeRevenue": 13292.4,
-        "dailyPlatformFees": 108.8,
-        "dailyCharity": 43.2,
-        "dailyPlayerPayouts": 244.8,
-        "dailyRevenue": 396.8
-      }
-    ],
-    "charts": {
-      "platformFees": {
-        "day": 4,
-        "dailyValue": 108.8,
-        "cumulativeValue": 3342
-      },
-      "charity": {
-        "day": 4,
-        "dailyValue": 43.2,
-        "cumulativeValue": 1492.56
-      },
-      "playerPayouts": {
-        "day": 4,
-        "dailyValue": 244.8,
-        "cumulativeValue": 8457.84
-      },
-      "totalRevenue": {
-        "day": 4,
-        "dailyValue": 396.8,
-        "cumulativeValue": 13292.4
-      }
-    }
-  },
-  {
-    "day": 5,
-    "date": "2025-01-05T00:00:00.000Z",
-    "totals": {
-      "revenue": 433.6,
-      "platformFees": 102.4,
-      "charity": 49.68,
-      "playerPayouts": 281.52,
-      "gamesPlayed": 512,
-      "activePlayers": 0,
-      "totalPlayers": 2000
-    },
-    "pool": {
-      "depositedToday": 378,
-      "consumedToday": 1024,
-      "outstanding": 32
-    },
-    "cashouts": {
-      "countToday": 110,
-      "amountToday": 331.2,
-      "cumulativeAmount": 10281.6,
-      "cumulativeCount": 3247
-    },
-    "workflowNodes": [
-      {
-        "id": "platform",
-        "label": "Platform Fees",
-        "category": "platform",
-        "amount": 102.4,
-        "cumulativeAmount": 3444.4,
-        "percentageOfTotal": 23.6,
-        "layers": [
-          {
-            "id": "fees",
-            "label": "Click Fees",
-            "amount": 102.4,
-            "percentage": 23.6
-          }
-        ]
-      },
-      {
-        "id": "charity",
-        "label": "Charity",
-        "category": "charity",
-        "amount": 49.68,
-        "cumulativeAmount": 1542.24,
-        "percentageOfTotal": 11.5,
-        "layers": [
-          {
-            "id": "donations",
-            "label": "Donations",
-            "amount": 49.68,
-            "percentage": 11.5
-          }
-        ]
-      },
-      {
-        "id": "players",
-        "label": "Player Payouts",
-        "category": "players",
-        "amount": 281.52,
-        "cumulativeAmount": 8739.36,
-        "percentageOfTotal": 64.9,
-        "layers": [
-          {
-            "id": "winnings",
-            "label": "Winnings",
-            "amount": 281.52,
-            "percentage": 64.9
-          }
-        ]
-      }
-    ],
-    "timelineTicks": [
-      {
-        "id": "day-5",
-        "label": "Day 5",
-        "day": 5,
-        "cumulativePlatformFees": 3444.4,
-        "cumulativeCharity": 1542.24,
-        "cumulativePlayerPayouts": 8739.36,
-        "cumulativeRevenue": 13726,
-        "dailyPlatformFees": 102.4,
-        "dailyCharity": 49.68,
-        "dailyPlayerPayouts": 281.52,
-        "dailyRevenue": 433.6
-      }
-    ],
-    "charts": {
-      "platformFees": {
-        "day": 5,
-        "dailyValue": 102.4,
-        "cumulativeValue": 3444.4
-      },
-      "charity": {
-        "day": 5,
-        "dailyValue": 49.68,
-        "cumulativeValue": 1542.24
-      },
-      "playerPayouts": {
-        "day": 5,
-        "dailyValue": 281.52,
-        "cumulativeValue": 8739.36
-      },
-      "totalRevenue": {
-        "day": 5,
-        "dailyValue": 433.6,
-        "cumulativeValue": 13726
-      }
-    }
-  },
-  {
-    "day": 6,
-    "date": "2025-01-06T00:00:00.000Z",
-    "totals": {
-      "revenue": 395.4,
-      "platformFees": 109.2,
-      "charity": 42.93,
-      "playerPayouts": 243.27,
-      "gamesPlayed": 546,
-      "activePlayers": 0,
-      "totalPlayers": 2000
-    },
-    "pool": {
-      "depositedToday": 400,
-      "consumedToday": 1092,
-      "outstanding": 46
-    },
-    "cashouts": {
-      "countToday": 113,
-      "amountToday": 286.2,
-      "cumulativeAmount": 10567.8,
-      "cumulativeCount": 3360
-    },
-    "workflowNodes": [
-      {
-        "id": "platform",
-        "label": "Platform Fees",
-        "category": "platform",
-        "amount": 109.2,
-        "cumulativeAmount": 3553.6,
-        "percentageOfTotal": 27.6,
-        "layers": [
-          {
-            "id": "fees",
-            "label": "Click Fees",
-            "amount": 109.2,
-            "percentage": 27.6
-          }
-        ]
-      },
-      {
-        "id": "charity",
-        "label": "Charity",
-        "category": "charity",
-        "amount": 42.93,
-        "cumulativeAmount": 1585.17,
-        "percentageOfTotal": 10.9,
-        "layers": [
-          {
-            "id": "donations",
-            "label": "Donations",
-            "amount": 42.93,
-            "percentage": 10.9
-          }
-        ]
-      },
-      {
-        "id": "players",
-        "label": "Player Payouts",
-        "category": "players",
-        "amount": 243.27,
-        "cumulativeAmount": 8982.63,
-        "percentageOfTotal": 61.5,
-        "layers": [
-          {
-            "id": "winnings",
-            "label": "Winnings",
-            "amount": 243.27,
-            "percentage": 61.5
-          }
-        ]
-      }
-    ],
-    "timelineTicks": [
-      {
-        "id": "day-6",
-        "label": "Day 6",
-        "day": 6,
-        "cumulativePlatformFees": 3553.6,
-        "cumulativeCharity": 1585.17,
-        "cumulativePlayerPayouts": 8982.63,
-        "cumulativeRevenue": 14121.4,
-        "dailyPlatformFees": 109.2,
-        "dailyCharity": 42.93,
-        "dailyPlayerPayouts": 243.27,
-        "dailyRevenue": 395.4
-      }
-    ],
-    "charts": {
-      "platformFees": {
-        "day": 6,
-        "dailyValue": 109.2,
-        "cumulativeValue": 3553.6
-      },
-      "charity": {
-        "day": 6,
-        "dailyValue": 42.93,
-        "cumulativeValue": 1585.17
-      },
-      "playerPayouts": {
-        "day": 6,
-        "dailyValue": 243.27,
-        "cumulativeValue": 8982.63
-      },
-      "totalRevenue": {
-        "day": 6,
-        "dailyValue": 395.4,
-        "cumulativeValue": 14121.4
-      }
-    }
-  },
-  {
-    "day": 7,
-    "date": "2025-01-07T00:00:00.000Z",
-    "totals": {
-      "revenue": 415,
-      "platformFees": 103.6,
-      "charity": 46.71,
-      "playerPayouts": 264.69,
-      "gamesPlayed": 518,
-      "activePlayers": 0,
-      "totalPlayers": 2000
-    },
-    "pool": {
-      "depositedToday": 378,
-      "consumedToday": 1036,
-      "outstanding": 62
-    },
-    "cashouts": {
-      "countToday": 103,
-      "amountToday": 311.4,
-      "cumulativeAmount": 10879.2,
-      "cumulativeCount": 3463
-    },
-    "workflowNodes": [
-      {
-        "id": "platform",
-        "label": "Platform Fees",
-        "category": "platform",
-        "amount": 103.6,
-        "cumulativeAmount": 3657.2,
-        "percentageOfTotal": 25,
-        "layers": [
-          {
-            "id": "fees",
-            "label": "Click Fees",
-            "amount": 103.6,
-            "percentage": 25
-          }
-        ]
-      },
-      {
-        "id": "charity",
-        "label": "Charity",
-        "category": "charity",
-        "amount": 46.71,
-        "cumulativeAmount": 1631.88,
-        "percentageOfTotal": 11.3,
-        "layers": [
-          {
-            "id": "donations",
-            "label": "Donations",
-            "amount": 46.71,
-            "percentage": 11.3
-          }
-        ]
-      },
-      {
-        "id": "players",
-        "label": "Player Payouts",
-        "category": "players",
-        "amount": 264.69,
-        "cumulativeAmount": 9247.32,
-        "percentageOfTotal": 63.8,
-        "layers": [
-          {
-            "id": "winnings",
-            "label": "Winnings",
-            "amount": 264.69,
-            "percentage": 63.8
-          }
-        ]
-      }
-    ],
-    "timelineTicks": [
-      {
-        "id": "day-7",
-        "label": "Day 7",
-        "day": 7,
-        "cumulativePlatformFees": 3657.2,
-        "cumulativeCharity": 1631.88,
-        "cumulativePlayerPayouts": 9247.32,
-        "cumulativeRevenue": 14536.4,
-        "dailyPlatformFees": 103.6,
-        "dailyCharity": 46.71,
-        "dailyPlayerPayouts": 264.69,
-        "dailyRevenue": 415
-      }
-    ],
-    "charts": {
-      "platformFees": {
-        "day": 7,
-        "dailyValue": 103.6,
-        "cumulativeValue": 3657.2
-      },
-      "charity": {
-        "day": 7,
-        "dailyValue": 46.71,
-        "cumulativeValue": 1631.88
-      },
-      "playerPayouts": {
-        "day": 7,
-        "dailyValue": 264.69,
-        "cumulativeValue": 9247.32
-      },
-      "totalRevenue": {
-        "day": 7,
-        "dailyValue": 415,
-        "cumulativeValue": 14536.4
-      }
-    }
-  },
-  {
-    "day": 8,
-    "date": "2025-01-08T00:00:00.000Z",
-    "totals": {
-      "revenue": 386.2,
-      "platformFees": 107.2,
-      "charity": 41.85,
-      "playerPayouts": 237.15,
-      "gamesPlayed": 536,
-      "activePlayers": 0,
-      "totalPlayers": 2000
-    },
-    "pool": {
-      "depositedToday": 386,
-      "consumedToday": 1072,
-      "outstanding": 81
-    },
-    "cashouts": {
-      "countToday": 99,
-      "amountToday": 279,
-      "cumulativeAmount": 11158.2,
-      "cumulativeCount": 3562
-    },
-    "workflowNodes": [
-      {
-        "id": "platform",
-        "label": "Platform Fees",
-        "category": "platform",
-        "amount": 107.2,
-        "cumulativeAmount": 3764.4,
-        "percentageOfTotal": 27.8,
-        "layers": [
-          {
-            "id": "fees",
-            "label": "Click Fees",
-            "amount": 107.2,
-            "percentage": 27.8
-          }
-        ]
-      },
-      {
-        "id": "charity",
-        "label": "Charity",
-        "category": "charity",
-        "amount": 41.85,
-        "cumulativeAmount": 1673.73,
-        "percentageOfTotal": 10.8,
-        "layers": [
-          {
-            "id": "donations",
-            "label": "Donations",
-            "amount": 41.85,
-            "percentage": 10.8
-          }
-        ]
-      },
-      {
-        "id": "players",
-        "label": "Player Payouts",
-        "category": "players",
-        "amount": 237.15,
-        "cumulativeAmount": 9484.47,
-        "percentageOfTotal": 61.4,
-        "layers": [
-          {
-            "id": "winnings",
-            "label": "Winnings",
-            "amount": 237.15,
-            "percentage": 61.4
-          }
-        ]
-      }
-    ],
-    "timelineTicks": [
-      {
-        "id": "day-8",
-        "label": "Day 8",
-        "day": 8,
-        "cumulativePlatformFees": 3764.4,
-        "cumulativeCharity": 1673.73,
-        "cumulativePlayerPayouts": 9484.47,
-        "cumulativeRevenue": 14922.6,
-        "dailyPlatformFees": 107.2,
-        "dailyCharity": 41.85,
-        "dailyPlayerPayouts": 237.15,
-        "dailyRevenue": 386.2
-      }
-    ],
-    "charts": {
-      "platformFees": {
-        "day": 8,
-        "dailyValue": 107.2,
-        "cumulativeValue": 3764.4
-      },
-      "charity": {
-        "day": 8,
-        "dailyValue": 41.85,
-        "cumulativeValue": 1673.73
-      },
-      "playerPayouts": {
-        "day": 8,
-        "dailyValue": 237.15,
-        "cumulativeValue": 9484.47
-      },
-      "totalRevenue": {
-        "day": 8,
-        "dailyValue": 386.2,
-        "cumulativeValue": 14922.6
-      }
-    }
-  },
-  {
-    "day": 9,
-    "date": "2025-01-09T00:00:00.000Z",
-    "totals": {
-      "revenue": 500.6,
-      "platformFees": 102.8,
+      "revenue": 501.8,
+      "platformFees": 104,
       "charity": 59.67,
       "playerPayouts": 338.13,
-      "gamesPlayed": 514,
-      "activePlayers": 0,
-      "totalPlayers": 2000
+      "gamesPlayed": 520,
+      "activePlayers": 1,
+      "totalPlayers": 2387
     },
     "pool": {
-      "depositedToday": 392,
-      "consumedToday": 1028,
-      "outstanding": 102
+      "depositedToday": 348,
+      "consumedToday": 1040,
+      "outstanding": 1
     },
     "cashouts": {
-      "countToday": 114,
+      "countToday": 93,
       "amountToday": 397.8,
-      "cumulativeAmount": 11556,
-      "cumulativeCount": 3676
+      "cumulativeAmount": 9801,
+      "cumulativeCount": 3133
     },
     "workflowNodes": [
       {
         "id": "platform",
         "label": "Platform Fees",
         "category": "platform",
-        "amount": 102.8,
-        "cumulativeAmount": 3867.2,
-        "percentageOfTotal": 20.5,
+        "amount": 104,
+        "cumulativeAmount": 3319.6,
+        "percentageOfTotal": 20.7,
         "layers": [
           {
             "id": "fees",
             "label": "Click Fees",
-            "amount": 102.8,
-            "percentage": 20.5
+            "amount": 104,
+            "percentage": 20.7
           }
         ]
       },
@@ -932,7 +377,7 @@
         "label": "Charity",
         "category": "charity",
         "amount": 59.67,
-        "cumulativeAmount": 1733.4,
+        "cumulativeAmount": 1470.15,
         "percentageOfTotal": 11.9,
         "layers": [
           {
@@ -948,14 +393,569 @@
         "label": "Player Payouts",
         "category": "players",
         "amount": 338.13,
-        "cumulativeAmount": 9822.6,
-        "percentageOfTotal": 67.5,
+        "cumulativeAmount": 8330.85,
+        "percentageOfTotal": 67.4,
         "layers": [
           {
             "id": "winnings",
             "label": "Winnings",
             "amount": 338.13,
-            "percentage": 67.5
+            "percentage": 67.4
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-4",
+        "label": "Day 4",
+        "day": 4,
+        "cumulativePlatformFees": 3319.6,
+        "cumulativeCharity": 1470.15,
+        "cumulativePlayerPayouts": 8330.85,
+        "cumulativeRevenue": 13120.6,
+        "dailyPlatformFees": 104,
+        "dailyCharity": 59.67,
+        "dailyPlayerPayouts": 338.13,
+        "dailyRevenue": 501.8
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 4,
+        "dailyValue": 104,
+        "cumulativeValue": 3319.6
+      },
+      "charity": {
+        "day": 4,
+        "dailyValue": 59.67,
+        "cumulativeValue": 1470.15
+      },
+      "playerPayouts": {
+        "day": 4,
+        "dailyValue": 338.13,
+        "cumulativeValue": 8330.85
+      },
+      "totalRevenue": {
+        "day": 4,
+        "dailyValue": 501.8,
+        "cumulativeValue": 13120.6
+      }
+    }
+  },
+  {
+    "day": 5,
+    "date": "2025-01-05T00:00:00.000Z",
+    "totals": {
+      "revenue": 354.6,
+      "platformFees": 97.2,
+      "charity": 38.61,
+      "playerPayouts": 218.79,
+      "gamesPlayed": 486,
+      "activePlayers": 3,
+      "totalPlayers": 2486
+    },
+    "pool": {
+      "depositedToday": 340,
+      "consumedToday": 972,
+      "outstanding": 4
+    },
+    "cashouts": {
+      "countToday": 94,
+      "amountToday": 257.4,
+      "cumulativeAmount": 10058.4,
+      "cumulativeCount": 3227
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 97.2,
+        "cumulativeAmount": 3416.8,
+        "percentageOfTotal": 27.4,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 97.2,
+            "percentage": 27.4
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 38.61,
+        "cumulativeAmount": 1508.76,
+        "percentageOfTotal": 10.9,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 38.61,
+            "percentage": 10.9
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 218.79,
+        "cumulativeAmount": 8549.64,
+        "percentageOfTotal": 61.7,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 218.79,
+            "percentage": 61.7
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-5",
+        "label": "Day 5",
+        "day": 5,
+        "cumulativePlatformFees": 3416.8,
+        "cumulativeCharity": 1508.76,
+        "cumulativePlayerPayouts": 8549.64,
+        "cumulativeRevenue": 13475.2,
+        "dailyPlatformFees": 97.2,
+        "dailyCharity": 38.61,
+        "dailyPlayerPayouts": 218.79,
+        "dailyRevenue": 354.6
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 5,
+        "dailyValue": 97.2,
+        "cumulativeValue": 3416.8
+      },
+      "charity": {
+        "day": 5,
+        "dailyValue": 38.61,
+        "cumulativeValue": 1508.76
+      },
+      "playerPayouts": {
+        "day": 5,
+        "dailyValue": 218.79,
+        "cumulativeValue": 8549.64
+      },
+      "totalRevenue": {
+        "day": 5,
+        "dailyValue": 354.6,
+        "cumulativeValue": 13475.2
+      }
+    }
+  },
+  {
+    "day": 6,
+    "date": "2025-01-06T00:00:00.000Z",
+    "totals": {
+      "revenue": 379.4,
+      "platformFees": 107.6,
+      "charity": 40.77,
+      "playerPayouts": 231.03,
+      "gamesPlayed": 538,
+      "activePlayers": 3,
+      "totalPlayers": 2583
+    },
+    "pool": {
+      "depositedToday": 380,
+      "consumedToday": 1076,
+      "outstanding": 3
+    },
+    "cashouts": {
+      "countToday": 112,
+      "amountToday": 271.8,
+      "cumulativeAmount": 10330.2,
+      "cumulativeCount": 3339
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 107.6,
+        "cumulativeAmount": 3524.4,
+        "percentageOfTotal": 28.4,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 107.6,
+            "percentage": 28.4
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 40.77,
+        "cumulativeAmount": 1549.53,
+        "percentageOfTotal": 10.7,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 40.77,
+            "percentage": 10.7
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 231.03,
+        "cumulativeAmount": 8780.67,
+        "percentageOfTotal": 60.9,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 231.03,
+            "percentage": 60.9
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-6",
+        "label": "Day 6",
+        "day": 6,
+        "cumulativePlatformFees": 3524.4,
+        "cumulativeCharity": 1549.53,
+        "cumulativePlayerPayouts": 8780.67,
+        "cumulativeRevenue": 13854.6,
+        "dailyPlatformFees": 107.6,
+        "dailyCharity": 40.77,
+        "dailyPlayerPayouts": 231.03,
+        "dailyRevenue": 379.4
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 6,
+        "dailyValue": 107.6,
+        "cumulativeValue": 3524.4
+      },
+      "charity": {
+        "day": 6,
+        "dailyValue": 40.77,
+        "cumulativeValue": 1549.53
+      },
+      "playerPayouts": {
+        "day": 6,
+        "dailyValue": 231.03,
+        "cumulativeValue": 8780.67
+      },
+      "totalRevenue": {
+        "day": 6,
+        "dailyValue": 379.4,
+        "cumulativeValue": 13854.6
+      }
+    }
+  },
+  {
+    "day": 7,
+    "date": "2025-01-07T00:00:00.000Z",
+    "totals": {
+      "revenue": 389.8,
+      "platformFees": 110.8,
+      "charity": 41.85,
+      "playerPayouts": 237.15,
+      "gamesPlayed": 554,
+      "activePlayers": 4,
+      "totalPlayers": 2680
+    },
+    "pool": {
+      "depositedToday": 374,
+      "consumedToday": 1108,
+      "outstanding": 4
+    },
+    "cashouts": {
+      "countToday": 96,
+      "amountToday": 279,
+      "cumulativeAmount": 10609.2,
+      "cumulativeCount": 3435
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 110.8,
+        "cumulativeAmount": 3635.2,
+        "percentageOfTotal": 28.4,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 110.8,
+            "percentage": 28.4
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 41.85,
+        "cumulativeAmount": 1591.38,
+        "percentageOfTotal": 10.7,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 41.85,
+            "percentage": 10.7
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 237.15,
+        "cumulativeAmount": 9017.82,
+        "percentageOfTotal": 60.8,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 237.15,
+            "percentage": 60.8
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-7",
+        "label": "Day 7",
+        "day": 7,
+        "cumulativePlatformFees": 3635.2,
+        "cumulativeCharity": 1591.38,
+        "cumulativePlayerPayouts": 9017.82,
+        "cumulativeRevenue": 14244.4,
+        "dailyPlatformFees": 110.8,
+        "dailyCharity": 41.85,
+        "dailyPlayerPayouts": 237.15,
+        "dailyRevenue": 389.8
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 7,
+        "dailyValue": 110.8,
+        "cumulativeValue": 3635.2
+      },
+      "charity": {
+        "day": 7,
+        "dailyValue": 41.85,
+        "cumulativeValue": 1591.38
+      },
+      "playerPayouts": {
+        "day": 7,
+        "dailyValue": 237.15,
+        "cumulativeValue": 9017.82
+      },
+      "totalRevenue": {
+        "day": 7,
+        "dailyValue": 389.8,
+        "cumulativeValue": 14244.4
+      }
+    }
+  },
+  {
+    "day": 8,
+    "date": "2025-01-08T00:00:00.000Z",
+    "totals": {
+      "revenue": 406.8,
+      "platformFees": 111.6,
+      "charity": 44.28,
+      "playerPayouts": 250.92,
+      "gamesPlayed": 558,
+      "activePlayers": 2,
+      "totalPlayers": 2776
+    },
+    "pool": {
+      "depositedToday": 388,
+      "consumedToday": 1116,
+      "outstanding": 2
+    },
+    "cashouts": {
+      "countToday": 111,
+      "amountToday": 295.2,
+      "cumulativeAmount": 10904.4,
+      "cumulativeCount": 3546
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 111.6,
+        "cumulativeAmount": 3746.8,
+        "percentageOfTotal": 27.4,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 111.6,
+            "percentage": 27.4
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 44.28,
+        "cumulativeAmount": 1635.66,
+        "percentageOfTotal": 10.9,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 44.28,
+            "percentage": 10.9
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 250.92,
+        "cumulativeAmount": 9268.74,
+        "percentageOfTotal": 61.7,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 250.92,
+            "percentage": 61.7
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-8",
+        "label": "Day 8",
+        "day": 8,
+        "cumulativePlatformFees": 3746.8,
+        "cumulativeCharity": 1635.66,
+        "cumulativePlayerPayouts": 9268.74,
+        "cumulativeRevenue": 14651.2,
+        "dailyPlatformFees": 111.6,
+        "dailyCharity": 44.28,
+        "dailyPlayerPayouts": 250.92,
+        "dailyRevenue": 406.8
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 8,
+        "dailyValue": 111.6,
+        "cumulativeValue": 3746.8
+      },
+      "charity": {
+        "day": 8,
+        "dailyValue": 44.28,
+        "cumulativeValue": 1635.66
+      },
+      "playerPayouts": {
+        "day": 8,
+        "dailyValue": 250.92,
+        "cumulativeValue": 9268.74
+      },
+      "totalRevenue": {
+        "day": 8,
+        "dailyValue": 406.8,
+        "cumulativeValue": 14651.2
+      }
+    }
+  },
+  {
+    "day": 9,
+    "date": "2025-01-09T00:00:00.000Z",
+    "totals": {
+      "revenue": 347,
+      "platformFees": 100.4,
+      "charity": 36.99,
+      "playerPayouts": 209.61,
+      "gamesPlayed": 502,
+      "activePlayers": 5,
+      "totalPlayers": 2874
+    },
+    "pool": {
+      "depositedToday": 356,
+      "consumedToday": 1004,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 102,
+      "amountToday": 246.6,
+      "cumulativeAmount": 11151,
+      "cumulativeCount": 3648
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 100.4,
+        "cumulativeAmount": 3847.2,
+        "percentageOfTotal": 28.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 100.4,
+            "percentage": 28.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 36.99,
+        "cumulativeAmount": 1672.65,
+        "percentageOfTotal": 10.7,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 36.99,
+            "percentage": 10.7
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 209.61,
+        "cumulativeAmount": 9478.35,
+        "percentageOfTotal": 60.4,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 209.61,
+            "percentage": 60.4
           }
         ]
       }
@@ -965,36 +965,36 @@
         "id": "day-9",
         "label": "Day 9",
         "day": 9,
-        "cumulativePlatformFees": 3867.2,
-        "cumulativeCharity": 1733.4,
-        "cumulativePlayerPayouts": 9822.6,
-        "cumulativeRevenue": 15423.2,
-        "dailyPlatformFees": 102.8,
-        "dailyCharity": 59.67,
-        "dailyPlayerPayouts": 338.13,
-        "dailyRevenue": 500.6
+        "cumulativePlatformFees": 3847.2,
+        "cumulativeCharity": 1672.65,
+        "cumulativePlayerPayouts": 9478.35,
+        "cumulativeRevenue": 14998.2,
+        "dailyPlatformFees": 100.4,
+        "dailyCharity": 36.99,
+        "dailyPlayerPayouts": 209.61,
+        "dailyRevenue": 347
       }
     ],
     "charts": {
       "platformFees": {
         "day": 9,
-        "dailyValue": 102.8,
-        "cumulativeValue": 3867.2
+        "dailyValue": 100.4,
+        "cumulativeValue": 3847.2
       },
       "charity": {
         "day": 9,
-        "dailyValue": 59.67,
-        "cumulativeValue": 1733.4
+        "dailyValue": 36.99,
+        "cumulativeValue": 1672.65
       },
       "playerPayouts": {
         "day": 9,
-        "dailyValue": 338.13,
-        "cumulativeValue": 9822.6
+        "dailyValue": 209.61,
+        "cumulativeValue": 9478.35
       },
       "totalRevenue": {
         "day": 9,
-        "dailyValue": 500.6,
-        "cumulativeValue": 15423.2
+        "dailyValue": 347,
+        "cumulativeValue": 14998.2
       }
     }
   },
@@ -1002,39 +1002,39 @@
     "day": 10,
     "date": "2025-01-10T00:00:00.000Z",
     "totals": {
-      "revenue": 354.6,
-      "platformFees": 108,
-      "charity": 36.99,
-      "playerPayouts": 209.61,
-      "gamesPlayed": 540,
-      "activePlayers": 0,
-      "totalPlayers": 2000
+      "revenue": 471.8,
+      "platformFees": 110,
+      "charity": 54.27,
+      "playerPayouts": 307.53,
+      "gamesPlayed": 550,
+      "activePlayers": 4,
+      "totalPlayers": 2969
     },
     "pool": {
-      "depositedToday": 388,
-      "consumedToday": 1080,
-      "outstanding": 127
+      "depositedToday": 376,
+      "consumedToday": 1100,
+      "outstanding": 4
     },
     "cashouts": {
-      "countToday": 93,
-      "amountToday": 246.6,
-      "cumulativeAmount": 11802.6,
-      "cumulativeCount": 3769
+      "countToday": 102,
+      "amountToday": 361.8,
+      "cumulativeAmount": 11512.8,
+      "cumulativeCount": 3750
     },
     "workflowNodes": [
       {
         "id": "platform",
         "label": "Platform Fees",
         "category": "platform",
-        "amount": 108,
-        "cumulativeAmount": 3975.2,
-        "percentageOfTotal": 30.5,
+        "amount": 110,
+        "cumulativeAmount": 3957.2,
+        "percentageOfTotal": 23.3,
         "layers": [
           {
             "id": "fees",
             "label": "Click Fees",
-            "amount": 108,
-            "percentage": 30.5
+            "amount": 110,
+            "percentage": 23.3
           }
         ]
       },
@@ -1042,15 +1042,15 @@
         "id": "charity",
         "label": "Charity",
         "category": "charity",
-        "amount": 36.99,
-        "cumulativeAmount": 1770.39,
-        "percentageOfTotal": 10.4,
+        "amount": 54.27,
+        "cumulativeAmount": 1726.92,
+        "percentageOfTotal": 11.5,
         "layers": [
           {
             "id": "donations",
             "label": "Donations",
-            "amount": 36.99,
-            "percentage": 10.4
+            "amount": 54.27,
+            "percentage": 11.5
           }
         ]
       },
@@ -1058,15 +1058,15 @@
         "id": "players",
         "label": "Player Payouts",
         "category": "players",
-        "amount": 209.61,
-        "cumulativeAmount": 10032.21,
-        "percentageOfTotal": 59.1,
+        "amount": 307.53,
+        "cumulativeAmount": 9785.88,
+        "percentageOfTotal": 65.2,
         "layers": [
           {
             "id": "winnings",
             "label": "Winnings",
-            "amount": 209.61,
-            "percentage": 59.1
+            "amount": 307.53,
+            "percentage": 65.2
           }
         ]
       }
@@ -1076,36 +1076,36 @@
         "id": "day-10",
         "label": "Day 10",
         "day": 10,
-        "cumulativePlatformFees": 3975.2,
-        "cumulativeCharity": 1770.39,
-        "cumulativePlayerPayouts": 10032.21,
-        "cumulativeRevenue": 15777.8,
-        "dailyPlatformFees": 108,
-        "dailyCharity": 36.99,
-        "dailyPlayerPayouts": 209.61,
-        "dailyRevenue": 354.6
+        "cumulativePlatformFees": 3957.2,
+        "cumulativeCharity": 1726.92,
+        "cumulativePlayerPayouts": 9785.88,
+        "cumulativeRevenue": 15470,
+        "dailyPlatformFees": 110,
+        "dailyCharity": 54.27,
+        "dailyPlayerPayouts": 307.53,
+        "dailyRevenue": 471.8
       }
     ],
     "charts": {
       "platformFees": {
         "day": 10,
-        "dailyValue": 108,
-        "cumulativeValue": 3975.2
+        "dailyValue": 110,
+        "cumulativeValue": 3957.2
       },
       "charity": {
         "day": 10,
-        "dailyValue": 36.99,
-        "cumulativeValue": 1770.39
+        "dailyValue": 54.27,
+        "cumulativeValue": 1726.92
       },
       "playerPayouts": {
         "day": 10,
-        "dailyValue": 209.61,
-        "cumulativeValue": 10032.21
+        "dailyValue": 307.53,
+        "cumulativeValue": 9785.88
       },
       "totalRevenue": {
         "day": 10,
-        "dailyValue": 354.6,
-        "cumulativeValue": 15777.8
+        "dailyValue": 471.8,
+        "cumulativeValue": 15470
       }
     }
   }

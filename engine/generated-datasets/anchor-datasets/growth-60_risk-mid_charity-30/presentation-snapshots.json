@@ -1,6 +1,6 @@
 {
   "scenarioId": "growth-60_risk-mid_charity-30",
-  "generatedAt": "2025-09-22T03:41:20.978Z",
+  "generatedAt": "2025-09-22T03:58:42.118Z",
   "parameters": {
     "adoptionRate": "high",
     "cashOutStrategy": "mid",
@@ -12,50 +12,50 @@
     "charityShare": 1
   },
   "totals": {
-    "players": 2000,
-    "activePlayers": 0,
-    "cumulativeRevenue": 15777.8,
-    "cumulativeCharity": 1770.39,
-    "cumulativeFees": 3975.2,
-    "cumulativePayouts": 10032.21
+    "players": 2969,
+    "activePlayers": 4,
+    "cumulativeRevenue": 15470,
+    "cumulativeCharity": 1726.92,
+    "cumulativeFees": 3957.2,
+    "cumulativePayouts": 9785.88
   },
   "days": [
     {
       "dayIndex": 0,
       "date": "2025-01-01T00:00:00.000Z",
       "summary": {
-        "dailyRevenue": 12072,
-        "dailyCharity": 1358.64,
-        "dailyFees": 3014.4,
-        "dailyPayouts": 7698.96,
-        "netChange": 4373.04
+        "dailyRevenue": 11840.4,
+        "dailyCharity": 1323,
+        "dailyFees": 3020.4,
+        "dailyPayouts": 7497,
+        "netChange": 4343.4
       },
       "timelineTick": {
         "label": "Day 1",
-        "cumulativeRevenue": 12072,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3014.4,
-        "cumulativeCharity": 1358.64,
-        "cumulativePayouts": 7698.96
+        "cumulativeRevenue": 11840.4,
+        "cumulativePlayers": 2099,
+        "cumulativeFees": 3020.4,
+        "cumulativeCharity": 1323,
+        "cumulativePayouts": 7497
       },
       "financialWorkflow": {
         "nodes": [
           {
             "id": "total",
             "label": "Total Revenue",
-            "aggregateValue": 12072,
+            "aggregateValue": 11840.4,
             "progress": 1
           },
           {
             "id": "platform",
             "label": "Platform Fees",
-            "aggregateValue": 3014.4,
-            "progress": 0.25,
+            "aggregateValue": 3020.4,
+            "progress": 0.255,
             "layers": [
               {
                 "id": "fees",
                 "label": "Click Fees",
-                "value": 3014.4,
+                "value": 3020.4,
                 "color": "#38bdf8"
               }
             ]
@@ -63,13 +63,13 @@
           {
             "id": "charity",
             "label": "Charity",
-            "aggregateValue": 1358.64,
-            "progress": 0.113,
+            "aggregateValue": 1323,
+            "progress": 0.11199999999999999,
             "layers": [
               {
                 "id": "donations",
                 "label": "Donations",
-                "value": 1358.64,
+                "value": 1323,
                 "color": "#f472b6"
               }
             ]
@@ -77,13 +77,13 @@
           {
             "id": "players",
             "label": "Player Payouts",
-            "aggregateValue": 7698.96,
-            "progress": 0.638,
+            "aggregateValue": 7497,
+            "progress": 0.633,
             "layers": [
               {
                 "id": "winnings",
                 "label": "Winnings",
-                "value": 7698.96,
+                "value": 7497,
                 "color": "#34d399"
               }
             ]
@@ -94,19 +94,19 @@
             "id": "total->platform",
             "source": "total",
             "target": "platform",
-            "value": 3014.4
+            "value": 3020.4
           },
           {
             "id": "total->charity",
             "source": "total",
             "target": "charity",
-            "value": 1358.64
+            "value": 1323
           },
           {
             "id": "total->players",
             "source": "total",
             "target": "players",
-            "value": 7698.96
+            "value": 7497
           }
         ]
       },
@@ -114,33 +114,33 @@
         "distributionSeries": [
           {
             "category": "platformFees",
-            "value": 3014.4
+            "value": 3020.4
           },
           {
             "category": "charity",
-            "value": 1358.64
+            "value": 1323
           },
           {
             "category": "playerPayouts",
-            "value": 7698.96
+            "value": 7497
           }
         ],
         "accumulationSeries": [
           {
             "metric": "platformFees",
-            "cumulative": 3014.4
+            "cumulative": 3020.4
           },
           {
             "metric": "charity",
-            "cumulative": 1358.64
+            "cumulative": 1323
           },
           {
             "metric": "playerPayouts",
-            "cumulative": 7698.96
+            "cumulative": 7497
           },
           {
             "metric": "revenue",
-            "cumulative": 12072
+            "cumulative": 11840.4
           }
         ]
       }
@@ -149,408 +149,33 @@
       "dayIndex": 1,
       "date": "2025-01-02T00:00:00.000Z",
       "summary": {
-        "dailyRevenue": 455.8,
-        "dailyCharity": 52.11,
-        "dailyFees": 108.4,
-        "dailyPayouts": 295.29,
-        "netChange": 160.51
+        "dailyRevenue": 403,
+        "dailyCharity": 45.09,
+        "dailyFees": 102.4,
+        "dailyPayouts": 255.51,
+        "netChange": 147.49
       },
       "timelineTick": {
         "label": "Day 2",
-        "cumulativeRevenue": 12527.8,
-        "cumulativePlayers": 2000,
+        "cumulativeRevenue": 12243.4,
+        "cumulativePlayers": 2196,
         "cumulativeFees": 3122.8,
-        "cumulativeCharity": 1410.75,
-        "cumulativePayouts": 7994.25
+        "cumulativeCharity": 1368.09,
+        "cumulativePayouts": 7752.51
       },
       "financialWorkflow": {
         "nodes": [
           {
             "id": "total",
             "label": "Total Revenue",
-            "aggregateValue": 455.8,
-            "progress": 1
-          },
-          {
-            "id": "platform",
-            "label": "Platform Fees",
-            "aggregateValue": 108.4,
-            "progress": 0.23800000000000002,
-            "layers": [
-              {
-                "id": "fees",
-                "label": "Click Fees",
-                "value": 108.4,
-                "color": "#38bdf8"
-              }
-            ]
-          },
-          {
-            "id": "charity",
-            "label": "Charity",
-            "aggregateValue": 52.11,
-            "progress": 0.114,
-            "layers": [
-              {
-                "id": "donations",
-                "label": "Donations",
-                "value": 52.11,
-                "color": "#f472b6"
-              }
-            ]
-          },
-          {
-            "id": "players",
-            "label": "Player Payouts",
-            "aggregateValue": 295.29,
-            "progress": 0.648,
-            "layers": [
-              {
-                "id": "winnings",
-                "label": "Winnings",
-                "value": 295.29,
-                "color": "#34d399"
-              }
-            ]
-          }
-        ],
-        "links": [
-          {
-            "id": "total->platform",
-            "source": "total",
-            "target": "platform",
-            "value": 108.4
-          },
-          {
-            "id": "total->charity",
-            "source": "total",
-            "target": "charity",
-            "value": 52.11
-          },
-          {
-            "id": "total->players",
-            "source": "total",
-            "target": "players",
-            "value": 295.29
-          }
-        ]
-      },
-      "charts": {
-        "distributionSeries": [
-          {
-            "category": "platformFees",
-            "value": 108.4
-          },
-          {
-            "category": "charity",
-            "value": 52.11
-          },
-          {
-            "category": "playerPayouts",
-            "value": 295.29
-          }
-        ],
-        "accumulationSeries": [
-          {
-            "metric": "platformFees",
-            "cumulative": 3122.8
-          },
-          {
-            "metric": "charity",
-            "cumulative": 1410.75
-          },
-          {
-            "metric": "playerPayouts",
-            "cumulative": 7994.25
-          },
-          {
-            "metric": "revenue",
-            "cumulative": 12527.8
-          }
-        ]
-      }
-    },
-    {
-      "dayIndex": 2,
-      "date": "2025-01-03T00:00:00.000Z",
-      "summary": {
-        "dailyRevenue": 367.8,
-        "dailyCharity": 38.61,
-        "dailyFees": 110.4,
-        "dailyPayouts": 218.79,
-        "netChange": 149.01
-      },
-      "timelineTick": {
-        "label": "Day 3",
-        "cumulativeRevenue": 12895.6,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3233.2,
-        "cumulativeCharity": 1449.36,
-        "cumulativePayouts": 8213.04
-      },
-      "financialWorkflow": {
-        "nodes": [
-          {
-            "id": "total",
-            "label": "Total Revenue",
-            "aggregateValue": 367.8,
-            "progress": 1
-          },
-          {
-            "id": "platform",
-            "label": "Platform Fees",
-            "aggregateValue": 110.4,
-            "progress": 0.3,
-            "layers": [
-              {
-                "id": "fees",
-                "label": "Click Fees",
-                "value": 110.4,
-                "color": "#38bdf8"
-              }
-            ]
-          },
-          {
-            "id": "charity",
-            "label": "Charity",
-            "aggregateValue": 38.61,
-            "progress": 0.105,
-            "layers": [
-              {
-                "id": "donations",
-                "label": "Donations",
-                "value": 38.61,
-                "color": "#f472b6"
-              }
-            ]
-          },
-          {
-            "id": "players",
-            "label": "Player Payouts",
-            "aggregateValue": 218.79,
-            "progress": 0.595,
-            "layers": [
-              {
-                "id": "winnings",
-                "label": "Winnings",
-                "value": 218.79,
-                "color": "#34d399"
-              }
-            ]
-          }
-        ],
-        "links": [
-          {
-            "id": "total->platform",
-            "source": "total",
-            "target": "platform",
-            "value": 110.4
-          },
-          {
-            "id": "total->charity",
-            "source": "total",
-            "target": "charity",
-            "value": 38.61
-          },
-          {
-            "id": "total->players",
-            "source": "total",
-            "target": "players",
-            "value": 218.79
-          }
-        ]
-      },
-      "charts": {
-        "distributionSeries": [
-          {
-            "category": "platformFees",
-            "value": 110.4
-          },
-          {
-            "category": "charity",
-            "value": 38.61
-          },
-          {
-            "category": "playerPayouts",
-            "value": 218.79
-          }
-        ],
-        "accumulationSeries": [
-          {
-            "metric": "platformFees",
-            "cumulative": 3233.2
-          },
-          {
-            "metric": "charity",
-            "cumulative": 1449.36
-          },
-          {
-            "metric": "playerPayouts",
-            "cumulative": 8213.04
-          },
-          {
-            "metric": "revenue",
-            "cumulative": 12895.6
-          }
-        ]
-      }
-    },
-    {
-      "dayIndex": 3,
-      "date": "2025-01-04T00:00:00.000Z",
-      "summary": {
-        "dailyRevenue": 396.8,
-        "dailyCharity": 43.2,
-        "dailyFees": 108.8,
-        "dailyPayouts": 244.8,
-        "netChange": 152
-      },
-      "timelineTick": {
-        "label": "Day 4",
-        "cumulativeRevenue": 13292.4,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3342,
-        "cumulativeCharity": 1492.56,
-        "cumulativePayouts": 8457.84
-      },
-      "financialWorkflow": {
-        "nodes": [
-          {
-            "id": "total",
-            "label": "Total Revenue",
-            "aggregateValue": 396.8,
-            "progress": 1
-          },
-          {
-            "id": "platform",
-            "label": "Platform Fees",
-            "aggregateValue": 108.8,
-            "progress": 0.27399999999999997,
-            "layers": [
-              {
-                "id": "fees",
-                "label": "Click Fees",
-                "value": 108.8,
-                "color": "#38bdf8"
-              }
-            ]
-          },
-          {
-            "id": "charity",
-            "label": "Charity",
-            "aggregateValue": 43.2,
-            "progress": 0.109,
-            "layers": [
-              {
-                "id": "donations",
-                "label": "Donations",
-                "value": 43.2,
-                "color": "#f472b6"
-              }
-            ]
-          },
-          {
-            "id": "players",
-            "label": "Player Payouts",
-            "aggregateValue": 244.8,
-            "progress": 0.617,
-            "layers": [
-              {
-                "id": "winnings",
-                "label": "Winnings",
-                "value": 244.8,
-                "color": "#34d399"
-              }
-            ]
-          }
-        ],
-        "links": [
-          {
-            "id": "total->platform",
-            "source": "total",
-            "target": "platform",
-            "value": 108.8
-          },
-          {
-            "id": "total->charity",
-            "source": "total",
-            "target": "charity",
-            "value": 43.2
-          },
-          {
-            "id": "total->players",
-            "source": "total",
-            "target": "players",
-            "value": 244.8
-          }
-        ]
-      },
-      "charts": {
-        "distributionSeries": [
-          {
-            "category": "platformFees",
-            "value": 108.8
-          },
-          {
-            "category": "charity",
-            "value": 43.2
-          },
-          {
-            "category": "playerPayouts",
-            "value": 244.8
-          }
-        ],
-        "accumulationSeries": [
-          {
-            "metric": "platformFees",
-            "cumulative": 3342
-          },
-          {
-            "metric": "charity",
-            "cumulative": 1492.56
-          },
-          {
-            "metric": "playerPayouts",
-            "cumulative": 8457.84
-          },
-          {
-            "metric": "revenue",
-            "cumulative": 13292.4
-          }
-        ]
-      }
-    },
-    {
-      "dayIndex": 4,
-      "date": "2025-01-05T00:00:00.000Z",
-      "summary": {
-        "dailyRevenue": 433.6,
-        "dailyCharity": 49.68,
-        "dailyFees": 102.4,
-        "dailyPayouts": 281.52,
-        "netChange": 152.08
-      },
-      "timelineTick": {
-        "label": "Day 5",
-        "cumulativeRevenue": 13726,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3444.4,
-        "cumulativeCharity": 1542.24,
-        "cumulativePayouts": 8739.36
-      },
-      "financialWorkflow": {
-        "nodes": [
-          {
-            "id": "total",
-            "label": "Total Revenue",
-            "aggregateValue": 433.6,
+            "aggregateValue": 403,
             "progress": 1
           },
           {
             "id": "platform",
             "label": "Platform Fees",
             "aggregateValue": 102.4,
-            "progress": 0.23600000000000002,
+            "progress": 0.254,
             "layers": [
               {
                 "id": "fees",
@@ -563,13 +188,13 @@
           {
             "id": "charity",
             "label": "Charity",
-            "aggregateValue": 49.68,
-            "progress": 0.115,
+            "aggregateValue": 45.09,
+            "progress": 0.11199999999999999,
             "layers": [
               {
                 "id": "donations",
                 "label": "Donations",
-                "value": 49.68,
+                "value": 45.09,
                 "color": "#f472b6"
               }
             ]
@@ -577,13 +202,13 @@
           {
             "id": "players",
             "label": "Player Payouts",
-            "aggregateValue": 281.52,
-            "progress": 0.649,
+            "aggregateValue": 255.51,
+            "progress": 0.634,
             "layers": [
               {
                 "id": "winnings",
                 "label": "Winnings",
-                "value": 281.52,
+                "value": 255.51,
                 "color": "#34d399"
               }
             ]
@@ -600,13 +225,13 @@
             "id": "total->charity",
             "source": "total",
             "target": "charity",
-            "value": 49.68
+            "value": 45.09
           },
           {
             "id": "total->players",
             "source": "total",
             "target": "players",
-            "value": 281.52
+            "value": 255.51
           }
         ]
       },
@@ -618,69 +243,69 @@
           },
           {
             "category": "charity",
-            "value": 49.68
+            "value": 45.09
           },
           {
             "category": "playerPayouts",
-            "value": 281.52
+            "value": 255.51
           }
         ],
         "accumulationSeries": [
           {
             "metric": "platformFees",
-            "cumulative": 3444.4
+            "cumulative": 3122.8
           },
           {
             "metric": "charity",
-            "cumulative": 1542.24
+            "cumulative": 1368.09
           },
           {
             "metric": "playerPayouts",
-            "cumulative": 8739.36
+            "cumulative": 7752.51
           },
           {
             "metric": "revenue",
-            "cumulative": 13726
+            "cumulative": 12243.4
           }
         ]
       }
     },
     {
-      "dayIndex": 5,
-      "date": "2025-01-06T00:00:00.000Z",
+      "dayIndex": 2,
+      "date": "2025-01-03T00:00:00.000Z",
       "summary": {
-        "dailyRevenue": 395.4,
-        "dailyCharity": 42.93,
-        "dailyFees": 109.2,
-        "dailyPayouts": 243.27,
-        "netChange": 152.13
+        "dailyRevenue": 375.4,
+        "dailyCharity": 42.39,
+        "dailyFees": 92.8,
+        "dailyPayouts": 240.21,
+        "netChange": 135.19
       },
       "timelineTick": {
-        "label": "Day 6",
-        "cumulativeRevenue": 14121.4,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3553.6,
-        "cumulativeCharity": 1585.17,
-        "cumulativePayouts": 8982.63
+        "label": "Day 3",
+        "cumulativeRevenue": 12618.8,
+        "cumulativePlayers": 2293,
+        "cumulativeFees": 3215.6,
+        "cumulativeCharity": 1410.48,
+        "cumulativePayouts": 7992.72
       },
       "financialWorkflow": {
         "nodes": [
           {
             "id": "total",
             "label": "Total Revenue",
-            "aggregateValue": 395.4,
+            "aggregateValue": 375.4,
             "progress": 1
           },
           {
             "id": "platform",
             "label": "Platform Fees",
-            "aggregateValue": 109.2,
-            "progress": 0.276,
+            "aggregateValue": 92.8,
+            "progress": 0.247,
             "layers": [
               {
                 "id": "fees",
                 "label": "Click Fees",
-                "value": 109.2,
+                "value": 92.8,
                 "color": "#38bdf8"
               }
             ]
@@ -688,138 +313,13 @@
           {
             "id": "charity",
             "label": "Charity",
-            "aggregateValue": 42.93,
-            "progress": 0.109,
-            "layers": [
-              {
-                "id": "donations",
-                "label": "Donations",
-                "value": 42.93,
-                "color": "#f472b6"
-              }
-            ]
-          },
-          {
-            "id": "players",
-            "label": "Player Payouts",
-            "aggregateValue": 243.27,
-            "progress": 0.615,
-            "layers": [
-              {
-                "id": "winnings",
-                "label": "Winnings",
-                "value": 243.27,
-                "color": "#34d399"
-              }
-            ]
-          }
-        ],
-        "links": [
-          {
-            "id": "total->platform",
-            "source": "total",
-            "target": "platform",
-            "value": 109.2
-          },
-          {
-            "id": "total->charity",
-            "source": "total",
-            "target": "charity",
-            "value": 42.93
-          },
-          {
-            "id": "total->players",
-            "source": "total",
-            "target": "players",
-            "value": 243.27
-          }
-        ]
-      },
-      "charts": {
-        "distributionSeries": [
-          {
-            "category": "platformFees",
-            "value": 109.2
-          },
-          {
-            "category": "charity",
-            "value": 42.93
-          },
-          {
-            "category": "playerPayouts",
-            "value": 243.27
-          }
-        ],
-        "accumulationSeries": [
-          {
-            "metric": "platformFees",
-            "cumulative": 3553.6
-          },
-          {
-            "metric": "charity",
-            "cumulative": 1585.17
-          },
-          {
-            "metric": "playerPayouts",
-            "cumulative": 8982.63
-          },
-          {
-            "metric": "revenue",
-            "cumulative": 14121.4
-          }
-        ]
-      }
-    },
-    {
-      "dayIndex": 6,
-      "date": "2025-01-07T00:00:00.000Z",
-      "summary": {
-        "dailyRevenue": 415,
-        "dailyCharity": 46.71,
-        "dailyFees": 103.6,
-        "dailyPayouts": 264.69,
-        "netChange": 150.31
-      },
-      "timelineTick": {
-        "label": "Day 7",
-        "cumulativeRevenue": 14536.4,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3657.2,
-        "cumulativeCharity": 1631.88,
-        "cumulativePayouts": 9247.32
-      },
-      "financialWorkflow": {
-        "nodes": [
-          {
-            "id": "total",
-            "label": "Total Revenue",
-            "aggregateValue": 415,
-            "progress": 1
-          },
-          {
-            "id": "platform",
-            "label": "Platform Fees",
-            "aggregateValue": 103.6,
-            "progress": 0.25,
-            "layers": [
-              {
-                "id": "fees",
-                "label": "Click Fees",
-                "value": 103.6,
-                "color": "#38bdf8"
-              }
-            ]
-          },
-          {
-            "id": "charity",
-            "label": "Charity",
-            "aggregateValue": 46.71,
+            "aggregateValue": 42.39,
             "progress": 0.113,
             "layers": [
               {
                 "id": "donations",
                 "label": "Donations",
-                "value": 46.71,
+                "value": 42.39,
                 "color": "#f472b6"
               }
             ]
@@ -827,13 +327,13 @@
           {
             "id": "players",
             "label": "Player Payouts",
-            "aggregateValue": 264.69,
-            "progress": 0.638,
+            "aggregateValue": 240.21,
+            "progress": 0.64,
             "layers": [
               {
                 "id": "winnings",
                 "label": "Winnings",
-                "value": 264.69,
+                "value": 240.21,
                 "color": "#34d399"
               }
             ]
@@ -844,19 +344,19 @@
             "id": "total->platform",
             "source": "total",
             "target": "platform",
-            "value": 103.6
+            "value": 92.8
           },
           {
             "id": "total->charity",
             "source": "total",
             "target": "charity",
-            "value": 46.71
+            "value": 42.39
           },
           {
             "id": "total->players",
             "source": "total",
             "target": "players",
-            "value": 264.69
+            "value": 240.21
           }
         ]
       },
@@ -864,198 +364,73 @@
         "distributionSeries": [
           {
             "category": "platformFees",
-            "value": 103.6
+            "value": 92.8
           },
           {
             "category": "charity",
-            "value": 46.71
+            "value": 42.39
           },
           {
             "category": "playerPayouts",
-            "value": 264.69
+            "value": 240.21
           }
         ],
         "accumulationSeries": [
           {
             "metric": "platformFees",
-            "cumulative": 3657.2
+            "cumulative": 3215.6
           },
           {
             "metric": "charity",
-            "cumulative": 1631.88
+            "cumulative": 1410.48
           },
           {
             "metric": "playerPayouts",
-            "cumulative": 9247.32
+            "cumulative": 7992.72
           },
           {
             "metric": "revenue",
-            "cumulative": 14536.4
+            "cumulative": 12618.8
           }
         ]
       }
     },
     {
-      "dayIndex": 7,
-      "date": "2025-01-08T00:00:00.000Z",
+      "dayIndex": 3,
+      "date": "2025-01-04T00:00:00.000Z",
       "summary": {
-        "dailyRevenue": 386.2,
-        "dailyCharity": 41.85,
-        "dailyFees": 107.2,
-        "dailyPayouts": 237.15,
-        "netChange": 149.05
-      },
-      "timelineTick": {
-        "label": "Day 8",
-        "cumulativeRevenue": 14922.6,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3764.4,
-        "cumulativeCharity": 1673.73,
-        "cumulativePayouts": 9484.47
-      },
-      "financialWorkflow": {
-        "nodes": [
-          {
-            "id": "total",
-            "label": "Total Revenue",
-            "aggregateValue": 386.2,
-            "progress": 1
-          },
-          {
-            "id": "platform",
-            "label": "Platform Fees",
-            "aggregateValue": 107.2,
-            "progress": 0.278,
-            "layers": [
-              {
-                "id": "fees",
-                "label": "Click Fees",
-                "value": 107.2,
-                "color": "#38bdf8"
-              }
-            ]
-          },
-          {
-            "id": "charity",
-            "label": "Charity",
-            "aggregateValue": 41.85,
-            "progress": 0.10800000000000001,
-            "layers": [
-              {
-                "id": "donations",
-                "label": "Donations",
-                "value": 41.85,
-                "color": "#f472b6"
-              }
-            ]
-          },
-          {
-            "id": "players",
-            "label": "Player Payouts",
-            "aggregateValue": 237.15,
-            "progress": 0.614,
-            "layers": [
-              {
-                "id": "winnings",
-                "label": "Winnings",
-                "value": 237.15,
-                "color": "#34d399"
-              }
-            ]
-          }
-        ],
-        "links": [
-          {
-            "id": "total->platform",
-            "source": "total",
-            "target": "platform",
-            "value": 107.2
-          },
-          {
-            "id": "total->charity",
-            "source": "total",
-            "target": "charity",
-            "value": 41.85
-          },
-          {
-            "id": "total->players",
-            "source": "total",
-            "target": "players",
-            "value": 237.15
-          }
-        ]
-      },
-      "charts": {
-        "distributionSeries": [
-          {
-            "category": "platformFees",
-            "value": 107.2
-          },
-          {
-            "category": "charity",
-            "value": 41.85
-          },
-          {
-            "category": "playerPayouts",
-            "value": 237.15
-          }
-        ],
-        "accumulationSeries": [
-          {
-            "metric": "platformFees",
-            "cumulative": 3764.4
-          },
-          {
-            "metric": "charity",
-            "cumulative": 1673.73
-          },
-          {
-            "metric": "playerPayouts",
-            "cumulative": 9484.47
-          },
-          {
-            "metric": "revenue",
-            "cumulative": 14922.6
-          }
-        ]
-      }
-    },
-    {
-      "dayIndex": 8,
-      "date": "2025-01-09T00:00:00.000Z",
-      "summary": {
-        "dailyRevenue": 500.6,
+        "dailyRevenue": 501.8,
         "dailyCharity": 59.67,
-        "dailyFees": 102.8,
+        "dailyFees": 104,
         "dailyPayouts": 338.13,
-        "netChange": 162.47
+        "netChange": 163.67
       },
       "timelineTick": {
-        "label": "Day 9",
-        "cumulativeRevenue": 15423.2,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3867.2,
-        "cumulativeCharity": 1733.4,
-        "cumulativePayouts": 9822.6
+        "label": "Day 4",
+        "cumulativeRevenue": 13120.6,
+        "cumulativePlayers": 2387,
+        "cumulativeFees": 3319.6,
+        "cumulativeCharity": 1470.15,
+        "cumulativePayouts": 8330.85
       },
       "financialWorkflow": {
         "nodes": [
           {
             "id": "total",
             "label": "Total Revenue",
-            "aggregateValue": 500.6,
+            "aggregateValue": 501.8,
             "progress": 1
           },
           {
             "id": "platform",
             "label": "Platform Fees",
-            "aggregateValue": 102.8,
-            "progress": 0.205,
+            "aggregateValue": 104,
+            "progress": 0.207,
             "layers": [
               {
                 "id": "fees",
                 "label": "Click Fees",
-                "value": 102.8,
+                "value": 104,
                 "color": "#38bdf8"
               }
             ]
@@ -1078,7 +453,7 @@
             "id": "players",
             "label": "Player Payouts",
             "aggregateValue": 338.13,
-            "progress": 0.675,
+            "progress": 0.674,
             "layers": [
               {
                 "id": "winnings",
@@ -1094,7 +469,7 @@
             "id": "total->platform",
             "source": "total",
             "target": "platform",
-            "value": 102.8
+            "value": 104
           },
           {
             "id": "total->charity",
@@ -1114,7 +489,7 @@
         "distributionSeries": [
           {
             "category": "platformFees",
-            "value": 102.8
+            "value": 104
           },
           {
             "category": "charity",
@@ -1128,40 +503,40 @@
         "accumulationSeries": [
           {
             "metric": "platformFees",
-            "cumulative": 3867.2
+            "cumulative": 3319.6
           },
           {
             "metric": "charity",
-            "cumulative": 1733.4
+            "cumulative": 1470.15
           },
           {
             "metric": "playerPayouts",
-            "cumulative": 9822.6
+            "cumulative": 8330.85
           },
           {
             "metric": "revenue",
-            "cumulative": 15423.2
+            "cumulative": 13120.6
           }
         ]
       }
     },
     {
-      "dayIndex": 9,
-      "date": "2025-01-10T00:00:00.000Z",
+      "dayIndex": 4,
+      "date": "2025-01-05T00:00:00.000Z",
       "summary": {
         "dailyRevenue": 354.6,
-        "dailyCharity": 36.99,
-        "dailyFees": 108,
-        "dailyPayouts": 209.61,
-        "netChange": 144.99
+        "dailyCharity": 38.61,
+        "dailyFees": 97.2,
+        "dailyPayouts": 218.79,
+        "netChange": 135.81
       },
       "timelineTick": {
-        "label": "Day 10",
-        "cumulativeRevenue": 15777.8,
-        "cumulativePlayers": 2000,
-        "cumulativeFees": 3975.2,
-        "cumulativeCharity": 1770.39,
-        "cumulativePayouts": 10032.21
+        "label": "Day 5",
+        "cumulativeRevenue": 13475.2,
+        "cumulativePlayers": 2486,
+        "cumulativeFees": 3416.8,
+        "cumulativeCharity": 1508.76,
+        "cumulativePayouts": 8549.64
       },
       "financialWorkflow": {
         "nodes": [
@@ -1174,13 +549,513 @@
           {
             "id": "platform",
             "label": "Platform Fees",
-            "aggregateValue": 108,
-            "progress": 0.305,
+            "aggregateValue": 97.2,
+            "progress": 0.27399999999999997,
             "layers": [
               {
                 "id": "fees",
                 "label": "Click Fees",
-                "value": 108,
+                "value": 97.2,
+                "color": "#38bdf8"
+              }
+            ]
+          },
+          {
+            "id": "charity",
+            "label": "Charity",
+            "aggregateValue": 38.61,
+            "progress": 0.109,
+            "layers": [
+              {
+                "id": "donations",
+                "label": "Donations",
+                "value": 38.61,
+                "color": "#f472b6"
+              }
+            ]
+          },
+          {
+            "id": "players",
+            "label": "Player Payouts",
+            "aggregateValue": 218.79,
+            "progress": 0.617,
+            "layers": [
+              {
+                "id": "winnings",
+                "label": "Winnings",
+                "value": 218.79,
+                "color": "#34d399"
+              }
+            ]
+          }
+        ],
+        "links": [
+          {
+            "id": "total->platform",
+            "source": "total",
+            "target": "platform",
+            "value": 97.2
+          },
+          {
+            "id": "total->charity",
+            "source": "total",
+            "target": "charity",
+            "value": 38.61
+          },
+          {
+            "id": "total->players",
+            "source": "total",
+            "target": "players",
+            "value": 218.79
+          }
+        ]
+      },
+      "charts": {
+        "distributionSeries": [
+          {
+            "category": "platformFees",
+            "value": 97.2
+          },
+          {
+            "category": "charity",
+            "value": 38.61
+          },
+          {
+            "category": "playerPayouts",
+            "value": 218.79
+          }
+        ],
+        "accumulationSeries": [
+          {
+            "metric": "platformFees",
+            "cumulative": 3416.8
+          },
+          {
+            "metric": "charity",
+            "cumulative": 1508.76
+          },
+          {
+            "metric": "playerPayouts",
+            "cumulative": 8549.64
+          },
+          {
+            "metric": "revenue",
+            "cumulative": 13475.2
+          }
+        ]
+      }
+    },
+    {
+      "dayIndex": 5,
+      "date": "2025-01-06T00:00:00.000Z",
+      "summary": {
+        "dailyRevenue": 379.4,
+        "dailyCharity": 40.77,
+        "dailyFees": 107.6,
+        "dailyPayouts": 231.03,
+        "netChange": 148.37
+      },
+      "timelineTick": {
+        "label": "Day 6",
+        "cumulativeRevenue": 13854.6,
+        "cumulativePlayers": 2583,
+        "cumulativeFees": 3524.4,
+        "cumulativeCharity": 1549.53,
+        "cumulativePayouts": 8780.67
+      },
+      "financialWorkflow": {
+        "nodes": [
+          {
+            "id": "total",
+            "label": "Total Revenue",
+            "aggregateValue": 379.4,
+            "progress": 1
+          },
+          {
+            "id": "platform",
+            "label": "Platform Fees",
+            "aggregateValue": 107.6,
+            "progress": 0.284,
+            "layers": [
+              {
+                "id": "fees",
+                "label": "Click Fees",
+                "value": 107.6,
+                "color": "#38bdf8"
+              }
+            ]
+          },
+          {
+            "id": "charity",
+            "label": "Charity",
+            "aggregateValue": 40.77,
+            "progress": 0.107,
+            "layers": [
+              {
+                "id": "donations",
+                "label": "Donations",
+                "value": 40.77,
+                "color": "#f472b6"
+              }
+            ]
+          },
+          {
+            "id": "players",
+            "label": "Player Payouts",
+            "aggregateValue": 231.03,
+            "progress": 0.609,
+            "layers": [
+              {
+                "id": "winnings",
+                "label": "Winnings",
+                "value": 231.03,
+                "color": "#34d399"
+              }
+            ]
+          }
+        ],
+        "links": [
+          {
+            "id": "total->platform",
+            "source": "total",
+            "target": "platform",
+            "value": 107.6
+          },
+          {
+            "id": "total->charity",
+            "source": "total",
+            "target": "charity",
+            "value": 40.77
+          },
+          {
+            "id": "total->players",
+            "source": "total",
+            "target": "players",
+            "value": 231.03
+          }
+        ]
+      },
+      "charts": {
+        "distributionSeries": [
+          {
+            "category": "platformFees",
+            "value": 107.6
+          },
+          {
+            "category": "charity",
+            "value": 40.77
+          },
+          {
+            "category": "playerPayouts",
+            "value": 231.03
+          }
+        ],
+        "accumulationSeries": [
+          {
+            "metric": "platformFees",
+            "cumulative": 3524.4
+          },
+          {
+            "metric": "charity",
+            "cumulative": 1549.53
+          },
+          {
+            "metric": "playerPayouts",
+            "cumulative": 8780.67
+          },
+          {
+            "metric": "revenue",
+            "cumulative": 13854.6
+          }
+        ]
+      }
+    },
+    {
+      "dayIndex": 6,
+      "date": "2025-01-07T00:00:00.000Z",
+      "summary": {
+        "dailyRevenue": 389.8,
+        "dailyCharity": 41.85,
+        "dailyFees": 110.8,
+        "dailyPayouts": 237.15,
+        "netChange": 152.65
+      },
+      "timelineTick": {
+        "label": "Day 7",
+        "cumulativeRevenue": 14244.4,
+        "cumulativePlayers": 2680,
+        "cumulativeFees": 3635.2,
+        "cumulativeCharity": 1591.38,
+        "cumulativePayouts": 9017.82
+      },
+      "financialWorkflow": {
+        "nodes": [
+          {
+            "id": "total",
+            "label": "Total Revenue",
+            "aggregateValue": 389.8,
+            "progress": 1
+          },
+          {
+            "id": "platform",
+            "label": "Platform Fees",
+            "aggregateValue": 110.8,
+            "progress": 0.284,
+            "layers": [
+              {
+                "id": "fees",
+                "label": "Click Fees",
+                "value": 110.8,
+                "color": "#38bdf8"
+              }
+            ]
+          },
+          {
+            "id": "charity",
+            "label": "Charity",
+            "aggregateValue": 41.85,
+            "progress": 0.107,
+            "layers": [
+              {
+                "id": "donations",
+                "label": "Donations",
+                "value": 41.85,
+                "color": "#f472b6"
+              }
+            ]
+          },
+          {
+            "id": "players",
+            "label": "Player Payouts",
+            "aggregateValue": 237.15,
+            "progress": 0.608,
+            "layers": [
+              {
+                "id": "winnings",
+                "label": "Winnings",
+                "value": 237.15,
+                "color": "#34d399"
+              }
+            ]
+          }
+        ],
+        "links": [
+          {
+            "id": "total->platform",
+            "source": "total",
+            "target": "platform",
+            "value": 110.8
+          },
+          {
+            "id": "total->charity",
+            "source": "total",
+            "target": "charity",
+            "value": 41.85
+          },
+          {
+            "id": "total->players",
+            "source": "total",
+            "target": "players",
+            "value": 237.15
+          }
+        ]
+      },
+      "charts": {
+        "distributionSeries": [
+          {
+            "category": "platformFees",
+            "value": 110.8
+          },
+          {
+            "category": "charity",
+            "value": 41.85
+          },
+          {
+            "category": "playerPayouts",
+            "value": 237.15
+          }
+        ],
+        "accumulationSeries": [
+          {
+            "metric": "platformFees",
+            "cumulative": 3635.2
+          },
+          {
+            "metric": "charity",
+            "cumulative": 1591.38
+          },
+          {
+            "metric": "playerPayouts",
+            "cumulative": 9017.82
+          },
+          {
+            "metric": "revenue",
+            "cumulative": 14244.4
+          }
+        ]
+      }
+    },
+    {
+      "dayIndex": 7,
+      "date": "2025-01-08T00:00:00.000Z",
+      "summary": {
+        "dailyRevenue": 406.8,
+        "dailyCharity": 44.28,
+        "dailyFees": 111.6,
+        "dailyPayouts": 250.92,
+        "netChange": 155.88
+      },
+      "timelineTick": {
+        "label": "Day 8",
+        "cumulativeRevenue": 14651.2,
+        "cumulativePlayers": 2776,
+        "cumulativeFees": 3746.8,
+        "cumulativeCharity": 1635.66,
+        "cumulativePayouts": 9268.74
+      },
+      "financialWorkflow": {
+        "nodes": [
+          {
+            "id": "total",
+            "label": "Total Revenue",
+            "aggregateValue": 406.8,
+            "progress": 1
+          },
+          {
+            "id": "platform",
+            "label": "Platform Fees",
+            "aggregateValue": 111.6,
+            "progress": 0.27399999999999997,
+            "layers": [
+              {
+                "id": "fees",
+                "label": "Click Fees",
+                "value": 111.6,
+                "color": "#38bdf8"
+              }
+            ]
+          },
+          {
+            "id": "charity",
+            "label": "Charity",
+            "aggregateValue": 44.28,
+            "progress": 0.109,
+            "layers": [
+              {
+                "id": "donations",
+                "label": "Donations",
+                "value": 44.28,
+                "color": "#f472b6"
+              }
+            ]
+          },
+          {
+            "id": "players",
+            "label": "Player Payouts",
+            "aggregateValue": 250.92,
+            "progress": 0.617,
+            "layers": [
+              {
+                "id": "winnings",
+                "label": "Winnings",
+                "value": 250.92,
+                "color": "#34d399"
+              }
+            ]
+          }
+        ],
+        "links": [
+          {
+            "id": "total->platform",
+            "source": "total",
+            "target": "platform",
+            "value": 111.6
+          },
+          {
+            "id": "total->charity",
+            "source": "total",
+            "target": "charity",
+            "value": 44.28
+          },
+          {
+            "id": "total->players",
+            "source": "total",
+            "target": "players",
+            "value": 250.92
+          }
+        ]
+      },
+      "charts": {
+        "distributionSeries": [
+          {
+            "category": "platformFees",
+            "value": 111.6
+          },
+          {
+            "category": "charity",
+            "value": 44.28
+          },
+          {
+            "category": "playerPayouts",
+            "value": 250.92
+          }
+        ],
+        "accumulationSeries": [
+          {
+            "metric": "platformFees",
+            "cumulative": 3746.8
+          },
+          {
+            "metric": "charity",
+            "cumulative": 1635.66
+          },
+          {
+            "metric": "playerPayouts",
+            "cumulative": 9268.74
+          },
+          {
+            "metric": "revenue",
+            "cumulative": 14651.2
+          }
+        ]
+      }
+    },
+    {
+      "dayIndex": 8,
+      "date": "2025-01-09T00:00:00.000Z",
+      "summary": {
+        "dailyRevenue": 347,
+        "dailyCharity": 36.99,
+        "dailyFees": 100.4,
+        "dailyPayouts": 209.61,
+        "netChange": 137.39
+      },
+      "timelineTick": {
+        "label": "Day 9",
+        "cumulativeRevenue": 14998.2,
+        "cumulativePlayers": 2874,
+        "cumulativeFees": 3847.2,
+        "cumulativeCharity": 1672.65,
+        "cumulativePayouts": 9478.35
+      },
+      "financialWorkflow": {
+        "nodes": [
+          {
+            "id": "total",
+            "label": "Total Revenue",
+            "aggregateValue": 347,
+            "progress": 1
+          },
+          {
+            "id": "platform",
+            "label": "Platform Fees",
+            "aggregateValue": 100.4,
+            "progress": 0.289,
+            "layers": [
+              {
+                "id": "fees",
+                "label": "Click Fees",
+                "value": 100.4,
                 "color": "#38bdf8"
               }
             ]
@@ -1189,7 +1064,7 @@
             "id": "charity",
             "label": "Charity",
             "aggregateValue": 36.99,
-            "progress": 0.10400000000000001,
+            "progress": 0.107,
             "layers": [
               {
                 "id": "donations",
@@ -1203,7 +1078,7 @@
             "id": "players",
             "label": "Player Payouts",
             "aggregateValue": 209.61,
-            "progress": 0.591,
+            "progress": 0.604,
             "layers": [
               {
                 "id": "winnings",
@@ -1219,7 +1094,7 @@
             "id": "total->platform",
             "source": "total",
             "target": "platform",
-            "value": 108
+            "value": 100.4
           },
           {
             "id": "total->charity",
@@ -1239,7 +1114,7 @@
         "distributionSeries": [
           {
             "category": "platformFees",
-            "value": 108
+            "value": 100.4
           },
           {
             "category": "charity",
@@ -1253,19 +1128,144 @@
         "accumulationSeries": [
           {
             "metric": "platformFees",
-            "cumulative": 3975.2
+            "cumulative": 3847.2
           },
           {
             "metric": "charity",
-            "cumulative": 1770.39
+            "cumulative": 1672.65
           },
           {
             "metric": "playerPayouts",
-            "cumulative": 10032.21
+            "cumulative": 9478.35
           },
           {
             "metric": "revenue",
-            "cumulative": 15777.8
+            "cumulative": 14998.2
+          }
+        ]
+      }
+    },
+    {
+      "dayIndex": 9,
+      "date": "2025-01-10T00:00:00.000Z",
+      "summary": {
+        "dailyRevenue": 471.8,
+        "dailyCharity": 54.27,
+        "dailyFees": 110,
+        "dailyPayouts": 307.53,
+        "netChange": 164.27
+      },
+      "timelineTick": {
+        "label": "Day 10",
+        "cumulativeRevenue": 15470,
+        "cumulativePlayers": 2969,
+        "cumulativeFees": 3957.2,
+        "cumulativeCharity": 1726.92,
+        "cumulativePayouts": 9785.88
+      },
+      "financialWorkflow": {
+        "nodes": [
+          {
+            "id": "total",
+            "label": "Total Revenue",
+            "aggregateValue": 471.8,
+            "progress": 1
+          },
+          {
+            "id": "platform",
+            "label": "Platform Fees",
+            "aggregateValue": 110,
+            "progress": 0.233,
+            "layers": [
+              {
+                "id": "fees",
+                "label": "Click Fees",
+                "value": 110,
+                "color": "#38bdf8"
+              }
+            ]
+          },
+          {
+            "id": "charity",
+            "label": "Charity",
+            "aggregateValue": 54.27,
+            "progress": 0.115,
+            "layers": [
+              {
+                "id": "donations",
+                "label": "Donations",
+                "value": 54.27,
+                "color": "#f472b6"
+              }
+            ]
+          },
+          {
+            "id": "players",
+            "label": "Player Payouts",
+            "aggregateValue": 307.53,
+            "progress": 0.652,
+            "layers": [
+              {
+                "id": "winnings",
+                "label": "Winnings",
+                "value": 307.53,
+                "color": "#34d399"
+              }
+            ]
+          }
+        ],
+        "links": [
+          {
+            "id": "total->platform",
+            "source": "total",
+            "target": "platform",
+            "value": 110
+          },
+          {
+            "id": "total->charity",
+            "source": "total",
+            "target": "charity",
+            "value": 54.27
+          },
+          {
+            "id": "total->players",
+            "source": "total",
+            "target": "players",
+            "value": 307.53
+          }
+        ]
+      },
+      "charts": {
+        "distributionSeries": [
+          {
+            "category": "platformFees",
+            "value": 110
+          },
+          {
+            "category": "charity",
+            "value": 54.27
+          },
+          {
+            "category": "playerPayouts",
+            "value": 307.53
+          }
+        ],
+        "accumulationSeries": [
+          {
+            "metric": "platformFees",
+            "cumulative": 3957.2
+          },
+          {
+            "metric": "charity",
+            "cumulative": 1726.92
+          },
+          {
+            "metric": "playerPayouts",
+            "cumulative": 9785.88
+          },
+          {
+            "metric": "revenue",
+            "cumulative": 15470
           }
         ]
       }
