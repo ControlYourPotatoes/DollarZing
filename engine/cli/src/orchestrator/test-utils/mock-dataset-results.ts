@@ -87,6 +87,8 @@ export function createMockDatasetResults(
         revenuePerGame: 2.5,
         charityPercentage: combination.charityPercentage / 100,
         averageRevenuePerDay: 27.4,
+        totalCashOuts: 0,
+        cashOutCount: 0,
       },
       gameStats: {
         totalGames: 4000,
