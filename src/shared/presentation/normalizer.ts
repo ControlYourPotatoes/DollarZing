@@ -11,9 +11,7 @@ function roundToTwoDecimals(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-function buildDistributionSeries(
-  points: NormalizedDistributionPoint[]
-): {
+function buildDistributionSeries(points: NormalizedDistributionPoint[]): {
   series: NormalizedDistributionPoint[];
   total: number;
 } {
@@ -68,6 +66,8 @@ export function normalizePresentationSnapshot(
         accumulationSeries,
         accumulationMap,
       },
+      ...(day.pool ? { pool: { ...day.pool } } : {}),
+      ...(day.cashouts ? { cashouts: { ...day.cashouts } } : {}),
     };
   });
 
