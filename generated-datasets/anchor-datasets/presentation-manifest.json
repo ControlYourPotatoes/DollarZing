@@ -1,0 +1,82 @@
+[
+  {
+    "scenarioId": "growth-15_risk-low_charity-10",
+    "path": "anchor-datasets/growth-15_risk-low_charity-10/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "low",
+      "charityShare": "10"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0,
+      "charityShare": 0
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T21:38:48.939Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-low_charity-20",
+    "path": "anchor-datasets/growth-15_risk-low_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "low",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T21:39:06.637Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-low_charity-30",
+    "path": "anchor-datasets/growth-15_risk-low_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "low",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T21:39:39.341Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-mid_charity-10",
+    "path": "anchor-datasets/growth-15_risk-mid_charity-10/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "mid",
+      "charityShare": "10"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0.5,
+      "charityShare": 0
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T21:40:44.840Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-mid_charity-20",
+    "path": "anchor-datasets/growth-15_risk-mid_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "mid",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0.5,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T21:42:47.720Z"
+  }
+]

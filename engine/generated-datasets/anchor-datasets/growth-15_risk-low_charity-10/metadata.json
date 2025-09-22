@@ -1,13 +1,13 @@
 {
-  "generationTimestamp": "2025-09-20T21:50:06.025Z",
+  "generationTimestamp": "2025-09-21T23:26:01.447Z",
   "parameters": {
     "growthRate": 15,
     "riskLevel": "low",
     "charityPercentage": 10
   },
-  "generationTimeMs": 388.39111099999997,
-  "datasetSizeBytes": 30326,
-  "recordCount": 30,
+  "generationTimeMs": 5711.954331999999,
+  "datasetSizeBytes": 358565,
+  "recordCount": 365,
   "version": "1.0.0",
   "generatorVersion": "orchestrator-v1.0.0",
   "runtime": {
@@ -22,8 +22,8 @@
     "presentation": "generated-datasets/anchor-datasets/growth-15_risk-low_charity-10/presentation-snapshots.json"
   },
   "aggregates": {
-    "dailySnapshotCount": 30,
+    "dailySnapshotCount": 365,
     "eventTraceCount": 0,
-    "presentationSnapshotCount": 30
+    "presentationSnapshotCount": 365
   }
 }

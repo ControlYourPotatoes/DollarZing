@@ -12,8 +12,8 @@
       "cashOutStrategy": 0,
       "charityShare": 0
     },
-    "days": 30,
-    "generatedAt": "2025-09-20T21:50:06.027Z"
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:01.452Z"
   },
   {
     "scenarioId": "growth-15_risk-high_charity-10",
@@ -28,8 +28,8 @@
       "cashOutStrategy": 1,
       "charityShare": 0
     },
-    "days": 30,
-    "generatedAt": "2025-09-20T22:17:20.901Z"
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:35.718Z"
   },
   {
     "scenarioId": "growth-35_risk-low_charity-10",
@@ -44,7 +44,391 @@
       "cashOutStrategy": 0,
       "charityShare": 0
     },
-    "days": 30,
-    "generatedAt": "2025-09-20T22:18:17.592Z"
+    "days": 365,
+    "generatedAt": "2025-09-21T23:27:11.739Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-low_charity-20",
+    "path": "anchor-datasets/growth-15_risk-low_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "low",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:07.077Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-low_charity-30",
+    "path": "anchor-datasets/growth-15_risk-low_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "low",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:12.659Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-mid_charity-10",
+    "path": "anchor-datasets/growth-15_risk-mid_charity-10/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "mid",
+      "charityShare": "10"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0.5,
+      "charityShare": 0
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:18.459Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-mid_charity-20",
+    "path": "anchor-datasets/growth-15_risk-mid_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "mid",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0.5,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:24.121Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-mid_charity-30",
+    "path": "anchor-datasets/growth-15_risk-mid_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "mid",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 0.5,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:29.837Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-high_charity-20",
+    "path": "anchor-datasets/growth-15_risk-high_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "high",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 1,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:41.484Z"
+  },
+  {
+    "scenarioId": "growth-15_risk-high_charity-30",
+    "path": "anchor-datasets/growth-15_risk-high_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "low",
+      "cashOutStrategy": "high",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 0,
+      "cashOutStrategy": 1,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:26:47.502Z"
+  },
+  {
+    "scenarioId": "growth-35_risk-low_charity-20",
+    "path": "anchor-datasets/growth-35_risk-low_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "mid",
+      "cashOutStrategy": "low",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 0.5,
+      "cashOutStrategy": 0,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:27:38.646Z"
+  },
+  {
+    "scenarioId": "growth-35_risk-low_charity-30",
+    "path": "anchor-datasets/growth-35_risk-low_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "mid",
+      "cashOutStrategy": "low",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 0.5,
+      "cashOutStrategy": 0,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:28:05.482Z"
+  },
+  {
+    "scenarioId": "growth-35_risk-mid_charity-10",
+    "path": "anchor-datasets/growth-35_risk-mid_charity-10/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "mid",
+      "cashOutStrategy": "mid",
+      "charityShare": "10"
+    },
+    "coordinates": {
+      "adoptionRate": 0.5,
+      "cashOutStrategy": 0.5,
+      "charityShare": 0
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:28:34.198Z"
+  },
+  {
+    "scenarioId": "growth-35_risk-mid_charity-20",
+    "path": "anchor-datasets/growth-35_risk-mid_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "mid",
+      "cashOutStrategy": "mid",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 0.5,
+      "cashOutStrategy": 0.5,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:29:07.324Z"
+  },
+  {
+    "scenarioId": "growth-35_risk-mid_charity-30",
+    "path": "anchor-datasets/growth-35_risk-mid_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "mid",
+      "cashOutStrategy": "mid",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 0.5,
+      "cashOutStrategy": 0.5,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:29:34.388Z"
+  },
+  {
+    "scenarioId": "growth-35_risk-high_charity-10",
+    "path": "anchor-datasets/growth-35_risk-high_charity-10/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "mid",
+      "cashOutStrategy": "high",
+      "charityShare": "10"
+    },
+    "coordinates": {
+      "adoptionRate": 0.5,
+      "cashOutStrategy": 1,
+      "charityShare": 0
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:30:04.675Z"
+  },
+  {
+    "scenarioId": "growth-35_risk-high_charity-20",
+    "path": "anchor-datasets/growth-35_risk-high_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "mid",
+      "cashOutStrategy": "high",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 0.5,
+      "cashOutStrategy": 1,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:30:34.230Z"
+  },
+  {
+    "scenarioId": "growth-35_risk-high_charity-30",
+    "path": "anchor-datasets/growth-35_risk-high_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "mid",
+      "cashOutStrategy": "high",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 0.5,
+      "cashOutStrategy": 1,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:31:02.490Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-low_charity-10",
+    "path": "anchor-datasets/growth-60_risk-low_charity-10/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "low",
+      "charityShare": "10"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 0,
+      "charityShare": 0
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:34:07.397Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-low_charity-20",
+    "path": "anchor-datasets/growth-60_risk-low_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "low",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 0,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:36:42.109Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-low_charity-30",
+    "path": "anchor-datasets/growth-60_risk-low_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "low",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 0,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:39:17.954Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-mid_charity-10",
+    "path": "anchor-datasets/growth-60_risk-mid_charity-10/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "mid",
+      "charityShare": "10"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 0.5,
+      "charityShare": 0
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:42:03.393Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-mid_charity-20",
+    "path": "anchor-datasets/growth-60_risk-mid_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "mid",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 0.5,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:44:45.655Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-mid_charity-30",
+    "path": "anchor-datasets/growth-60_risk-mid_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "mid",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 0.5,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:53:22.818Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-high_charity-10",
+    "path": "anchor-datasets/growth-60_risk-high_charity-10/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "high",
+      "charityShare": "10"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 1,
+      "charityShare": 0
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:56:42.869Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-high_charity-20",
+    "path": "anchor-datasets/growth-60_risk-high_charity-20/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "high",
+      "charityShare": "20"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 1,
+      "charityShare": 0.5
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:54:33.850Z"
+  },
+  {
+    "scenarioId": "growth-60_risk-high_charity-30",
+    "path": "anchor-datasets/growth-60_risk-high_charity-30/presentation-snapshots.json",
+    "parameters": {
+      "adoptionRate": "high",
+      "cashOutStrategy": "high",
+      "charityShare": "30"
+    },
+    "coordinates": {
+      "adoptionRate": 1,
+      "cashOutStrategy": 1,
+      "charityShare": 1
+    },
+    "days": 365,
+    "generatedAt": "2025-09-21T23:58:02.916Z"
   }
 ]
