@@ -281,8 +281,13 @@ const PrototypeDashboard = () => {
 
         {/* Floating TimelineScrubber is rendered globally; remove embedded card */}
 
-        <section className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
+        {/* Financial Workflow - Full Width */}
+        <section className="mb-6 ">
           <FinancialWorkflowDiagram />
+        </section>
+
+        {/* Daily Increments Card - Separate */}
+        <section className="mb-6 w-72">
           <aside className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 text-sm text-slate-300">
             {activeDay ? (
               <div className="space-y-3">

@@ -160,6 +160,16 @@ export interface NormalizedPresentationScenario {
     payouts: number[];
     players: number[];
   };
+  summary: {
+    daysCount: number;
+    firstDate?: string;
+    lastDate?: string;
+    totalRevenue: number;
+    totalCharity: number;
+    totalFees: number;
+    totalPayouts: number;
+    maxPlayers: number;
+  };
 }
 
 export interface ScenarioIndex {

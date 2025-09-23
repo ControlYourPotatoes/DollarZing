@@ -559,6 +559,25 @@ export function toValidationError(error: unknown): Error {
   return new Error("Unknown validation error");
 }
 
+export function createValidationErrorWithContext(
+  message: string,
+  context: Record<string, unknown> = {}
+): Error {
+  const contextStr =
+    Object.keys(context).length > 0
+      ? `\nContext: ${JSON.stringify(context, null, 2)}`
+      : "";
+  return new ValidationError(`${message}${contextStr}`);
+}
+
+export function flattenValidationErrors(errors: string[]): string {
+  if (errors.length === 0) return "No validation errors";
+  if (errors.length === 1) return errors[0];
+  return `Multiple validation errors:\n${errors
+    .map((err, i) => `  ${i + 1}. ${err}`)
+    .join("\n")}`;
+}
+
 export function assertCoordinatesInRange(
   coordinates: PresentationScenarioCoordinates,
   messagePrefix = "coordinates"

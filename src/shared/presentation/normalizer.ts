@@ -97,6 +97,18 @@ export function normalizePresentationSnapshot(
     }
   );
 
+  // Build summary object for UI convenience
+  const summary = {
+    daysCount: days.length,
+    firstDate: days.length > 0 ? days[0].date : undefined,
+    lastDate: days.length > 0 ? days[days.length - 1].date : undefined,
+    totalRevenue: roundToTwoDecimals(snapshotFile.totals.cumulativeRevenue),
+    totalCharity: roundToTwoDecimals(snapshotFile.totals.cumulativeCharity),
+    totalFees: roundToTwoDecimals(snapshotFile.totals.cumulativeFees),
+    totalPayouts: roundToTwoDecimals(snapshotFile.totals.cumulativePayouts),
+    maxPlayers: Math.max(...timelineSeries.players),
+  };
+
   return {
     scenarioId: snapshotFile.scenarioId,
     parameters: snapshotFile.parameters,
@@ -107,6 +119,7 @@ export function normalizePresentationSnapshot(
     days,
     dayLookup,
     timelineSeries,
+    summary,
   };
 }
 
