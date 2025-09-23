@@ -64,7 +64,7 @@ export function FinancialWorkflowDiagram({
         role="img"
         aria-label="Financial distribution flow diagram"
         width="100%"
-        height={Math.max(320, height)}
+        height={Math.max(500, height)}
         viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}
         className="mx-auto block"
         preserveAspectRatio="xMidYMid meet"
@@ -117,6 +117,11 @@ export function FinancialWorkflowDiagram({
             label={node.label}
             aggregateValue={node.aggregateValue}
             layers={node.layers}
+            midSegments={node.midSegments}
+            highSegments={node.highSegments}
+            baseValue={node.baseValue}
+            midValue={node.midValue}
+            highValue={node.highValue}
             x={node.x}
             y={node.y}
             radius={node.radius}
@@ -134,12 +139,57 @@ export function FinancialWorkflowDiagram({
               <div className="space-y-1">
                 <div className="font-semibold text-slate-100">{node.label}</div>
                 <div>
-                  Total:{" "}
-                  {node.aggregateValue.toLocaleString(undefined, {
-                    style: "currency",
-                    currency: "USD",
-                  })}
+                  Base:{" "}
+                  {(node.baseValue ?? node.aggregateValue).toLocaleString(
+                    undefined,
+                    {
+                      style: "currency",
+                      currency: "USD",
+                    }
+                  )}
                 </div>
+                {(node.midValue !== undefined || node.highValue !== undefined) && (
+                  <div className="grid grid-cols-2 gap-2 text-slate-300/90">
+                    {node.midValue !== undefined && (
+                      <div>
+                        Mid:{" "}
+                        {node.midValue.toLocaleString(undefined, {
+                          style: "currency",
+                          currency: "USD",
+                          maximumFractionDigits: 0,
+                        })}
+                        {node.baseValue !== undefined && node.midValue > node.baseValue && (
+                          <span className="ml-2 text-emerald-400">+
+                            {(node.midValue - node.baseValue).toLocaleString(undefined, {
+                              style: "currency",
+                              currency: "USD",
+                              maximumFractionDigits: 0,
+                            })}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {node.highValue !== undefined && (
+                      <div>
+                        High:{" "}
+                        {node.highValue.toLocaleString(undefined, {
+                          style: "currency",
+                          currency: "USD",
+                          maximumFractionDigits: 0,
+                        })}
+                        {node.baseValue !== undefined && node.highValue > node.baseValue && (
+                          <span className="ml-2 text-emerald-400">+
+                            {(node.highValue - node.baseValue).toLocaleString(undefined, {
+                              style: "currency",
+                              currency: "USD",
+                              maximumFractionDigits: 0,
+                            })}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
                 {node.layers && node.layers.length > 0 && (
                   <ul className="space-y-1">
                     {node.layers.map((layer) => (
@@ -164,6 +214,61 @@ export function FinancialWorkflowDiagram({
                       </li>
                     ))}
                   </ul>
+                )}
+                {((node.midSegments && node.midSegments.length > 0) ||
+                  (node.highSegments && node.highSegments.length > 0)) && (
+                  <div className="mt-2 grid grid-cols-2 gap-3">
+                    {node.midSegments && node.midSegments.length > 0 && (
+                      <div>
+                        <div className="mb-1 font-medium text-slate-200">Mid Δ</div>
+                        <ul className="space-y-1">
+                          {node.midSegments.map((seg) => (
+                            <li key={`mid-${seg.id}`} className="flex items-center justify-between">
+                              <span className="flex items-center gap-2">
+                                <span
+                                  className="inline-block h-2 w-2 rounded-full"
+                                  style={{ backgroundColor: seg.color }}
+                                />
+                                {seg.label}
+                              </span>
+                              <span>
+                                {seg.value.toLocaleString(undefined, {
+                                  style: "currency",
+                                  currency: "USD",
+                                  maximumFractionDigits: 0,
+                                })}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {node.highSegments && node.highSegments.length > 0 && (
+                      <div>
+                        <div className="mb-1 font-medium text-slate-200">High Δ</div>
+                        <ul className="space-y-1">
+                          {node.highSegments.map((seg) => (
+                            <li key={`high-${seg.id}`} className="flex items-center justify-between">
+                              <span className="flex items-center gap-2">
+                                <span
+                                  className="inline-block h-2 w-2 rounded-full"
+                                  style={{ backgroundColor: seg.color }}
+                                />
+                                {seg.label}
+                              </span>
+                              <span>
+                                {seg.value.toLocaleString(undefined, {
+                                  style: "currency",
+                                  currency: "USD",
+                                  maximumFractionDigits: 0,
+                                })}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             );

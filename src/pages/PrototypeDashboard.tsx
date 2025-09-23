@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  loadPresentationManifest,
-  loadPresentationSnapshot,
-  PresentationManifestEntry,
-} from "@/shared/presentation";
+import { loadPresentationManifest, loadPresentationSnapshot, PresentationManifestEntry } from "@/shared/presentation";
+import { resolveSnapshotUrl, resolvePublicPath, joinUrl, defaultDatasetsBase } from "@/shared/presentation/url-resolver";
 import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 import { TimelineScrubber, useActiveTimelineDay } from "@/features/timeline";
 import { FinancialWorkflowDiagram } from "@/features/financial-flow";
@@ -16,68 +13,11 @@ const {
   VITE_PRESENTATION_OVERRIDES,
 } = ((import.meta as any).env ?? {}) as Record<string, string | undefined>;
 
-// Respect Vite base (e.g., "/DollarZing/") so public assets resolve correctly in dev/prod
-const DEFAULT_PUBLIC_BASE =
-  (((import.meta as any).env ?? {}) as Record<string, string | undefined>)[
-    "BASE_URL"
-  ] || "/";
-const DEFAULT_DATASETS_BASE = `${DEFAULT_PUBLIC_BASE.replace(
-  /\/$/,
-  ""
-)}/engine/generated-datasets/`;
-
-function joinUrl(base: string, path: string): string {
-  const left = base.endsWith("/") ? base.slice(0, -1) : base;
-  const right = path.startsWith("/") ? path.slice(1) : path;
-  return `${left}/${right}`;
-}
-
-function resolvePublicPath(url: string): string {
-  if (/^https?:\/\//i.test(url)) return url;
-  // Ensure URLs respect the dev/prod base path
-  return joinUrl(DEFAULT_PUBLIC_BASE, url);
-}
-
 const MANIFEST_CANDIDATES: string[] = [
-  VITE_PRESENTATION_MANIFEST_URL
-    ? resolvePublicPath(VITE_PRESENTATION_MANIFEST_URL)
-    : "",
-  joinUrl(DEFAULT_DATASETS_BASE, "anchor-datasets/presentation-manifest.json"),
-  joinUrl(DEFAULT_DATASETS_BASE, "presentation-manifest.json"),
+  VITE_PRESENTATION_MANIFEST_URL ? resolvePublicPath(VITE_PRESENTATION_MANIFEST_URL) : "",
+  joinUrl(defaultDatasetsBase(), "anchor-datasets/presentation-manifest.json"),
+  joinUrl(defaultDatasetsBase(), "presentation-manifest.json"),
 ].filter(Boolean);
-
-function resolveSnapshotUrl(entry: PresentationManifestEntry): string {
-  // Highest priority: explicit per-scenario override map (JSON string mapping scenarioId -> URL)
-  if (VITE_PRESENTATION_OVERRIDES) {
-    try {
-      const map = JSON.parse(VITE_PRESENTATION_OVERRIDES) as Record<
-        string,
-        string
-      >;
-      const override = map[entry.scenarioId];
-      if (override) return override;
-    } catch {
-      // Ignore malformed override map
-    }
-  }
-
-  const candidates: string[] = [];
-  const base = VITE_PRESENTATION_BASE_URL
-    ? resolvePublicPath(VITE_PRESENTATION_BASE_URL)
-    : DEFAULT_DATASETS_BASE;
-  // 1) Use manifest-provided path under base
-  candidates.push(joinUrl(base, entry.path));
-  // 2) Fallback: derive from scenarioId
-  candidates.push(
-    joinUrl(
-      base,
-      `anchor-datasets/${entry.scenarioId}/presentation-snapshots.json`
-    )
-  );
-
-  // Return first candidate (the loader will actually fetch and handle errors)
-  return candidates[0];
-}
 
 const PrototypeDashboard = () => {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
