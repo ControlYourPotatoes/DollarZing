@@ -1,0 +1,51 @@
+{
+  "name": "DollarZing Full Development Environment",
+  "build": {
+    "dockerfile": "Dockerfile.dev",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "source=dollarzing-data,target=/data/datasets,type=volume"
+  ],
+  "portsAttributes": {
+    "3000": { "label": "App", "onAutoForward": "notify" },
+    "3001": { "label": "Debug", "onAutoForward": "ignore" }
+  },
+  "remoteEnv": {
+    "OPENROUTER_API_KEY": "${localEnv:OPENROUTER_API_KEY}",
+    "NODE_ENV": "development",
+    "LOG_LEVEL": "debug"
+  },
+  "containerEnv": {
+    "CODEX_UNSAFE_ALLOW_NO_SANDBOX": "true",
+    "PORT": "3001"
+  },
+  "runArgs": ["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-eslint",
+        "ms-vscode.vscode-docker",
+        "continue.continue"
+      ],
+      "settings": {
+        "typescript.preferences.includePackageJsonAutoImports": "on",
+        "typescript.suggest.autoImports": true,
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveTimeout": 10000,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "continue.telemetryEnabled": false
+      }
+    }
+  },
+  "postCreateCommand": "cd /workspace && npm install && cd engine && npm ci && mkdir -p /home/developer/.continue && cat > /home/developer/.continue/config.json << 'EOF'\n{\n  \"models\": [\n    {\n      \"title\": \"OpenRouter GPT-4o-mini\",\n      \"provider\": \"openrouter\",\n      \"model\": \"openai/gpt-4o-mini\",\n      \"apiKey\": \"env:OPENROUTER_API_KEY\",\n      \"apiBase\": \"https://openrouter.ai/api/v1\"\n    }\n  ],\n  \"tabAutocompleteModel\": {\n    \"title\": \"OpenRouter GPT-4o-mini\",\n    \"provider\": \"openrouter\",\n    \"model\": \"openai/gpt-4o-mini\",\n    \"apiKey\": \"env:OPENROUTER_API_KEY\",\n    \"apiBase\": \"https://openrouter.ai/api/v1\"\n  }\n}\nEOF\n&& echo 'Continue config setup complete'",
+  "remoteUser": "developer",
+  "features": {}
+}
