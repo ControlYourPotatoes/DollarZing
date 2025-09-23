@@ -41,6 +41,7 @@ services:
       - VITE_DEV_MODE=true
       - VITE_PRESENTATION_MANIFEST_URL=/engine/generated-datasets/anchor-datasets/presentation-manifest.json
       - VITE_PRESENTATION_BASE_URL=/engine/generated-datasets/
+      - OPENROUTER_API_KEY=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
     depends_on:
       - engine
     networks:
