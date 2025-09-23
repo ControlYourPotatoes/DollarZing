@@ -34,3 +34,4 @@ dist-ssr
 .claude/
 .References/
 References/
+.devcontainer/devcontainer.json
