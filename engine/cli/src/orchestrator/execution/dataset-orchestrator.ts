@@ -164,15 +164,18 @@ export class DatasetOrchestrator {
 
         // Emit completion event with failure
         if (this.sharedEventBus) {
-          await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
-            type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-            timestamp: new Date(),
-            parameterId,
-            success: false,
-            durationMs: result.generationTimeMs,
-            recordCount: 0,
-            error: result.error,
-          } as DatasetGenerationCompletedEvent);
+          await this.sharedEventBus.emit(
+            EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+            {
+              type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+              timestamp: new Date(),
+              parameterId,
+              success: false,
+              durationMs: result.generationTimeMs,
+              recordCount: 0,
+              error: result.error,
+            } as DatasetGenerationCompletedEvent
+          );
         }
 
         return result;
@@ -200,13 +203,15 @@ export class DatasetOrchestrator {
 
       if (this.orchestratorConfig.verbose) {
         console.log(
-          `Prepared simulator profile ${profile.name} for combination ${generateDirectoryName(
-            combination
-          )}`
+          `Prepared simulator profile ${
+            profile.name
+          } for combination ${generateDirectoryName(combination)}`
         );
       }
 
-      const debugInterface = shouldCollectEvents ? assembly.debugInterface : undefined;
+      const debugInterface = shouldCollectEvents
+        ? assembly.debugInterface
+        : undefined;
       let debugSession: DebugSessionResult | null = null;
 
       if (debugInterface) {
@@ -262,7 +267,8 @@ export class DatasetOrchestrator {
               totalGames: simulationResults.gameStats?.totalGames || 0,
               totalPlayers: simulationResults.playerStats?.totalPlayers || 0,
               revenueConsistency:
-                (simulationResults.revenueStats?.totalPlatformRevenue || 0) >= 0,
+                (simulationResults.revenueStats?.totalPlatformRevenue || 0) >=
+                0,
             },
           } as DatasetValidationEvent);
         }
@@ -284,15 +290,18 @@ export class DatasetOrchestrator {
           };
 
           if (this.sharedEventBus) {
-            await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
-              type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-              timestamp: new Date(),
-              parameterId,
-              success: false,
-              durationMs: generationTimeMs,
-              recordCount: 0,
-              error: failureResult.error,
-            } as DatasetGenerationCompletedEvent);
+            await this.sharedEventBus.emit(
+              EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+              {
+                type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+                timestamp: new Date(),
+                parameterId,
+                success: false,
+                durationMs: generationTimeMs,
+                recordCount: 0,
+                error: failureResult.error,
+              } as DatasetGenerationCompletedEvent
+            );
           }
 
           return failureResult;
@@ -350,9 +359,10 @@ export class DatasetOrchestrator {
         const eventsContent = shouldCollectEvents
           ? formatEventTracesAsNdjson(eventTraces)
           : undefined;
-        const presentationJson = shouldCollectPresentation && presentationSnapshot
-          ? serializePresentationSnapshots(presentationSnapshot)
-          : undefined;
+        const presentationJson =
+          shouldCollectPresentation && presentationSnapshot
+            ? serializePresentationSnapshots(presentationSnapshot)
+            : undefined;
 
         const artifactContent: DatasetArtifactContent = {
           datasetJson,
@@ -374,11 +384,9 @@ export class DatasetOrchestrator {
           artifactContent.presentationJson = presentationJson;
         }
 
-        await writeDatasetArtifacts(
-          outputPaths,
-          artifactContent,
-          { dryRun: this.orchestratorConfig.dryRun }
-        );
+        await writeDatasetArtifacts(outputPaths, artifactContent, {
+          dryRun: this.orchestratorConfig.dryRun,
+        });
 
         if (shouldCollectPresentation && presentationSnapshot) {
           const manifestPath = join(
@@ -389,7 +397,11 @@ export class DatasetOrchestrator {
           const relativePath = `anchor-datasets/${scenarioSlug}/presentation-snapshots.json`;
           await upsertPresentationManifest(
             manifestPath,
-            createManifestEntry(scenarioSlug, presentationSnapshot, relativePath)
+            createManifestEntry(
+              scenarioSlug,
+              presentationSnapshot,
+              relativePath
+            )
           );
         }
 
@@ -404,15 +416,18 @@ export class DatasetOrchestrator {
         };
 
         if (this.sharedEventBus) {
-          await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
-            type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-            timestamp: new Date(),
-            parameterId,
-            success: true,
-            durationMs: generationTimeMs,
-            recordCount,
-            outputPaths,
-          } as DatasetGenerationCompletedEvent);
+          await this.sharedEventBus.emit(
+            EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+            {
+              type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+              timestamp: new Date(),
+              parameterId,
+              success: true,
+              durationMs: generationTimeMs,
+              recordCount,
+              outputPaths,
+            } as DatasetGenerationCompletedEvent
+          );
         }
 
         return successResult;
@@ -436,15 +451,18 @@ export class DatasetOrchestrator {
 
       // Emit completion event with error
       if (this.sharedEventBus) {
-        await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
-          type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-          timestamp: new Date(),
-          parameterId,
-          success: false,
-          durationMs: result.generationTimeMs,
-          recordCount: 0,
-          error: result.error,
-        } as DatasetGenerationCompletedEvent);
+        await this.sharedEventBus.emit(
+          EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+          {
+            type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+            timestamp: new Date(),
+            parameterId,
+            success: false,
+            durationMs: result.generationTimeMs,
+            recordCount: 0,
+            error: result.error,
+          } as DatasetGenerationCompletedEvent
+        );
       }
 
       return result;
@@ -459,12 +477,8 @@ export class DatasetOrchestrator {
   ): SimulationConfig {
     const { growthRate, riskLevel, charityPercentage } = combination;
 
-    // Map growth rate to S-curve adoption rate
-    const adoptionRateMapping = {
-      15: 0.01, // Conservative: 1% adoption rate (slow growth)
-      35: 0.1, // Market: 10% adoption rate (steady growth)
-      60: 0.5, // Viral: 50% adoption rate (explosive growth)
-    };
+    // Convert growth rate percentage to decimal adoption rate
+    const adoptionRate = growthRate / 100; // 15% -> 0.15, 35% -> 0.35, 60% -> 0.60
 
     // Apply growth rate scaling
     const playerCountMultiplier =
@@ -497,7 +511,7 @@ export class DatasetOrchestrator {
 
       // S-curve growth model parameters
       growthModel: {
-        adoptionRate: adoptionRateMapping[growthRate],
+        adoptionRate: adoptionRate, // Use calculated adoption rate from growth rate percentage
         baseMarket: 1000000, // 1M base market size
         midpointDay: 90, // S-curve inflection at day 90
         steepnessFactor: 20, // Controls curve steepness
@@ -630,7 +644,7 @@ export class DatasetOrchestrator {
       poolingEnabled: boolean;
       snapshotCount: number;
       eventCount: number;
-       presentationCount: number;
+      presentationCount: number;
       artifactPaths: DatasetArtifactPaths;
     }
   ): DatasetMetadata {
