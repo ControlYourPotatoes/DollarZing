@@ -13,7 +13,7 @@ export interface FinancialWorkflowDiagramProps {
 
 export function FinancialWorkflowDiagram({
   width = 720,
-  height = 260,
+  height = 460,
 }: FinancialWorkflowDiagramProps) {
   const { nodes, links, day } = useWorkflowData();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export function FinancialWorkflowDiagram({
   }
 
   // Compute dynamic viewBox to fit all nodes/links comfortably
-  const padding = 32;
+  const padding = 42;
   const bounds = nodes.length
     ? nodes.reduce(
         (acc, n) => {
@@ -64,7 +64,7 @@ export function FinancialWorkflowDiagram({
         role="img"
         aria-label="Financial distribution flow diagram"
         width="100%"
-        height={Math.max(500, height)}
+        height={Math.max(550, height)}
         viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}
         className="mx-auto block"
         preserveAspectRatio="xMidYMid meet"
@@ -110,7 +110,20 @@ export function FinancialWorkflowDiagram({
             }
           />
         ))}
-        {nodes.map((node) => (
+        {nodes.map((node) => {
+          // Apply individual offsets (add more ifs for other nodes)
+          let adjustedX = node.x;
+          let adjustedY = node.y;
+          if (node.id === "platform") {
+            adjustedX += 10;  // Move right by 10px (positive x)
+            adjustedY += 0;  // Uncomment/example: Move down by 20px (positive y)
+          }
+          // Example for another node:
+          // if (node.id === "platform") {
+          //   adjustedX -= 15;  // Move left
+          // }
+
+        return (
           <WorkflowNode
             key={node.id}
             id={node.id}
@@ -122,13 +135,14 @@ export function FinancialWorkflowDiagram({
             baseValue={node.baseValue}
             midValue={node.midValue}
             highValue={node.highValue}
-            x={node.x}
-            y={node.y}
+            x={adjustedX}
+            y={adjustedY}
             radius={node.radius}
             isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
             onHover={setHoveredId}
           />
-        ))}
+        );
+      })}
       </motion.svg>
       {hoveredId && (
         <div className="mt-3 rounded-md border border-slate-800 bg-slate-900/80 px-3 py-2 text-xs text-slate-300">
