@@ -75,9 +75,7 @@ export async function runSimulation(
   }
 
   const startTime = performance.now();
-  const progressCallback = config.verbose
-    ? createProgressLogger()
-    : undefined;
+  const progressCallback = config.verbose ? createProgressLogger() : undefined;
 
   let debugSummary: DebugSanitySummary | undefined;
   const results = await assembly.simulator
@@ -183,12 +181,14 @@ export function printSimulationSummary(
       console.log("");
       console.log("💵 Fund Distribution:");
       console.log(
-        `  Donation Funds: $${results.playerStats.totalDonationsFunds.toFixed(
+        `  Donation Funds: $${results.playerStats.totalCharityContributions.toFixed(
           2
         )}`
       );
       console.log(
-        `  Winnings Funds: $${results.playerStats.totalWinningsFunds.toFixed(2)}`
+        `  Winnings Funds: $${results.playerStats.totalPlayerPayouts.toFixed(
+          2
+        )}`
       );
       console.log(
         `  Progression Funds: $${results.playerStats.totalProgressionFunds.toFixed(
@@ -198,7 +198,9 @@ export function printSimulationSummary(
     }
 
     console.log("");
-    console.log(context.successMessage ?? "🎉 Simulation completed successfully!");
+    console.log(
+      context.successMessage ?? "🎉 Simulation completed successfully!"
+    );
 
     if (results.gameStats.totalGames === 0) {
       console.log("⚠️  Warning: No games were played");
@@ -379,9 +381,9 @@ function printSanityDashboard(summary: DebugSanitySummary): void {
   console.log("====================");
   console.log(`Status: ${summary.status.toUpperCase()}`);
   console.log(
-    `Events Processed: ${summary.stats.totalEventsProcessed} (error rate: ${summary.stats.errorRate.toFixed(
-      2
-    )}%)`
+    `Events Processed: ${
+      summary.stats.totalEventsProcessed
+    } (error rate: ${summary.stats.errorRate.toFixed(2)}%)`
   );
 
   if (summary.stats.currentSessionDuration !== undefined) {
