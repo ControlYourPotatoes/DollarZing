@@ -9,6 +9,11 @@ import {
 import { normalizePresentationSnapshot } from "../presentation/normalizer";
 import { buildScenarioIndex } from "../presentation/scenario-index";
 import { computeInterpolationAnchors } from "../presentation/interpolation";
+import {
+  SimulationPhase,
+  WorkflowNodeViewState,
+  WorkflowRingKey,
+} from "@/features/financial-flow/types";
 
 interface TimelineState {
   scenarios: Record<string, NormalizedPresentationScenario>;
@@ -18,6 +23,10 @@ interface TimelineState {
   isPlaying: boolean;
   playbackSpeed: number;
   lastUpdatedAt?: number;
+  hoveredNodeId?: string | null;
+  hoveredRingKey?: WorkflowRingKey | null;
+  nodeViewStates: Record<string, WorkflowNodeViewState>;
+  simulationPhase: SimulationPhase;
   loadManifest: (manifestRaw: unknown) => ScenarioIndex;
   upsertScenario: (
     snapshotRaw: PresentationSnapshotFile | unknown
@@ -27,6 +36,10 @@ interface TimelineState {
   stepDay: (delta: number) => void;
   setPlaybackState: (isPlaying: boolean) => void;
   setPlaybackSpeed: (speed: number) => void;
+  setHoveredNode: (nodeId: string | null) => void;
+  setHoveredRing: (ringKey: WorkflowRingKey | null) => void;
+  setNodeViewState: (nodeId: string, viewState: WorkflowNodeViewState) => void;
+  setSimulationPhase: (phase: SimulationPhase) => void;
   getActiveScenario: () => NormalizedPresentationScenario | undefined;
   getActiveDay: () => NormalizedPresentationDay | undefined;
   computeAnchors: (coordinates: {
@@ -73,6 +86,10 @@ export const usePresentationTimelineStore = create<TimelineState>()(
     activeDayIndex: 0,
     isPlaying: false,
     playbackSpeed: 1,
+    hoveredNodeId: null,
+    hoveredRingKey: null,
+    nodeViewStates: {},
+    simulationPhase: "idle",
     loadManifest: (manifestRaw: unknown) => {
       const manifest = buildScenarioIndex(manifestRaw);
       set({ manifest });
@@ -127,6 +144,13 @@ export const usePresentationTimelineStore = create<TimelineState>()(
       }
       set({ playbackSpeed: speed });
     },
+    setHoveredNode: (nodeId) => set({ hoveredNodeId: nodeId }),
+    setHoveredRing: (ringKey) => set({ hoveredRingKey: ringKey }),
+    setNodeViewState: (nodeId, viewState) =>
+      set((state) => ({
+        nodeViewStates: { ...state.nodeViewStates, [nodeId]: viewState },
+      })),
+    setSimulationPhase: (phase) => set({ simulationPhase: phase }),
     getActiveScenario: () => {
       const state = get();
       if (!state.activeScenarioId) {
