@@ -1,6 +1,13 @@
 import { motion } from "framer-motion";
-
+import * as d3 from "d3";
 import { PresentationWorkflowLayer } from "@/shared/presentation";
+
+type ArcData = {
+  data: PresentationWorkflowLayer;
+  startAngle: number;
+  endAngle: number;
+  padAngle: number;
+};
 
 export interface WorkflowNodeProps {
   id: string;
@@ -27,25 +34,24 @@ function formatCurrency(value: number): string {
   });
 }
 
-function computeLayerArcs(layers: PresentationWorkflowLayer[], radius: number) {
+function computeArcs(layers: PresentationWorkflowLayer[]): ArcData[] {
   if (!layers || layers.length === 0) {
     return [];
   }
   const total = layers.reduce((sum, layer) => sum + layer.value, 0);
-  const circumference = 2 * Math.PI * radius;
-  let offset = 0;
-  return layers.map((layer) => {
-    const fraction = total > 0 ? layer.value / total : 0;
-    const arcLength = circumference * fraction;
-    const arc = {
-      id: layer.id,
-      color: layer.color,
-      dashArray: `${arcLength} ${circumference - arcLength}`,
-      dashOffset: offset,
-    };
-    offset -= arcLength;
-    return arc;
-  });
+  if (total === 0) return [];
+  const sorted = [...layers].sort((a, b) => a.id.localeCompare(b.id));
+  let startAngle = -Math.PI / 2;
+  const arcs: ArcData[] = [];
+  for (const seg of sorted) {
+    const fraction = seg.value / total;
+    const arcLengthRadians = 2 * Math.PI * fraction;
+    const padAngle_local = Math.min(0.1, arcLengthRadians * 0.15);
+    const endAngle = startAngle + arcLengthRadians;
+    arcs.push({ data: seg, startAngle, endAngle, padAngle: 0 });
+    startAngle = endAngle + padAngle_local;
+  }
+  return arcs;
 }
 
 export function WorkflowNode({
@@ -65,9 +71,9 @@ export function WorkflowNode({
   onHover,
 }: WorkflowNodeProps) {
   const valueLabel = formatCurrency(aggregateValue);
-  const arcsBase = computeLayerArcs(layers, radius - 6);
-  const arcsMid = computeLayerArcs(midSegments, radius);
-  const arcsHigh = computeLayerArcs(highSegments, radius + 6);
+  const arcsBase = computeArcs(layers);
+  const arcsMid = computeArcs(midSegments);
+  const arcsHigh = computeArcs(highSegments);
 
   return (
     <motion.g
@@ -96,75 +102,94 @@ export function WorkflowNode({
           cx={0}
           cy={0}
           r={radius}
-          fill="rgba(15, 23, 42, 0.85)"
+          fill="rgba(15, 23, 42, 0.85)" 
           stroke={isActive ? "#38bdf8" : "rgba(148, 163, 184, 0.35)"}
           strokeWidth={isActive ? 4 : 3}
         />
         {/* Base segments */}
-        {arcsBase.map((arc) => (
-          <motion.circle
-            key={arc.id}
-            cx={0}
-            cy={0}
-            r={radius - 6}
-            fill="transparent"
-            stroke={arc.color}
-            strokeWidth={isActive ? 6 : 4}
-            strokeLinecap="round"
-            strokeDasharray={arc.dashArray}
-            strokeDashoffset={arc.dashOffset}
-            transform="rotate(-90)"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isActive ? 1 : 0.9 }}
-            transition={{ delay: 0.06, duration: 0.28 }}
-          />
-        ))}
+        {arcsBase.map((arcItem, index) => {
+          const ringCenter = radius - 6;
+          const thickness = 8;
+          const innerRadius = ringCenter - thickness / 2;
+          const outerRadius = ringCenter + thickness / 2;
+          const arcData = {
+            innerRadius,
+            outerRadius,
+            startAngle: arcItem.startAngle,
+            endAngle: arcItem.endAngle,
+            padAngle: 0
+          };
+          const dPath = d3.arc()(arcData) || '';
+          return (
+            <motion.path
+              key={arcItem.data.id}
+              d={dPath}
+              fill={arcItem.data.color}
+              stroke="none"
+              initial={{ opacity: 0, pathLength: 0 }}
+              animate={{ opacity: isActive ? 1 : 0.9, pathLength: 1 }}
+              transition={{ delay: 0.06 + index * 0.05, duration: 0.28 }}
+            />
+          );
+        })}
         {/* Mid comparison ring */}
-        {arcsMid.map((arc) => (
-          <motion.circle
-            key={`mid-${arc.id}`}
-            cx={0}
-            cy={0}
-            r={radius}
-            fill="transparent"
-            stroke={arc.color}
-            strokeOpacity={isActive ? 0.9 : 0.5}
-            strokeWidth={isActive ? 6 : 2.5}
-            strokeLinecap="round"
-            strokeDasharray={arc.dashArray}
-            strokeDashoffset={arc.dashOffset}
-            transform="rotate(-90)"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isActive ? 1 : 0.8 }}
-            transition={{ delay: 0.05, duration: 0.25 }}
-          />
-        ))}
+        {arcsMid.map((arcItem, index) => {
+          const ringCenter = radius;
+          const thickness = 5;
+          const innerRadius = ringCenter - thickness / 2;
+          const outerRadius = ringCenter + thickness / 2;
+          const arcData = {
+            innerRadius,
+            outerRadius,
+            startAngle: arcItem.startAngle,
+            endAngle: arcItem.endAngle,
+            padAngle: 0
+          };
+          const dPath = d3.arc()(arcData) || '';
+          return (
+            <motion.path
+              key={`mid-${arcItem.data.id}`}
+              d={dPath}
+              fill={arcItem.data.color}
+              stroke="none"
+              initial={{ opacity: 0, pathLength: 0 }}
+              animate={{ opacity: isActive ? 0.9 : 0.5, pathLength: 1 }}
+              transition={{ delay: 0.05 + index * 0.05, duration: 0.25 }}
+            />
+          );
+        })}
         {/* High comparison ring */}
-        {arcsHigh.map((arc) => (
-          <motion.circle
-            key={`high-${arc.id}`}
-            cx={0}
-            cy={0}
-            r={radius + 6}
-            fill="transparent"
-            stroke={arc.color}
-            strokeOpacity={isActive ? 0.85 : 0.45}
-            strokeWidth={isActive ? 6 : 2.5}
-            strokeLinecap="round"
-            strokeDasharray={arc.dashArray}
-            strokeDashoffset={arc.dashOffset}
-            transform="rotate(-90)"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isActive ? 1 : 0.7 }}
-            transition={{ delay: 0.02, duration: 0.25 }}
-          />
-        ))}
+        {arcsHigh.map((arcItem, index) => {
+          const ringCenter = radius + 6;
+          const thickness = 5;
+          const innerRadius = ringCenter - thickness / 2;
+          const outerRadius = ringCenter + thickness / 2;
+          const arcData = {
+            innerRadius,
+            outerRadius,
+            startAngle: arcItem.startAngle,
+            endAngle: arcItem.endAngle,
+            padAngle: 0
+          };
+          const dPath = d3.arc()(arcData) || '';
+          return (
+            <motion.path
+              key={`high-${arcItem.data.id}`}
+              d={dPath}
+              fill={arcItem.data.color}
+              stroke="none"
+              initial={{ opacity: 0, pathLength: 0 }}
+              animate={{ opacity: isActive ? 0.85 : 0.45, pathLength: 1 }}
+              transition={{ delay: 0.02 + index * 0.05, duration: 0.25 }}
+            />
+          );
+        })}
         <motion.text
           x={0}
           y={-radius - 24}
           textAnchor="middle"
           fontSize={24}
-          fill="rgba(148,163,184,0.85)"
+          fill="rgba(148,163,184,0.85)" 
         >
           {label}
         </motion.text>
