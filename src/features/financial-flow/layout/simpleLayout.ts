@@ -4,7 +4,7 @@ import {
 } from "@/shared/presentation";
 
 const GAP_Y = 250;
-const GAP_X = 460;
+const GAP_X = 500;
 const MARGIN_X = 80;
 const MARGIN_Y = 60;
 

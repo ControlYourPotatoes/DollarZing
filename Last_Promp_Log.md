@@ -10,3 +10,86 @@ Earlier you were having issues making edits in the documents, lets see if you ca
 Ive installed d3, but maybe need to update the normalizer for the moment if needed for this implementation. 
 
 /workspaces/DollarZing/.agent-os/specs/2025-09-19-presentation-front-end-refactor/new_workflow.md
+
+
+
+▌ ok, i think i didnt clarify. I want 3 states tecnically, because I want onhover to be expandend, The total node being expanded by default is fine so it
+▌ toggles of when i hover the other 3 nodes, but the 3 distribution nodes need to be in there compact mode unless hovered on the node. The third states I
+▌ guess is when I hover on a specific ring. I want more details about that ring when I do and some animations will happen but not yet. lets we get that
+▌ first, Then I mentioned earlier about the order of the rings. theres 3, for some reason the base white ring is always full, and in center most ring, this
+▌ one will usally have the lowest value unless we start making worst case scenerios the others are ment to be higher value, currently the mid ring is less
+▌ value but thats due to a dataset issue, i dont know what scenerio combination is using but i need to re run the simulation for it. Given the expected
+▌ range of the rings where the base is one will have the lowest value, i thought that on hover of the ring the base moves to the most outer ring, due to its
+▌ lower value, so when active the lowest value ring has a transition to move outside while switching to expanded mode. Do you think this effect is possible?
+
+To clarify there two active states the node itself with all the rings will add the opacity and everything pretyy much the same
+▌ but i want it to switch the order of the rings drawn to be lowest value to higher, maybe some cool tapers but order switch will be a cool transition sense
+▌ the smallest one will be the BaseScenerio or the white ring that will be in the center when collapsed right, but there a third active state per ring, i
+▌ want to be able to hover on a ring and it would expand some details drawn on it, the ring itself it posible maybe it also increases the gap and add things
+▌ in the inner and outer circumfarance right, pretty cool.
+
+▌ ▌ lower value, so when active the lowest value ring has a transition to move outside while switching to expanded mode. Do you think this effect is
+▌ possible? To clarify there two active states the node itself with all the rings will add the opacity and everything pretyy much the same but i want it to
+▌ switch the order of the rings drawn to be lowest value to higher, maybe some cool tapers but order switch will be a cool transition sense the smallest one
+▌ will be the BaseScenerio or the white ring that will be in the center when collapsed right, but there a third active state per ring, i want to be able to
+▌ hover on a ring and it would expand some details drawn on it, the ring itself it posible maybe it also increases the gap and add things in the inner and
+▌ outer circumfarance right, pretty cool. so there two on hover trigger, on the node to expand and fix order and per ring. Do you think its possible
+
+> Absolutely doable. Here’s how I’d tackle it:
+  ring-hover (only the hovered ring expands).
+  - Keep the rings’ data in an array of objects with value, id, etc. When the node enters the hover state, sort a derived copy of that array so the lowest
+  value becomes the outer ring; for the collapsed state render the original order. That lets you animate the order swap without mutating the base dataset.
+  - Animating the base ring sliding from center to outer edge is easiest if the rings are rendered as separate SVG groups: you can interpolate radius/
+  position while you swap the sorted array.
+
+  If you have the current component handy, I can sketch the exact prop/state wiring or prototype the animation.
+
+▌ /workspaces/DollarZing/src/features/financial-flow/primitives/WorkflowNode.tsx Do you think we need a useAnimation hook, as there is going to be more when
+▌ simulation is in  "Running state", there also different time scales the animation will run too aswell.
+
+• Explored
+  └ List ls
+    Read WorkflowNode.tsx
+
+> Adding a useAnimation (or a reusable animation controller hook) will make life easier once you introduce those extra states and time scales. Right now the
+  node reacts directly inside the render (sortedDescriptors, inline motion props), which keeps things tidy for the current transitions. But as soon as you:
+
+  - juggle three view states (default, node-hover, ring-hover) with reordering,
+  - run “simulation running” timelines that need to sync across rings/nodes,
+  - adjust easing/duration based on time-scale or scenario type,
+  the logic will sprawl unless you centralize state + animation sequencing.
+
+
+  We don’t have to refactor immediately, but carving out that hook sooner rather than later keeps the component from ballooning, and gives you a clean spot
+  to plug in the “running state” choreography. Let me know if you want me to scaffold the hook and wire it into WorkflowNode.tsx.
+
+▌ sure, id read the time scale and the timelinescrubber more details about the "Running" state of the simulation, the other part i was considering is a
+▌ state manager.
+
+• Explored
+  └ Search TimelineScrubber
+    Search time scale
+    Read TimelineScrubber.tsx
+
+> Tying the node animation system into the existing timeline + time-scale plumbing is straightforward, and it’s a good moment to introduce both a
+  useWorkflowNodeAnimation helper and a small state manager slice.
+
+  - useAnimation hook: wrap Framer’s useAnimation (or even a tiny wrapper around it) so each ring can subscribe to a shared nodeState payload. The hook can
+  accept { nodeId, ringId, viewState, isSimulationRunning, timeScale } and return controls plus derived layout targets (sorted order, ring radii, opacity).
+  Because it’s a hook, you can trigger async sequences when the simulation toggles into “Running” or when the timeline day changes.
+  - Time-scale awareness: the TimelineScrubber already publishes time-scale jumps via getTimeScaleForIndex and getStepForScale (src/features/timeline/
+  components/TimelineScrubber.tsx:54). Expose that through the presentation-timeline store (usePresentationTimelineStore) so the node hook can read the
+  current scale and choose durations/easing (fast for daily, slow for monthly, etc.).
+  - State manager: extend the existing Zustand store (@/shared/hooks/presentationTimelineStore.ts—the same store the scrubber uses) with a new slice
+  holding:
+      - hoveredNodeId, hoveredRingId
+      - nodeViewState map keyed by node id (compact | standard | expanded)
+      - isSimulationRunning, timeScale
+        That keeps hover, playback, and simulation flags in one consistent source, so your hook can subscribe to just the pieces it cares about.
+  - Component wiring (src/features/financial-flow/primitives/WorkflowNode.tsx): replace inline sortedDescriptors with values returned from the hook,
+  and feed controls into motion components, e.g. <motion.g animate={controls.node}> and <motion.path animate={controls.rings[ringId]}>. On hover events,
+  dispatch to the store instead of setting local state.
+  - Future timeline integration: when playback advances (setActiveDay in the scrubber), fire a store action that the animation hook listens to. That’s where
+  you’ll later branch on time scale or “Running” to kick off multi-step transitions.
+
+  If you’d like, I can scaffold the useWorkflowNodeAnimation hook and the Zustand slice to show how they connect.
