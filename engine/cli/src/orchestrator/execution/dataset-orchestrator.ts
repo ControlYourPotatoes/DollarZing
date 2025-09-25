@@ -599,8 +599,8 @@ export class DatasetOrchestrator {
       growthRateScaling: {
         playerCountMultiplier: {
           15: 0.5, // Low growth: 50% of base players
-          35: 1.0, // Mid growth: 100% of base players
-          60: 2.0, // High growth: 200% of base players
+          35: 0.5, // Mid growth: 100% of base players
+          60: 0.5, // High growth: 200% of base players
         },
         durationMultiplier: {
           15: 1.0, // All simulations run for same duration
