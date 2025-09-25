@@ -255,7 +255,7 @@ describe("GameEngineSimulator", () => {
       // Verify data consistency
       const dayResult = results.dailyResults[0];
       expect(dayResult.playerStatistics.totalPlayers).toBe(2);
-      expect(dayResult.playerStatistics.totalDonationsFunds).toBe(80.0); // 2 players * $40 (updated calculation)
+      expect(dayResult.playerStatistics.totalCharityContributions).toBe(80.0); // 2 players * $40 (updated calculation)
     });
   });
 });
