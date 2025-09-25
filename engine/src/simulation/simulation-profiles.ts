@@ -119,7 +119,8 @@ function buildSimulationConfig(
     enableProgressReporting: overrides.enableProgressReporting ?? false,
     growthModel: {
       adoptionRate:
-        overrides.growthModel?.adoptionRate ?? DEFAULT_GROWTH_MODEL.adoptionRate,
+        overrides.growthModel?.adoptionRate ??
+        DEFAULT_GROWTH_MODEL.adoptionRate,
       baseMarket:
         overrides.growthModel?.baseMarket ?? DEFAULT_GROWTH_MODEL.baseMarket,
       midpointDay:
@@ -158,7 +159,8 @@ function normalizeStrategies(
   }
 
   return {
-    [CashOutStrategy.CONSERVATIVE]: merged[CashOutStrategy.CONSERVATIVE] / total,
+    [CashOutStrategy.CONSERVATIVE]:
+      merged[CashOutStrategy.CONSERVATIVE] / total,
     [CashOutStrategy.BALANCED]: merged[CashOutStrategy.BALANCED] / total,
     [CashOutStrategy.AGGRESSIVE]: merged[CashOutStrategy.AGGRESSIVE] / total,
   };

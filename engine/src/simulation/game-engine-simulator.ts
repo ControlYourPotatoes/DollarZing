@@ -70,10 +70,11 @@ export interface SimulationProgress {
  */
 export interface PlayerStatistics {
   totalPlayers: number;
-  activePlayers: number;
-  retiredPlayers: number;
-  totalDonationsFunds: number;
-  totalWinningsFunds: number;
+  activePlayers: number; // DAU target - number of players we aim to keep active daily
+  retiredPlayers: number; // Players not in DAU target (inactive/retired)
+  completedRunsPlayers: number; // Players who completed their runs (cashed out or eliminated)
+  totalCharityContributions: number; // Duplicate of revenueStatistics.totalCharityContributions for player charts
+  totalPlayerPayouts: number; // Duplicate of revenueStatistics.totalPlayerPayouts for player charts
   totalProgressionFunds: number;
   averageGamesPerPlayer: number;
   playerRetirementRate: number;
@@ -99,10 +100,11 @@ export interface RevenueStatistics {
 export interface GameStatistics {
   totalGames: number;
   averageGamesPerDay: number;
-  totalVirtualDollars: number;
+  pooledVirtualDollars: number; // Virtual dollars currently in matching pool
+  totalVirtualDollars: number; // Total virtual dollars created throughout simulation
   totalRunsCreated: number;
   completedRuns: number;
-  activeRuns: number;
+  activeRuns: number; // Same as pooledVirtualDollars - runs currently in pool
   jackpotsWon: number;
   averageRunLength: number;
 }
@@ -115,6 +117,7 @@ export interface DailyResult {
   playerStatistics: PlayerStatistics;
   gameStatistics: GameStatistics;
   revenueStatistics: RevenueStatistics;
+  newPlayers: number; // Number of new players added this day
 }
 
 /**
@@ -176,6 +179,8 @@ export class GameEngineSimulator {
     totalRunsCreated: 0,
   };
   private runCreatedSubscription: EventSubscription | null = null;
+  private dailyNewPlayers: number = 0; // Track new players for current day
+  private dayCompletedSubscription: EventSubscription | null = null;
 
   constructor(
     gameMatchingEngine: GameMatchingEngine,
@@ -233,6 +238,11 @@ export class GameEngineSimulator {
       EVENT_TYPES.NEW_RUN_CREATED,
       this.handleRunCreated.bind(this)
     );
+
+    this.dayCompletedSubscription = this.eventBus.on<any>(
+      EVENT_TYPES.DAY_COMPLETED,
+      this.handleDayCompleted.bind(this)
+    );
   }
 
   private handleRunCreated(_event: NewRunCreatedEvent): void {
@@ -241,6 +251,15 @@ export class GameEngineSimulator {
     }
 
     this.runMetrics.totalRunsCreated += 1;
+  }
+
+  private handleDayCompleted(event: any): void {
+    if (!this.isRunning) {
+      return;
+    }
+
+    // Capture new players count from the day completed event
+    this.dailyNewPlayers = event.newPlayers || 0;
   }
 
   private resetRunMetrics(): void {
@@ -445,9 +464,13 @@ export class GameEngineSimulator {
         playerStatistics: this.getPlayerStatisticsFromState(),
         gameStatistics: this.generateGameStatistics(),
         revenueStatistics: this.generateRevenueStatistics(),
+        newPlayers: this.dailyNewPlayers,
       };
 
       dailyResults.push(dailyResult);
+
+      // Reset daily new players count for next day
+      this.dailyNewPlayers = 0;
 
       // Report progress if enabled
       if (enableProgressReporting && progressCallback) {
@@ -553,26 +576,30 @@ export class GameEngineSimulator {
     // Get totals from PlayerManager when available
     const totalPlayers = this.getTotalPlayersFromRevenueCalc();
     const pm = this.components.playerManager as {
-      getActivePlayerCount?: () => number;
+      getPlayerStatistics?: (config: any) => PlayerStatistics;
     };
-    const activeFromRegistry = pm?.getActivePlayerCount?.();
-    const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
-    const activePlayers =
-      typeof activeFromRegistry === "number" && activeFromRegistry >= 0
-        ? activeFromRegistry
-        : poolStats.totalDollarsInPool;
+
+    // Use PlayerManager's statistics which now includes DAU target
+    const playerStats = pm?.getPlayerStatistics?.({} as any);
+    const activePlayers = playerStats?.activePlayers ?? 0; // DAU target
     const retiredPlayers = Math.max(0, totalPlayers - activePlayers);
+
+    // Get pool stats for progression funds
+    const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
 
     // Get financial data from RevenueCalculator (managed by RevenueTrackingHandler)
     const totalWinningsFunds =
       this.components.revenueCalculator.getPlayerWinnings();
+    const totalCharityContributions =
+      this.components.revenueCalculator.getCharityContributions();
 
     return {
       totalPlayers,
       activePlayers,
       retiredPlayers,
-      totalDonationsFunds: 0, // Tracked via events now
-      totalWinningsFunds,
+      completedRunsPlayers: playerStats?.completedRunsPlayers ?? 0,
+      totalCharityContributions, // Duplicate of revenueStatistics.totalCharityContributions for player charts
+      totalPlayerPayouts: totalWinningsFunds, // Duplicate of revenueStatistics.totalPlayerPayouts for player charts
       totalProgressionFunds: poolStats.dollarsInGame, // Active progression funds
       averageGamesPerPlayer:
         totalPlayers > 0
@@ -621,7 +648,7 @@ export class GameEngineSimulator {
       totalGames / Math.max(this.config.durationDays, 1);
 
     const poolStats = this.components.gameMatchingEngine.getPoolStatistics();
-    const totalVirtualDollars = poolStats.totalDollarsInPool;
+    const pooledVirtualDollars = poolStats.totalDollarsInPool;
     const totalRunsCreated = this.runMetrics.totalRunsCreated;
 
     // In event-driven architecture, we don't have direct access to completed runs
@@ -629,10 +656,11 @@ export class GameEngineSimulator {
     return {
       totalGames,
       averageGamesPerDay,
-      totalVirtualDollars,
+      pooledVirtualDollars, // Virtual dollars currently in matching pool
+      totalVirtualDollars: totalRunsCreated, // Total virtual dollars created throughout simulation
       totalRunsCreated,
       completedRuns: 0, // Would need event tracking
-      activeRuns: poolStats.totalDollarsInPool,
+      activeRuns: pooledVirtualDollars, // Same as pooledVirtualDollars - runs currently in pool
       jackpotsWon: 0, // Would need event tracking
       averageRunLength:
         totalGames > 0
@@ -677,8 +705,9 @@ export class GameEngineSimulator {
       totalPlayers: 0,
       activePlayers: 0,
       retiredPlayers: 0,
-      totalDonationsFunds: 0,
-      totalWinningsFunds: 0,
+      completedRunsPlayers: 0,
+      totalCharityContributions: 0,
+      totalPlayerPayouts: 0,
       totalProgressionFunds: 0,
       averageGamesPerPlayer: 0,
       playerRetirementRate: 0,
@@ -702,6 +731,7 @@ export class GameEngineSimulator {
     return {
       totalGames: 0,
       averageGamesPerDay: 0,
+      pooledVirtualDollars: 0,
       totalVirtualDollars: 0,
       totalRunsCreated: 0,
       completedRuns: 0,
@@ -793,6 +823,10 @@ export class GameEngineSimulator {
     if (this.runCreatedSubscription) {
       this.runCreatedSubscription.unsubscribe();
       this.runCreatedSubscription = null;
+    }
+    if (this.dayCompletedSubscription) {
+      this.dayCompletedSubscription.unsubscribe();
+      this.dayCompletedSubscription = null;
     }
   }
 

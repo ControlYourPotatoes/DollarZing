@@ -204,8 +204,8 @@ describe("PlayerManager", () => {
       expect(stats.totalPlayers).toBe(20);
       expect(stats.activePlayers).toBe(15);
       expect(stats.retiredPlayers).toBe(5);
-      expect(stats.totalDonationsFunds).toBe(1000);
-      expect(stats.totalWinningsFunds).toBe(500);
+      expect(stats.totalCharityContributions).toBe(1000);
+      expect(stats.totalPlayerPayouts).toBe(500);
     });
 
     it("should calculate retirement rate correctly", () => {
