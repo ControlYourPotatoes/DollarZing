@@ -8,6 +8,7 @@ interface WorkflowNodeTooltipProps {
   className?: string;
   style?: CSSProperties;
   side?: "left" | "right";
+  offsetPx?: number;
 }
 
 export function WorkflowNodeTooltip({
@@ -16,6 +17,7 @@ export function WorkflowNodeTooltip({
   className,
   style,
   side = "right",
+  offsetPx,
 }: WorkflowNodeTooltipProps) {
   const dayLabel = dayIndex !== undefined ? dayIndex + 1 : "--";
 
@@ -54,16 +56,17 @@ export function WorkflowNodeTooltip({
     ]
   );
 
+  const offset = offsetPx ?? 16;
   const transform =
     side === "left"
-      ? "translate(calc(-100% - 16px), -50%)"
-      : "translate(16px, -50%)";
+      ? `translate(calc(-100% - ${offset}px), -50%)`
+      : `translate(${offset}px, -50%)`;
   const rootStyle: CSSProperties = {
     ...style,
     transform,
   };
   const rootClassName = [
-    "pointer-events-none absolute max-w-md rounded-md border border-slate-800 bg-slate-900/85 px-4 py-3 text-xs text-slate-200 shadow-lg",
+    "pointer-events-none absolute max-w-lg rounded-md border border-slate-800 bg-slate-900/85 px-5 py-3 text-xs text-slate-200 shadow-lg",
     className,
   ]
     .filter(Boolean)

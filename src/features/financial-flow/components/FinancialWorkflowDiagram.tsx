@@ -25,13 +25,29 @@ export function FinancialWorkflowDiagram({
         x: number;
         y: number;
         side: "left" | "right";
+        offset: number;
       }
     | null
   >(null);
 
+  const displayNodes = useMemo(() => {
+    return nodes.map((node) => {
+      let adjustedX = node.x;
+      let adjustedY = node.y;
+      if (node.id === "platform") {
+        adjustedX += 10;
+      }
+      return {
+        ...node,
+        x: adjustedX,
+        y: adjustedY,
+      };
+    });
+  }, [nodes]);
+
   const hoveredNode = useMemo(
-    () => nodes.find((candidate) => candidate.id === hoveredId),
-    [hoveredId, nodes]
+    () => displayNodes.find((candidate) => candidate.id === hoveredId),
+    [hoveredId, displayNodes]
   );
 
   if (!day) {
@@ -44,8 +60,8 @@ export function FinancialWorkflowDiagram({
 
   // Compute dynamic viewBox to fit all nodes/links comfortably
   const padding = 35;
-  const bounds = nodes.length
-    ? nodes.reduce(
+  const bounds = displayNodes.length
+    ? displayNodes.reduce(
         (acc, n) => {
           acc.minX = Math.min(acc.minX, n.x - n.radius);
           acc.maxX = Math.max(acc.maxX, n.x + n.radius);
@@ -84,11 +100,13 @@ export function FinancialWorkflowDiagram({
     const anchorX = offsetX + normalizedX;
     const anchorY = offsetY + normalizedY;
     const side: "left" | "right" =
-      normalizedX > svgRect.width * 0.55
-        ? "left"
-        : normalizedX < svgRect.width * 0.45
-        ? "right"
-        : "right";
+      normalizedX > svgRect.width * 0.55 ? "left" : "right";
+
+    const nodeRadiusPx = Math.max(
+      0,
+      (hoveredNode.radius / Math.max(1, vbW)) * svgRect.width
+    );
+    const horizontalOffset = Math.max(28, nodeRadiusPx + 24);
 
     const paddingY = 20;
     const clampedY = Math.max(
@@ -100,8 +118,9 @@ export function FinancialWorkflowDiagram({
       x: anchorX,
       y: clampedY,
       side,
+      offset: horizontalOffset,
     });
-  }, [hoveredNode, vbX, vbY, vbW, vbH]);
+  }, [hoveredNode, vbX, vbW]);
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg">
@@ -137,7 +156,7 @@ export function FinancialWorkflowDiagram({
           </filter>
         </defs>
         {/* Debug: draw crosshairs at node positions to verify clipping */}
-        {nodes.map((n) => (
+        {displayNodes.map((n) => (
           <g key={`debug-${n.id}`} opacity={0.25}>
             <line
               x1={n.x - 8}
@@ -168,39 +187,25 @@ export function FinancialWorkflowDiagram({
             }
           />
         ))}
-        {nodes.map((node) => {
-          // Apply individual offsets (add more ifs for other nodes)
-          let adjustedX = node.x;
-          let adjustedY = node.y;
-          if (node.id === "platform") {
-            adjustedX += 10;  // Move right by 10px (positive x)
-            adjustedY += 0;  // Uncomment/example: Move down by 20px (positive y)
-          }
-          // Example for another node:
-          // if (node.id === "platform") {
-          //   adjustedX -= 15;  // Move left
-          // }
-
-        return (
-            <WorkflowNode
-              key={node.id}
-              id={node.id}
-              label={node.label}
-              aggregateValue={node.aggregateValue}
-              layers={node.layers}
-              midSegments={node.midSegments}
-              highSegments={node.highSegments}
-              baseValue={node.baseValue}
-              midValue={node.midValue}
-              highValue={node.highValue}
-              x={adjustedX}
-              y={adjustedY}
-              radius={node.radius}
-              isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
-              onHover={setHoveredId}
-            />
-          );
-        })}
+        {displayNodes.map((node) => (
+          <WorkflowNode
+            key={node.id}
+            id={node.id}
+            label={node.label}
+            aggregateValue={node.aggregateValue}
+            layers={node.layers}
+            midSegments={node.midSegments}
+            highSegments={node.highSegments}
+            baseValue={node.baseValue}
+            midValue={node.midValue}
+            highValue={node.highValue}
+            x={node.x}
+            y={node.y}
+            radius={node.radius}
+            isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
+            onHover={setHoveredId}
+          />
+        ))}
         </motion.svg>
         {hoveredNode && tooltipPosition && (
           <WorkflowNodeTooltip
