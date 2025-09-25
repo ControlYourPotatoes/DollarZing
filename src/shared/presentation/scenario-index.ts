@@ -27,17 +27,7 @@ function dedupeAndSort(values: number[]): number[] {
   return Array.from(new Set(values)).sort((a, b) => a - b);
 }
 
-export interface ScenarioIndex {
-  manifest: readonly PresentationManifestEntry[];
-  axes: {
-    adoptionRate: readonly number[];
-    cashOutStrategy: readonly number[];
-    charityShare: readonly number[];
-  };
-  byId: ReadonlyMap<string, PresentationManifestEntry>;
-  byCoordinateKey: ReadonlyMap<string, PresentationManifestEntry>;
-  byAnchorKey: ReadonlyMap<string, PresentationManifestEntry>; // New: anchor key lookup
-}
+// Note: ScenarioIndex shape is declared in ./types. This module only builds/queries it.
 
 export function buildScenarioIndex(input: unknown): ScenarioIndex {
   try {

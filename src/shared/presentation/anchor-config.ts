@@ -16,35 +16,23 @@ export const ANCHOR_LEVELS = {
   charity: [10, 20, 30] as const,
 } as const;
 
-export const PARAM_TO_COORD_MAP: Record<number | string, CoordinateMapping> = {
-  // Growth to adoptionRate
-  15: { adoptionRate: 0.01 },
-  35: { adoptionRate: 0.1 },
-  60: { adoptionRate: 0.5 },
-  // Risk to cashOutStrategy
-  low: { cashOutStrategy: 0.0 },
-  mid: { cashOutStrategy: 0.5 },
-  high: { cashOutStrategy: 1.0 },
-  // Charity to charityShare
-  10: { charityShare: 0.1 },
-  20: { charityShare: 0.2 },
-  30: { charityShare: 0.3 },
+// Forward maps from discrete params → normalized coordinates
+const GROWTH_TO_ADOPTION: Record<number, number> = { 15: 0, 35: 0.5, 60: 1 };
+const RISK_TO_CASHOUT: Record<"low" | "mid" | "high", number> = {
+  low: 0,
+  mid: 0.5,
+  high: 1,
 };
+const CHARITY_TO_SHARE: Record<number, number> = { 10: 0, 20: 0.5, 30: 1 };
 
-export const COORD_TO_PARAM_MAP: Record<number, number | string> = {
-  // adoptionRate to growth
-  0.01: 15,
-  0.1: 35,
-  0.5: 60,
-  // cashOutStrategy to risk
-  0.0: "low",
+// Reverse maps from normalized coordinates → discrete params
+const ADOPTION_TO_GROWTH: Record<number, number> = { 0: 15, 0.5: 35, 1: 60 };
+const CASHOUT_TO_RISK: Record<number, "low" | "mid" | "high"> = {
+  0: "low",
   0.5: "mid",
-  1.0: "high",
-  // charityShare to charity
-  0.1: 10,
-  0.2: 20,
-  0.3: 30,
+  1: "high",
 };
+const SHARE_TO_CHARITY: Record<number, number> = { 0: 10, 0.5: 20, 1: 30 };
 
 export function getAnchorKey(params: AnchorParameters): string {
   return `growth-${params.growth}_risk-${params.risk}_charity-${params.charity}`;
@@ -65,18 +53,18 @@ export function coordinatesToAnchorParams(
   coords: CoordinateMapping
 ): AnchorParameters {
   return {
-    growth: COORD_TO_PARAM_MAP[coords.adoptionRate] as number,
-    risk: COORD_TO_PARAM_MAP[coords.cashOutStrategy] as "low" | "mid" | "high",
-    charity: COORD_TO_PARAM_MAP[coords.charityShare] as number,
+    growth: ADOPTION_TO_GROWTH[coords.adoptionRate],
+    risk: CASHOUT_TO_RISK[coords.cashOutStrategy],
+    charity: SHARE_TO_CHARITY[coords.charityShare],
   };
 }
 
 export function anchorParamsToCoordinates(
   params: AnchorParameters
 ): CoordinateMapping {
-  const coordGrowth = PARAM_TO_COORD_MAP[params.growth].adoptionRate;
-  const coordRisk = PARAM_TO_COORD_MAP[params.risk].cashOutStrategy;
-  const coordCharity = PARAM_TO_COORD_MAP[params.charity].charityShare;
+  const coordGrowth = GROWTH_TO_ADOPTION[params.growth];
+  const coordRisk = RISK_TO_CASHOUT[params.risk];
+  const coordCharity = CHARITY_TO_SHARE[params.charity];
   return {
     adoptionRate: coordGrowth,
     cashOutStrategy: coordRisk,
@@ -88,11 +76,6 @@ export function getRelativeAnchor(
   baseParams: AnchorParameters,
   relative: "mid" | "high"
 ): AnchorParameters {
-  const growthIndex = ANCHOR_LEVELS.growth.findIndex(
-    (g) => g === baseParams.growth
-  );
-  const riskIndex = ANCHOR_LEVELS.risk.findIndex((r) => r === baseParams.risk);
-
   const relativeGrowthIndex =
     relative === "mid"
       ? Math.floor(ANCHOR_LEVELS.growth.length / 2) // Mid: index 1 (35)
@@ -107,5 +90,21 @@ export function getRelativeAnchor(
     growth: ANCHOR_LEVELS.growth[relativeGrowthIndex],
     risk: ANCHOR_LEVELS.risk[relativeRiskIndex],
     charity: baseParams.charity, // Keep base charity
+  };
+}
+
+/**
+ * Compute an absolute anchor for a given level while preserving the base charity.
+ * Useful for UI controls that directly switch baseline among low/mid/high.
+ */
+export function getAbsoluteAnchor(
+  baseParams: AnchorParameters,
+  level: "low" | "mid" | "high"
+): AnchorParameters {
+  const idx = level === "low" ? 0 : level === "mid" ? 1 : 2;
+  return {
+    growth: ANCHOR_LEVELS.growth[idx],
+    risk: ANCHOR_LEVELS.risk[idx],
+    charity: baseParams.charity,
   };
 }

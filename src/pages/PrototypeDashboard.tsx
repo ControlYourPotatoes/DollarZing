@@ -5,13 +5,13 @@ import { resolveSnapshotUrl, resolvePublicPath, joinUrl, defaultDatasetsBase } f
 import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 import { TimelineScrubber, useActiveTimelineDay } from "@/features/timeline";
 import { FinancialWorkflowDiagram } from "@/features/financial-flow";
+// import { useActiveTimelineScenario } from "@/features/timeline";
+import { useComparisonSelectionStore } from "@/shared/hooks/comparisonSelectionStore";
 
 // Optional runtime overrides to fetch manifest/snapshots from an external base or per-scenario URLs
-const {
-  VITE_PRESENTATION_BASE_URL,
-  VITE_PRESENTATION_MANIFEST_URL,
-  VITE_PRESENTATION_OVERRIDES,
-} = ((import.meta as any).env ?? {}) as Record<string, string | undefined>;
+const { VITE_PRESENTATION_MANIFEST_URL } = (
+  (import.meta as any).env ?? {}
+) as Record<string, string | undefined>;
 
 const MANIFEST_CANDIDATES: string[] = [
   VITE_PRESENTATION_MANIFEST_URL ? resolvePublicPath(VITE_PRESENTATION_MANIFEST_URL) : "",
@@ -35,13 +35,18 @@ const PrototypeDashboard = () => {
   const setActiveDay = usePresentationTimelineStore(
     (state) => state.setActiveDay
   );
-  const manifestIndex = usePresentationTimelineStore((state) => state.manifest);
+  const manifestIndex = usePresentationTimelineStore((state) => state.index);
   const scenarios = usePresentationTimelineStore((state) => state.scenarios);
   const activeScenarioId = usePresentationTimelineStore(
     (state) => state.activeScenarioId
   );
 
   const activeDay = useActiveTimelineDay();
+  // const activeScenario = useActiveTimelineScenario();
+  const midSelection = useComparisonSelectionStore((s) => s.midScenarioId);
+  const highSelection = useComparisonSelectionStore((s) => s.highScenarioId);
+  const setMidSelection = useComparisonSelectionStore((s) => s.setMidScenarioId);
+  const setHighSelection = useComparisonSelectionStore((s) => s.setHighScenarioId);
 
   const manifestEntries = useMemo(
     () => manifestIndex?.manifest ?? [],
@@ -122,6 +127,21 @@ const PrototypeDashboard = () => {
     [ensureScenarioLoaded, manifestIndex, setActiveDay, setActiveScenario]
   );
 
+  // Ensure currently selected comparison scenarios are loaded if chosen
+  useEffect(() => {
+    if (!manifestIndex) return;
+    (async () => {
+      if (midSelection) {
+        const entry = manifestIndex.byId.get(midSelection);
+        if (entry) await ensureScenarioLoaded(entry);
+      }
+      if (highSelection) {
+        const entry = manifestIndex.byId.get(highSelection);
+        if (entry) await ensureScenarioLoaded(entry);
+      }
+    })();
+  }, [ensureScenarioLoaded, highSelection, manifestIndex, midSelection]);
+
   const stats = useMemo(() => {
     if (!activeDay) {
       return null;
@@ -191,6 +211,39 @@ const PrototypeDashboard = () => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">
+              <span className="block text-xs uppercase tracking-widest text-slate-400">Comparisons</span>
+              <div className="mt-2 flex gap-3">
+                <label className="text-xs text-slate-400">Mid</label>
+                <select
+                  className="w-64 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none"
+                  value={midSelection ?? ""}
+                  onChange={(e) => setMidSelection(e.target.value || null)}
+                >
+                  <option value="">Default (mid/mid)</option>
+                  {manifestEntries.map((entry) => (
+                    <option key={entry.scenarioId} value={entry.scenarioId}>
+                      {entry.scenarioId}
+                    </option>
+                  ))}
+                </select>
+
+                <label className="ml-4 text-xs text-slate-400">High</label>
+                <select
+                  className="w-64 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none"
+                  value={highSelection ?? ""}
+                  onChange={(e) => setHighSelection(e.target.value || null)}
+                >
+                  <option value="">Default (high/high)</option>
+                  {manifestEntries.map((entry) => (
+                    <option key={entry.scenarioId} value={entry.scenarioId}>
+                      {entry.scenarioId}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 

@@ -5,13 +5,14 @@ import {
   NormalizedPresentationScenario,
   PresentationWorkflowLink,
   PresentationWorkflowNode,
+  PresentationWorkflowLayer,
 } from "@/shared/presentation";
 import { layoutWorkflow } from "../layout/simpleLayout";
 import {
   useActiveTimelineDay,
   useActiveTimelineScenario,
 } from "@/features/timeline";
-import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
+// import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 import { useScenarioComparisons } from "@/shared/hooks/useScenarioComparisons";
 
 interface PositionedNode extends PresentationWorkflowNode {
@@ -53,8 +54,8 @@ function computePositions(
 export function useWorkflowData(): WorkflowLayoutResult {
   const scenario = useActiveTimelineScenario();
   const day = useActiveTimelineDay();
-  const manifest = usePresentationTimelineStore((s) => s.manifest);
-  const scenariosMap = usePresentationTimelineStore((s) => s.scenarios);
+  // const manifest = usePresentationTimelineStore((s) => s.index);
+  // const scenariosMap = usePresentationTimelineStore((s) => s.scenarios);
   const { mid: midScenario, high: highScenario } = useScenarioComparisons();
 
   return useMemo(() => {

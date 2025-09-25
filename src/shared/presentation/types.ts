@@ -175,6 +175,7 @@ export interface NormalizedPresentationScenario {
 export interface ScenarioIndex {
   byId: Map<string, PresentationManifestEntry>;
   byCoordinateKey: Map<string, PresentationManifestEntry>;
+  byAnchorKey: Map<string, PresentationManifestEntry>;
   manifest: PresentationManifest;
   axes: {
     adoptionRate: number[];

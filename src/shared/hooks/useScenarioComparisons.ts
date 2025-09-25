@@ -12,9 +12,9 @@ import {
   coordinatesToAnchorParams,
   getRelativeAnchor,
   getAnchorKey,
-  AnchorParameters,
 } from "@/shared/presentation/anchor-config";
 import { findScenarioByAnchorKey } from "@/shared/presentation/scenario-index";
+import { useComparisonSelectionStore } from "./comparisonSelectionStore";
 
 export interface ComparisonScenarios {
   base?: NormalizedPresentationScenario;
@@ -33,6 +33,8 @@ export function useScenarioComparisons(): ComparisonScenarios {
     (s) => s.activeScenarioId
   );
   const upsertScenario = usePresentationTimelineStore((s) => s.upsertScenario);
+  const selectedMidId = useComparisonSelectionStore((s) => s.midScenarioId);
+  const selectedHighId = useComparisonSelectionStore((s) => s.highScenarioId);
 
   const base = activeScenarioId ? scenarios[activeScenarioId] : undefined;
 
@@ -44,17 +46,24 @@ export function useScenarioComparisons(): ComparisonScenarios {
       // Parse base coordinates to anchor params
       const baseParams = coordinatesToAnchorParams(base.coordinates);
 
-      // Compute relative anchor params (keep base charity)
-      const midParams = getRelativeAnchor(baseParams, "mid");
-      const highParams = getRelativeAnchor(baseParams, "high");
-
-      // Generate anchor keys
-      const midKey = getAnchorKey(midParams);
-      const highKey = getAnchorKey(highParams);
-
+      // Determine target entries from either explicit selections or relative defaults
       const candidates: PresentationManifestEntry[] = [];
-      const midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
-      const highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
+      let midEntry: PresentationManifestEntry | undefined;
+      let highEntry: PresentationManifestEntry | undefined;
+      if (selectedMidId) {
+        midEntry = manifestIndex.byId.get(selectedMidId);
+      } else {
+        const midParams = getRelativeAnchor(baseParams, "mid");
+        const midKey = getAnchorKey(midParams);
+        midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
+      }
+      if (selectedHighId) {
+        highEntry = manifestIndex.byId.get(selectedHighId);
+      } else {
+        const highParams = getRelativeAnchor(baseParams, "high");
+        const highKey = getAnchorKey(highParams);
+        highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
+      }
 
       if (midEntry) candidates.push(midEntry);
       if (highEntry) candidates.push(highEntry);
@@ -78,7 +87,7 @@ export function useScenarioComparisons(): ComparisonScenarios {
     return () => {
       cancelled = true;
     };
-  }, [manifestIndex, base, upsertScenario, scenarios]);
+  }, [manifestIndex, base, upsertScenario, scenarios, selectedMidId, selectedHighId]);
 
   return useMemo(() => {
     if (!manifestIndex || !base) return { base };
@@ -86,24 +95,26 @@ export function useScenarioComparisons(): ComparisonScenarios {
     // Parse base params
     const baseParams = coordinatesToAnchorParams(base.coordinates);
 
-    // Compute relative anchors
-    const midParams = getRelativeAnchor(baseParams, "mid");
-    const highParams = getRelativeAnchor(baseParams, "high");
-
-    // Generate keys and lookup
-    const midKey = getAnchorKey(midParams);
-    const highKey = getAnchorKey(highParams);
-
-    const midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
-    const highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
-
-    const midId = midEntry?.scenarioId;
-    const highId = highEntry?.scenarioId;
+    // Resolve final mid/high ids: explicit overrides first, then relative defaults
+    let midId: string | undefined = selectedMidId || undefined;
+    let highId: string | undefined = selectedHighId || undefined;
+    if (!midId) {
+      const midParams = getRelativeAnchor(baseParams, "mid");
+      const midKey = getAnchorKey(midParams);
+      const midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
+      midId = midEntry?.scenarioId;
+    }
+    if (!highId) {
+      const highParams = getRelativeAnchor(baseParams, "high");
+      const highKey = getAnchorKey(highParams);
+      const highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
+      highId = highEntry?.scenarioId;
+    }
 
     return {
       base,
       mid: midId ? scenarios[midId] : undefined,
       high: highId ? scenarios[highId] : undefined,
     };
-  }, [manifestIndex, base, scenarios]);
+  }, [manifestIndex, base, scenarios, selectedMidId, selectedHighId]);
 }
