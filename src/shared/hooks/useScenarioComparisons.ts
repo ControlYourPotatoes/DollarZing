@@ -7,7 +7,14 @@ import {
 import { usePresentationTimelineStore } from "./presentationTimelineStore";
 import { loadPresentationSnapshot } from "@/shared/presentation";
 import { resolveSnapshotUrl } from "@/shared/presentation/url-resolver";
-import { getCoordinateKey } from "@/shared/presentation/scenario-index";
+// Remove getCoordinateKey import, add anchor imports
+import {
+  coordinatesToAnchorParams,
+  getRelativeAnchor,
+  getAnchorKey,
+  AnchorParameters,
+} from "@/shared/presentation/anchor-config";
+import { findScenarioByAnchorKey } from "@/shared/presentation/scenario-index";
 
 export interface ComparisonScenarios {
   base?: NormalizedPresentationScenario;
@@ -20,9 +27,11 @@ export interface ComparisonScenarios {
  * are loaded alongside the active scenario. Returns references if present.
  */
 export function useScenarioComparisons(): ComparisonScenarios {
-  const manifest = usePresentationTimelineStore((s) => s.manifest);
+  const manifestIndex = usePresentationTimelineStore((s) => s.index); // Assuming store has updated index with byAnchorKey
   const scenarios = usePresentationTimelineStore((s) => s.scenarios);
-  const activeScenarioId = usePresentationTimelineStore((s) => s.activeScenarioId);
+  const activeScenarioId = usePresentationTimelineStore(
+    (s) => s.activeScenarioId
+  );
   const upsertScenario = usePresentationTimelineStore((s) => s.upsertScenario);
 
   const base = activeScenarioId ? scenarios[activeScenarioId] : undefined;
@@ -30,16 +39,23 @@ export function useScenarioComparisons(): ComparisonScenarios {
   useEffect(() => {
     let cancelled = false;
     async function ensureLoaded() {
-      if (!manifest || !base) return;
-      const charity = base.coordinates.charityShare;
-      const mk = (a: number, c: number) => getCoordinateKey({
-        adoptionRate: a,
-        cashOutStrategy: c,
-        charityShare: charity,
-      });
+      if (!manifestIndex || !base) return;
+
+      // Parse base coordinates to anchor params
+      const baseParams = coordinatesToAnchorParams(base.coordinates);
+
+      // Compute relative anchor params (keep base charity)
+      const midParams = getRelativeAnchor(baseParams, "mid");
+      const highParams = getRelativeAnchor(baseParams, "high");
+
+      // Generate anchor keys
+      const midKey = getAnchorKey(midParams);
+      const highKey = getAnchorKey(highParams);
+
       const candidates: PresentationManifestEntry[] = [];
-      const midEntry = manifest.byCoordinateKey.get(mk(0.5, 0.5));
-      const highEntry = manifest.byCoordinateKey.get(mk(1, 1));
+      const midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
+      const highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
+
       if (midEntry) candidates.push(midEntry);
       if (highEntry) candidates.push(highEntry);
 
@@ -47,7 +63,9 @@ export function useScenarioComparisons(): ComparisonScenarios {
         if (cancelled) return;
         if (scenarios[entry.scenarioId]) continue;
         try {
-          const snapshot = await loadPresentationSnapshot(resolveSnapshotUrl(entry));
+          const snapshot = await loadPresentationSnapshot(
+            resolveSnapshotUrl(entry)
+          );
           if (cancelled) return;
           upsertScenario(snapshot);
         } catch (err) {
@@ -60,23 +78,32 @@ export function useScenarioComparisons(): ComparisonScenarios {
     return () => {
       cancelled = true;
     };
-  }, [manifest, base, upsertScenario, scenarios]);
+  }, [manifestIndex, base, upsertScenario, scenarios]);
 
   return useMemo(() => {
-    if (!manifest || !base) return { base };
-    const charity = base.coordinates.charityShare;
-    const mk = (a: number, c: number) => getCoordinateKey({
-      adoptionRate: a,
-      cashOutStrategy: c,
-      charityShare: charity,
-    });
-    const midId = manifest.byCoordinateKey.get(mk(0.5, 0.5))?.scenarioId;
-    const highId = manifest.byCoordinateKey.get(mk(1, 1))?.scenarioId;
+    if (!manifestIndex || !base) return { base };
+
+    // Parse base params
+    const baseParams = coordinatesToAnchorParams(base.coordinates);
+
+    // Compute relative anchors
+    const midParams = getRelativeAnchor(baseParams, "mid");
+    const highParams = getRelativeAnchor(baseParams, "high");
+
+    // Generate keys and lookup
+    const midKey = getAnchorKey(midParams);
+    const highKey = getAnchorKey(highParams);
+
+    const midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
+    const highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
+
+    const midId = midEntry?.scenarioId;
+    const highId = highEntry?.scenarioId;
+
     return {
       base,
       mid: midId ? scenarios[midId] : undefined,
       high: highId ? scenarios[highId] : undefined,
     };
-  }, [manifest, base, scenarios]);
+  }, [manifestIndex, base, scenarios]);
 }
-
