@@ -38,6 +38,8 @@ export interface WorkflowNodeProps {
   midValue?: number;
   highValue?: number;
   baseDeltaPercent?: number;
+  midDeltaPercent?: number;
+  highDeltaPercent?: number;
   x: number;
   y: number;
   radius: number;
@@ -84,6 +86,8 @@ export function WorkflowNode({
   midValue,
   highValue,
   baseDeltaPercent,
+  midDeltaPercent,
+  highDeltaPercent,
   x,
   y,
   radius,
@@ -92,17 +96,19 @@ export function WorkflowNode({
   viewState = "standard",
 }: WorkflowNodeProps) {
   const valueLabel = formatCurrency(aggregateValue);
-  const hasBaseDeltaPercent =
-    baseDeltaPercent !== undefined && !Number.isNaN(baseDeltaPercent);
-  const formattedBaseDeltaPercent = hasBaseDeltaPercent
-    ? `${baseDeltaPercent > 0 ? "+" : ""}${baseDeltaPercent.toFixed(1)}%`
-    : null;
-  const baseDeltaColor =
-    !hasBaseDeltaPercent || baseDeltaPercent === 0
-      ? "rgba(148,163,184,0.65)"
-      : baseDeltaPercent && baseDeltaPercent > 0
-      ? "#22c55e"
-      : "#f87171";
+  const renderDelta = (
+    percent: number | undefined,
+    positiveColor = "#22c55e"
+  ): { label: string | null; color: string } => {
+    if (percent === undefined || Number.isNaN(percent)) {
+      return { label: null, color: "rgba(148,163,184,0.65)" };
+    }
+    const rounded = percent.toFixed(1);
+    const labelText = `${percent > 0 ? "+" : ""}${rounded}%`;
+    const color = percent > 0 ? positiveColor : percent < 0 ? "#f87171" : "rgba(148,163,184,0.65)";
+    return { label: labelText, color };
+  };
+  const baseDeltaMeta = renderDelta(baseDeltaPercent);
 
   const rings: WorkflowRingMetrics[] = useMemo(
     () => {
@@ -221,8 +227,8 @@ export function WorkflowNode({
       role="button"
       tabIndex={0}
       aria-label={
-        formattedBaseDeltaPercent
-          ? `${label}: ${valueLabel}, ${formattedBaseDeltaPercent} change vs previous day`
+        baseDeltaMeta.label
+          ? `${label}: ${valueLabel}, ${baseDeltaMeta.label} change vs previous day`
           : `${label}: ${valueLabel}`
       }
       initial={{ opacity: 0, scale: 0.95 }}
@@ -284,7 +290,7 @@ export function WorkflowNode({
           y={-radius - 24}
           textAnchor="middle"
           fontSize={24}
-          fill="rgba(148,163,184,0.85)" 
+          fill="rgba(148,163,184,0.85)"
         >
           {label}
         </motion.text>
@@ -298,16 +304,16 @@ export function WorkflowNode({
         >
           {valueLabel}
         </motion.text>
-        {formattedBaseDeltaPercent && (
+        {baseDeltaMeta.label && (
           <motion.text
             x={0}
             y={32}
             textAnchor="middle"
             fontSize={18}
             fontWeight={500}
-            fill={baseDeltaColor}
+            fill={baseDeltaMeta.color}
           >
-            {formattedBaseDeltaPercent}
+            {baseDeltaMeta.label}
           </motion.text>
         )}
       </g>
