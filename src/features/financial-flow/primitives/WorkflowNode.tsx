@@ -1,7 +1,10 @@
+import { useMemo } from "react";
+
 import { motion } from "framer-motion";
 import * as d3 from "d3";
 
-import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
+type DefaultArcObject = d3.DefaultArcObject;
+
 import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 import { PresentationWorkflowLayer } from "@/shared/presentation";
 
@@ -16,19 +19,12 @@ type ArcData = {
   data: PresentationWorkflowLayer;
   startAngle: number;
   endAngle: number;
-  padAngle: number;
 };
 
 type RingDescriptor = {
   key: WorkflowRingKey;
   arcs: ArcData[];
-  thickness: number;
-  direction: "inner" | "outer";
-  activeOpacity: number;
-  inactiveOpacity: number;
-  delayStart: number;
-  delayStep: number;
-  duration?: number;
+  radius: number;
 };
 
 export interface WorkflowNodeProps {
@@ -58,7 +54,7 @@ function formatCurrency(value: number): string {
   });
 }
 
-function computeArcs(layers: PresentationWorkflowLayer[]): ArcData[] {
+function computeArcs(layers?: PresentationWorkflowLayer[]): ArcData[] {
   if (!layers || layers.length === 0) {
     return [];
   }
@@ -70,10 +66,9 @@ function computeArcs(layers: PresentationWorkflowLayer[]): ArcData[] {
   for (const seg of sorted) {
     const fraction = seg.value / total;
     const arcLengthRadians = 2 * Math.PI * fraction;
-    const padAngle_local = Math.min(0.1, arcLengthRadians * 0.15);
     const endAngle = startAngle + arcLengthRadians;
-    arcs.push({ data: seg, startAngle, endAngle, padAngle: 0 });
-    startAngle = endAngle + padAngle_local;
+    arcs.push({ data: seg, startAngle, endAngle });
+    startAngle = endAngle;
   }
   return arcs;
 }
@@ -109,10 +104,117 @@ export function WorkflowNode({
       ? "#22c55e"
       : "#f87171";
 
-  const arcGenerator = d3.arc();
-  const arcsBase = computeLayerArcs(layers, radius - 6);
-  const arcsMid = computeLayerArcs(midSegments, radius);
-  const arcsHigh = computeLayerArcs(highSegments, radius + 6);
+  const rings: WorkflowRingMetrics[] = useMemo(
+    () => {
+      const base = baseValue ?? aggregateValue ?? 0;
+      const mid = midValue ?? 0;
+      const high = highValue ?? 0;
+      const total = Math.max(base, mid, high, 1);
+      return [
+        { key: "base", value: base, percent: base / total },
+        { key: "mid", value: mid, percent: mid / total },
+        { key: "high", value: high, percent: high / total },
+      ];
+    },
+    [aggregateValue, baseValue, midValue, highValue]
+  );
+
+  const hoveredRingKey = usePresentationTimelineStore(
+    (state) => state.hoveredRingKey
+  );
+  const simulationPhase = usePresentationTimelineStore(
+    (state) => state.simulationPhase
+  );
+  const setStoreHoveredNode = usePresentationTimelineStore(
+    (state) => state.setHoveredNode
+  );
+  const setHoveredRing = usePresentationTimelineStore(
+    (state) => state.setHoveredRing
+  );
+  const ringHoverKey = hoveredRingKey ?? null;
+
+  const {
+    nodeControls,
+    ringControls,
+  } = useWorkflowNodeAnimation({
+    nodeId: id,
+    isActive,
+    viewState,
+    rings,
+    ringHoverKey,
+    phase: simulationPhase,
+  });
+
+  const ringDescriptors: RingDescriptor[] = useMemo(() => {
+    const baseRadius = Math.max(0, radius - 12);
+    const midRadius = Math.max(radius, baseRadius + 8);
+    const highRadius = midRadius + 12;
+    return [
+      { key: "base", arcs: computeArcs(layers), radius: baseRadius },
+      { key: "mid", arcs: computeArcs(midSegments), radius: midRadius },
+      { key: "high", arcs: computeArcs(highSegments), radius: highRadius },
+    ];
+  }, [layers, midSegments, highSegments, radius]);
+
+  const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
+  const interactiveRadius = Math.max(radius + 30, radius * 1.3);
+
+  const renderRing = (descriptor: RingDescriptor) => {
+    if (!descriptor.arcs.length) return null;
+    const { key, arcs } = descriptor;
+    const controls = ringControls[key];
+    if (!controls) return null;
+    const outerRadius = descriptor.radius;
+    if (outerRadius <= 0) return null;
+    const innerRadius = Math.max(0, outerRadius - 10);
+    return (
+      <motion.g
+        key={key}
+        animate={controls}
+        initial={{ opacity: 0, scale: 0.95 }}
+        onMouseEnter={() => setHoveredRing(key)}
+        onMouseLeave={() => setHoveredRing(null)}
+        role="presentation"
+      >
+        {arcs.map((arc) => {
+          const arcShape: DefaultArcObject = {
+            innerRadius,
+            outerRadius,
+            startAngle: arc.startAngle,
+            endAngle: arc.endAngle,
+          };
+          const path = arcGenerator(arcShape);
+          const isHovered = ringHoverKey === key;
+          return (
+            <path
+              key={`${key}-${arc.data.id}`}
+              d={path || undefined}
+              fill={
+                arc.data.color && arc.data.color !== "transparent"
+                  ? arc.data.color
+                  : "rgba(148,163,184,0.2)"
+              }
+              fillOpacity={isHovered ? 0.95 : 0.75}
+              stroke="#0f172a"
+              strokeWidth={0.8}
+            />
+          );
+        })}
+      </motion.g>
+    );
+  };
+
+  const baseRing = ringDescriptors.find((descriptor) => descriptor.key === "base");
+  const midRing = ringDescriptors.find((descriptor) => descriptor.key === "mid");
+  const highRing = ringDescriptors.find((descriptor) => descriptor.key === "high");
+
+  const innerRingNodes = baseRing ? renderRing(baseRing) : null;
+  const outerRingNodes = (
+    <>
+      {midRing ? renderRing(midRing) : null}
+      {highRing ? renderRing(highRing) : null}
+    </>
+  );
 
   return (
     <motion.g
