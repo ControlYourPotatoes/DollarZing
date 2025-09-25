@@ -389,6 +389,7 @@ export function useWorkflowData(): WorkflowLayoutResult {
                 color: defaultSeg.color,
               },
             ];
+          }
           if (highDeltaAmount !== undefined && highDeltaAmount > 0) {
             highSegments = [
               {
