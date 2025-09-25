@@ -115,35 +115,34 @@ export function FinancialWorkflowDiagram({
           let adjustedX = node.x;
           let adjustedY = node.y;
           if (node.id === "platform") {
-            adjustedX += 10; // Move right by 10px (positive x)
-            adjustedY += 0; // Uncomment/example: Move down by 20px (positive y)
+            adjustedX += 10;  // Move right by 10px (positive x)
+            adjustedY += 0;  // Uncomment/example: Move down by 20px (positive y)
           }
           // Example for another node:
           // if (node.id === "platform") {
           //   adjustedX -= 15;  // Move left
           // }
 
-          return (
-            <WorkflowNode
-              key={node.id}
-              id={node.id}
-              label={node.label}
-              aggregateValue={node.aggregateValue}
-              layers={node.layers}
-              midSegments={node.midSegments}
-              highSegments={node.highSegments}
-              baseValue={node.baseValue}
-              midValue={node.midValue}
-              highValue={node.highValue}
-              baseDeltaPercent={node.baseDeltaPercent}
-              x={adjustedX}
-              y={adjustedY}
-              radius={node.radius}
-              isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
-              onHover={setHoveredId}
-            />
-          );
-        })}
+        return (
+          <WorkflowNode
+            key={node.id}
+            id={node.id}
+            label={node.label}
+            aggregateValue={node.aggregateValue}
+            layers={node.layers}
+            midSegments={node.midSegments}
+            highSegments={node.highSegments}
+            baseValue={node.baseValue}
+            midValue={node.midValue}
+            highValue={node.highValue}
+            x={adjustedX}
+            y={adjustedY}
+            radius={node.radius}
+            isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
+            onHover={setHoveredId}
+          />
+        );
+      })}
       </motion.svg>
       {hoveredId && (
         <div className="mt-3 max-w-md rounded-md border border-slate-800 bg-slate-900/85 px-4 py-3 text-xs text-slate-200 shadow-lg">
