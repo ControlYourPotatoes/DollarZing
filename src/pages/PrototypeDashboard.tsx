@@ -313,7 +313,7 @@ const PrototypeDashboard = () => {
         {/* Floating TimelineScrubber is rendered globally; remove embedded card */}
 
         {/* Financial Workflow - Full Width */}
-        <section className="mb-6 ">
+        <section className="mb-6 h-full">
           <FinancialWorkflowDiagram />
         </section>
 

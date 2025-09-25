@@ -27,7 +27,7 @@ export function FinancialWorkflowDiagram({
   }
 
   // Compute dynamic viewBox to fit all nodes/links comfortably
-  const padding = 42;
+  const padding = 35;
   const bounds = nodes.length
     ? nodes.reduce(
         (acc, n) => {

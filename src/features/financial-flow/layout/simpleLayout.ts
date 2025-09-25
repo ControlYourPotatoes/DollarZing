@@ -3,9 +3,9 @@ import {
   PresentationWorkflowNode,
 } from "@/shared/presentation";
 
-const GAP_Y = 250;
-const GAP_X = 500;
-const MARGIN_X = 80;
+const GAP_Y = 270;
+const GAP_X = 700;
+const MARGIN_X = 100;
 const MARGIN_Y = 60;
 
 function computeRanks(

@@ -327,14 +327,18 @@ export function WorkflowNode({
     });
 
   let nextOuterRingInner = radius + outerRingGap;
+  let maxOuterRingRadius = radius;
   const outerRingNodes = sortedDescriptors
     .filter((descriptor) => descriptor.direction === "outer" && descriptor.arcs.length)
     .flatMap((descriptor) => {
       const innerRadius = Math.max(0, nextOuterRingInner);
       const outerRadius = innerRadius + descriptor.thickness;
+      maxOuterRingRadius = Math.max(maxOuterRingRadius, outerRadius);
       nextOuterRingInner = outerRadius + outerRingGap;
       return renderRing(descriptor, innerRadius, outerRadius);
     });
+
+  const interactiveRadius = Math.max(radius, maxOuterRingRadius);
 
   return (
     <motion.g
@@ -375,6 +379,14 @@ export function WorkflowNode({
       }}
     >
       <g transform={`translate(${x}, ${y})`}>
+        <circle
+          cx={0}
+          cy={0}
+          r={interactiveRadius}
+          fill="transparent"
+          stroke="none"
+          pointerEvents="all"
+        />
         <motion.circle
           cx={0}
           cy={0}
