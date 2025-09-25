@@ -32,3 +32,5 @@ The extra --experimentalSpecifierResolution=node flag lets ts-node resolve those
 Either approach will produce the shorter 3‑month dataset for the first matrix combination.
 
 node dist/scripts/run-orchestrator.js   --days 90   --combo 15,low,10   --no-events
+
+node dist/scripts/run-orchestrator.js --days 365 --no-events
