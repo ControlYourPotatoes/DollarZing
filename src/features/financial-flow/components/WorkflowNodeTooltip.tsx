@@ -1,42 +1,76 @@
+import { type CSSProperties, useMemo } from "react";
+
 import type { WorkflowLayoutResult } from "../hooks/useWorkflowData";
 
 interface WorkflowNodeTooltipProps {
   node: WorkflowLayoutResult["nodes"][number];
   dayIndex?: number;
+  className?: string;
+  style?: CSSProperties;
+  side?: "left" | "right";
 }
 
 export function WorkflowNodeTooltip({
   node,
   dayIndex,
+  className,
+  style,
+  side = "right",
 }: WorkflowNodeTooltipProps) {
   const dayLabel = dayIndex !== undefined ? dayIndex + 1 : "--";
 
-  const scenarioBlocks = [
-    {
-      label: "Base Scenario",
-      value: node.baseValue ?? node.aggregateValue,
-      delta: node.baseDeltaPercent,
-      color: "text-slate-100",
-      segments: node.layers,
-    },
-    {
-      label: "Mid Scenario",
-      value: node.midValue,
-      delta: node.midDeltaPercent,
-      color: "text-sky-300",
-      segments: node.midSegments,
-    },
-    {
-      label: "High Scenario",
-      value: node.highValue,
-      delta: node.highDeltaPercent,
-      color: "text-violet-300",
-      segments: node.highSegments,
-    },
-  ];
+  const scenarioBlocks = useMemo(
+    () => [
+      {
+        label: "Base Scenario",
+        value: node.baseValue ?? node.aggregateValue,
+        delta: node.baseDeltaPercent,
+        segments: node.layers,
+      },
+      {
+        label: "Mid Scenario",
+        value: node.midValue,
+        delta: node.midDeltaPercent,
+        segments: node.midSegments,
+      },
+      {
+        label: "High Scenario",
+        value: node.highValue,
+        delta: node.highDeltaPercent,
+        segments: node.highSegments,
+      },
+    ],
+    [
+      node.aggregateValue,
+      node.baseDeltaPercent,
+      node.baseValue,
+      node.highDeltaPercent,
+      node.highSegments,
+      node.highValue,
+      node.layers,
+      node.midDeltaPercent,
+      node.midSegments,
+      node.midValue,
+    ]
+  );
+
+  const transform =
+    side === "left"
+      ? "translate(calc(-100% - 16px), -50%)"
+      : "translate(16px, -50%)";
+  const rootStyle: CSSProperties = {
+    ...style,
+    transform,
+  };
+  const rootClassName = [
+    "pointer-events-none absolute max-w-md rounded-md border border-slate-800 bg-slate-900/85 px-4 py-3 text-xs text-slate-200 shadow-lg",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className="mt-3 max-w-md rounded-md border border-slate-800 bg-slate-900/85 px-4 py-3 text-xs text-slate-200 shadow-lg">
+    <div className={rootClassName} style={rootStyle}>
       <div className="space-y-3">
         <div className="flex items-start justify-between">
           <div>

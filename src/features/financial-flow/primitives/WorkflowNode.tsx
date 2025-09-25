@@ -86,8 +86,6 @@ export function WorkflowNode({
   midValue,
   highValue,
   baseDeltaPercent,
-  midDeltaPercent,
-  highDeltaPercent,
   x,
   y,
   radius,
