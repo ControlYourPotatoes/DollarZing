@@ -348,8 +348,8 @@
       "cashOutStrategy": 0.5,
       "charityShare": 0
     },
-    "days": 90,
-    "generatedAt": "2025-09-25T04:23:26.885Z"
+    "days": 365,
+    "generatedAt": "2025-09-25T12:07:05.340Z"
   },
   {
     "scenarioId": "growth-60_risk-mid_charity-20",
