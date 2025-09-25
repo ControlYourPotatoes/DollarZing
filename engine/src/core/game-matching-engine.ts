@@ -85,8 +85,9 @@ export class GameMatchingEngine {
 
   // Pool management
   private pooledDollars: Map<string, VirtualDollar> = new Map();
-  private dollarsByLevel: Map<BettingLevel, Set<string>> = new Map();
   private dollarsInGame: Set<string> = new Set();
+
+  private levelQueues: Map<BettingLevel, LevelQueue> = new Map();
 
   // Game management
   private activeGames: Map<string, GameSession> = new Map();
@@ -107,9 +108,86 @@ export class GameMatchingEngine {
     this.eventBus = eventBus;
 
     // Initialize level pools
-    for (let level = 1; level <= 11; level++) {
-      this.dollarsByLevel.set(level as BettingLevel, new Set());
+    for (let level = 1; level <= 10; level++) {
+      this.levelQueues.set(level as BettingLevel, {
+        items: [],
+        head: 0,
+        pending: new Set(),
+      });
     }
+  }
+
+  /**
+   * Internal representation of level-specific FIFO queue
+   */
+  private getLevelQueue(level: BettingLevel): LevelQueue {
+    let queue = this.levelQueues.get(level);
+    if (!queue) {
+      queue = { items: [], head: 0, pending: new Set() };
+      this.levelQueues.set(level, queue);
+    }
+    return queue;
+  }
+
+  private compactLevelQueue(queue: LevelQueue): void {
+    const remaining = queue.items.length - queue.head;
+    if (queue.head === 0 || remaining > queue.items.length / 2) {
+      return;
+    }
+
+    const newItems: string[] = [];
+    for (let i = queue.head; i < queue.items.length; i++) {
+      const id = queue.items[i];
+      if (queue.pending.has(id)) {
+        newItems.push(id);
+      }
+    }
+
+    queue.items = newItems;
+    queue.head = 0;
+    queue.pending = new Set(newItems);
+  }
+
+  private dequeueEligibleDollar(level: BettingLevel): VirtualDollar | null {
+    const queue = this.getLevelQueue(level);
+
+    while (queue.head < queue.items.length) {
+      const id = queue.items[queue.head++];
+      if (!queue.pending.delete(id)) {
+        continue;
+      }
+
+      const dollar = this.pooledDollars.get(id);
+      if (!dollar) {
+        continue;
+      }
+
+      if (dollar.state !== DollarState.POOLED) {
+        continue;
+      }
+
+      if (this.dollarsInGame.has(id)) {
+        continue;
+      }
+
+      this.compactLevelQueue(queue);
+      return dollar;
+    }
+
+    this.compactLevelQueue(queue);
+    return null;
+  }
+
+  private requeueDollar(level: BettingLevel, dollar: VirtualDollar): void {
+    const queue = this.getLevelQueue(level);
+    queue.head = Math.max(queue.head - 1, 0);
+    queue.items[queue.head] = dollar.id;
+    queue.pending.add(dollar.id);
+  }
+
+  private removeFromLevelQueue(level: BettingLevel, dollarId: string): void {
+    const queue = this.getLevelQueue(level);
+    queue.pending.delete(dollarId);
   }
 
   /**
