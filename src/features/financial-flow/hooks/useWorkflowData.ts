@@ -176,7 +176,8 @@ export function useWorkflowData(): WorkflowLayoutResult {
         id: string
       ) => {
         if (!sc) return undefined;
-        const d = sc.dayLookup[day.dayIndex];
+        const idx = Math.min(day.dayIndex, Math.max(0, sc.duration - 1));
+        const d = sc.dayLookup[idx];
         if (!d) return undefined;
         switch (id) {
           case "total":
@@ -351,5 +352,5 @@ export function useWorkflowData(): WorkflowLayoutResult {
       links: positionedLinks,
       highlightedIds: positionedNodes.map((node) => node.id),
     };
-  }, [day, scenario]);
+  }, [day, scenario, midScenario, highScenario]);
 }

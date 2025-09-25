@@ -20,6 +20,8 @@ export interface ComparisonScenarios {
   base?: NormalizedPresentationScenario;
   mid?: NormalizedPresentationScenario;
   high?: NormalizedPresentationScenario;
+  midId?: string;
+  highId?: string;
 }
 
 /**
@@ -115,6 +117,8 @@ export function useScenarioComparisons(): ComparisonScenarios {
       base,
       mid: midId ? scenarios[midId] : undefined,
       high: highId ? scenarios[highId] : undefined,
+      midId,
+      highId,
     };
   }, [manifestIndex, base, scenarios, selectedMidId, selectedHighId]);
 }

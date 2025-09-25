@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { loadPresentationManifest, loadPresentationSnapshot, PresentationManifestEntry } from "@/shared/presentation";
+import { loadPresentationManifest, loadPresentationSnapshot } from "@/shared/presentation";
+import type { PresentationManifestEntry } from "@/shared/presentation";
 import { resolveSnapshotUrl, resolvePublicPath, joinUrl, defaultDatasetsBase } from "@/shared/presentation/url-resolver";
 import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 import { TimelineScrubber, useActiveTimelineDay } from "@/features/timeline";
@@ -52,8 +53,39 @@ const PrototypeDashboard = () => {
     () => manifestIndex?.manifest ?? [],
     [manifestIndex]
   );
+
+  const sortOrder = { low: 0, mid: 1, high: 2 } as const;
+  const sortedManifestEntries = useMemo(() => {
+    const list = [...manifestEntries];
+    list.sort((a, b) => {
+      const ag = sortOrder[(a.parameters.adoptionRate as "low" | "mid" | "high") ?? "low"] ?? 0;
+      const bg = sortOrder[(b.parameters.adoptionRate as "low" | "mid" | "high") ?? "low"] ?? 0;
+      if (ag !== bg) return ag - bg; // growth: low → mid → high
+
+      const ar = sortOrder[(a.parameters.cashOutStrategy as "low" | "mid" | "high") ?? "low"] ?? 0;
+      const br = sortOrder[(b.parameters.cashOutStrategy as "low" | "mid" | "high") ?? "low"] ?? 0;
+      if (ar !== br) return ar - br; // risk: low → mid → high
+
+      const ac = parseInt(String(a.parameters.charityShare ?? "0"), 10);
+      const bc = parseInt(String(b.parameters.charityShare ?? "0"), 10);
+      return ac - bc; // charity: 10 → 20 → 30
+    });
+    return list;
+  }, [manifestEntries]);
   const selectedScenarioId =
-    activeScenarioId ?? manifestEntries[0]?.scenarioId ?? "";
+    activeScenarioId ?? sortedManifestEntries[0]?.scenarioId ?? "";
+
+  const formatScenarioLabel = useCallback((entry: PresentationManifestEntry) => {
+    const growth = String(entry.parameters.adoptionRate || "").toUpperCase();
+    const risk = String(entry.parameters.cashOutStrategy || "");
+    const charity = String(entry.parameters.charityShare || "");
+    return `${growth} growth · ${risk} risk · ${charity}% charity`;
+  }, []);
+
+  const comparisonOptions = useMemo(
+    () => sortedManifestEntries.filter((e) => e.scenarioId !== selectedScenarioId),
+    [sortedManifestEntries, selectedScenarioId]
+  );
 
   const ensureScenarioLoaded = useCallback(
     async (entry: PresentationManifestEntry) => {
@@ -172,6 +204,12 @@ const PrototypeDashboard = () => {
     ];
   }, [activeDay]);
 
+  // Keep selections valid if baseline changes to one of the selected comparisons
+  useEffect(() => {
+    if (midSelection === selectedScenarioId) setMidSelection(null);
+    if (highSelection === selectedScenarioId) setHighSelection(null);
+  }, [highSelection, midSelection, selectedScenarioId, setHighSelection, setMidSelection]);
+
   return (
     <div className="min-h-screen bg-slate-950 px-6 py-10 pb-28 text-slate-100">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -203,7 +241,7 @@ const PrototypeDashboard = () => {
                 onChange={(event) => handleScenarioChange(event.target.value)}
                 disabled={status === "loading" || manifestEntries.length === 0}
               >
-                {manifestEntries.map((entry) => (
+                {sortedManifestEntries.map((entry) => (
                   <option key={entry.scenarioId} value={entry.scenarioId}>
                     {entry.parameters.adoptionRate.toUpperCase()} growth ·{" "}
                     {entry.parameters.cashOutStrategy} risk ·{" "}
@@ -214,32 +252,32 @@ const PrototypeDashboard = () => {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">
-              <span className="block text-xs uppercase tracking-widest text-slate-400">Comparisons</span>
-              <div className="mt-2 flex gap-3">
-                <label className="text-xs text-slate-400">Mid</label>
+              <span className="block text-sm font-bold uppercase tracking-widest text-slate-400">Comparisons</span>
+              <div className="mt-2 flex gap-3 items-center">
+                <label className="text-sm text-slate-400">Mid</label>
                 <select
                   className="w-64 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none"
                   value={midSelection ?? ""}
                   onChange={(e) => setMidSelection(e.target.value || null)}
                 >
                   <option value="">Default (mid/mid)</option>
-                  {manifestEntries.map((entry) => (
+                  {comparisonOptions.map((entry) => (
                     <option key={entry.scenarioId} value={entry.scenarioId}>
-                      {entry.scenarioId}
+                      {formatScenarioLabel(entry)}
                     </option>
                   ))}
                 </select>
 
-                <label className="ml-4 text-xs text-slate-400">High</label>
+                <label className="ml-4 text-sm text-slate-400">High</label>
                 <select
                   className="w-64 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none"
                   value={highSelection ?? ""}
                   onChange={(e) => setHighSelection(e.target.value || null)}
                 >
                   <option value="">Default (high/high)</option>
-                  {manifestEntries.map((entry) => (
+                  {comparisonOptions.map((entry) => (
                     <option key={entry.scenarioId} value={entry.scenarioId}>
-                      {entry.scenarioId}
+                      {formatScenarioLabel(entry)}
                     </option>
                   ))}
                 </select>
