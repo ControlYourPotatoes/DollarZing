@@ -40,6 +40,9 @@ export interface WorkflowNodeProps {
   baseValue?: number;
   midValue?: number;
   highValue?: number;
+  basePercent?: number;
+  midPercent?: number;
+  highPercent?: number;
   x: number;
   y: number;
   radius: number;
@@ -86,6 +89,9 @@ export function WorkflowNode({
   baseValue,
   midValue,
   highValue,
+  basePercent = 0,
+  midPercent = 0,
+  highPercent = 0,
   x,
   y,
   radius,
@@ -93,11 +99,12 @@ export function WorkflowNode({
   onHover,
   viewState = "standard",
 }: WorkflowNodeProps) {
-  const valueLabel = formatCurrency(aggregateValue);
+  const valueLabel = `${formatCurrency(aggregateValue)} (${Math.round(
+    basePercent
+  )}%)`;
   const arcsBase = computeArcs(layers);
   const arcsMid = computeArcs(midSegments);
   const arcsHigh = computeArcs(highSegments);
-
   const arcGenerator = d3.arc();
 
   const nodeViewState = usePresentationTimelineStore((state) =>
@@ -171,10 +178,9 @@ export function WorkflowNode({
     : "compact";
 
   const preset = layoutPresets[effectiveViewState];
-
-  const baseThickness = Math.max(preset.minBase, radius * preset.baseScale);
-  const midThickness = Math.max(preset.minMid, radius * preset.midScale);
-  const highThickness = Math.max(preset.minHigh, radius * preset.highScale);
+  const baseThickness = preset.minBase + (radius * preset.baseScale * (basePercent / 100));
+  const midThickness = preset.minMid + (radius * preset.midScale * (midPercent / 100));
+  const highThickness = preset.minHigh + (radius * preset.highScale * (highPercent / 100));
   const innerRingGap = Math.max(preset.minInnerGap, radius * preset.innerGapScale);
   const outerRingGap = Math.max(preset.minOuterGap, radius * preset.outerGapScale);
 

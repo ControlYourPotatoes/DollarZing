@@ -25,6 +25,9 @@ interface PositionedNode extends PresentationWorkflowNode {
   baseValue?: number;
   midValue?: number;
   highValue?: number;
+  basePercent?: number;
+  midPercent?: number;
+  highPercent?: number;
 }
 
 interface PositionedLink extends PresentationWorkflowLink {
@@ -61,6 +64,32 @@ export function useWorkflowData(): WorkflowLayoutResult {
   return useMemo(() => {
     if (!day || !scenario) {
       return { scenario, day, nodes: [], links: [], highlightedIds: [] };
+    }
+
+    let globalMax = 0;
+    const scenariosToCheck = [
+      scenario,
+      midScenario,
+      highScenario,
+    ].filter(Boolean) as NormalizedPresentationScenario[];
+
+    scenariosToCheck.forEach((sc) => {
+      if (!sc?.dayLookup) return;
+      Object.values(sc.dayLookup).forEach((d) => {
+        if (!d?.timelineTick) return;
+        const tick = d.timelineTick;
+        globalMax = Math.max(
+          globalMax,
+          tick.cumulativeRevenue || 0,
+          tick.cumulativeFees || 0,
+          tick.cumulativeCharity || 0,
+          tick.cumulativePayouts || 0
+        );
+      });
+    });
+
+    if (globalMax === 0) {
+      globalMax = 1;
     }
 
     // Derive canonical nodes/links if missing from snapshot
@@ -197,8 +226,23 @@ export function useWorkflowData(): WorkflowLayoutResult {
       const midValue = collectValue(midScenario, node.id);
       const highValue = collectValue(highScenario, node.id);
 
-      const deltaMid = midValue !== undefined ? Math.max(0, midValue - baseValue) : 0;
-      const deltaHigh = highValue !== undefined ? Math.max(0, highValue - baseValue) : 0;
+      const deltaMid =
+        midValue !== undefined ? Math.max(0, midValue - baseValue) : 0;
+      const deltaHigh =
+        highValue !== undefined ? Math.max(0, highValue - baseValue) : 0;
+
+      const basePercent = Math.max(
+        0,
+        Math.min(100, ((baseValue || 0) / globalMax) * 100)
+      );
+      const midPercent = Math.max(
+        0,
+        Math.min(100, ((midValue || 0) / globalMax) * 100)
+      );
+      const highPercent = Math.max(
+        0,
+        Math.min(100, ((highValue || 0) / globalMax) * 100)
+      );
 
       // Comparison mode: 'normalized' (default) or 'delta'
       const comparisonMode: "normalized" | "delta" = "normalized";
@@ -319,8 +363,10 @@ export function useWorkflowData(): WorkflowLayoutResult {
         baseValue,
         midValue,
         highValue,
-        // Override base layers for normalized comparison to show gauge instead of category split
-        ...(baseSegmentsOverride ? { layers: baseSegmentsOverride } : {}),
+        layers: baseSegmentsOverride ?? node.layers,
+        basePercent,
+        midPercent,
+        highPercent,
       };
     });
 
