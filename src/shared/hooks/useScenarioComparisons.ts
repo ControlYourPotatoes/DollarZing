@@ -89,7 +89,14 @@ export function useScenarioComparisons(): ComparisonScenarios {
     return () => {
       cancelled = true;
     };
-  }, [manifestIndex, base, upsertScenario, scenarios, selectedMidId, selectedHighId]);
+  }, [
+    manifestIndex,
+    base,
+    upsertScenario,
+    scenarios,
+    selectedMidId,
+    selectedHighId,
+  ]);
 
   return useMemo(() => {
     if (!manifestIndex || !base) return { base };
