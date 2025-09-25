@@ -594,7 +594,7 @@ export class DatasetOrchestrator {
       baseSimulationDays: 365, // 1 year simulation
       basePlayerCount: 1000, // Base player count
       baseInitialDonation: 50, // $50 starting donation
-      maxSimulationTimeMs: 300000, // 5 minutes max per simulation
+      maxSimulationTimeMs: 900000, // 5 minutes max per simulation
 
       growthRateScaling: {
         playerCountMultiplier: {

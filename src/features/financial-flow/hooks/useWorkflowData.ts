@@ -25,9 +25,7 @@ interface PositionedNode extends PresentationWorkflowNode {
   baseValue?: number;
   midValue?: number;
   highValue?: number;
-  basePercent?: number;
-  midPercent?: number;
-  highPercent?: number;
+  baseDeltaPercent?: number;
 }
 
 interface PositionedLink extends PresentationWorkflowLink {
@@ -67,11 +65,9 @@ export function useWorkflowData(): WorkflowLayoutResult {
     }
 
     let globalMax = 0;
-    const scenariosToCheck = [
-      scenario,
-      midScenario,
-      highScenario,
-    ].filter(Boolean) as NormalizedPresentationScenario[];
+    const scenariosToCheck = [scenario, midScenario, highScenario].filter(
+      Boolean
+    ) as NormalizedPresentationScenario[];
 
     scenariosToCheck.forEach((sc) => {
       if (!sc?.dayLookup) return;
@@ -202,21 +198,23 @@ export function useWorkflowData(): WorkflowLayoutResult {
       // Base/Mid/High values for this node id
       const collectValue = (
         sc: NormalizedPresentationScenario | undefined,
-        id: string
+        id: string,
+        overrideIndex?: number
       ) => {
         if (!sc) return undefined;
-        const idx = Math.min(day.dayIndex, Math.max(0, sc.duration - 1));
+        const baseIndex = overrideIndex ?? day.dayIndex;
+        const idx = Math.min(baseIndex, Math.max(0, sc.duration - 1));
         const d = sc.dayLookup[idx];
         if (!d) return undefined;
         switch (id) {
           case "total":
-            return Math.max(0, d.timelineTick.cumulativeRevenue || 0);
+            return d.timelineTick.cumulativeRevenue || 0;
           case "platform":
-            return Math.max(0, d.timelineTick.cumulativeFees || 0);
+            return d.timelineTick.cumulativeFees || 0;
           case "charity":
-            return Math.max(0, d.timelineTick.cumulativeCharity || 0);
+            return d.timelineTick.cumulativeCharity || 0;
           case "players":
-            return Math.max(0, d.timelineTick.cumulativePayouts || 0);
+            return d.timelineTick.cumulativePayouts || 0;
           default:
             return undefined;
         }
@@ -226,23 +224,25 @@ export function useWorkflowData(): WorkflowLayoutResult {
       const midValue = collectValue(midScenario, node.id);
       const highValue = collectValue(highScenario, node.id);
 
-      const deltaMid =
-        midValue !== undefined ? Math.max(0, midValue - baseValue) : 0;
-      const deltaHigh =
-        highValue !== undefined ? Math.max(0, highValue - baseValue) : 0;
+      const midDeltaAmount =
+        midValue !== undefined && baseValue !== undefined
+          ? midValue - baseValue
+          : undefined;
+      const highDeltaAmount =
+        highValue !== undefined && baseValue !== undefined
+          ? highValue - baseValue
+          : undefined;
 
-      const basePercent = Math.max(
-        0,
-        Math.min(100, ((baseValue || 0) / globalMax) * 100)
-      );
-      const midPercent = Math.max(
-        0,
-        Math.min(100, ((midValue || 0) / globalMax) * 100)
-      );
-      const highPercent = Math.max(
-        0,
-        Math.min(100, ((highValue || 0) / globalMax) * 100)
-      );
+      const previousBaseValue =
+        day.dayIndex > 0
+          ? collectValue(scenario, node.id, day.dayIndex - 1)
+          : undefined;
+      const baseDeltaPercent =
+        previousBaseValue !== undefined &&
+        previousBaseValue !== 0 &&
+        baseValue !== undefined
+          ? ((baseValue - previousBaseValue) / previousBaseValue) * 100
+          : undefined;
 
       // Comparison mode: 'normalized' (default) or 'delta'
       const comparisonMode: "normalized" | "delta" = "normalized";
@@ -252,11 +252,7 @@ export function useWorkflowData(): WorkflowLayoutResult {
       let baseSegmentsOverride: PresentationWorkflowLayer[] | undefined;
 
       if (comparisonMode === "normalized") {
-        const maxVal = Math.max(
-          baseValue || 0,
-          midValue || 0,
-          highValue || 0
-        );
+        const maxVal = Math.max(baseValue || 0, midValue || 0, highValue || 0);
         const mkGauge = (
           val: number | undefined,
           max: number,
@@ -268,12 +264,20 @@ export function useWorkflowData(): WorkflowLayoutResult {
           const rest = Math.max(0, max - filled);
           return [
             { id: `${key}-filled`, label: "filled", value: filled, color },
-            { id: `${key}-rest`, label: "rest", value: rest, color: "transparent" },
+            {
+              id: `${key}-rest`,
+              label: "rest",
+              value: rest,
+              color: "transparent",
+            },
           ];
         };
 
-        // Distinct colors per ring
-        const COLORS = { base: "#e2e8f0", mid: "#38bdf8", high: "#a78bfa" } as const;
+        const COLORS = {
+          base: "#e2e8f0",
+          mid: "#38bdf8",
+          high: "#a78bfa",
+        } as const;
         baseSegmentsOverride = mkGauge(baseValue, maxVal, COLORS.base, "base");
         midSegments = mkGauge(midValue, maxVal, COLORS.mid, "mid");
         highSegments = mkGauge(highValue, maxVal, COLORS.high, "high");
@@ -315,11 +319,26 @@ export function useWorkflowData(): WorkflowLayoutResult {
             const dCharity = deltaCat("charity", midCats);
             const dPlayers = deltaCat("players", midCats);
             if (dPlatform > 0)
-              m.push({ id: "platform", label: "Platform", value: dPlatform, color: COLORS.platform });
+              m.push({
+                id: "platform",
+                label: "Platform",
+                value: dPlatform,
+                color: COLORS.platform,
+              });
             if (dCharity > 0)
-              m.push({ id: "charity", label: "Charity", value: dCharity, color: COLORS.charity });
+              m.push({
+                id: "charity",
+                label: "Charity",
+                value: dCharity,
+                color: COLORS.charity,
+              });
             if (dPlayers > 0)
-              m.push({ id: "players", label: "Players", value: dPlayers, color: COLORS.players });
+              m.push({
+                id: "players",
+                label: "Players",
+                value: dPlayers,
+                color: COLORS.players,
+              });
             if (m.length > 0) midSegments = m;
           }
           if (highCats) {
@@ -328,26 +347,56 @@ export function useWorkflowData(): WorkflowLayoutResult {
             const dCharity = deltaCat("charity", highCats);
             const dPlayers = deltaCat("players", highCats);
             if (dPlatform > 0)
-              h.push({ id: "platform", label: "Platform", value: dPlatform, color: COLORS.platform });
+              h.push({
+                id: "platform",
+                label: "Platform",
+                value: dPlatform,
+                color: COLORS.platform,
+              });
             if (dCharity > 0)
-              h.push({ id: "charity", label: "Charity", value: dCharity, color: COLORS.charity });
+              h.push({
+                id: "charity",
+                label: "Charity",
+                value: dCharity,
+                color: COLORS.charity,
+              });
             if (dPlayers > 0)
-              h.push({ id: "players", label: "Players", value: dPlayers, color: COLORS.players });
+              h.push({
+                id: "players",
+                label: "Players",
+                value: dPlayers,
+                color: COLORS.players,
+              });
             if (h.length > 0) highSegments = h;
           }
         } else {
           // For other nodes, single segment using node primary color
           const baseLayer = (node.layers && node.layers[0]) || undefined;
           const defaultSeg =
-            baseLayer || ({ id: "value", label: "Value", color: "#64748b", value: 0 } as PresentationWorkflowLayer);
-          if (deltaMid > 0) {
+            baseLayer ||
+            ({
+              id: "value",
+              label: "Value",
+              color: "#64748b",
+              value: 0,
+            } as PresentationWorkflowLayer);
+          if (midDeltaAmount !== undefined && midDeltaAmount > 0) {
             midSegments = [
-              { id: defaultSeg.id, label: defaultSeg.label, value: deltaMid, color: defaultSeg.color },
+              {
+                id: defaultSeg.id,
+                label: defaultSeg.label,
+                value: midDeltaAmount,
+                color: defaultSeg.color,
+              },
             ];
-          }
-          if (deltaHigh > 0) {
+          if (highDeltaAmount !== undefined && highDeltaAmount > 0) {
             highSegments = [
-              { id: defaultSeg.id, label: defaultSeg.label, value: deltaHigh, color: defaultSeg.color },
+              {
+                id: defaultSeg.id,
+                label: defaultSeg.label,
+                value: highDeltaAmount,
+                color: defaultSeg.color,
+              },
             ];
           }
         }
@@ -363,10 +412,8 @@ export function useWorkflowData(): WorkflowLayoutResult {
         baseValue,
         midValue,
         highValue,
+        baseDeltaPercent,
         layers: baseSegmentsOverride ?? node.layers,
-        basePercent,
-        midPercent,
-        highPercent,
       };
     });
 

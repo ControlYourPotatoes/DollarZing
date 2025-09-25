@@ -115,129 +115,156 @@ export function FinancialWorkflowDiagram({
           let adjustedX = node.x;
           let adjustedY = node.y;
           if (node.id === "platform") {
-            adjustedX += 10;  // Move right by 10px (positive x)
-            adjustedY += 0;  // Uncomment/example: Move down by 20px (positive y)
+            adjustedX += 10; // Move right by 10px (positive x)
+            adjustedY += 0; // Uncomment/example: Move down by 20px (positive y)
           }
           // Example for another node:
           // if (node.id === "platform") {
           //   adjustedX -= 15;  // Move left
           // }
 
-        return (
-          <WorkflowNode
-            key={node.id}
-            id={node.id}
-            label={node.label}
-            aggregateValue={node.aggregateValue}
-            layers={node.layers}
-            midSegments={node.midSegments}
-            highSegments={node.highSegments}
-            baseValue={node.baseValue}
-            midValue={node.midValue}
-            highValue={node.highValue}
-            x={adjustedX}
-            y={adjustedY}
-            radius={node.radius}
-            isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
-            onHover={setHoveredId}
-          />
-        );
-      })}
+          return (
+            <WorkflowNode
+              key={node.id}
+              id={node.id}
+              label={node.label}
+              aggregateValue={node.aggregateValue}
+              layers={node.layers}
+              midSegments={node.midSegments}
+              highSegments={node.highSegments}
+              baseValue={node.baseValue}
+              midValue={node.midValue}
+              highValue={node.highValue}
+              baseDeltaPercent={node.baseDeltaPercent}
+              x={adjustedX}
+              y={adjustedY}
+              radius={node.radius}
+              isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
+              onHover={setHoveredId}
+            />
+          );
+        })}
       </motion.svg>
       {hoveredId && (
-        <div className="mt-3 rounded-md border border-slate-800 bg-slate-900/80 px-3 py-2 text-xs text-slate-300">
+        <div className="mt-3 max-w-md rounded-md border border-slate-800 bg-slate-900/85 px-4 py-3 text-xs text-slate-200 shadow-lg">
           {(() => {
             const node = nodes.find((candidate) => candidate.id === hoveredId);
             if (!node) return null;
             return (
-              <div className="space-y-1">
-                <div className="font-semibold text-slate-100">{node.label}</div>
-                <div>
-                  Base:{" "}
-                  {(node.baseValue ?? node.aggregateValue).toLocaleString(
-                    undefined,
-                    {
-                      style: "currency",
-                      currency: "USD",
-                    }
-                  )}
-                </div>
-                {(node.midValue !== undefined || node.highValue !== undefined) && (
-                  <div className="grid grid-cols-2 gap-2 text-slate-300/90">
-                    {node.midValue !== undefined && (
-                      <div>
-                        Mid:{" "}
-                        {node.midValue.toLocaleString(undefined, {
+              <div className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-100">
+                      {node.label}
+                    </div>
+                    <div className="text-[11px] uppercase tracking-wide text-slate-500">
+                      Cumulative totals
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-slate-100">
+                      {(node.baseValue ?? node.aggregateValue).toLocaleString(
+                        undefined,
+                        {
                           style: "currency",
                           currency: "USD",
                           maximumFractionDigits: 0,
-                        })}
-                        {node.baseValue !== undefined && node.midValue > node.baseValue && (
-                          <span className="ml-2 text-emerald-400">+
-                            {(node.midValue - node.baseValue).toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "USD",
-                              maximumFractionDigits: 0,
-                            })}
-                          </span>
-                        )}
+                        }
+                      )}
+                    </div>
+                    {node.baseDeltaPercent !== undefined && (
+                      <div
+                        className={`text-[11px] font-medium ${
+                          node.baseDeltaPercent > 0
+                            ? "text-emerald-400"
+                            : node.baseDeltaPercent < 0
+                            ? "text-rose-400"
+                            : "text-slate-500"
+                        }`}
+                      >
+                        {node.baseDeltaPercent > 0 ? "+" : ""}
+                        {node.baseDeltaPercent.toFixed(1)}%
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {(node.midValue !== undefined ||
+                  node.highValue !== undefined) && (
+                  <div className="grid grid-cols-2 gap-3 text-slate-100">
+                    {node.midValue !== undefined && (
+                      <div>
+                        <div className="text-[11px] uppercase tracking-wide text-slate-500">
+                          Mid Scenario
+                        </div>
+                        <div className="mt-1 text-sm font-semibold">
+                          {node.midValue.toLocaleString(undefined, {
+                            style: "currency",
+                            currency: "USD",
+                            maximumFractionDigits: 0,
+                          })}
+                        </div>
                       </div>
                     )}
                     {node.highValue !== undefined && (
                       <div>
-                        High:{" "}
-                        {node.highValue.toLocaleString(undefined, {
-                          style: "currency",
-                          currency: "USD",
-                          maximumFractionDigits: 0,
-                        })}
-                        {node.baseValue !== undefined && node.highValue > node.baseValue && (
-                          <span className="ml-2 text-emerald-400">+
-                            {(node.highValue - node.baseValue).toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "USD",
-                              maximumFractionDigits: 0,
-                            })}
-                          </span>
-                        )}
+                        <div className="text-[11px] uppercase tracking-wide text-slate-500">
+                          High Scenario
+                        </div>
+                        <div className="mt-1 text-sm font-semibold">
+                          {node.highValue.toLocaleString(undefined, {
+                            style: "currency",
+                            currency: "USD",
+                            maximumFractionDigits: 0,
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
                 {node.layers && node.layers.length > 0 && (
-                  <ul className="space-y-1">
-                    {node.layers.map((layer) => (
-                      <li
-                        key={layer.id}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <span
-                            className="inline-block h-2 w-2 rounded-full"
-                            style={{ backgroundColor: layer.color }}
-                          />
-                          {layer.label}
-                        </span>
-                        <span>
-                          {layer.value.toLocaleString(undefined, {
-                            style: "currency",
-                            currency: "USD",
-                            maximumFractionDigits: 0,
-                          })}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div>
+                    <div className="mb-1 text-[11px] uppercase tracking-wide text-slate-500">
+                      Composition
+                    </div>
+                    <ul className="space-y-1">
+                      {node.layers.map((layer) => (
+                        <li
+                          key={layer.id}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="inline-block h-2 w-2 rounded-full"
+                              style={{ backgroundColor: layer.color }}
+                            />
+                            {layer.label}
+                          </span>
+                          <span className="font-semibold text-slate-100">
+                            {layer.value.toLocaleString(undefined, {
+                              style: "currency",
+                              currency: "USD",
+                              maximumFractionDigits: 0,
+                            })}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
                 {((node.midSegments && node.midSegments.length > 0) ||
                   (node.highSegments && node.highSegments.length > 0)) && (
-                  <div className="mt-2 grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
                     {node.midSegments && node.midSegments.length > 0 && (
                       <div>
-                        <div className="mb-1 font-medium text-slate-200">Mid Δ</div>
+                        <div className="mb-1 text-[11px] uppercase tracking-wide text-slate-500">
+                          Mid contributors
+                        </div>
                         <ul className="space-y-1">
                           {node.midSegments.map((seg) => (
-                            <li key={`mid-${seg.id}`} className="flex items-center justify-between">
+                            <li
+                              key={`mid-${seg.id}`}
+                              className="flex items-center justify-between"
+                            >
                               <span className="flex items-center gap-2">
                                 <span
                                   className="inline-block h-2 w-2 rounded-full"
@@ -259,10 +286,15 @@ export function FinancialWorkflowDiagram({
                     )}
                     {node.highSegments && node.highSegments.length > 0 && (
                       <div>
-                        <div className="mb-1 font-medium text-slate-200">High Δ</div>
+                        <div className="mb-1 text-[11px] uppercase tracking-wide text-slate-500">
+                          High contributors
+                        </div>
                         <ul className="space-y-1">
                           {node.highSegments.map((seg) => (
-                            <li key={`high-${seg.id}`} className="flex items-center justify-between">
+                            <li
+                              key={`high-${seg.id}`}
+                              className="flex items-center justify-between"
+                            >
                               <span className="flex items-center gap-2">
                                 <span
                                   className="inline-block h-2 w-2 rounded-full"

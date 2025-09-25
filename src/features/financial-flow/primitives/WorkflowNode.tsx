@@ -40,9 +40,7 @@ export interface WorkflowNodeProps {
   baseValue?: number;
   midValue?: number;
   highValue?: number;
-  basePercent?: number;
-  midPercent?: number;
-  highPercent?: number;
+  baseDeltaPercent?: number;
   x: number;
   y: number;
   radius: number;
@@ -89,9 +87,7 @@ export function WorkflowNode({
   baseValue,
   midValue,
   highValue,
-  basePercent = 0,
-  midPercent = 0,
-  highPercent = 0,
+  baseDeltaPercent,
   x,
   y,
   radius,
@@ -99,16 +95,25 @@ export function WorkflowNode({
   onHover,
   viewState = "standard",
 }: WorkflowNodeProps) {
-  const valueLabel = `${formatCurrency(aggregateValue)} (${Math.round(
-    basePercent
-  )}%)`;
+  const valueLabel = `${formatCurrency(aggregateValue)}`;
+  const hasBaseDeltaPercent =
+    baseDeltaPercent !== undefined && !Number.isNaN(baseDeltaPercent);
+  const formattedBaseDeltaPercent = hasBaseDeltaPercent
+    ? `${baseDeltaPercent > 0 ? "+" : ""}${baseDeltaPercent.toFixed(1)}%`
+    : null;
+  const baseDeltaColor =
+    !hasBaseDeltaPercent || baseDeltaPercent === 0
+      ? "rgba(148,163,184,0.65)"
+      : baseDeltaPercent && baseDeltaPercent > 0
+      ? "#22c55e"
+      : "#f87171";
   const arcsBase = computeArcs(layers);
   const arcsMid = computeArcs(midSegments);
   const arcsHigh = computeArcs(highSegments);
   const arcGenerator = d3.arc();
 
-  const nodeViewState = usePresentationTimelineStore((state) =>
-    state.nodeViewStates[id] ?? viewState
+  const nodeViewState = usePresentationTimelineStore(
+    (state) => state.nodeViewStates[id] ?? viewState
   );
   const setStoreHoveredNode = usePresentationTimelineStore(
     (state) => state.setHoveredNode
@@ -123,18 +128,21 @@ export function WorkflowNode({
     (state) => state.simulationPhase
   );
 
-  const layoutPresets: Record<WorkflowNodeViewState, {
-    baseScale: number;
-    midScale: number;
-    highScale: number;
-    minBase: number;
-    minMid: number;
-    minHigh: number;
-    innerGapScale: number;
-    outerGapScale: number;
-    minInnerGap: number;
-    minOuterGap: number;
-  }> = {
+  const layoutPresets: Record<
+    WorkflowNodeViewState,
+    {
+      baseScale: number;
+      midScale: number;
+      highScale: number;
+      minBase: number;
+      minMid: number;
+      minHigh: number;
+      innerGapScale: number;
+      outerGapScale: number;
+      minInnerGap: number;
+      minOuterGap: number;
+    }
+  > = {
     compact: {
       baseScale: 0.22,
       midScale: 0.08,
@@ -178,16 +186,23 @@ export function WorkflowNode({
     : "compact";
 
   const preset = layoutPresets[effectiveViewState];
-  const baseThickness = preset.minBase + (radius * preset.baseScale * (basePercent / 100));
-  const midThickness = preset.minMid + (radius * preset.midScale * (midPercent / 100));
-  const highThickness = preset.minHigh + (radius * preset.highScale * (highPercent / 100));
-  const innerRingGap = Math.max(preset.minInnerGap, radius * preset.innerGapScale);
-  const outerRingGap = Math.max(preset.minOuterGap, radius * preset.outerGapScale);
+  const baseThickness = preset.minBase + radius * preset.baseScale * 0.6;
+  const midThickness = preset.minMid + radius * preset.midScale * 0.5;
+  const highThickness = preset.minHigh + radius * preset.highScale * 0.4;
+  const innerRingGap = Math.max(
+    preset.minInnerGap,
+    radius * preset.innerGapScale
+  );
+  const outerRingGap = Math.max(
+    preset.minOuterGap,
+    radius * preset.outerGapScale
+  );
 
   const ringMetrics: WorkflowRingMetrics[] = [
     {
       key: "base",
-      value: baseValue ?? arcsBase.reduce((sum, arc) => sum + arc.data.value, 0),
+      value:
+        baseValue ?? arcsBase.reduce((sum, arc) => sum + arc.data.value, 0),
     },
     {
       key: "mid",
@@ -195,18 +210,21 @@ export function WorkflowNode({
     },
     {
       key: "high",
-      value: highValue ?? arcsHigh.reduce((sum, arc) => sum + arc.data.value, 0),
+      value:
+        highValue ?? arcsHigh.reduce((sum, arc) => sum + arc.data.value, 0),
     },
   ];
 
-  const { nodeControls, ringControls, orderedRings } = useWorkflowNodeAnimation({
-    nodeId: id,
-    viewState: effectiveViewState,
-    isActive,
-    rings: ringMetrics,
-    ringHoverKey: hoveredRingKey,
-    phase: simulationPhase,
-  });
+  const { nodeControls, ringControls, orderedRings } = useWorkflowNodeAnimation(
+    {
+      nodeId: id,
+      viewState: effectiveViewState,
+      isActive,
+      rings: ringMetrics,
+      ringHoverKey: hoveredRingKey,
+      phase: simulationPhase,
+    }
+  );
 
   const baseDescriptorMap: Record<WorkflowRingKey, RingDescriptor> = {
     base: {
@@ -318,7 +336,9 @@ export function WorkflowNode({
 
   let nextInnerRingOuter = radius - innerRingGap;
   const innerRingNodes = sortedDescriptors
-    .filter((descriptor) => descriptor.direction === "inner" && descriptor.arcs.length)
+    .filter(
+      (descriptor) => descriptor.direction === "inner" && descriptor.arcs.length
+    )
     .flatMap((descriptor) => {
       const outerRadius = Math.max(0, nextInnerRingOuter);
       const innerRadius = Math.max(0, outerRadius - descriptor.thickness);
@@ -329,7 +349,9 @@ export function WorkflowNode({
   let nextOuterRingInner = radius + outerRingGap;
   let maxOuterRingRadius = radius;
   const outerRingNodes = sortedDescriptors
-    .filter((descriptor) => descriptor.direction === "outer" && descriptor.arcs.length)
+    .filter(
+      (descriptor) => descriptor.direction === "outer" && descriptor.arcs.length
+    )
     .flatMap((descriptor) => {
       const innerRadius = Math.max(0, nextOuterRingInner);
       const outerRadius = innerRadius + descriptor.thickness;
@@ -344,7 +366,11 @@ export function WorkflowNode({
     <motion.g
       role="button"
       tabIndex={0}
-      aria-label={`${label}: ${valueLabel}`}
+      aria-label={
+        formattedBaseDeltaPercent
+          ? `${label}: ${valueLabel}, ${formattedBaseDeltaPercent} change vs previous day`
+          : `${label}: ${valueLabel}`
+      }
       initial={{ opacity: 0, scale: 0.95 }}
       animate={nodeControls}
       transition={{ type: "spring", stiffness: 220, damping: 18 }}
@@ -391,7 +417,7 @@ export function WorkflowNode({
           cx={0}
           cy={0}
           r={radius}
-          fill="rgba(15, 23, 42, 0.85)" 
+          fill="rgba(15, 23, 42, 0.85)"
           stroke={isActive ? "#38bdf8" : "rgba(148, 163, 184, 0.35)"}
           strokeWidth={isActive ? 4 : 3}
         />
@@ -404,7 +430,7 @@ export function WorkflowNode({
           y={-radius - 24}
           textAnchor="middle"
           fontSize={24}
-          fill="rgba(148,163,184,0.85)" 
+          fill="rgba(148,163,184,0.85)"
         >
           {label}
         </motion.text>
@@ -418,6 +444,18 @@ export function WorkflowNode({
         >
           {valueLabel}
         </motion.text>
+        {formattedBaseDeltaPercent && (
+          <motion.text
+            x={0}
+            y={32}
+            textAnchor="middle"
+            fontSize={18}
+            fontWeight={500}
+            fill={baseDeltaColor}
+          >
+            {formattedBaseDeltaPercent}
+          </motion.text>
+        )}
       </g>
     </motion.g>
   );
