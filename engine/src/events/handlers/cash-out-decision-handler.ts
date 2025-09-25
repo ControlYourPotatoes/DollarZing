@@ -239,6 +239,23 @@ export class CashOutDecisionHandler {
       };
 
       await this.eventBus.emit(EVENT_TYPES.CASH_OUT_COMPLETED, completedEvent);
+
+      // Also emit VIRTUAL_DOLLAR_RUN_COMPLETED since cash-out is a type of run completion
+      const runCompletedEvent = {
+        type: EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
+        timestamp: new Date(),
+        playerId: event.winnerId,
+        virtualDollarId: event.winnerDollarId,
+        finalLevel: result.finalLevel,
+        totalWinnings: result.totalWinnings,
+        completionType: "CASH_OUT" as const,
+        wasSuccessful: true,
+      };
+
+      await this.eventBus.emit(
+        EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
+        runCompletedEvent
+      );
     } catch (error) {
       console.error(
         `[CashOutDecisionHandler] Error processing cash-out:`,
@@ -249,6 +266,14 @@ export class CashOutDecisionHandler {
   }
 
   private async processContinuePlay(event: GameResolvedEvent): Promise<void> {
+    // Don't emit CONTINUE_PLAY for level 10 players - they should have cashed out
+    if (event.winnerLevel >= 10) {
+      console.warn(
+        `[CashOutDecisionHandler] Attempted to continue play at level ${event.winnerLevel} - this should not happen`
+      );
+      return;
+    }
+
     // Calculate next level potential winnings
     const nextLevel = Math.min(event.winnerLevel + 1, 10);
     const nextPotentialWinnings = this.calculateNextLevelWinnings(nextLevel);

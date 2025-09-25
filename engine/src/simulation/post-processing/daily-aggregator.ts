@@ -37,6 +37,24 @@ export interface ChartSeriesPoint {
   cumulativeValue: number;
 }
 
+export interface LevelBreakdown {
+  level: number;
+  gamesPlayed: number;
+  wins: number;
+  cashouts: number;
+  progressions: number;
+  winnings: number;
+  losses: number;
+}
+
+export interface RunLifecycle {
+  runsStarted: number;
+  runsCompleted: number;
+  runsCashedOut: number;
+  runsFailed: number;
+  levelDistribution: number[]; // Array of 10 numbers, index 0 = level 1, index 9 = level 10
+}
+
 export interface DailyAggregateSnapshot {
   day: number;
   date: string;
@@ -48,6 +66,7 @@ export interface DailyAggregateSnapshot {
     gamesPlayed: number;
     activePlayers: number;
     totalPlayers: number;
+    newPlayers: number;
   };
   pool?: {
     depositedToday: number; // runs created today
@@ -60,6 +79,8 @@ export interface DailyAggregateSnapshot {
     cumulativeAmount: number;
     cumulativeCount: number;
   };
+  levels?: LevelBreakdown[]; // Array of 10 items (level 1-10)
+  lifecycle?: RunLifecycle;
   workflowNodes: WorkflowNode[];
   timelineTicks: TimelineTick[];
   charts: {
@@ -80,6 +101,24 @@ interface RevenueAccumulator {
   cashoutsCount: number;
 }
 
+interface LevelAccumulator {
+  level: number;
+  gamesPlayed: number;
+  wins: number;
+  cashouts: number;
+  progressions: number;
+  winnings: number;
+  losses: number;
+}
+
+interface LifecycleAccumulator {
+  runsStarted: number;
+  runsCompleted: number;
+  runsCashedOut: number;
+  runsFailed: number;
+  levelDistribution: number[]; // Array of 10 numbers for levels 1-10
+}
+
 const BASE_SNAPSHOT_DATE = Date.UTC(2025, 0, 1);
 
 export function generateDailyAggregates(
@@ -94,6 +133,28 @@ export function generateDailyAggregates(
     runs: 0,
     cashoutsAmount: 0,
     cashoutsCount: 0,
+  };
+
+  // Initialize level accumulators for all 10 levels
+  const levelAccumulators: LevelAccumulator[] = Array.from(
+    { length: 10 },
+    (_, i) => ({
+      level: i + 1,
+      gamesPlayed: 0,
+      wins: 0,
+      cashouts: 0,
+      progressions: 0,
+      winnings: 0,
+      losses: 0,
+    })
+  );
+
+  const lifecycleAccumulator: LifecycleAccumulator = {
+    runsStarted: 0,
+    runsCompleted: 0,
+    runsCashedOut: 0,
+    runsFailed: 0,
+    levelDistribution: Array(10).fill(0),
   };
 
   if (!results.dailyResults || results.dailyResults.length === 0) {
@@ -155,6 +216,7 @@ export function generateDailyAggregates(
       gamesPlayed: dailyGames,
       activePlayers: dailyResult.playerStatistics?.activePlayers ?? 0,
       totalPlayers: dailyResult.playerStatistics?.totalPlayers ?? 0,
+      newPlayers: dailyResult.newPlayers ?? 0,
     };
 
     const workflowNodes = buildWorkflowNodes(
@@ -191,6 +253,15 @@ export function generateDailyAggregates(
       cumulativeRevenue,
     });
 
+    // Generate level breakdown for this day
+    const levelBreakdown = generateLevelBreakdown(
+      levelAccumulators,
+      dailyResult
+    );
+
+    // Generate lifecycle data for this day
+    const lifecycle = generateLifecycleData(lifecycleAccumulator, dailyResult);
+
     aggregates.push({
       day: dayIndex,
       date: buildSnapshotDate(dayIndex),
@@ -198,7 +269,7 @@ export function generateDailyAggregates(
       pool: {
         depositedToday: dailyRuns,
         consumedToday: dailyGames * 2,
-        outstanding: gameStats?.totalVirtualDollars ?? 0,
+        outstanding: gameStats?.pooledVirtualDollars ?? 0,
       },
       cashouts: {
         countToday: dailyCashoutsCount,
@@ -206,6 +277,8 @@ export function generateDailyAggregates(
         cumulativeAmount: roundToCents(cumulativeCashoutsAmount),
         cumulativeCount: cumulativeCashoutsCount,
       },
+      levels: levelBreakdown,
+      lifecycle: lifecycle,
       workflowNodes,
       timelineTicks: [timelineTick],
       charts,
@@ -366,4 +439,65 @@ function clampToZero(value: number): number {
     return 0;
   }
   return value < 0 ? 0 : value;
+}
+
+function generateLevelBreakdown(
+  levelAccumulators: LevelAccumulator[],
+  dailyResult: any
+): LevelBreakdown[] {
+  // This function processes level data from the simulation results
+  // Currently returns placeholder data - will be enhanced when simulation provides level data
+
+  const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
+
+  return levelAccumulators.map((acc, index) => {
+    const levelValue = LEVELS[index];
+    const totalGames = dailyResult.gameStatistics?.totalGames || 0;
+
+    // Placeholder logic - in real implementation, this would come from simulation
+    // For now, distribute games across levels with decreasing frequency
+    const gamesAtLevel = Math.floor(totalGames / Math.pow(2, index));
+    const wins = Math.floor(gamesAtLevel / 2);
+    const cashouts = Math.floor(wins * (0.1 + index * 0.05)); // Increasing cashout rate
+    const progressions = wins - cashouts;
+
+    return {
+      level: acc.level,
+      gamesPlayed: gamesAtLevel,
+      wins: wins,
+      cashouts: cashouts,
+      progressions: progressions,
+      winnings: cashouts * levelValue * 1.8, // Match existing winnings structure
+      losses: gamesAtLevel - wins, // Per-level losses, not cumulative
+    };
+  });
+}
+
+function generateLifecycleData(
+  _lifecycleAccumulator: LifecycleAccumulator,
+  dailyResult: any
+): RunLifecycle {
+  // This function processes run lifecycle data from the simulation results
+  // Currently returns placeholder data - will be enhanced when simulation provides lifecycle data
+
+  const gameStats = dailyResult.gameStatistics || {};
+
+  // Placeholder logic - in real implementation, this would come from simulation
+  const runsStarted = gameStats.totalRunsCreated || 0;
+  const runsCompleted = gameStats.jackpotsWon || 0;
+  const runsCashedOut = Math.floor(runsStarted * 0.3); // 30% cashout rate
+  const runsFailed = runsStarted - runsCompleted - runsCashedOut;
+
+  // Distribute runs across levels (more at lower levels)
+  const levelDistribution = Array.from({ length: 10 }, (_, i) =>
+    Math.floor(runsStarted / Math.pow(2, i + 1))
+  );
+
+  return {
+    runsStarted: runsStarted,
+    runsCompleted: runsCompleted,
+    runsCashedOut: runsCashedOut,
+    runsFailed: runsFailed,
+    levelDistribution: levelDistribution,
+  };
 }

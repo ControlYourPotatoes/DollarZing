@@ -41,6 +41,7 @@ export interface PresentationSnapshot {
   timelineTick: PresentationTimelineTick;
   financialWorkflow: PresentationWorkflow;
   charts: PresentationCharts;
+  levels?: PresentationLevelBreakdown[];
 }
 
 export interface PresentationTimelineTick {
@@ -94,6 +95,16 @@ export interface PresentationAccumulationPoint {
   cumulative: number;
 }
 
+export interface PresentationLevelBreakdown {
+  level: number;
+  gamesPlayed: number;
+  wins: number;
+  cashouts: number;
+  progressions: number;
+  winnings: number;
+  losses: number;
+}
+
 export interface PresentationSnapshotOptions {
   scenarioId: string;
   parameters: PresentationScenarioParameters;
@@ -120,7 +131,11 @@ export function buildPresentationSnapshotFile(
   };
 
   const days = dailySnapshots.map((snapshot, index) =>
-    buildPresentationSnapshot(snapshot, index)
+    buildPresentationSnapshot(
+      snapshot,
+      index,
+      dailySnapshots.slice(0, index + 1)
+    )
   );
 
   return {
@@ -135,7 +150,8 @@ export function buildPresentationSnapshotFile(
 
 function buildPresentationSnapshot(
   snapshot: DailyAggregateSnapshot,
-  index: number
+  index: number,
+  previousSnapshots: DailyAggregateSnapshot[]
 ): PresentationSnapshot {
   const timeline = snapshot.timelineTicks[0];
   const summary = {
@@ -160,6 +176,7 @@ function buildPresentationSnapshot(
     },
     financialWorkflow: buildWorkflow(snapshot),
     charts: buildCharts(snapshot),
+    levels: buildCumulativeLevelBreakdown(previousSnapshots),
   };
 }
 
@@ -255,13 +272,11 @@ function round(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-export function mapParametersToScenario(
-  combination: {
-    growthRate: number;
-    riskLevel: string;
-    charityPercentage: number;
-  }
-): {
+export function mapParametersToScenario(combination: {
+  growthRate: number;
+  riskLevel: string;
+  charityPercentage: number;
+}): {
   parameters: PresentationScenarioParameters;
   coordinates: PresentationScenarioCoordinates;
 } {
@@ -329,4 +344,45 @@ function mapCharityToCoordinate(charity: number): number {
     default:
       return 0;
   }
+}
+
+function buildCumulativeLevelBreakdown(
+  snapshots: DailyAggregateSnapshot[]
+): PresentationLevelBreakdown[] {
+  // Initialize cumulative level data for all 10 levels
+  const cumulativeLevels: PresentationLevelBreakdown[] = Array.from(
+    { length: 10 },
+    (_, i) => ({
+      level: i + 1,
+      gamesPlayed: 0,
+      wins: 0,
+      cashouts: 0,
+      progressions: 0,
+      winnings: 0,
+      losses: 0,
+    })
+  );
+
+  // Accumulate data from all snapshots up to this point
+  for (const snapshot of snapshots) {
+    if (snapshot.levels) {
+      for (
+        let i = 0;
+        i < snapshot.levels.length && i < cumulativeLevels.length;
+        i++
+      ) {
+        const dailyLevel = snapshot.levels[i];
+        const cumulativeLevel = cumulativeLevels[i];
+
+        cumulativeLevel.gamesPlayed += dailyLevel.gamesPlayed;
+        cumulativeLevel.wins += dailyLevel.wins;
+        cumulativeLevel.cashouts += dailyLevel.cashouts;
+        cumulativeLevel.progressions += dailyLevel.progressions;
+        cumulativeLevel.winnings += dailyLevel.winnings;
+        cumulativeLevel.losses += dailyLevel.losses;
+      }
+    }
+  }
+
+  return cumulativeLevels;
 }

@@ -1,12 +1,12 @@
 {
-  "generationTimestamp": "2025-09-21T23:26:29.834Z",
+  "generationTimestamp": "2025-09-24T04:47:44.484Z",
   "parameters": {
     "growthRate": 15,
     "riskLevel": "mid",
     "charityPercentage": 30
   },
-  "generationTimeMs": 5630.989997999997,
-  "datasetSizeBytes": 357746,
+  "generationTimeMs": 91720.354918,
+  "datasetSizeBytes": 445130,
   "recordCount": 365,
   "version": "1.0.0",
   "generatorVersion": "orchestrator-v1.0.0",

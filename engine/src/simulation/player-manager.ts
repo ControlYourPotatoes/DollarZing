@@ -22,10 +22,11 @@ export interface PlayerManagementConfig {
  */
 export interface PlayerStatistics {
   totalPlayers: number;
-  activePlayers: number;
-  retiredPlayers: number;
-  totalDonationsFunds: number;
-  totalWinningsFunds: number;
+  activePlayers: number; // DAU target - number of players we aim to keep active daily
+  retiredPlayers: number; // Players not in DAU target (inactive/retired)
+  completedRunsPlayers: number; // Players who completed their runs (cashed out or eliminated)
+  totalCharityContributions: number; // Duplicate of revenueStatistics.totalCharityContributions for player charts
+  totalPlayerPayouts: number; // Duplicate of revenueStatistics.totalPlayerPayouts for player charts
   totalProgressionFunds: number;
   averageGamesPerPlayer: number;
   playerRetirementRate: number;
@@ -60,22 +61,29 @@ export class PlayerManager {
   private dayStartedSubscription: EventSubscription | null = null;
   private simulationStartedSubscription: EventSubscription | null = null;
   private runCompletedSubscription: EventSubscription | null = null;
-  private cashOutCompletedSubscription: EventSubscription | null = null;
   // No end-of-day clearing subscription; we clear at next DAY_STARTED to avoid race with late events
   private pendingInitialPlayers: number = 0;
   // Throttles to prevent runaway growth and memory pressure
-  private static readonly MAX_NEW_PLAYERS_PER_DAY = 2000;
+  private static readonly MAX_NEW_PLAYERS_PER_DAY = 3000;
   private static readonly DAILY_ONBOARDING_RATE = 0.02; // 2% of remaining gap per day
-  private static readonly TARGET_DAU_RATIO = 0.05; // 5% of total players active per day
+  // DAU targets by cohort (Base scenario from research)
+  private static readonly DAU_TARGETS: Record<CashOutStrategy, number> = {
+    [CashOutStrategy.CONSERVATIVE]: 0.18, // Light: 18% DAU
+    [CashOutStrategy.BALANCED]: 0.26, // Mid: 26% DAU
+    [CashOutStrategy.AGGRESSIVE]: 0.45, // Whales: 45% DAU
+  };
   private static readonly NEW_PLAYER_STARTING_DOLLARS = 5;
+  // Weekly allowance ranges from research (Base scenario) - divided by 7 for daily
   private static readonly ALLOWANCE_PER_DAY: Record<CashOutStrategy, number> = {
-    [CashOutStrategy.CONSERVATIVE]: 2,
-    [CashOutStrategy.BALANCED]: 4,
-    [CashOutStrategy.AGGRESSIVE]: 6,
+    [CashOutStrategy.CONSERVATIVE]: 4, // Light: $8-16/week = ~$1.1-2.3/day
+    [CashOutStrategy.BALANCED]: 7, // Mid: $35-70/week = ~$5-10/day
+    [CashOutStrategy.AGGRESSIVE]: 31, // Whales: $160-320/week = ~$23-46/day
   };
 
   // Active-only model counters
   private totalPlayersCounter = 0;
+  private completedRunsCounter = 0; // Track players who completed their runs
+  private dailyNewPlayersCounter = 0; // Track new players added today
 
   /**
    * Setup event subscriptions for event-driven processing
@@ -100,6 +108,8 @@ export class PlayerManager {
         const dollarId = evt?.virtualDollarId;
         if (playerId && dollarId) {
           this.removeActiveRun(playerId, dollarId);
+          // Track completed runs
+          this.completedRunsCounter++;
           // Release completed dollar to free memory
           this.virtualDollarFactory.releaseDollar(dollarId);
         }
@@ -107,20 +117,8 @@ export class PlayerManager {
       5
     );
 
-    // Mark runs inactive on cash-out completion
-    this.cashOutCompletedSubscription = this.eventBus.on(
-      EVENT_TYPES.CASH_OUT_COMPLETED as any,
-      async (evt: any) => {
-        const playerId = evt?.playerId;
-        const dollarId = evt?.virtualDollarId;
-        if (playerId && dollarId) {
-          this.removeActiveRun(playerId, dollarId);
-          // Release cashed-out dollar to free memory
-          this.virtualDollarFactory.releaseDollar(dollarId);
-        }
-      },
-      5
-    );
+    // Note: CASH_OUT_COMPLETED events are handled by the same VIRTUAL_DOLLAR_RUN_COMPLETED handler
+    // since cash-outs should also emit VIRTUAL_DOLLAR_RUN_COMPLETED events
 
     // Clear previous day's actives at next DAY_STARTED (safe point)
   }
@@ -152,7 +150,7 @@ export class PlayerManager {
     // Calculate current total player count from counter (active-only model)
     const currentPlayerCount = this.totalPlayersCounter;
 
-    // Add new players if we're below target (throttled)
+    // Add new players if we're below S-curve target (throttled)
     const playersToAdd = Math.max(0, targetPlayers - currentPlayerCount);
     const throttledFromRate = Math.max(
       1,
@@ -163,17 +161,25 @@ export class PlayerManager {
       throttledFromRate,
       PlayerManager.MAX_NEW_PLAYERS_PER_DAY
     );
-    // We only count new players; actives are created below to match DAU
-    void dailyNewPlayers;
+
+    // Create new players to reach S-curve target
+    if (dailyNewPlayers > 0) {
+      this.totalPlayersCounter += dailyNewPlayers;
+      this.dailyNewPlayersCounter += dailyNewPlayers;
+      await this.createActives(dailyNewPlayers, playerStrategies, true);
+    }
 
     // Note: we do not create passive players here; we only count them. Actives are created below to match DAU.
 
     // Create today's DAU actives: prefer reactivation, then mint new
-    const targetDailyActives = Math.floor(
-      this.totalPlayersCounter * PlayerManager.TARGET_DAU_RATIO
+    // Calculate cohort-based targets from research
+    const cohortTargets = this.calculateCohortDAUTargets();
+    const totalTargetActives = Object.values(cohortTargets).reduce(
+      (sum, count) => sum + count,
+      0
     );
     const currentActive = this.getActivePlayerCount();
-    const deficit = Math.max(0, targetDailyActives - currentActive);
+    const deficit = Math.max(0, totalTargetActives - currentActive);
 
     if (deficit > 0) {
       const inactiveStock = Math.max(
@@ -316,7 +322,7 @@ export class PlayerManager {
   getPlayerStatistics(_config: PlayerManagementConfig): PlayerStatistics {
     // Use player registry for accurate player counts
     const totalPlayers = this.totalPlayersCounter;
-    const activePlayers = this.getActivePlayerCount();
+    const activePlayers = this.calculateDAUTargetFromTotal(totalPlayers);
     const retiredPlayers = totalPlayers - activePlayers;
 
     // Calculate total progression funds from active runs
@@ -332,8 +338,9 @@ export class PlayerManager {
       totalPlayers,
       activePlayers,
       retiredPlayers,
-      totalDonationsFunds: 0, // Now handled by RevenueTrackingHandler
-      totalWinningsFunds: 0, // Now handled by RevenueTrackingHandler
+      completedRunsPlayers: this.completedRunsCounter,
+      totalCharityContributions: 0, // Will be populated by GameEngineSimulator with revenue data
+      totalPlayerPayouts: 0, // Will be populated by GameEngineSimulator with revenue data
       totalProgressionFunds: totalProgressionFunds,
       averageGamesPerPlayer: 0, // Will be calculated by caller with game data
       playerRetirementRate:
@@ -373,6 +380,62 @@ export class PlayerManager {
       }
     }
     return activeCount;
+  }
+
+  /**
+   * Calculate DAU target based on total players using average DAU rate
+   */
+  private calculateDAUTargetFromTotal(totalPlayers: number): number {
+    // Use average DAU rate across all strategies
+    const averageDAURate =
+      Object.values(PlayerManager.DAU_TARGETS).reduce(
+        (sum, rate) => sum + rate,
+        0
+      ) / Object.keys(PlayerManager.DAU_TARGETS).length;
+
+    return Math.floor(totalPlayers * averageDAURate);
+  }
+
+  /**
+   * Get daily new players count and reset for next day
+   */
+  getDailyNewPlayersCount(): number {
+    const count = this.dailyNewPlayersCounter;
+    this.dailyNewPlayersCounter = 0; // Reset for next day
+    return count;
+  }
+
+  /**
+   * Calculate DAU targets by cohort based on research data
+   */
+  private calculateCohortDAUTargets(): Record<CashOutStrategy, number> {
+    const targets: Record<CashOutStrategy, number> = {
+      [CashOutStrategy.CONSERVATIVE]: 0,
+      [CashOutStrategy.BALANCED]: 0,
+      [CashOutStrategy.AGGRESSIVE]: 0,
+    };
+
+    // Count players by strategy from active registry
+    const strategyCounts: Record<CashOutStrategy, number> = {
+      [CashOutStrategy.CONSERVATIVE]: 0,
+      [CashOutStrategy.BALANCED]: 0,
+      [CashOutStrategy.AGGRESSIVE]: 0,
+    };
+
+    for (const player of this.playerRegistry.values()) {
+      strategyCounts[player.strategy]++;
+    }
+
+    // Calculate targets based on research DAU rates
+    // Note: This calculates DAU target for currently active players only
+    // The actual DAU target should be based on total players, but we only have active players in registry
+    for (const strategy of Object.keys(CashOutStrategy) as CashOutStrategy[]) {
+      const playerCount = strategyCounts[strategy];
+      const dauRate = PlayerManager.DAU_TARGETS[strategy];
+      targets[strategy] = Math.floor(playerCount * dauRate);
+    }
+
+    return targets;
   }
 
   /**
@@ -475,12 +538,10 @@ export class PlayerManager {
     this.dayStartedSubscription?.unsubscribe();
     this.simulationStartedSubscription?.unsubscribe();
     this.runCompletedSubscription?.unsubscribe();
-    this.cashOutCompletedSubscription?.unsubscribe();
     // no day-completed subscription
     this.dayStartedSubscription = null;
     this.simulationStartedSubscription = null;
     this.runCompletedSubscription = null;
-    this.cashOutCompletedSubscription = null;
     // no day-completed subscription
     this.playerRegistry.clear();
   }

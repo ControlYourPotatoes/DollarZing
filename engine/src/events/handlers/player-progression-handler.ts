@@ -110,6 +110,14 @@ export class PlayerProgressionHandler {
     event: ContinuePlayEvent
   ): Promise<void> {
     try {
+      // Don't process progression for level 10 players - they should have cashed out
+      if (event.currentLevel >= 10) {
+        console.warn(
+          `[PlayerProgressionHandler] Attempted to progress player at level ${event.currentLevel} - this should not happen`
+        );
+        return;
+      }
+
       // Resolve a valid virtual dollar id (defensive in case event payload is missing it)
       let vdId = event.virtualDollarId;
       if (!vdId || typeof vdId !== "string" || vdId.length === 0) {

@@ -127,24 +127,25 @@ export class DayProcessor {
     // Event-driven architecture: MatchmakingEventHandler will automatically
     // attempt matchmaking when POOL_ADDED and POOL_UPDATED events are emitted
     // The daily loop is no longer needed as matchmaking happens reactively
-    
+
     if (this.loggingEnabled) {
       console.log(
         `DEBUG: Day ${day} - Matchmaking will be handled by MatchmakingEventHandler through events`
       );
     }
-    
+
     // Small delay to allow event processing
     await new Promise((resolve) => setTimeout(resolve, 10));
 
     // Emit day completed event
     const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();
+    const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
     await this.eventBus.emit(EVENT_TYPES.DAY_COMPLETED, {
       type: EVENT_TYPES.DAY_COMPLETED,
       timestamp: new Date(),
       dayNumber: day,
       gamesProcessed: maxGamesPerDay, // Approximate
-      newPlayers: 0, // Would need to track this
+      newPlayers: dailyNewPlayers, // Track new players added today
       totalRevenue: 0, // Would need to track this through revenue events
       poolSize: finalPoolStats.totalDollarsInPool,
       activePlayers: 0, // Would need to track this properly

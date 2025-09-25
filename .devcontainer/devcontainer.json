@@ -19,6 +19,7 @@
     "LOG_LEVEL": "debug"
   },
   "containerEnv": {
+    "OPENROUTER_API_KEY": "${localEnv:OPENROUTER_API_KEY}",
     "CODEX_UNSAFE_ALLOW_NO_SANDBOX": "true",
     "PORT": "3001"
   },
@@ -45,7 +46,7 @@
       }
     }
   },
-  "postCreateCommand": "cd /workspace && npm install && cd engine && npm ci && mkdir -p /home/developer/.continue && cat > /home/developer/.continue/config.json << 'EOF'\n{\n  \"models\": [\n    {\n      \"title\": \"OpenRouter GPT-4o-mini\",\n      \"provider\": \"openrouter\",\n      \"model\": \"openai/gpt-4o-mini\",\n      \"apiKey\": \"env:OPENROUTER_API_KEY\",\n      \"apiBase\": \"https://openrouter.ai/api/v1\"\n    }\n  ],\n  \"tabAutocompleteModel\": {\n    \"title\": \"OpenRouter GPT-4o-mini\",\n    \"provider\": \"openrouter\",\n    \"model\": \"openai/gpt-4o-mini\",\n    \"apiKey\": \"env:OPENROUTER_API_KEY\",\n    \"apiBase\": \"https://openrouter.ai/api/v1\"\n  }\n}\nEOF\n&& echo 'Continue config setup complete'",
+  "postCreateCommand": "cd /workspace && npm install && cd engine && npm ci && if [ -f .env ]; then set -a && source .env && set +a; fi && mkdir -p /home/developer/.continue && cat > /home/developer/.continue/config.json << 'EOF'\n{\n  \"models\": [\n    {\n      \"title\": \"OpenRouter GPT-4o-mini\",\n      \"provider\": \"openrouter\",\n      \"model\": \"openai/gpt-4o-mini\",\n      \"apiKey\": \"env:OPENROUTER_API_KEY\",\n      \"apiBase\": \"https://openrouter.ai/api/v1\"\n    }\n  ],\n  \"tabAutocompleteModel\": {\n    \"title\": \"OpenRouter GPT-4o-mini\",\n    \"provider\": \"openrouter\",\n    \"model\": \"openai/gpt-4o-mini\",\n    \"apiKey\": \"env:OPENROUTER_API_KEY\",\n    \"apiBase\": \"https://openrouter.ai/api/v1\"\n  }\n}\nEOF\n&& echo 'Continue config setup complete'",
   "remoteUser": "developer",
   "features": {}
 }
