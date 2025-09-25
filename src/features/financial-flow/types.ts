@@ -7,5 +7,6 @@ export type SimulationPhase = "idle" | "running" | "scrubbing";
 export interface WorkflowRingMetrics {
   key: WorkflowRingKey;
   value: number;
+  percent: number;
 }
 

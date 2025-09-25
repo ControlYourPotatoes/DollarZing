@@ -144,3 +144,4 @@ To clarify there two active states the node itself with all the rings will add t
 ▌ OK then can you implement it now.
 
 https://www.youtube.com/watch?v=mN--sGH97dY
+https://www.joshwcomeau.com/svg/friendly-introduction-to-svg/
