@@ -46,7 +46,7 @@ export interface WorkflowLayoutResult {
   highlightedIds: string[];
 }
 
-const DEFAULT_NODE_RADIUS = 100;
+const DEFAULT_NODE_RADIUS = 80;
 
 function computePositions(
   nodes: PresentationWorkflowNode[],

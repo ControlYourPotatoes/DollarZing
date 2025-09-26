@@ -24,7 +24,40 @@ type ArcData = {
 type RingDescriptor = {
   key: WorkflowRingKey;
   arcs: ArcData[];
-  radius: number;
+  innerRadius: number;
+  outerRadius: number;
+};
+
+type RingSizingVariant = {
+  innerOffset: number;
+  thickness: number;
+  gapToNext: number;
+};
+
+type RingSizingConfig = Record<WorkflowRingKey, {
+  default: RingSizingVariant;
+  active?: RingSizingVariant;
+  hovered?: RingSizingVariant;
+}>;
+
+const RING_ORDER: WorkflowRingKey[] = ["base", "mid", "high"];
+
+const DEFAULT_RING_SIZING_CONFIG: RingSizingConfig = {
+  base: {
+    default: { innerOffset: 1, thickness: 12, gapToNext: 2 },
+    active: { innerOffset: 1, thickness: 16, gapToNext: 6 },
+    hovered: { innerOffset: 0, thickness: 24, gapToNext: 12 },
+  },
+  mid: {
+    default: { innerOffset: 0, thickness: 10, gapToNext: 2 },
+    active: { innerOffset: 0, thickness: 14, gapToNext: 4 },
+    hovered: { innerOffset: 0, thickness: 24, gapToNext: 6 },
+  },
+  high: {
+    default: { innerOffset: 0, thickness: 10, gapToNext: 0 },
+    active: { innerOffset: 0, thickness: 12, gapToNext: 0 },
+    hovered: { innerOffset: 0, thickness: 14, gapToNext: 0 },
+  },
 };
 
 export type WorkflowNodeProps = {
@@ -47,6 +80,7 @@ export type WorkflowNodeProps = {
   onHover?: (id: string | null) => void;
   onToggle?: (id: string) => void;
   viewState?: WorkflowNodeViewState;
+  ringSizing?: RingSizingConfig;
 };
 
 function formatCurrency(value: number): string {
@@ -94,6 +128,7 @@ export function WorkflowNode({
   onHover,
   onToggle,
   viewState = "standard",
+  ringSizing,
 }: WorkflowNodeProps) {
   const valueLabel = formatCurrency(aggregateValue);
   const renderDelta = (
@@ -152,27 +187,47 @@ export function WorkflowNode({
   });
 
   const ringDescriptors: RingDescriptor[] = useMemo(() => {
-    const baseRadius = Math.max(0, radius - 16);
-    const midRadius = Math.max(radius, baseRadius + 10);
-    const highRadius = midRadius + 16;
-    return [
-      { key: "base", arcs: computeArcs(layers), radius: baseRadius },
-      { key: "mid", arcs: computeArcs(midSegments), radius: midRadius },
-      { key: "high", arcs: computeArcs(highSegments), radius: highRadius },
-    ];
-  }, [layers, midSegments, highSegments, radius]);
+    const sizing = ringSizing ?? DEFAULT_RING_SIZING_CONFIG;
+    const descriptors: RingDescriptor[] = [];
+    let currentOuter = radius;
+
+    for (const key of RING_ORDER) {
+      const config = sizing[key];
+      const isCurrentHovered = ringHoverKey === key;
+      let variant = config.default;
+      if (isActive && config.active) {
+        variant = config.active;
+      }
+      if (isCurrentHovered && config.hovered) {
+        variant = config.hovered;
+      }
+
+      const arcs =
+        key === "base"
+          ? computeArcs(layers)
+          : key === "mid"
+          ? computeArcs(midSegments)
+          : computeArcs(highSegments);
+
+      const outerRadius = Math.max(0, currentOuter + variant.innerOffset + variant.thickness);
+      const innerRadius = Math.max(0, outerRadius - variant.thickness);
+
+      descriptors.push({ key, arcs, innerRadius, outerRadius });
+      currentOuter = outerRadius + variant.gapToNext;
+    }
+
+    return descriptors;
+  }, [layers, midSegments, highSegments, radius, ringHoverKey, ringSizing, isActive]);
 
   const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
   const interactiveRadius = Math.max(radius + 30, radius * 1.3);
 
   const renderRing = (descriptor: RingDescriptor) => {
     if (!descriptor.arcs.length) return null;
-    const { key, arcs } = descriptor;
+    const { key, arcs, innerRadius, outerRadius } = descriptor;
     const controls = ringControls[key];
     if (!controls) return null;
-    const outerRadius = descriptor.radius;
     if (outerRadius <= 0) return null;
-    const innerRadius = Math.max(0, outerRadius - 10);
     return (
       <motion.g
         key={key}
@@ -288,9 +343,9 @@ export function WorkflowNode({
           cx={0}
           cy={0}
           r={radius}
-          fill="rgba(15, 23, 42, 0.85)" 
-          stroke={isActive ? "#38bdf8" : "rgba(148, 163, 184, 0.35)"}
-          strokeWidth={isActive ? 4 : 3}
+          fill="rgba(15, 23, 42, 0.85)"
+          stroke="rgba(148, 163, 184, 0.35)"
+          strokeWidth={3}
         />
         {/* Inner stacked rings anchor to the node and size themselves to prevent overlap */}
         {innerRingNodes}
