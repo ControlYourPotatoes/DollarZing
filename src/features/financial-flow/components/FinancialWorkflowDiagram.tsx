@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { motion } from "framer-motion";
 
 import { useWorkflowData } from "../hooks/useWorkflowData";
 import { WorkflowNode } from "../primitives/WorkflowNode";
 import { WorkflowLink } from "../primitives/WorkflowLink";
+import { WorkflowNodeTooltip } from "./WorkflowNodeTooltip";
 
 export interface FinancialWorkflowDiagramProps {
   width?: number; // container hint; svg fills 100%
@@ -17,6 +18,37 @@ export function FinancialWorkflowDiagram({
 }: FinancialWorkflowDiagramProps) {
   const { nodes, links, day } = useWorkflowData();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const svgWrapperRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<
+    | {
+        x: number;
+        y: number;
+        side: "left" | "right";
+        offset: number;
+      }
+    | null
+  >(null);
+
+  const displayNodes = useMemo(() => {
+    return nodes.map((node) => {
+      let adjustedX = node.x;
+      let adjustedY = node.y;
+      if (node.id === "platform") {
+        adjustedX += 10;
+      }
+      return {
+        ...node,
+        x: adjustedX,
+        y: adjustedY,
+      };
+    });
+  }, [nodes]);
+
+  const hoveredNode = useMemo(
+    () => displayNodes.find((candidate) => candidate.id === hoveredId),
+    [hoveredId, displayNodes]
+  );
 
   if (!day) {
     return (
@@ -28,8 +60,8 @@ export function FinancialWorkflowDiagram({
 
   // Compute dynamic viewBox to fit all nodes/links comfortably
   const padding = 35;
-  const bounds = nodes.length
-    ? nodes.reduce(
+  const bounds = displayNodes.length
+    ? displayNodes.reduce(
         (acc, n) => {
           acc.minX = Math.min(acc.minX, n.x - n.radius);
           acc.maxX = Math.max(acc.maxX, n.x + n.radius);
@@ -47,6 +79,49 @@ export function FinancialWorkflowDiagram({
   const vbW = Math.max(width, bounds.maxX + padding - vbX);
   const vbH = Math.max(height, bounds.maxY + padding - vbY);
 
+  useEffect(() => {
+    if (!hoveredNode || !svgRef.current || !svgWrapperRef.current) {
+      setTooltipPosition(null);
+      return;
+    }
+    const svgElement = svgRef.current;
+    const wrapperElement = svgWrapperRef.current;
+    const svgRect = svgElement.getBoundingClientRect();
+    const wrapperRect = wrapperElement.getBoundingClientRect();
+    if (svgRect.width === 0 || svgRect.height === 0) {
+      setTooltipPosition(null);
+      return;
+    }
+
+    const normalizedX = ((hoveredNode.x - vbX) / vbW) * svgRect.width;
+    const normalizedY = ((hoveredNode.y - vbY) / vbH) * svgRect.height;
+    const offsetX = svgRect.left - wrapperRect.left;
+    const offsetY = svgRect.top - wrapperRect.top;
+    const anchorX = offsetX + normalizedX;
+    const anchorY = offsetY + normalizedY;
+    const side: "left" | "right" =
+      normalizedX > svgRect.width * 0.55 ? "left" : "right";
+
+    const nodeRadiusPx = Math.max(
+      0,
+      (hoveredNode.radius / Math.max(1, vbW)) * svgRect.width
+    );
+    const horizontalOffset = Math.max(28, nodeRadiusPx + 24);
+
+    const paddingY = 20;
+    const clampedY = Math.max(
+      paddingY,
+      Math.min(wrapperRect.height - paddingY, anchorY)
+    );
+
+    setTooltipPosition({
+      x: anchorX,
+      y: clampedY,
+      side,
+      offset: horizontalOffset,
+    });
+  }, [hoveredNode, vbX, vbW]);
+
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg">
       <div className="mb-3 flex items-center justify-between text-sm text-slate-300">
@@ -60,15 +135,17 @@ export function FinancialWorkflowDiagram({
           })}
         </span>
       </div>
-      <motion.svg
-        role="img"
-        aria-label="Financial distribution flow diagram"
-        width="100%"
-        height={Math.max(550, height)}
-        viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}
-        className="mx-auto block"
-        preserveAspectRatio="xMidYMid meet"
-      >
+      <div ref={svgWrapperRef} className="relative">
+        <motion.svg
+          ref={svgRef}
+          role="img"
+          aria-label="Financial distribution flow diagram"
+          width="100%"
+          height={Math.max(550, height)}
+          viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}
+          className="mx-auto block"
+          preserveAspectRatio="xMidYMid meet"
+        >
         <defs>
           <filter id="workflow-glow" x="-20" y="-20" width="200" height="200">
             <feGaussianBlur stdDeviation="6" result="blur" />
@@ -79,7 +156,7 @@ export function FinancialWorkflowDiagram({
           </filter>
         </defs>
         {/* Debug: draw crosshairs at node positions to verify clipping */}
-        {nodes.map((n) => (
+        {displayNodes.map((n) => (
           <g key={`debug-${n.id}`} opacity={0.25}>
             <line
               x1={n.x - 8}
@@ -110,217 +187,35 @@ export function FinancialWorkflowDiagram({
             }
           />
         ))}
-        {nodes.map((node) => {
-          // Apply individual offsets (add more ifs for other nodes)
-          let adjustedX = node.x;
-          let adjustedY = node.y;
-          if (node.id === "platform") {
-            adjustedX += 10; // Move right by 10px (positive x)
-            adjustedY += 0; // Uncomment/example: Move down by 20px (positive y)
-          }
-          // Example for another node:
-          // if (node.id === "platform") {
-          //   adjustedX -= 15;  // Move left
-          // }
-
-          return (
-            <WorkflowNode
-              key={node.id}
-              id={node.id}
-              label={node.label}
-              aggregateValue={node.aggregateValue}
-              layers={node.layers}
-              midSegments={node.midSegments}
-              highSegments={node.highSegments}
-              baseValue={node.baseValue}
-              midValue={node.midValue}
-              highValue={node.highValue}
-              baseDeltaPercent={node.baseDeltaPercent}
-              x={adjustedX}
-              y={adjustedY}
-              radius={node.radius}
-              isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
-              onHover={setHoveredId}
-            />
-          );
-        })}
-      </motion.svg>
-      {hoveredId && (
-        <div className="mt-3 max-w-md rounded-md border border-slate-800 bg-slate-900/85 px-4 py-3 text-xs text-slate-200 shadow-lg">
-          {(() => {
-            const node = nodes.find((candidate) => candidate.id === hoveredId);
-            if (!node) return null;
-            return (
-              <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="text-sm font-semibold text-slate-100">
-                      {node.label}
-                    </div>
-                    <div className="text-[11px] uppercase tracking-wide text-slate-500">
-                      Cumulative totals
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-semibold text-slate-100">
-                      {(node.baseValue ?? node.aggregateValue).toLocaleString(
-                        undefined,
-                        {
-                          style: "currency",
-                          currency: "USD",
-                          maximumFractionDigits: 0,
-                        }
-                      )}
-                    </div>
-                    {node.baseDeltaPercent !== undefined && (
-                      <div
-                        className={`text-[11px] font-medium ${
-                          node.baseDeltaPercent > 0
-                            ? "text-emerald-400"
-                            : node.baseDeltaPercent < 0
-                            ? "text-rose-400"
-                            : "text-slate-500"
-                        }`}
-                      >
-                        {node.baseDeltaPercent > 0 ? "+" : ""}
-                        {node.baseDeltaPercent.toFixed(1)}%
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {(node.midValue !== undefined ||
-                  node.highValue !== undefined) && (
-                  <div className="grid grid-cols-2 gap-3 text-slate-100">
-                    {node.midValue !== undefined && (
-                      <div>
-                        <div className="text-[11px] uppercase tracking-wide text-slate-500">
-                          Mid Scenario
-                        </div>
-                        <div className="mt-1 text-sm font-semibold">
-                          {node.midValue.toLocaleString(undefined, {
-                            style: "currency",
-                            currency: "USD",
-                            maximumFractionDigits: 0,
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    {node.highValue !== undefined && (
-                      <div>
-                        <div className="text-[11px] uppercase tracking-wide text-slate-500">
-                          High Scenario
-                        </div>
-                        <div className="mt-1 text-sm font-semibold">
-                          {node.highValue.toLocaleString(undefined, {
-                            style: "currency",
-                            currency: "USD",
-                            maximumFractionDigits: 0,
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {node.layers && node.layers.length > 0 && (
-                  <div>
-                    <div className="mb-1 text-[11px] uppercase tracking-wide text-slate-500">
-                      Composition
-                    </div>
-                    <ul className="space-y-1">
-                      {node.layers.map((layer) => (
-                        <li
-                          key={layer.id}
-                          className="flex items-center justify-between"
-                        >
-                          <span className="flex items-center gap-2">
-                            <span
-                              className="inline-block h-2 w-2 rounded-full"
-                              style={{ backgroundColor: layer.color }}
-                            />
-                            {layer.label}
-                          </span>
-                          <span className="font-semibold text-slate-100">
-                            {layer.value.toLocaleString(undefined, {
-                              style: "currency",
-                              currency: "USD",
-                              maximumFractionDigits: 0,
-                            })}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {((node.midSegments && node.midSegments.length > 0) ||
-                  (node.highSegments && node.highSegments.length > 0)) && (
-                  <div className="space-y-2">
-                    {node.midSegments && node.midSegments.length > 0 && (
-                      <div>
-                        <div className="mb-1 text-[11px] uppercase tracking-wide text-slate-500">
-                          Mid contributors
-                        </div>
-                        <ul className="space-y-1">
-                          {node.midSegments.map((seg) => (
-                            <li
-                              key={`mid-${seg.id}`}
-                              className="flex items-center justify-between"
-                            >
-                              <span className="flex items-center gap-2">
-                                <span
-                                  className="inline-block h-2 w-2 rounded-full"
-                                  style={{ backgroundColor: seg.color }}
-                                />
-                                {seg.label}
-                              </span>
-                              <span>
-                                {seg.value.toLocaleString(undefined, {
-                                  style: "currency",
-                                  currency: "USD",
-                                  maximumFractionDigits: 0,
-                                })}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {node.highSegments && node.highSegments.length > 0 && (
-                      <div>
-                        <div className="mb-1 text-[11px] uppercase tracking-wide text-slate-500">
-                          High contributors
-                        </div>
-                        <ul className="space-y-1">
-                          {node.highSegments.map((seg) => (
-                            <li
-                              key={`high-${seg.id}`}
-                              className="flex items-center justify-between"
-                            >
-                              <span className="flex items-center gap-2">
-                                <span
-                                  className="inline-block h-2 w-2 rounded-full"
-                                  style={{ backgroundColor: seg.color }}
-                                />
-                                {seg.label}
-                              </span>
-                              <span>
-                                {seg.value.toLocaleString(undefined, {
-                                  style: "currency",
-                                  currency: "USD",
-                                  maximumFractionDigits: 0,
-                                })}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </div>
-      )}
+        {displayNodes.map((node) => (
+          <WorkflowNode
+            key={node.id}
+            id={node.id}
+            label={node.label}
+            aggregateValue={node.aggregateValue}
+            layers={node.layers}
+            midSegments={node.midSegments}
+            highSegments={node.highSegments}
+            baseValue={node.baseValue}
+            midValue={node.midValue}
+            highValue={node.highValue}
+            x={node.x}
+            y={node.y}
+            radius={node.radius}
+            isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
+            onHover={setHoveredId}
+          />
+        ))}
+        </motion.svg>
+        {hoveredNode && tooltipPosition && (
+          <WorkflowNodeTooltip
+            node={hoveredNode}
+            dayIndex={day?.dayIndex}
+            style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
+            side={tooltipPosition.side}
+          />
+        )}
+      </div>
     </div>
   );
 }

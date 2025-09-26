@@ -26,6 +26,9 @@ interface PositionedNode extends PresentationWorkflowNode {
   midValue?: number;
   highValue?: number;
   baseDeltaPercent?: number;
+  midDeltaPercent?: number;
+  highDeltaPercent?: number;
+  comparisonMax?: number;
 }
 
 interface PositionedLink extends PresentationWorkflowLink {
@@ -65,14 +68,26 @@ export function useWorkflowData(): WorkflowLayoutResult {
     }
 
     let globalMax = 0;
+    const nodeComparisonMax: Record<string, number> = {};
+
+    const trackMaxValue = (nodeId: string, rawValue: number | undefined) => {
+      if (rawValue === undefined || Number.isNaN(rawValue)) {
+        return;
+      }
+      const value = Math.max(0, rawValue);
+      nodeComparisonMax[nodeId] = Math.max(nodeComparisonMax[nodeId] ?? 0, value);
+    };
     const scenariosToCheck = [scenario, midScenario, highScenario].filter(
       Boolean
     ) as NormalizedPresentationScenario[];
 
+    const activeDayIndex = day.dayIndex ?? 0;
     scenariosToCheck.forEach((sc) => {
       if (!sc?.dayLookup) return;
-      Object.values(sc.dayLookup).forEach((d) => {
+      Object.entries(sc.dayLookup).forEach(([dayKey, d]) => {
         if (!d?.timelineTick) return;
+        const idx = Number(dayKey);
+        if (!Number.isFinite(idx) || idx > activeDayIndex) return;
         const tick = d.timelineTick;
         globalMax = Math.max(
           globalMax,
@@ -81,11 +96,25 @@ export function useWorkflowData(): WorkflowLayoutResult {
           tick.cumulativeCharity || 0,
           tick.cumulativePayouts || 0
         );
+
+        trackMaxValue("total", tick.cumulativeRevenue || 0);
+        trackMaxValue("platform", tick.cumulativeFees || 0);
+        trackMaxValue("charity", tick.cumulativeCharity || 0);
+        trackMaxValue("players", tick.cumulativePayouts || 0);
+
+        if (d.financialWorkflow?.nodes) {
+          d.financialWorkflow.nodes.forEach((workflowNode) => {
+            trackMaxValue(workflowNode.id, workflowNode.aggregateValue);
+          });
+        }
       });
     });
 
+    const HEADROOM_FACTOR = 1.1;
     if (globalMax === 0) {
       globalMax = 1;
+    } else {
+      globalMax *= HEADROOM_FACTOR;
     }
 
     // Derive canonical nodes/links if missing from snapshot
@@ -244,6 +273,15 @@ export function useWorkflowData(): WorkflowLayoutResult {
           ? ((baseValue - previousBaseValue) / previousBaseValue) * 100
           : undefined;
 
+      const midDeltaPercent =
+        midValue !== undefined && baseValue !== undefined && baseValue !== 0
+          ? ((midValue - baseValue) / baseValue) * 100
+          : undefined;
+      const highDeltaPercent =
+        highValue !== undefined && baseValue !== undefined && baseValue !== 0
+          ? ((highValue - baseValue) / baseValue) * 100
+          : undefined;
+
       // Comparison mode: 'normalized' (default) or 'delta'
       const comparisonMode: "normalized" | "delta" = "normalized";
 
@@ -252,7 +290,15 @@ export function useWorkflowData(): WorkflowLayoutResult {
       let baseSegmentsOverride: PresentationWorkflowLayer[] | undefined;
 
       if (comparisonMode === "normalized") {
-        const maxVal = Math.max(baseValue || 0, midValue || 0, highValue || 0);
+        const historicalMax = nodeComparisonMax[node.id] ?? 0;
+        const immediateMax = Math.max(
+          baseValue || 0,
+          midValue || 0,
+          highValue || 0,
+          0
+        );
+        const baseComparisonMax = Math.max(historicalMax, immediateMax);
+        const comparisonMax = Math.max(1, baseComparisonMax * HEADROOM_FACTOR);
         const mkGauge = (
           val: number | undefined,
           max: number,
@@ -278,9 +324,26 @@ export function useWorkflowData(): WorkflowLayoutResult {
           mid: "#38bdf8",
           high: "#a78bfa",
         } as const;
-        baseSegmentsOverride = mkGauge(baseValue, maxVal, COLORS.base, "base");
-        midSegments = mkGauge(midValue, maxVal, COLORS.mid, "mid");
-        highSegments = mkGauge(highValue, maxVal, COLORS.high, "high");
+        baseSegmentsOverride = mkGauge(baseValue, comparisonMax, COLORS.base, "base");
+        midSegments = mkGauge(midValue, comparisonMax, COLORS.mid, "mid");
+        highSegments = mkGauge(highValue, comparisonMax, COLORS.high, "high");
+
+        return {
+          ...node,
+          x: pos.x,
+          y: pos.y,
+          radius: DEFAULT_NODE_RADIUS,
+          midSegments,
+          highSegments,
+          baseValue,
+          midValue,
+          highValue,
+          baseDeltaPercent,
+          midDeltaPercent,
+          highDeltaPercent,
+          layers: baseSegmentsOverride ?? node.layers,
+          comparisonMax,
+        } as PositionedNode;
       } else {
         // Delta mode (previous behavior)
         // For the 'total' node, segment by category deltas (platform/charity/players)
@@ -414,8 +477,11 @@ export function useWorkflowData(): WorkflowLayoutResult {
         midValue,
         highValue,
         baseDeltaPercent,
+        midDeltaPercent,
+        highDeltaPercent,
         layers: baseSegmentsOverride ?? node.layers,
-      };
+        comparisonMax: nodeComparisonMax[node.id],
+      } as PositionedNode;
     });
 
     const nodeById = new Map<string, PositionedNode>(

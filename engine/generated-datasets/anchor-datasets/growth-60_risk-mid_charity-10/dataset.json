@@ -22,8 +22,8 @@
     }
   },
   "summary": {
-    "totalDays": 365,
-    "totalPlayers": 594119,
+    "totalDays": 90,
+    "totalPlayers": 2000,
     "simulationCompleted": true
   },
   "playerStats": {
