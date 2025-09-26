@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
-import { motion } from "framer-motion";
+import { motion, useSpring } from "framer-motion";
 import * as d3 from "d3";
 
 type DefaultArcObject = d3.DefaultArcObject;
@@ -24,10 +24,43 @@ type ArcData = {
 type RingDescriptor = {
   key: WorkflowRingKey;
   arcs: ArcData[];
-  radius: number;
+  innerRadius: number;
+  outerRadius: number;
 };
 
-export interface WorkflowNodeProps {
+type RingSizingVariant = {
+  innerOffset: number;
+  thickness: number;
+  gapToNext: number;
+};
+
+type RingSizingConfig = Record<WorkflowRingKey, {
+  default: RingSizingVariant;
+  active?: RingSizingVariant;
+  hovered?: RingSizingVariant;
+}>;
+
+const RING_ORDER: WorkflowRingKey[] = ["base", "mid", "high"];
+
+const DEFAULT_RING_SIZING_CONFIG: RingSizingConfig = {
+  base: {
+    default: { innerOffset: 1, thickness: 12, gapToNext: 2 },
+    active: { innerOffset: 1, thickness: 16, gapToNext: 6 },
+    hovered: { innerOffset: 0, thickness: 22, gapToNext: 10 },
+  },
+  mid: {
+    default: { innerOffset: 0, thickness: 10, gapToNext: 2 },
+    active: { innerOffset: 0, thickness: 14, gapToNext: 4 },
+    hovered: { innerOffset: -2, thickness: 20, gapToNext: 8 },
+  },
+  high: {
+    default: { innerOffset: 0, thickness: 10, gapToNext: 0 },
+    active: { innerOffset: 0, thickness: 12, gapToNext: 0 },
+    hovered: { innerOffset: -2, thickness: 18, gapToNext: 0 },
+  },
+};
+
+export type WorkflowNodeProps = {
   id: string;
   label: string;
   aggregateValue: number;
@@ -45,8 +78,10 @@ export interface WorkflowNodeProps {
   radius: number;
   isActive?: boolean;
   onHover?: (id: string | null) => void;
+  onToggle?: (id: string) => void;
   viewState?: WorkflowNodeViewState;
-}
+  ringSizing?: RingSizingConfig;
+};
 
 function formatCurrency(value: number): string {
   return value.toLocaleString(undefined, {
@@ -91,7 +126,9 @@ export function WorkflowNode({
   radius,
   isActive = false,
   onHover,
+  onToggle,
   viewState = "standard",
+  ringSizing,
 }: WorkflowNodeProps) {
   const valueLabel = formatCurrency(aggregateValue);
   const renderDelta = (
@@ -149,37 +186,105 @@ export function WorkflowNode({
     phase: simulationPhase,
   });
 
-  const ringDescriptors: RingDescriptor[] = useMemo(() => {
-    const baseRadius = Math.max(0, radius - 12);
-    const midRadius = Math.max(radius, baseRadius + 8);
-    const highRadius = midRadius + 12;
-    return [
-      { key: "base", arcs: computeArcs(layers), radius: baseRadius },
-      { key: "mid", arcs: computeArcs(midSegments), radius: midRadius },
-      { key: "high", arcs: computeArcs(highSegments), radius: highRadius },
-    ];
-  }, [layers, midSegments, highSegments, radius]);
+  const ringDescriptors = useMemo(() => {
+    const sizing = ringSizing ?? DEFAULT_RING_SIZING_CONFIG;
+    const descriptors: RingDescriptor[] = [];
+    let currentOuter = radius;
+
+    for (const key of RING_ORDER) {
+      const config = sizing[key];
+      const isCurrentHovered = ringHoverKey === key;
+      let variant = config.default;
+      if (isActive && config.active) {
+        variant = config.active;
+      }
+      if (isCurrentHovered && config.hovered) {
+        variant = config.hovered;
+      }
+
+      const arcs =
+        key === "base"
+          ? computeArcs(layers)
+          : key === "mid"
+          ? computeArcs(midSegments)
+          : computeArcs(highSegments);
+
+      const outerRadius = Math.max(0, currentOuter + variant.innerOffset + variant.thickness);
+      const innerRadius = Math.max(0, outerRadius - variant.thickness);
+
+      descriptors.push({ key, arcs, innerRadius, outerRadius });
+      currentOuter = outerRadius + variant.gapToNext;
+    }
+
+    return descriptors;
+  }, [
+    layers,
+    midSegments,
+    highSegments,
+    radius,
+    ringHoverKey,
+    ringSizing,
+    isActive,
+  ]);
 
   const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
-  const interactiveRadius = Math.max(radius + 30, radius * 1.3);
+  const springConfig = { stiffness: 260, damping: 28, mass: 0.8 } as const;
+  const baseInnerRadius = useSpring(radius, springConfig);
+  const baseOuterRadius = useSpring(radius, springConfig);
+  const midInnerRadius = useSpring(radius, springConfig);
+  const midOuterRadius = useSpring(radius, springConfig);
+  const highInnerRadius = useSpring(radius, springConfig);
+  const highOuterRadius = useSpring(radius, springConfig);
+
+  const getRingMotion = (key: WorkflowRingKey) => {
+    switch (key) {
+      case "base":
+        return { inner: baseInnerRadius, outer: baseOuterRadius };
+      case "mid":
+        return { inner: midInnerRadius, outer: midOuterRadius };
+      case "high":
+      default:
+        return { inner: highInnerRadius, outer: highOuterRadius };
+    }
+  };
+
+  useEffect(() => {
+    ringDescriptors.forEach(({ key, innerRadius, outerRadius }) => {
+      const { inner, outer } = getRingMotion(key);
+      inner.set(innerRadius);
+      outer.set(outerRadius);
+    });
+  }, [ringDescriptors]);
 
   const renderRing = (descriptor: RingDescriptor) => {
     if (!descriptor.arcs.length) return null;
     const { key, arcs } = descriptor;
+    const { inner, outer } = getRingMotion(key);
+    const innerRadius = Math.max(0, inner.get());
+    const outerRadius = Math.max(innerRadius, outer.get());
+    const thickness = Math.max(0, outerRadius - innerRadius);
     const controls = ringControls[key];
     if (!controls) return null;
-    const outerRadius = descriptor.radius;
     if (outerRadius <= 0) return null;
-    const innerRadius = Math.max(0, outerRadius - 10);
     return (
       <motion.g
         key={key}
         animate={controls}
         initial={{ opacity: 0, scale: 0.95 }}
-        onMouseEnter={() => setHoveredRing(key)}
-        onMouseLeave={() => setHoveredRing(null)}
+        pointerEvents="none"
         role="presentation"
       >
+        <circle
+          cx={0}
+          cy={0}
+          r={innerRadius + thickness / 2}
+          stroke="transparent"
+          strokeWidth={Math.max(1, thickness)}
+          fill="transparent"
+          pointerEvents="stroke"
+          onPointerEnter={() => setHoveredRing(key)}
+          onPointerLeave={() => setHoveredRing(null)}
+        />
         {arcs.map((arc) => {
           const arcShape: DefaultArcObject = {
             innerRadius,
@@ -201,6 +306,7 @@ export function WorkflowNode({
               fillOpacity={isHovered ? 0.95 : 0.75}
               stroke="#0f172a"
               strokeWidth={0.8}
+              pointerEvents="none"
             />
           );
         })}
@@ -219,6 +325,14 @@ export function WorkflowNode({
       {highRing ? renderRing(highRing) : null}
     </>
   );
+
+  const interactiveRadius = useMemo(() => {
+    const maxOuter = ringDescriptors.reduce((acc, descriptor) => {
+      return Math.max(acc, descriptor.outerRadius);
+    }, radius);
+    return Math.max(maxOuter + 24, radius * 1.25);
+  }, [ringDescriptors, radius]);
+
 
   return (
     <motion.g
@@ -249,11 +363,22 @@ export function WorkflowNode({
         setStoreHoveredNode(null);
         setHoveredRing(null);
       }}
+      onClick={() => {
+        onToggle?.(id);
+        if (!onToggle) {
+          onHover?.(id);
+          setStoreHoveredNode(id);
+        }
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onHover?.(id);
-          setStoreHoveredNode(id);
+          if (onToggle) {
+            onToggle(id);
+          } else {
+            onHover?.(id);
+            setStoreHoveredNode(id);
+          }
         }
         if (e.key === "Escape") {
           onHover?.(null);
@@ -275,45 +400,48 @@ export function WorkflowNode({
           cx={0}
           cy={0}
           r={radius}
-          fill="rgba(15, 23, 42, 0.85)" 
-          stroke={isActive ? "#38bdf8" : "rgba(148, 163, 184, 0.35)"}
-          strokeWidth={isActive ? 4 : 3}
+          fill="rgba(15, 23, 42, 0.85)"
+          stroke="rgba(148, 163, 184, 0.35)"
+          strokeWidth={3}
         />
         {/* Inner stacked rings anchor to the node and size themselves to prevent overlap */}
         {innerRingNodes}
         {/* Outer stacked rings radiate outward without colliding */}
         {outerRingNodes}
-        <motion.text
-          x={0}
-          y={-radius - 24}
-          textAnchor="middle"
-          fontSize={24}
-          fill="rgba(148,163,184,0.85)"
-        >
-          {label}
-        </motion.text>
-        <motion.text
-          x={0}
-          y={8}
-          textAnchor="middle"
-          fontSize={20}
-          fontWeight={500}
-          fill="#f8fafc"
-        >
-          {valueLabel}
-        </motion.text>
-        {baseDeltaMeta.label && (
+        <g transform="translate(0, -6)">
           <motion.text
             x={0}
-            y={32}
+            y={-10}
+            textAnchor="middle"
+            fontSize={20}
+            fontWeight={600}
+            fill="#e2e8f0"
+          >
+            {label}
+          </motion.text>
+          <motion.text
+            x={0}
+            y={14}
             textAnchor="middle"
             fontSize={18}
             fontWeight={500}
-            fill={baseDeltaMeta.color}
+            fill="#f8fafc"
           >
-            {baseDeltaMeta.label}
+            {valueLabel}
           </motion.text>
-        )}
+          {baseDeltaMeta.label && (
+            <motion.text
+              x={0}
+              y={34}
+              textAnchor="middle"
+              fontSize={16}
+              fontWeight={600}
+              fill={baseDeltaMeta.color}
+            >
+              {baseDeltaMeta.label}
+            </motion.text>
+          )}
+        </g>
       </g>
     </motion.g>
   );
