@@ -44,19 +44,19 @@ const RING_ORDER: WorkflowRingKey[] = ["base", "mid", "high"];
 
 const DEFAULT_RING_SIZING_CONFIG: RingSizingConfig = {
   base: {
-    default: { innerOffset: 1, thickness: 12, gapToNext: 2 },
-    active: { innerOffset: 1, thickness: 16, gapToNext: 6 },
+    default: { innerOffset: 1, thickness: 18, gapToNext: 2 },
+    active: { innerOffset: 0, thickness: 14, gapToNext: 4 },
     hovered: { innerOffset: 0, thickness: 24, gapToNext: 12 },
   },
   mid: {
-    default: { innerOffset: 0, thickness: 10, gapToNext: 2 },
+    default: { innerOffset: 0, thickness: 5, gapToNext: 2 },
     active: { innerOffset: 0, thickness: 14, gapToNext: 4 },
-    hovered: { innerOffset: 0, thickness: 24, gapToNext: 6 },
+    hovered: { innerOffset: -4, thickness: 24, gapToNext: 12 },
   },
   high: {
-    default: { innerOffset: 0, thickness: 10, gapToNext: 0 },
-    active: { innerOffset: 0, thickness: 12, gapToNext: 0 },
-    hovered: { innerOffset: 0, thickness: 14, gapToNext: 0 },
+    default: { innerOffset: 0, thickness: 5, gapToNext: 0 },
+    active: { innerOffset: 0, thickness: 16, gapToNext: 0 },
+    hovered: { innerOffset: -4, thickness: 24, gapToNext: 0 },
   },
 };
 
@@ -220,7 +220,7 @@ export function WorkflowNode({
   }, [layers, midSegments, highSegments, radius, ringHoverKey, ringSizing, isActive]);
 
   const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
-  const interactiveRadius = Math.max(radius + 30, radius * 1.3);
+  const interactiveRadius = Math.max(radius + 40, radius * 1.3);
 
   const renderRing = (descriptor: RingDescriptor) => {
     if (!descriptor.arcs.length) return null;

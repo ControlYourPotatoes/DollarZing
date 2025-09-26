@@ -95,7 +95,7 @@ export function FinancialWorkflowDiagram({
       0,
       (hoveredNode.radius / Math.max(1, vbW)) * svgRect.width
     );
-    const horizontalOffset = Math.max(28, nodeRadiusPx + 120);
+    const horizontalOffset = Math.max(28, nodeRadiusPx + 200);
 
     const paddingY = 20;
     const clampedY = Math.max(
