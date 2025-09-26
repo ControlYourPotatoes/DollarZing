@@ -20,15 +20,12 @@ export function FinancialWorkflowDiagram({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [tooltipPosition, setTooltipPosition] = useState<
-    | {
-        x: number;
-        y: number;
-        side: "left" | "right";
-        offset: number;
-      }
-    | null
-  >(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{
+    x: number;
+    y: number;
+    side: "left" | "right";
+    offset: number;
+  } | null>(null);
 
   const displayNodes = useMemo(() => {
     return nodes.map((node) => {
@@ -49,14 +46,6 @@ export function FinancialWorkflowDiagram({
     () => displayNodes.find((candidate) => candidate.id === hoveredId),
     [hoveredId, displayNodes]
   );
-
-  if (!day) {
-    return (
-      <div className="rounded-md border border-slate-700 bg-slate-900/60 p-6 text-center text-slate-400">
-        Load a presentation snapshot to explore the financial workflow.
-      </div>
-    );
-  }
 
   // Compute dynamic viewBox to fit all nodes/links comfortably
   const padding = 35;
@@ -106,7 +95,7 @@ export function FinancialWorkflowDiagram({
       0,
       (hoveredNode.radius / Math.max(1, vbW)) * svgRect.width
     );
-    const horizontalOffset = Math.max(28, nodeRadiusPx + 24);
+    const horizontalOffset = Math.max(28, nodeRadiusPx + 120);
 
     const paddingY = 20;
     const clampedY = Math.max(
@@ -120,7 +109,15 @@ export function FinancialWorkflowDiagram({
       side,
       offset: horizontalOffset,
     });
-  }, [hoveredNode, vbX, vbW]);
+  }, [hoveredNode, vbX, vbW, vbY, vbH]);
+
+  if (!day) {
+    return (
+      <div className="rounded-md border border-slate-700 bg-slate-900/60 p-6 text-center text-slate-400">
+        Load a presentation snapshot to explore the financial workflow.
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg">
@@ -146,66 +143,66 @@ export function FinancialWorkflowDiagram({
           className="mx-auto block"
           preserveAspectRatio="xMidYMid meet"
         >
-        <defs>
-          <filter id="workflow-glow" x="-20" y="-20" width="200" height="200">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        {/* Debug: draw crosshairs at node positions to verify clipping */}
-        {displayNodes.map((n) => (
-          <g key={`debug-${n.id}`} opacity={0.25}>
-            <line
-              x1={n.x - 8}
-              y1={n.y}
-              x2={n.x + 8}
-              y2={n.y}
-              stroke="#22d3ee"
-              strokeWidth={1}
+          <defs>
+            <filter id="workflow-glow" x="-20" y="-20" width="200" height="200">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          {/* Debug: draw crosshairs at node positions to verify clipping */}
+          {displayNodes.map((n) => (
+            <g key={`debug-${n.id}`} opacity={0.25}>
+              <line
+                x1={n.x - 8}
+                y1={n.y}
+                x2={n.x + 8}
+                y2={n.y}
+                stroke="#22d3ee"
+                strokeWidth={1}
+              />
+              <line
+                x1={n.x}
+                y1={n.y - 8}
+                x2={n.x}
+                y2={n.y + 8}
+                stroke="#22d3ee"
+                strokeWidth={1}
+              />
+            </g>
+          ))}
+          {links.map((link) => (
+            <WorkflowLink
+              key={link.id}
+              {...link}
+              highlighted={
+                hoveredId
+                  ? link.target === hoveredId || link.source === hoveredId
+                  : false
+              }
             />
-            <line
-              x1={n.x}
-              y1={n.y - 8}
-              x2={n.x}
-              y2={n.y + 8}
-              stroke="#22d3ee"
-              strokeWidth={1}
+          ))}
+          {displayNodes.map((node) => (
+            <WorkflowNode
+              key={node.id}
+              id={node.id}
+              label={node.label}
+              aggregateValue={node.aggregateValue}
+              layers={node.layers}
+              midSegments={node.midSegments}
+              highSegments={node.highSegments}
+              baseValue={node.baseValue}
+              midValue={node.midValue}
+              highValue={node.highValue}
+              x={node.x}
+              y={node.y}
+              radius={node.radius}
+              isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
+              onHover={setHoveredId}
             />
-          </g>
-        ))}
-        {links.map((link) => (
-          <WorkflowLink
-            key={link.id}
-            {...link}
-            highlighted={
-              hoveredId
-                ? link.target === hoveredId || link.source === hoveredId
-                : false
-            }
-          />
-        ))}
-        {displayNodes.map((node) => (
-          <WorkflowNode
-            key={node.id}
-            id={node.id}
-            label={node.label}
-            aggregateValue={node.aggregateValue}
-            layers={node.layers}
-            midSegments={node.midSegments}
-            highSegments={node.highSegments}
-            baseValue={node.baseValue}
-            midValue={node.midValue}
-            highValue={node.highValue}
-            x={node.x}
-            y={node.y}
-            radius={node.radius}
-            isActive={hoveredId ? hoveredId === node.id : node.id === "total"}
-            onHover={setHoveredId}
-          />
-        ))}
+          ))}
         </motion.svg>
         {hoveredNode && tooltipPosition && (
           <WorkflowNodeTooltip
@@ -213,6 +210,7 @@ export function FinancialWorkflowDiagram({
             dayIndex={day?.dayIndex}
             style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
             side={tooltipPosition.side}
+            offsetPx={tooltipPosition.offset}
           />
         )}
       </div>
