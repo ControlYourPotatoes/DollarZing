@@ -98,7 +98,7 @@ export function FinancialWorkflowDiagram({
       0,
       (hoveredNode.radius / Math.max(1, vbW)) * svgRect.width
     );
-    const horizontalOffset = Math.max(28, nodeRadiusPx + 24);
+    const horizontalOffset = Math.max(28, nodeRadiusPx + 80);
 
     const paddingY = 20;
     const clampedY = Math.max(
@@ -215,6 +215,7 @@ export function FinancialWorkflowDiagram({
             dayIndex={day.dayIndex}
             style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
             side={tooltipPosition.side}
+            offsetPx={tooltipPosition.offset}
           />
         )}
       </div>
