@@ -20,15 +20,12 @@ export function FinancialWorkflowDiagram({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const [tooltipPosition, setTooltipPosition] = useState<
-    | {
-        x: number;
-        y: number;
-        side: "left" | "right";
-        offset: number;
-      }
-    | null
-  >(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{
+    x: number;
+    y: number;
+    side: "left" | "right";
+    offset: number;
+  } | null>(null);
 
   const displayNodes = useMemo(() => {
     return nodes.map((node) => {
@@ -112,7 +109,15 @@ export function FinancialWorkflowDiagram({
       side,
       offset: horizontalOffset,
     });
-  }, [hoveredNode, vbX, vbW]);
+  }, [hoveredNode, vbX, vbW, vbY, vbH]);
+
+  if (!day) {
+    return (
+      <div className="rounded-md border border-slate-700 bg-slate-900/60 p-6 text-center text-slate-400">
+        Load a presentation snapshot to explore the financial workflow.
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg">

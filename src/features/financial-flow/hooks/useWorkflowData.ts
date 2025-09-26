@@ -49,7 +49,7 @@ export interface WorkflowLayoutResult {
   highlightedIds: string[];
 }
 
-const DEFAULT_NODE_RADIUS = 100;
+const DEFAULT_NODE_RADIUS = 70;
 
 const LAYOUT_CONFIG = DEFAULT_LAYOUT_CONFIG;
 
