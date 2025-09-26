@@ -137,15 +137,11 @@ export class MatchmakingEventHandler {
       // Try to match at each level
       for (let level = 1; level <= 10; level++) {
         const bettingLevel = level as BettingLevel;
-        const levelDollars =
-          this.gameMatchingEngine.getDollarsAtLevel(bettingLevel);
+        const levelDollars = this.gameMatchingEngine.getDollarsAtLevel(
+          bettingLevel
+        );
 
-        if (!levelDollars || levelDollars.length < 2) {
-          // Not enough dollars at this level - emit waiting events for odd players
-          if (levelDollars && levelDollars.length === 1) {
-            const waitingDollar = levelDollars[0];
-            await this.emitPlayerWaiting(waitingDollar, bettingLevel, 1);
-          }
+        if (!levelDollars || levelDollars.length === 0) {
           continue;
         }
 
@@ -174,9 +170,12 @@ export class MatchmakingEventHandler {
           availableDollars.push(dollar);
         }
 
-        availableDollars.sort(
-          (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
-        );
+        if (availableDollars.length < 2) {
+          if (availableDollars.length === 1) {
+            await this.emitPlayerWaiting(availableDollars[0], bettingLevel, 1);
+          }
+          continue;
+        }
 
         // Match pairs
         for (let i = 0; i < availableDollars.length - 1; i += 2) {
@@ -237,11 +236,9 @@ export class MatchmakingEventHandler {
         }
 
         // Handle remaining odd player
-        const remainingDollars = availableDollars.slice(
-          Math.floor(availableDollars.length / 2) * 2
-        );
-        if (remainingDollars.length === 1) {
-          const waitingDollar = remainingDollars[0];
+        if (availableDollars.length % 2 === 1) {
+          const waitingDollar =
+            availableDollars[availableDollars.length - 1];
           const queuePosition = Math.floor(availableDollars.length / 2) + 1;
           await this.emitPlayerWaiting(
             waitingDollar,
@@ -379,11 +376,12 @@ export class MatchmakingEventHandler {
     const levelDollars = this.gameMatchingEngine.getDollarsAtLevel(
       level as BettingLevel
     );
-    const waitingPlayerIds =
-      levelDollars
-        ?.filter((dollar) => !this.gameMatchingEngine.isDollarInGame(dollar.id))
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-        .map((dollar) => dollar.ownerId) || [];
+    const waitingPlayerIds = levelDollars
+      .filter((dollar): dollar is VirtualDollar =>
+        Boolean(dollar) && dollar.state === DollarState.POOLED
+      )
+      .filter((dollar) => !this.gameMatchingEngine.isDollarInGame(dollar.id))
+      .map((dollar) => dollar.ownerId);
 
     const event: FifoQueueUpdatedEvent = {
       type: EVENT_TYPES.FIFO_QUEUE_UPDATED,

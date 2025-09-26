@@ -34,3 +34,5 @@ Either approach will produce the shorter 3‑month dataset for the first matrix 
 node dist/scripts/run-orchestrator.js   --days 90   --combo 15,low,10   --no-events
 
 node dist/scripts/run-orchestrator.js --days 365 --no-events
+
+NODE_OPTIONS="--max-old-space-size=9126" node dist/scripts/run-orchestrator.js --days 365 --no-events --combo 60,mid,10
