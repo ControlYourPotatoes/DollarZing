@@ -50,14 +50,6 @@ export function FinancialWorkflowDiagram({
     [hoveredId, displayNodes]
   );
 
-  if (!day) {
-    return (
-      <div className="rounded-md border border-slate-700 bg-slate-900/60 p-6 text-center text-slate-400">
-        Load a presentation snapshot to explore the financial workflow.
-      </div>
-    );
-  }
-
   // Compute dynamic viewBox to fit all nodes/links comfortably
   const padding = 35;
   const bounds = displayNodes.length
@@ -126,26 +118,31 @@ export function FinancialWorkflowDiagram({
     <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg">
       <div className="mb-3 flex items-center justify-between text-sm text-slate-300">
         <span>Financial Distribution Workflow</span>
-        <span className="text-slate-500">
-          Net change:{" "}
-          {day.summary.netChange.toLocaleString(undefined, {
-            style: "currency",
-            currency: "USD",
-            maximumFractionDigits: 0,
-          })}
-        </span>
+        {day ? (
+          <span className="text-slate-500">
+            Net change:{" "}
+            {day.summary.netChange.toLocaleString(undefined, {
+              style: "currency",
+              currency: "USD",
+              maximumFractionDigits: 0,
+            })}
+          </span>
+        ) : (
+          <span className="text-slate-500">Awaiting snapshot data…</span>
+        )}
       </div>
       <div ref={svgWrapperRef} className="relative">
-        <motion.svg
-          ref={svgRef}
-          role="img"
-          aria-label="Financial distribution flow diagram"
-          width="100%"
-          height={Math.max(550, height)}
-          viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}
-          className="mx-auto block"
-          preserveAspectRatio="xMidYMid meet"
-        >
+        {day ? (
+          <motion.svg
+            ref={svgRef}
+            role="img"
+            aria-label="Financial distribution flow diagram"
+            width="100%"
+            height={Math.max(550, height)}
+            viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`}
+            className="mx-auto block"
+            preserveAspectRatio="xMidYMid meet"
+          >
         <defs>
           <filter id="workflow-glow" x="-20" y="-20" width="200" height="200">
             <feGaussianBlur stdDeviation="6" result="blur" />
@@ -207,10 +204,15 @@ export function FinancialWorkflowDiagram({
           />
         ))}
         </motion.svg>
-        {hoveredNode && tooltipPosition && (
+        ) : (
+          <div className="rounded-md border border-slate-700 bg-slate-900/60 p-6 text-center text-slate-400">
+            Load a presentation snapshot to explore the financial workflow.
+          </div>
+        )}
+        {day && hoveredNode && tooltipPosition && (
           <WorkflowNodeTooltip
             node={hoveredNode}
-            dayIndex={day?.dayIndex}
+            dayIndex={day.dayIndex}
             style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
             side={tooltipPosition.side}
           />
