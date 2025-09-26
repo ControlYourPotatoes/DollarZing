@@ -27,7 +27,7 @@ type RingDescriptor = {
   radius: number;
 };
 
-export interface WorkflowNodeProps {
+export type WorkflowNodeProps = {
   id: string;
   label: string;
   aggregateValue: number;
@@ -45,8 +45,9 @@ export interface WorkflowNodeProps {
   radius: number;
   isActive?: boolean;
   onHover?: (id: string | null) => void;
+  onToggle?: (id: string) => void;
   viewState?: WorkflowNodeViewState;
-}
+};
 
 function formatCurrency(value: number): string {
   return value.toLocaleString(undefined, {
@@ -91,6 +92,7 @@ export function WorkflowNode({
   radius,
   isActive = false,
   onHover,
+  onToggle,
   viewState = "standard",
 }: WorkflowNodeProps) {
   const valueLabel = formatCurrency(aggregateValue);
@@ -150,9 +152,9 @@ export function WorkflowNode({
   });
 
   const ringDescriptors: RingDescriptor[] = useMemo(() => {
-    const baseRadius = Math.max(0, radius - 12);
-    const midRadius = Math.max(radius, baseRadius + 8);
-    const highRadius = midRadius + 12;
+    const baseRadius = Math.max(0, radius - 16);
+    const midRadius = Math.max(radius, baseRadius + 10);
+    const highRadius = midRadius + 16;
     return [
       { key: "base", arcs: computeArcs(layers), radius: baseRadius },
       { key: "mid", arcs: computeArcs(midSegments), radius: midRadius },
@@ -249,11 +251,22 @@ export function WorkflowNode({
         setStoreHoveredNode(null);
         setHoveredRing(null);
       }}
+      onClick={() => {
+        onToggle?.(id);
+        if (!onToggle) {
+          onHover?.(id);
+          setStoreHoveredNode(id);
+        }
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onHover?.(id);
-          setStoreHoveredNode(id);
+          if (onToggle) {
+            onToggle(id);
+          } else {
+            onHover?.(id);
+            setStoreHoveredNode(id);
+          }
         }
         if (e.key === "Escape") {
           onHover?.(null);
@@ -283,37 +296,40 @@ export function WorkflowNode({
         {innerRingNodes}
         {/* Outer stacked rings radiate outward without colliding */}
         {outerRingNodes}
-        <motion.text
-          x={0}
-          y={-radius - 24}
-          textAnchor="middle"
-          fontSize={24}
-          fill="rgba(148,163,184,0.85)"
-        >
-          {label}
-        </motion.text>
-        <motion.text
-          x={0}
-          y={8}
-          textAnchor="middle"
-          fontSize={20}
-          fontWeight={500}
-          fill="#f8fafc"
-        >
-          {valueLabel}
-        </motion.text>
-        {baseDeltaMeta.label && (
+        <g transform="translate(0, -6)">
           <motion.text
             x={0}
-            y={32}
+            y={-10}
+            textAnchor="middle"
+            fontSize={20}
+            fontWeight={600}
+            fill="#e2e8f0"
+          >
+            {label}
+          </motion.text>
+          <motion.text
+            x={0}
+            y={14}
             textAnchor="middle"
             fontSize={18}
             fontWeight={500}
-            fill={baseDeltaMeta.color}
+            fill="#f8fafc"
           >
-            {baseDeltaMeta.label}
+            {valueLabel}
           </motion.text>
-        )}
+          {baseDeltaMeta.label && (
+            <motion.text
+              x={0}
+              y={34}
+              textAnchor="middle"
+              fontSize={16}
+              fontWeight={600}
+              fill={baseDeltaMeta.color}
+            >
+              {baseDeltaMeta.label}
+            </motion.text>
+          )}
+        </g>
       </g>
     </motion.g>
   );

@@ -57,12 +57,23 @@ export function WorkflowNodeTooltip({
   );
 
   const offset = offsetPx ?? 16;
-  const transform =
-    side === "left"
-      ? `translate(calc(-100% - ${offset}px), -50%)`
-      : `translate(${offset}px, -50%)`;
+  const anchorLeft = style?.left;
+  const numericAnchorLeft =
+    typeof anchorLeft === "number"
+      ? anchorLeft
+      : typeof anchorLeft === "string"
+      ? Number.parseFloat(anchorLeft)
+      : undefined;
+  const adjustedStyle: CSSProperties = { ...style };
+  if (numericAnchorLeft !== undefined) {
+    adjustedStyle.left =
+      side === "left"
+        ? numericAnchorLeft - offset
+        : numericAnchorLeft + offset;
+  }
+  const transform = side === "left" ? "translate(-100%, -50%)" : "translate(0, -50%)";
   const rootStyle: CSSProperties = {
-    ...style,
+    ...adjustedStyle,
     transform,
   };
   const rootClassName = [
