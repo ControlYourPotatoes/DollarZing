@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
-import { motion } from "framer-motion";
+import { animate, motion, useMotionValue } from "framer-motion";
 import * as d3 from "d3";
 
 type DefaultArcObject = d3.DefaultArcObject;
@@ -21,11 +21,14 @@ type ArcData = {
   endAngle: number;
 };
 
+type RingSizingState = "default" | "active" | "hovered";
+
 type RingDescriptor = {
   key: WorkflowRingKey;
   arcs: ArcData[];
   innerRadius: number;
   outerRadius: number;
+  state: RingSizingState;
 };
 
 type RingSizingVariant = {
@@ -44,20 +47,26 @@ const RING_ORDER: WorkflowRingKey[] = ["base", "mid", "high"];
 
 const DEFAULT_RING_SIZING_CONFIG: RingSizingConfig = {
   base: {
-    default: { innerOffset: 1, thickness: 18, gapToNext: 2 },
-    active: { innerOffset: 0, thickness: 14, gapToNext: 4 },
-    hovered: { innerOffset: 0, thickness: 24, gapToNext: 12 },
+    default: { innerOffset: 1, thickness: 12, gapToNext: 2 },
+    active: { innerOffset: 1, thickness: 16, gapToNext: 6 },
+    hovered: { innerOffset: 0, thickness: 22, gapToNext: 10 },
   },
   mid: {
-    default: { innerOffset: 0, thickness: 5, gapToNext: 2 },
+    default: { innerOffset: 0, thickness: 10, gapToNext: 2 },
     active: { innerOffset: 0, thickness: 14, gapToNext: 4 },
-    hovered: { innerOffset: -4, thickness: 24, gapToNext: 12 },
+    hovered: { innerOffset: -2, thickness: 20, gapToNext: 8 },
   },
   high: {
-    default: { innerOffset: 0, thickness: 5, gapToNext: 0 },
-    active: { innerOffset: 0, thickness: 16, gapToNext: 0 },
-    hovered: { innerOffset: -4, thickness: 24, gapToNext: 0 },
+    default: { innerOffset: 0, thickness: 10, gapToNext: 0 },
+    active: { innerOffset: 0, thickness: 12, gapToNext: 0 },
+    hovered: { innerOffset: -2, thickness: 18, gapToNext: 0 },
   },
+};
+
+const RING_ANIMATION_DURATIONS: Record<RingSizingState, number> = {
+  default: 0.12,
+  active: 0.16,
+  hovered: 0.22,
 };
 
 export type WorkflowNodeProps = {
@@ -186,7 +195,7 @@ export function WorkflowNode({
     phase: simulationPhase,
   });
 
-  const ringDescriptors: RingDescriptor[] = useMemo(() => {
+  const ringDescriptors = useMemo(() => {
     const sizing = ringSizing ?? DEFAULT_RING_SIZING_CONFIG;
     const descriptors: RingDescriptor[] = [];
     let currentOuter = radius;
@@ -194,11 +203,14 @@ export function WorkflowNode({
     for (const key of RING_ORDER) {
       const config = sizing[key];
       const isCurrentHovered = ringHoverKey === key;
+      let state: RingSizingState = "default";
       let variant = config.default;
       if (isActive && config.active) {
+        state = "active";
         variant = config.active;
       }
       if (isCurrentHovered && config.hovered) {
+        state = "hovered";
         variant = config.hovered;
       }
 
@@ -212,7 +224,7 @@ export function WorkflowNode({
       const outerRadius = Math.max(0, currentOuter + variant.innerOffset + variant.thickness);
       const innerRadius = Math.max(0, outerRadius - variant.thickness);
 
-      descriptors.push({ key, arcs, innerRadius, outerRadius });
+      descriptors.push({ key, arcs, innerRadius, outerRadius, state });
       currentOuter = outerRadius + variant.gapToNext;
     }
 
@@ -220,11 +232,43 @@ export function WorkflowNode({
   }, [layers, midSegments, highSegments, radius, ringHoverKey, ringSizing, isActive]);
 
   const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
+  const baseInnerRadius = useMotionValue(radius);
+  const baseOuterRadius = useMotionValue(radius);
+  const midInnerRadius = useMotionValue(radius);
+  const midOuterRadius = useMotionValue(radius);
+  const highInnerRadius = useMotionValue(radius);
+  const highOuterRadius = useMotionValue(radius);
+
+  const getRingMotion = (key: WorkflowRingKey) => {
+    switch (key) {
+      case "base":
+        return { inner: baseInnerRadius, outer: baseOuterRadius };
+      case "mid":
+        return { inner: midInnerRadius, outer: midOuterRadius };
+      case "high":
+      default:
+        return { inner: highInnerRadius, outer: highOuterRadius };
+    }
+  };
+
+  useEffect(() => {
+    ringDescriptors.forEach(({ key, innerRadius, outerRadius, state }) => {
+      const { inner, outer } = getRingMotion(key);
+      const duration = RING_ANIMATION_DURATIONS[state] ?? 0.16;
+      const transition = { duration, ease: "easeOut" as const };
+      animate(inner, innerRadius, transition);
+      animate(outer, outerRadius, transition);
+    });
+  }, [ringDescriptors]);
+
   const interactiveRadius = Math.max(radius + 40, radius * 1.3);
 
   const renderRing = (descriptor: RingDescriptor) => {
     if (!descriptor.arcs.length) return null;
-    const { key, arcs, innerRadius, outerRadius } = descriptor;
+    const { key, arcs } = descriptor;
+    const { inner, outer } = getRingMotion(key);
+    const innerRadius = Math.max(0, inner.get());
+    const outerRadius = Math.max(innerRadius, outer.get());
     const controls = ringControls[key];
     if (!controls) return null;
     if (outerRadius <= 0) return null;
