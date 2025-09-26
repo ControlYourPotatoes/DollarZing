@@ -76,6 +76,13 @@ export interface AuditTrail {
  * GameMatchingEngine - Core class for managing 1v1 game matching and resolution
  * Handles virtual dollar pool management, automatic matching, and game lifecycle
  */
+const MAX_BETTING_LEVEL = 10;
+
+interface LevelQueue {
+  items: string[];
+  pending: Set<string>;
+}
+
 export class GameMatchingEngine {
   private virtualDollarFactory: VirtualDollarFactory;
   private scoringEngine: ScoringEngine;
@@ -85,9 +92,9 @@ export class GameMatchingEngine {
 
   // Pool management
   private pooledDollars: Map<string, VirtualDollar> = new Map();
-  private dollarsInGame: Set<string> = new Set();
-
+  private dollarsByLevel: Map<BettingLevel, Set<string>> = new Map();
   private levelQueues: Map<BettingLevel, LevelQueue> = new Map();
+  private dollarsInGame: Set<string> = new Set();
 
   // Game management
   private activeGames: Map<string, GameSession> = new Map();
@@ -108,61 +115,61 @@ export class GameMatchingEngine {
     this.eventBus = eventBus;
 
     // Initialize level pools
-    for (let level = 1; level <= 10; level++) {
+    for (let level = 1; level <= MAX_BETTING_LEVEL; level++) {
+      this.dollarsByLevel.set(level as BettingLevel, new Set());
       this.levelQueues.set(level as BettingLevel, {
         items: [],
-        head: 0,
         pending: new Set(),
       });
     }
   }
 
-  /**
-   * Internal representation of level-specific FIFO queue
-   */
   private getLevelQueue(level: BettingLevel): LevelQueue {
     let queue = this.levelQueues.get(level);
     if (!queue) {
-      queue = { items: [], head: 0, pending: new Set() };
+      queue = { items: [], pending: new Set() };
       this.levelQueues.set(level, queue);
     }
     return queue;
   }
 
-  private compactLevelQueue(queue: LevelQueue): void {
-    const remaining = queue.items.length - queue.head;
-    if (queue.head === 0 || remaining > queue.items.length / 2) {
+  private enqueueDollar(level: BettingLevel, dollarId: string): void {
+    const queue = this.getLevelQueue(level);
+    queue.items.push(dollarId);
+    queue.pending.add(dollarId);
+  }
+
+  private removeFromLevelQueue(level: BettingLevel, dollarId: string): void {
+    const queue = this.getLevelQueue(level);
+    if (!queue.pending.delete(dollarId)) {
       return;
     }
 
-    const newItems: string[] = [];
-    for (let i = queue.head; i < queue.items.length; i++) {
-      const id = queue.items[i];
-      if (queue.pending.has(id)) {
-        newItems.push(id);
-      }
+    const shouldCompact = queue.pending.size === 0 || queue.items.length > queue.pending.size * 2;
+    if (shouldCompact) {
+      queue.items = queue.items.filter((id) => queue.pending.has(id));
     }
-
-    queue.items = newItems;
-    queue.head = 0;
-    queue.pending = new Set(newItems);
   }
 
-  private dequeueEligibleDollar(level: BettingLevel): VirtualDollar | null {
+  private getQueuedDollarsSnapshot(level: BettingLevel): VirtualDollar[] {
     const queue = this.getLevelQueue(level);
+    if (queue.items.length === 0 || queue.pending.size === 0) {
+      return [];
+    }
 
-    while (queue.head < queue.items.length) {
-      const id = queue.items[queue.head++];
-      if (!queue.pending.delete(id)) {
+    const result: VirtualDollar[] = [];
+    let staleCount = 0;
+
+    for (const id of queue.items) {
+      if (!queue.pending.has(id)) {
+        staleCount++;
         continue;
       }
 
       const dollar = this.pooledDollars.get(id);
-      if (!dollar) {
-        continue;
-      }
-
-      if (dollar.state !== DollarState.POOLED) {
+      if (!dollar || dollar.state !== DollarState.POOLED) {
+        queue.pending.delete(id);
+        staleCount++;
         continue;
       }
 
@@ -170,24 +177,18 @@ export class GameMatchingEngine {
         continue;
       }
 
-      this.compactLevelQueue(queue);
-      return dollar;
+      result.push(dollar);
     }
 
-    this.compactLevelQueue(queue);
-    return null;
+    if (staleCount > 0 && (queue.items.length > queue.pending.size * 2 || queue.pending.size === 0)) {
+      queue.items = queue.items.filter((id) => queue.pending.has(id));
+    }
+
+    return result;
   }
 
-  private requeueDollar(level: BettingLevel, dollar: VirtualDollar): void {
-    const queue = this.getLevelQueue(level);
-    queue.head = Math.max(queue.head - 1, 0);
-    queue.items[queue.head] = dollar.id;
-    queue.pending.add(dollar.id);
-  }
-
-  private removeFromLevelQueue(level: BettingLevel, dollarId: string): void {
-    const queue = this.getLevelQueue(level);
-    queue.pending.delete(dollarId);
+  private getPendingCountForLevel(level: BettingLevel): number {
+    return this.getLevelQueue(level).pending.size;
   }
 
   /**
@@ -231,6 +232,8 @@ export class GameMatchingEngine {
     if (levelSet) {
       levelSet.add(dollar.id);
     }
+
+    this.enqueueDollar(dollar.currentLevel, dollar.id);
 
     // Emit POOL_ADDED event
     const poolAddedEvent: PoolAddedEvent = {
@@ -281,6 +284,8 @@ export class GameMatchingEngine {
     if (levelSet) {
       levelSet.delete(dollarId);
     }
+
+    this.removeFromLevelQueue(dollar.currentLevel, dollar.id);
 
     // Emit POOL_REMOVED event
     const poolRemovedEvent: PoolRemovedEvent = {
@@ -473,10 +478,9 @@ export class GameMatchingEngine {
       number
     >;
 
-    for (let level = 1; level <= 11; level++) {
+    for (let level = 1; level <= MAX_BETTING_LEVEL; level++) {
       const bettingLevel = level as BettingLevel;
-      dollarsByLevel[bettingLevel] =
-        this.dollarsByLevel.get(bettingLevel)?.size || 0;
+      dollarsByLevel[bettingLevel] = this.getPendingCountForLevel(bettingLevel);
     }
 
     return {
@@ -500,7 +504,7 @@ export class GameMatchingEngine {
     let totalWinnings = 0;
 
     // Initialize level counts
-    for (let level = 1; level <= 11; level++) {
+    for (let level = 1; level <= MAX_BETTING_LEVEL; level++) {
       gamesByLevel[level as BettingLevel] = 0;
     }
 
@@ -631,8 +635,15 @@ export class GameMatchingEngine {
    * Get dollars at specific level
    */
   getDollarsAtLevel(level: BettingLevel): VirtualDollar[] {
+    const queueSnapshot = this.getQueuedDollarsSnapshot(level);
+    if (queueSnapshot.length > 0) {
+      return queueSnapshot;
+    }
+
     const levelSet = this.dollarsByLevel.get(level);
-    if (!levelSet) return [];
+    if (!levelSet) {
+      return [];
+    }
 
     return Array.from(levelSet)
       .map((id) => this.pooledDollars.get(id))
