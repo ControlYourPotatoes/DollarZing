@@ -78,26 +78,32 @@ export function useWorkflowNodeAnimation({
   const duration = baseDuration * (SCALE_SPEED_FACTORS[activeScale] ?? 1);
 
   useEffect(() => {
+    const ringTransition = {
+      type: "tween" as const,
+      duration,
+      ease: "easeOut",
+    };
+    const nodeTransition = {
+      type: "tween" as const,
+      duration,
+      ease: "easeOut",
+    };
+    const baseOpacity = isActive ? 1 : 0.6;
+
     RING_KEYS.forEach((key) => {
       const controls = ringControls[key];
       const isHovered = ringHoverKey === key;
       void controls.start({
-        opacity: isActive ? 1 : 0.6,
+        opacity: baseOpacity,
         scale: isHovered ? 1.05 : 1,
-        transition: {
-          duration,
-          ease: "easeOut",
-        },
+        transition: ringTransition,
       });
     });
 
     void nodeControls.start({
       scale: isActive ? 1.05 : 1,
       opacity: phase === "running" ? 1 : 0.95,
-      transition: {
-        duration,
-        ease: "easeOut",
-      },
+      transition: nodeTransition,
     });
   }, [duration, isActive, nodeControls, phase, ringControls, ringHoverKey]);
 
@@ -115,4 +121,3 @@ export function useWorkflowNodeAnimation({
     duration,
   };
 }
-
