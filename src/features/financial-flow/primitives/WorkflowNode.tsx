@@ -1,6 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback, useRef } from "react";
 
-import { motion, useSpring } from "framer-motion";
 import * as d3 from "d3";
 
 type DefaultArcObject = d3.DefaultArcObject;
@@ -8,12 +7,7 @@ type DefaultArcObject = d3.DefaultArcObject;
 import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 import { PresentationWorkflowLayer } from "@/shared/presentation";
 
-import { useWorkflowNodeAnimation } from "../hooks/useWorkflowNodeAnimation";
-import {
-  WorkflowNodeViewState,
-  WorkflowRingKey,
-  WorkflowRingMetrics,
-} from "../types";
+import { WorkflowRingKey } from "../types";
 
 type ArcData = {
   data: PresentationWorkflowLayer;
@@ -34,11 +28,14 @@ type RingSizingVariant = {
   gapToNext: number;
 };
 
-type RingSizingConfig = Record<WorkflowRingKey, {
-  default: RingSizingVariant;
-  active?: RingSizingVariant;
-  hovered?: RingSizingVariant;
-}>;
+type RingSizingConfig = Record<
+  WorkflowRingKey,
+  {
+    default: RingSizingVariant;
+    active?: RingSizingVariant;
+    hovered?: RingSizingVariant;
+  }
+>;
 
 const RING_ORDER: WorkflowRingKey[] = ["base", "mid", "high"];
 
@@ -67,9 +64,6 @@ export type WorkflowNodeProps = {
   layers?: PresentationWorkflowLayer[];
   midSegments?: PresentationWorkflowLayer[];
   highSegments?: PresentationWorkflowLayer[];
-  baseValue?: number;
-  midValue?: number;
-  highValue?: number;
   baseDeltaPercent?: number;
   midDeltaPercent?: number;
   highDeltaPercent?: number;
@@ -79,31 +73,33 @@ export type WorkflowNodeProps = {
   isActive?: boolean;
   onHover?: (id: string | null) => void;
   onToggle?: (id: string) => void;
-  viewState?: WorkflowNodeViewState;
   ringSizing?: RingSizingConfig;
+  baseValue?: number; // Target for base ring
+  midValue?: number; // Target for mid
+  highValue?: number; // Target for high
 };
 
-function formatCurrency(value: number): string {
-  return value.toLocaleString(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
-}
-
-function computeArcs(layers?: PresentationWorkflowLayer[]): ArcData[] {
-  if (!layers || layers.length === 0) {
-    return [];
-  }
-  const total = layers.reduce((sum, layer) => sum + layer.value, 0);
-  if (total === 0) return [];
+function computeArcs(
+  layers?: PresentationWorkflowLayer[],
+  targetValue?: number
+): ArcData[] {
+  if (!layers || layers.length === 0) return [];
+  const sum = layers.reduce((s, l) => s + l.value, 0);
+  const effectiveTarget = (targetValue ?? sum) || 1;
   const sorted = [...layers].sort((a, b) => a.id.localeCompare(b.id));
   let startAngle = -Math.PI / 2;
   const arcs: ArcData[] = [];
+  let usedFraction = 0;
   for (const seg of sorted) {
-    const fraction = seg.value / total;
-    const arcLengthRadians = 2 * Math.PI * fraction;
-    const endAngle = startAngle + arcLengthRadians;
+    const fraction = Math.min(1, seg.value / effectiveTarget);
+    usedFraction += fraction;
+  }
+  const scale = Math.min(1, 1 / usedFraction); // Cap total to 1
+  startAngle = -Math.PI / 2;
+  for (const seg of sorted) {
+    const fraction = Math.min(1, seg.value / effectiveTarget) * scale;
+    const arcLength = 2 * Math.PI * fraction;
+    const endAngle = startAngle + arcLength;
     arcs.push({ data: seg, startAngle, endAngle });
     startAngle = endAngle;
   }
@@ -117,9 +113,6 @@ export function WorkflowNode({
   layers = [],
   midSegments = [],
   highSegments = [],
-  baseValue,
-  midValue,
-  highValue,
   baseDeltaPercent,
   x,
   y,
@@ -127,65 +120,35 @@ export function WorkflowNode({
   isActive = false,
   onHover,
   onToggle,
-  viewState = "standard",
   ringSizing,
+  baseValue,
+  midValue,
+  highValue,
 }: WorkflowNodeProps) {
-  const valueLabel = formatCurrency(aggregateValue);
-  const renderDelta = (
-    percent: number | undefined,
-    positiveColor = "#22c55e"
-  ): { label: string | null; color: string } => {
-    if (percent === undefined || Number.isNaN(percent)) {
-      return { label: null, color: "rgba(148,163,184,0.65)" };
-    }
-    const rounded = percent.toFixed(1);
-    const labelText = `${percent > 0 ? "+" : ""}${rounded}%`;
-    const color = percent > 0 ? positiveColor : percent < 0 ? "#f87171" : "rgba(148,163,184,0.65)";
-    return { label: labelText, color };
-  };
-  const baseDeltaMeta = renderDelta(baseDeltaPercent);
-
-  const rings: WorkflowRingMetrics[] = useMemo(
-    () => {
-      const base = baseValue ?? aggregateValue ?? 0;
-      const mid = midValue ?? 0;
-      const high = highValue ?? 0;
-      const total = Math.max(base, mid, high, 1);
-      return [
-        { key: "base", value: base, percent: base / total },
-        { key: "mid", value: mid, percent: mid / total },
-        { key: "high", value: high, percent: high / total },
-      ];
-    },
-    [aggregateValue, baseValue, midValue, highValue]
-  );
-
+  // Store hooks right after props
   const hoveredRingKey = usePresentationTimelineStore(
     (state) => state.hoveredRingKey
-  );
-  const simulationPhase = usePresentationTimelineStore(
-    (state) => state.simulationPhase
-  );
-  const setStoreHoveredNode = usePresentationTimelineStore(
-    (state) => state.setHoveredNode
   );
   const setHoveredRing = usePresentationTimelineStore(
     (state) => state.setHoveredRing
   );
+  const setStoreHoveredNode = usePresentationTimelineStore(
+    (state) => state.setHoveredNode
+  );
+  // const simulationPhase = usePresentationTimelineStore(
+  //   (state) => state.simulationPhase
+  // );
+
   const ringHoverKey = hoveredRingKey ?? null;
 
-  const {
-    nodeControls,
-    ringControls,
-  } = useWorkflowNodeAnimation({
-    nodeId: id,
-    isActive,
-    viewState,
-    rings,
-    ringHoverKey,
-    phase: simulationPhase,
-  });
+  const svgRef = useRef<SVGSVGElement>(null);
 
+  // State for current radii
+  // No [currentRingRadii] in deps
+
+  const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
+
+  // Compute absolute radii for all rings
   const ringDescriptors = useMemo(() => {
     const sizing = ringSizing ?? DEFAULT_RING_SIZING_CONFIG;
     const descriptors: RingDescriptor[] = [];
@@ -202,14 +165,19 @@ export function WorkflowNode({
         variant = config.hovered;
       }
 
-      const arcs =
-        key === "base"
-          ? computeArcs(layers)
-          : key === "mid"
-          ? computeArcs(midSegments)
-          : computeArcs(highSegments);
+      const segments =
+        key === "base" ? layers : key === "mid" ? midSegments : highSegments;
+      const sum = segments.reduce((s, l) => s + l.value, 0);
+      let target = undefined;
+      if (key === "base") target = baseValue ? baseValue * 1.3 : sum;
+      else if (key === "mid") target = midValue ? midValue * 1.2 : sum;
+      else if (key === "high") target = highValue ? highValue * 1.5 : sum;
+      const arcs = computeArcs(segments, target);
 
-      const outerRadius = Math.max(0, currentOuter + variant.innerOffset + variant.thickness);
+      const outerRadius = Math.max(
+        0,
+        currentOuter + variant.innerOffset + variant.thickness
+      );
       const innerRadius = Math.max(0, outerRadius - variant.thickness);
 
       descriptors.push({ key, arcs, innerRadius, outerRadius });
@@ -225,111 +193,35 @@ export function WorkflowNode({
     ringHoverKey,
     ringSizing,
     isActive,
+    baseValue,
+    midValue,
+    highValue,
   ]);
 
-  const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
-  const springConfig = { stiffness: 260, damping: 28, mass: 0.8 } as const;
-  const baseInnerRadius = useSpring(radius, springConfig);
-  const baseOuterRadius = useSpring(radius, springConfig);
-  const midInnerRadius = useSpring(radius, springConfig);
-  const midOuterRadius = useSpring(radius, springConfig);
-  const highInnerRadius = useSpring(radius, springConfig);
-  const highOuterRadius = useSpring(radius, springConfig);
+  // Compute totals for rings
+  const { midTotal, highTotal } = useMemo(() => {
+    const midTarget =
+      midValue ?? midSegments.reduce((sum, seg) => sum + seg.value, 0);
+    const highTarget =
+      highValue ?? highSegments.reduce((sum, seg) => sum + seg.value, 0);
+    return { midTotal: midTarget, highTotal: highTarget };
+  }, [midSegments, highSegments, midValue, highValue]);
 
-  const getRingMotion = (key: WorkflowRingKey) => {
-    switch (key) {
-      case "base":
-        return { inner: baseInnerRadius, outer: baseOuterRadius };
-      case "mid":
-        return { inner: midInnerRadius, outer: midOuterRadius };
-      case "high":
-      default:
-        return { inner: highInnerRadius, outer: highOuterRadius };
-    }
-  };
-
-  useEffect(() => {
-    ringDescriptors.forEach(({ key, innerRadius, outerRadius }) => {
-      const { inner, outer } = getRingMotion(key);
-      inner.set(innerRadius);
-      outer.set(outerRadius);
-    });
-  }, [ringDescriptors]);
-
-  const renderRing = (descriptor: RingDescriptor) => {
-    if (!descriptor.arcs.length) return null;
-    const { key, arcs } = descriptor;
-    const { inner, outer } = getRingMotion(key);
-    const innerRadius = Math.max(0, inner.get());
-    const outerRadius = Math.max(innerRadius, outer.get());
-    const controls = ringControls[key];
-    if (!controls) return null;
-    if (outerRadius <= 0) return null;
-
-    // Generate full ring path for precise hit detection
-    const hitArcShape: DefaultArcObject = {
-      innerRadius,
-      outerRadius,
-      startAngle: 0,
-      endAngle: 2 * Math.PI,
+  // Helper for polar to cartesian
+  const polarToCartesian = (
+    centerX: number,
+    centerY: number,
+    radius: number,
+    angleInDegrees: number
+  ) => {
+    const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+    return {
+      x: centerX + radius * Math.cos(angleInRadians),
+      y: centerY + radius * Math.sin(angleInRadians),
     };
-    const hitPath = arcGenerator(hitArcShape);
-
-    return (
-      <motion.g
-        key={key}
-        animate={controls}
-        initial={{ opacity: 0, scale: 0.95 }}
-        role="presentation"
-      >
-        <path
-          d={hitPath || undefined}
-          fill="transparent"
-          pointerEvents="all"
-          onPointerEnter={() => setHoveredRing(key)}
-          onPointerLeave={() => setHoveredRing(null)}
-        />
-        {arcs.map((arc) => {
-          const arcShape: DefaultArcObject = {
-            innerRadius,
-            outerRadius,
-            startAngle: arc.startAngle,
-            endAngle: arc.endAngle,
-          };
-          const path = arcGenerator(arcShape);
-          const isHovered = ringHoverKey === key;
-          return (
-            <path
-              key={`${key}-${arc.data.id}`}
-              d={path || undefined}
-              fill={
-                arc.data.color && arc.data.color !== "transparent"
-                  ? arc.data.color
-                  : "rgba(148,163,184,0.2)"
-              }
-              fillOpacity={isHovered ? 0.95 : 0.75}
-              stroke="#0f172a"
-              strokeWidth={0.8}
-              pointerEvents="none"
-            />
-          );
-        })}
-      </motion.g>
-    );
   };
 
-  const baseRing = ringDescriptors.find((descriptor) => descriptor.key === "base");
-  const midRing = ringDescriptors.find((descriptor) => descriptor.key === "mid");
-  const highRing = ringDescriptors.find((descriptor) => descriptor.key === "high");
-
-  const innerRingNodes = baseRing ? renderRing(baseRing) : null;
-  const outerRingNodes = (
-    <>
-      {midRing ? renderRing(midRing) : null}
-      {highRing ? renderRing(highRing) : null}
-    </>
-  );
-
+  // Interactive radius
   const interactiveRadius = useMemo(() => {
     const maxOuter = ringDescriptors.reduce((acc, descriptor) => {
       return Math.max(acc, descriptor.outerRadius);
@@ -337,9 +229,185 @@ export function WorkflowNode({
     return Math.max(maxOuter + 24, radius * 1.25);
   }, [ringDescriptors, radius]);
 
+  // D3 animation effect
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    RING_ORDER.forEach((key) => {
+      const descriptor = ringDescriptors.find((d) => d.key === key);
+      if (!descriptor) return;
+
+      const targetOpacity = ringHoverKey === key ? 0.95 : 0.75;
+
+      const selection = d3
+        .select(svgRef.current)
+        .selectAll(`.ring-${key} .ring-path`);
+
+      selection
+        .transition()
+        .duration(200)
+        .ease(d3.easeCubicOut)
+        .style("opacity", targetOpacity);
+    });
+  }, [ringHoverKey, ringDescriptors]); // Deps: only hover, no currentRingRadii
+
+  const handleRingHover = useCallback(
+    (e: React.PointerEvent<SVGCircleElement>) => {
+      const svg = e.currentTarget.ownerSVGElement;
+      if (!svg) return;
+
+      const point = svg.createSVGPoint();
+      point.x = e.clientX;
+      point.y = e.clientY;
+
+      const ctm = e.currentTarget.getScreenCTM();
+      if (!ctm) return;
+
+      const localPoint = point.matrixTransform(ctm.inverse());
+      const distance = Math.hypot(localPoint.x, localPoint.y);
+
+      if (distance > interactiveRadius) {
+        if (ringHoverKey !== null) {
+          setHoveredRing(null);
+        }
+        return;
+      }
+
+      let newHoveredRing: WorkflowRingKey | null = null;
+      for (const desc of ringDescriptors) {
+        if (distance >= desc.innerRadius && distance < desc.outerRadius) {
+          newHoveredRing = desc.key;
+          break;
+        }
+      }
+
+      if (newHoveredRing !== ringHoverKey) {
+        setHoveredRing(newHoveredRing);
+      }
+    },
+    [ringDescriptors, ringHoverKey, setHoveredRing, interactiveRadius]
+  );
+
+  // Update renderRing to include gap text and totals
+  const renderRing = (
+    descriptor: RingDescriptor,
+    index: number,
+    descriptors: RingDescriptor[]
+  ) => {
+    if (!descriptor.arcs.length) return null;
+    const { key, arcs, innerRadius, outerRadius } = descriptor;
+    const nextDescriptor = descriptors[index + 1];
+    const showGapText = index < descriptors.length - 1;
+    const gapMidRadius = showGapText
+      ? (outerRadius + nextDescriptor.innerRadius) / 2
+      : null;
+    const totalText =
+      key === "mid"
+        ? formatCurrency(midTotal)
+        : key === "high"
+        ? formatCurrency(highTotal)
+        : null;
+
+    const gapTextPos = showGapText
+      ? polarToCartesian(0, 0, gapMidRadius!, 0)
+      : { x: 0, y: 0 };
+    const totalPos = totalText
+      ? polarToCartesian(0, 0, outerRadius + 5, 0)
+      : { x: 0, y: 0 };
+
+    return (
+      <g className={`ring-${key}`} key={key}>
+        {arcs.map((arc) => {
+          const arcShape: DefaultArcObject = {
+            innerRadius,
+            outerRadius,
+            startAngle: arc.startAngle, // Already partial
+            endAngle: arc.endAngle,
+          };
+          const path = arcGenerator(arcShape);
+          return (
+            <path
+              className={`ring-path ${key}`}
+              key={`${key}-${arc.data.id}`}
+              d={path || ""}
+              fill={
+                arc.data.color && arc.data.color !== "transparent"
+                  ? arc.data.color
+                  : "rgba(148,163,184,0.2)"
+              }
+              style={{ opacity: ringHoverKey === key ? 0.95 : 0.75 }}
+              stroke="#0f172a"
+              strokeWidth={0.8}
+              pointerEvents="none"
+            />
+          );
+        })}
+        {totalText && ringHoverKey === key && (
+          <text
+            x={totalPos.x}
+            y={totalPos.y}
+            textAnchor="start"
+            fontSize={12}
+            fontWeight={500}
+            fill="#f8fafc"
+            pointerEvents="none"
+          >
+            {totalText}
+          </text>
+        )}
+        {showGapText && ringHoverKey === key && (
+          <text
+            x={gapTextPos.x}
+            y={gapTextPos.y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={10}
+            fontWeight={400}
+            fill="#cbd5e1"
+            pointerEvents="none"
+          >
+            {key.toUpperCase()}
+          </text>
+        )}
+      </g>
+    );
+  };
+
+  // Define renderDelta before use
+  const renderDelta = (
+    percent: number | undefined,
+    positiveColor = "#22c55e"
+  ) => {
+    if (percent === undefined || Number.isNaN(percent)) {
+      return { label: null, color: "rgba(148,163,184,0.65)" };
+    }
+    const rounded = percent.toFixed(1);
+    const labelText = `${percent > 0 ? "+" : ""}${rounded}%`;
+    const color =
+      percent > 0
+        ? positiveColor
+        : percent < 0
+        ? "#f87171"
+        : "rgba(148,163,184,0.65)";
+    return { label: labelText, color };
+  };
+
+  // Format currency utility (add if not imported)
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const valueLabel = formatCurrency(aggregateValue);
+
+  const baseDeltaMeta = renderDelta(baseDeltaPercent);
 
   return (
-    <motion.g
+    <g
       role="button"
       tabIndex={0}
       aria-label={
@@ -347,9 +415,6 @@ export function WorkflowNode({
           ? `${label}: ${valueLabel}, ${baseDeltaMeta.label} change vs previous day`
           : `${label}: ${valueLabel}`
       }
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={nodeControls}
-      transition={{ type: "spring", stiffness: 220, damping: 18 }}
       onFocus={() => {
         onHover?.(id);
         setStoreHoveredNode(id);
@@ -357,6 +422,7 @@ export function WorkflowNode({
       onBlur={() => {
         onHover?.(null);
         setStoreHoveredNode(null);
+        setHoveredRing(null);
       }}
       onMouseEnter={() => {
         onHover?.(id);
@@ -391,63 +457,69 @@ export function WorkflowNode({
         }
       }}
     >
-      <g transform={`translate(${x}, ${y})`}>
+      <g ref={svgRef} transform={`translate(${x}, ${y})`}>
         <circle
           cx={0}
           cy={0}
           r={interactiveRadius}
           fill="transparent"
           stroke="none"
-          pointerEvents="stroke"
+          pointerEvents="all"
+          onPointerEnter={handleRingHover}
+          onPointerMove={handleRingHover}
+          onPointerLeave={() => setHoveredRing(null)}
         />
-        <motion.circle
+        <circle
           cx={0}
           cy={0}
           r={radius}
           fill="rgba(15, 23, 42, 0.85)"
           stroke="rgba(148, 163, 184, 0.35)"
           strokeWidth={3}
+          pointerEvents="none"
         />
-        {/* Inner stacked rings anchor to the node and size themselves to prevent overlap */}
-        {innerRingNodes}
-        {/* Outer stacked rings radiate outward without colliding */}
-        {outerRingNodes}
+        {ringDescriptors.map((desc, idx) =>
+          renderRing(desc, idx, ringDescriptors)
+        )}
         <g transform="translate(0, -6)">
-          <motion.text
+          <text
             x={0}
             y={-10}
             textAnchor="middle"
             fontSize={20}
             fontWeight={600}
             fill="#e2e8f0"
+            pointerEvents="none"
           >
             {label}
-          </motion.text>
-          <motion.text
+          </text>
+          <text
             x={0}
             y={14}
             textAnchor="middle"
             fontSize={18}
             fontWeight={500}
             fill="#f8fafc"
+            pointerEvents="none"
           >
             {valueLabel}
-          </motion.text>
+          </text>
           {baseDeltaMeta.label && (
-            <motion.text
+            <text
               x={0}
               y={34}
               textAnchor="middle"
               fontSize={16}
               fontWeight={600}
               fill={baseDeltaMeta.color}
+              pointerEvents="none"
             >
               {baseDeltaMeta.label}
-            </motion.text>
+            </text>
           )}
         </g>
       </g>
-    </motion.g>
+    </g>
   );
 }
 
