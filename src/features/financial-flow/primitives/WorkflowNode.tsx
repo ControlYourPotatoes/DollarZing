@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { animate, motion, useMotionValue } from "framer-motion";
 import * as d3 from "d3";
@@ -37,29 +37,32 @@ type RingSizingVariant = {
   gapToNext: number;
 };
 
-type RingSizingConfig = Record<WorkflowRingKey, {
-  default: RingSizingVariant;
-  active?: RingSizingVariant;
-  hovered?: RingSizingVariant;
-}>;
+type RingSizingConfig = Record<
+  WorkflowRingKey,
+  {
+    default: RingSizingVariant;
+    active?: RingSizingVariant;
+    hovered?: RingSizingVariant;
+  }
+>;
 
 const RING_ORDER: WorkflowRingKey[] = ["base", "mid", "high"];
 
 const DEFAULT_RING_SIZING_CONFIG: RingSizingConfig = {
   base: {
     default: { innerOffset: 1, thickness: 12, gapToNext: 2 },
-    active: { innerOffset: 1, thickness: 16, gapToNext: 6 },
-    hovered: { innerOffset: 0, thickness: 22, gapToNext: 10 },
+    active: { innerOffset: 1, thickness: 16, gapToNext: 4 },
+    hovered: { innerOffset: 0, thickness: 22, gapToNext: 8 },
   },
   mid: {
     default: { innerOffset: 0, thickness: 10, gapToNext: 2 },
     active: { innerOffset: 0, thickness: 14, gapToNext: 4 },
-    hovered: { innerOffset: -2, thickness: 20, gapToNext: 8 },
+    hovered: { innerOffset: -4, thickness: 20, gapToNext: 14 },
   },
   high: {
     default: { innerOffset: 0, thickness: 10, gapToNext: 0 },
     active: { innerOffset: 0, thickness: 12, gapToNext: 0 },
-    hovered: { innerOffset: -2, thickness: 18, gapToNext: 0 },
+    hovered: { innerOffset: -2, thickness: 22, gapToNext: 0 },
   },
 };
 
@@ -149,25 +152,27 @@ export function WorkflowNode({
     }
     const rounded = percent.toFixed(1);
     const labelText = `${percent > 0 ? "+" : ""}${rounded}%`;
-    const color = percent > 0 ? positiveColor : percent < 0 ? "#f87171" : "rgba(148,163,184,0.65)";
+    const color =
+      percent > 0
+        ? positiveColor
+        : percent < 0
+        ? "#f87171"
+        : "rgba(148,163,184,0.65)";
     return { label: labelText, color };
   };
   const baseDeltaMeta = renderDelta(baseDeltaPercent);
 
-  const rings: WorkflowRingMetrics[] = useMemo(
-    () => {
-      const base = baseValue ?? aggregateValue ?? 0;
-      const mid = midValue ?? 0;
-      const high = highValue ?? 0;
-      const total = Math.max(base, mid, high, 1);
-      return [
-        { key: "base", value: base, percent: base / total },
-        { key: "mid", value: mid, percent: mid / total },
-        { key: "high", value: high, percent: high / total },
-      ];
-    },
-    [aggregateValue, baseValue, midValue, highValue]
-  );
+  const rings: WorkflowRingMetrics[] = useMemo(() => {
+    const base = baseValue ?? aggregateValue ?? 0;
+    const mid = midValue ?? 0;
+    const high = highValue ?? 0;
+    const total = Math.max(base, mid, high, 1);
+    return [
+      { key: "base", value: base, percent: base / total },
+      { key: "mid", value: mid, percent: mid / total },
+      { key: "high", value: high, percent: high / total },
+    ];
+  }, [aggregateValue, baseValue, midValue, highValue]);
 
   const hoveredRingKey = usePresentationTimelineStore(
     (state) => state.hoveredRingKey
@@ -183,10 +188,7 @@ export function WorkflowNode({
   );
   const ringHoverKey = hoveredRingKey ?? null;
 
-  const {
-    nodeControls,
-    ringControls,
-  } = useWorkflowNodeAnimation({
+  const { nodeControls, ringControls } = useWorkflowNodeAnimation({
     nodeId: id,
     isActive,
     viewState,
@@ -221,7 +223,10 @@ export function WorkflowNode({
           ? computeArcs(midSegments)
           : computeArcs(highSegments);
 
-      const outerRadius = Math.max(0, currentOuter + variant.innerOffset + variant.thickness);
+      const outerRadius = Math.max(
+        0,
+        currentOuter + variant.innerOffset + variant.thickness
+      );
       const innerRadius = Math.max(0, outerRadius - variant.thickness);
 
       descriptors.push({ key, arcs, innerRadius, outerRadius, state });
@@ -229,7 +234,15 @@ export function WorkflowNode({
     }
 
     return descriptors;
-  }, [layers, midSegments, highSegments, radius, ringHoverKey, ringSizing, isActive]);
+  }, [
+    layers,
+    midSegments,
+    highSegments,
+    radius,
+    ringHoverKey,
+    ringSizing,
+    isActive,
+  ]);
 
   const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
   const baseInnerRadius = useMotionValue(radius);
@@ -251,15 +264,57 @@ export function WorkflowNode({
     }
   };
 
-  useEffect(() => {
-    ringDescriptors.forEach(({ key, innerRadius, outerRadius, state }) => {
+  const animateRingToState = useCallback(
+    (
+      key: WorkflowRingKey,
+      innerRadius: number,
+      outerRadius: number,
+      state: RingSizingState
+    ) => {
       const { inner, outer } = getRingMotion(key);
       const duration = RING_ANIMATION_DURATIONS[state] ?? 0.16;
       const transition = { duration, ease: "easeOut" as const };
-      animate(inner, innerRadius, transition);
-      animate(outer, outerRadius, transition);
-    });
-  }, [ringDescriptors]);
+      const innerAnimation = animate(inner, innerRadius, transition);
+      const outerAnimation = animate(outer, outerRadius, transition);
+      return { innerAnimation, outerAnimation, inner, outer };
+    },
+    [
+      baseInnerRadius,
+      baseOuterRadius,
+      midInnerRadius,
+      midOuterRadius,
+      highInnerRadius,
+      highOuterRadius,
+    ]
+  );
+
+  useEffect(() => {
+    const animations = ringDescriptors.map(
+      ({ key, innerRadius, outerRadius, state }) => {
+        const { innerAnimation, outerAnimation, inner, outer } =
+          animateRingToState(key, innerRadius, outerRadius, state);
+        return {
+          key,
+          inner,
+          outer,
+          innerRadius,
+          outerRadius,
+          state,
+          innerAnimation,
+          outerAnimation,
+        };
+      }
+    );
+
+    return () => {
+      animations.forEach((entry) => {
+        entry.innerAnimation.stop();
+        entry.outerAnimation.stop();
+        entry.inner.set(entry.innerRadius);
+        entry.outer.set(entry.outerRadius);
+      });
+    };
+  }, [ringDescriptors, animateRingToState]);
 
   const interactiveRadius = Math.max(radius + 40, radius * 1.3);
 
@@ -302,6 +357,30 @@ export function WorkflowNode({
               fillOpacity={isHovered ? 0.95 : 0.75}
               stroke="#0f172a"
               strokeWidth={0.8}
+              onMouseLeave={() => {
+                const config = ringSizing ?? DEFAULT_RING_SIZING_CONFIG;
+                const ringConfig = config[key];
+                let targetState: RingSizingState = "default";
+                let variant = ringConfig.default;
+                if (isActive && ringConfig.active) {
+                  targetState = "active";
+                  variant = ringConfig.active;
+                }
+                if (ringHoverKey === key && ringConfig.hovered) {
+                  targetState = "hovered";
+                  variant = ringConfig.hovered;
+                }
+                const targetOuter = Math.max(
+                  0,
+                  innerRadius + variant.thickness
+                );
+                animateRingToState(
+                  key,
+                  Math.max(0, targetOuter - variant.thickness),
+                  targetOuter,
+                  targetState
+                );
+              }}
             />
           );
         })}
@@ -309,9 +388,15 @@ export function WorkflowNode({
     );
   };
 
-  const baseRing = ringDescriptors.find((descriptor) => descriptor.key === "base");
-  const midRing = ringDescriptors.find((descriptor) => descriptor.key === "mid");
-  const highRing = ringDescriptors.find((descriptor) => descriptor.key === "high");
+  const baseRing = ringDescriptors.find(
+    (descriptor) => descriptor.key === "base"
+  );
+  const midRing = ringDescriptors.find(
+    (descriptor) => descriptor.key === "mid"
+  );
+  const highRing = ringDescriptors.find(
+    (descriptor) => descriptor.key === "high"
+  );
 
   const innerRingNodes = baseRing ? renderRing(baseRing) : null;
   const outerRingNodes = (
