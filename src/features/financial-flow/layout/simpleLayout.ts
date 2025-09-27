@@ -3,10 +3,19 @@ import {
   PresentationWorkflowNode,
 } from "@/shared/presentation";
 
-const GAP_Y = 250;
-const GAP_X = 500;
-const MARGIN_X = 80;
-const MARGIN_Y = 60;
+export interface LayoutConfig {
+  gapX: number;
+  gapY: number;
+  marginX: number;
+  marginY: number;
+}
+
+export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {
+  gapX: 500,
+  gapY: 250,
+  marginX: 80,
+  marginY: 60,
+};
 
 function computeRanks(
   nodes: PresentationWorkflowNode[],
@@ -55,8 +64,10 @@ function computeRanks(
 
 export function layoutWorkflow(
   nodes: PresentationWorkflowNode[],
-  links: PresentationWorkflowLink[]
+  links: PresentationWorkflowLink[],
+  config: LayoutConfig = DEFAULT_LAYOUT_CONFIG
 ): Record<string, { x: number; y: number }> {
+  const { gapX, gapY, marginX, marginY } = config;
   const ranks = computeRanks(nodes, links);
   const byRank = new Map<number, PresentationWorkflowNode[]>();
   for (const n of nodes) {
@@ -70,11 +81,11 @@ export function layoutWorkflow(
   for (const r of sortedRanks) {
     const group = byRank.get(r)!;
     group.sort((a, b) => a.id.localeCompare(b.id));
-    const startY = MARGIN_Y;
+    const startY = marginY;
     group.forEach((node, idx) => {
       positions[node.id] = {
-        x: MARGIN_X + r * GAP_X,
-        y: startY + idx * GAP_Y,
+        x: marginX + r * gapX,
+        y: startY + idx * gapY,
       };
     });
   }

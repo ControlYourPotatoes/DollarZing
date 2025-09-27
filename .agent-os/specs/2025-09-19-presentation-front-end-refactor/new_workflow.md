@@ -10,6 +10,16 @@ The recommendations build on the existing shared utilities in `src/shared/presen
 
 These changes keep the frontend visually appealing (smooth Framer Motion animations, tooltips) while leveraging your simulation data (from `daily-snapshots.json` and `presentation-snapshots.json`). Snippets are provided as drop-in references—test incrementally.
 
+## Current State Snapshot (2025-02-xx)
+
+- **Loader/Normalizer**: `normalizePresentationSnapshot` (`src/shared/presentation/normalizer.ts`) remains unchanged; node prep still happens inside `useWorkflowData`. No `prepareNodesForDiagram` helper exists yet.
+- **WorkflowNode rendering**: Production code renders three radial gauges using synthetic two-slice segments (`filled` vs `rest`) built in `useWorkflowData.ts`. Layer data from the dataset is present but overridden.
+- **Comparisons**: Mid/High scenarios come from anchor lookups in `useScenarioComparisons.ts`; interpolation utilities are untouched.
+- **Layout**: Nodes are placed via the deterministic `simpleLayout` helper with fixed spacing (`GAP_X`, `GAP_Y`). No force simulation is active.
+- **State/Animation**: The component does not use Zustand today. Framer Motion springs sometimes stall when rapidly hovering between rings.
+
+Use this doc as a handoff baseline: the sections below outline what shipped, what remains, and the plan moving forward.
+
 ## 1. Prerequisites and Dependencies
 - **Install D3**: For arc generation (radial sunburst slices).
   ```
@@ -26,6 +36,11 @@ If your simulation adds daily perplexity boosts (e.g., per-layer cumulatives), t
 
 ## 2. Data Loading with Shared Utilities
 Use `loader.ts` for robust, cached loading of snapshots and manifests. This handles validation and normalization without boilerplate in components.
+
+### Reality Check
+- `loadAndNormalizeSnapshot`/`createScenarioIndex` are wired into the timeline store.
+- `useWorkflowData` still receives a already-normalized scenario and derives its own comparison segments. No dedicated node-prep helper is in place yet.
+- Daily snapshots are keyed objects (`"0"..."89"`), and presentation snapshots include per-node `layers`. We currently ignore those layers once the gauge override runs.
 
 ### Usage in Parent Component (e.g., `FinancialWorkflowDiagram.tsx`)
 ```tsx
@@ -64,6 +79,8 @@ The current `normalizer.ts` outputs `NormalizedPresentationScenario` with `days`
 
 ### Recommended Changes to `normalizer.ts`
 Add these functions/exports after the existing `normalizePresentationSnapshot`. This keeps the canonical normalizer focused while adding sunburst-specific prep.
+
+> **Status:** Not implemented yet. The production path builds comparison segments directly in `useWorkflowData.ts` via `mkGauge`. Bringing these helpers online is part of the hybrid gauge → sunburst roadmap.
 
 ```tsx
 // Add to normalizer.ts (after existing exports)
@@ -172,6 +189,16 @@ function getColorForLayer(id: string): string {
 ## 4. Updated WorkflowNode Component
 Replace the existing dashed-circle logic with D3 arcs for true radial slices. This creates deconstructed sunbursts: base (inner/opaque), mid (middle/semi-transparent), high (outer/transparent). Tune `padAngle` for spacing.
 
+### What We Have Today
+- `WorkflowNode.tsx` still calls `computeArcs` which simply sorts segments; our gauges come from synthetic layers (`filled` vs `rest`) created upstream.
+- All three rings share the same Framer Motion spring controls. Rapid hover transitions can leave a ring mid-animation.
+- Layer data from the dataset is not rendered; the doc’s D3 pad-angle guidance is aspirational.
+
+### Hybrid Gauge Plan
+- Keep the gauge semantics for each ring, but replace the synthetic `rest` slice with real layer slices plus an optional low-opacity remainder.
+- Once hybrid feels solid, drop the gauge remainder entirely and treat rings as sunburst slices.
+- Capture this migration in code via helper utilities (either in `normalizer.ts` or a new `sunburstPrep.ts`).
+
 ### Snippet: Updated `WorkflowNode.tsx`
 (See full code in previous responses; key excerpt for arcs/compute):
 ```tsx
@@ -207,40 +234,16 @@ const arcGen = d3.arc<d3.DefaultArcObject>()
 - **Animations**: Staggered Framer Motion (`delay: i * 0.05`) for burst-on-hover.
 - **Accessibility**: ARIA labels include day/cumulative (e.g., "Platform Fees: $13.2 (Cum: $13.2) - Day 1").
 
-## 5. Integration in Parent Diagram (FinancialWorkflowDiagram.tsx)
-Use force layout for deconstructed positioning (side-by-side nodes, no overlap). Tie to timeline.
-
-### Snippet: Parent Layout
-```tsx
-// In useEffect
-const simulation = d3.forceSimulation(nodesByDay[activeDay])
-  .force('charge', d3.forceManyBody().strength(-200)) // Repel for spacing
-  .force('collide', d3.forceCollide().radius(radius * 1.5)) // Min distance
-  .force('x', d3.forceX().x(i => i * 200)) // Horizontal deconstruction (node 0 at x=0, node 1 at x=200, etc.)
-  .on('tick', updatePositions);
-
-// Render
-{normalizedData.nodesByDay[activeDay]?.map((node, i) => (
-  <WorkflowNode
-    key={node.id}
-    node={node}
-    dayIndex={activeDay + 1}
-    x={positions[i]?.x || 100 + i * 200} // From sim or fixed
-    y={positions[i]?.y || height / 2}
-    radius={80}
-    isActive={activeNode === node.id}
-    onHover={setActiveNode}
-  />
-))}
-
-// Links: From financialWorkflow.links (render <line> between node positions)
-```
-
-- **Deconstruction**: Position nodes horizontally (e.g., platform at x=100, charity at x=300) for side-by-side sunbursts.
-- **Timeline**: Use `activeDay` to switch `nodesByDay`; add scrubber/slider.
-- **Clustering Fix**: Force `collide` ensures min distance (tune `.radius(radius * 2)` for dense days).
-
 ## 6. Testing and Tuning
+
+### Known Issues (Current)
+- Framer springs occasionally stall when rapidly crossing rings. Try `transition={{ type: "tween", duration: 0.18, ease: "easeOut" }}` or give each ring its own animation controls to avoid shared spring conflicts.
+- Hover state is local to `WorkflowNode`; introducing Zustand is optional. The stutter seems tied to shared animation controls rather than global state churn.
+
+### Next Steps
+- Prototype hybrid gauge segments using real dataset layers (plus optional remainder) before committing to full sunburst rendering.
+- Extract sunburst prep utilities (`prepareSunburstNodesForDay`, `prepareNodesForDiagram`) so node prep leaves `useWorkflowData`.
+- Externalize layout constants for responsive tweaks, then revisit a constrained force layout if we need adaptive spacing.
 - **Sample Data**: Use Day 1 from `daily-snapshots.json`: `layers = [{id: 'fees', value: 13.2, color: '#38bdf8'}]`.
 - **Visual Checks**:
   - Slices sum to 360° (log `arcs` to verify angles).

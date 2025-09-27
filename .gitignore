@@ -38,3 +38,6 @@ References/
 .devcontainer/devcontainer.json
 /devcontainer
 public/engine/
+
+# Generated datasets in public (copied from engine/)
+public/engine/generated-datasets/

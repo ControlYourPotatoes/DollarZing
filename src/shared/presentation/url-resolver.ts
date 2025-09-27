@@ -8,10 +8,9 @@ const DEFAULT_PUBLIC_BASE =
     "BASE_URL"
   ] || "/";
 
-const {
-  VITE_PRESENTATION_BASE_URL,
-  VITE_PRESENTATION_OVERRIDES,
-} = ((import.meta as any).env ?? {}) as Record<string, string | undefined>;
+const { VITE_PRESENTATION_BASE_URL, VITE_PRESENTATION_OVERRIDES } = ((
+  import.meta as any
+).env ?? {}) as Record<string, string | undefined>;
 
 export function joinUrl(base: string, path: string): string {
   const left = base.endsWith("/") ? base.slice(0, -1) : base;
@@ -38,7 +37,10 @@ export function resolveSnapshotUrl(entry: PresentationManifestEntry): string {
   // Highest priority: explicit per-scenario override map (JSON string mapping scenarioId -> URL)
   if (VITE_PRESENTATION_OVERRIDES) {
     try {
-      const map = JSON.parse(VITE_PRESENTATION_OVERRIDES) as Record<string, string>;
+      const map = JSON.parse(VITE_PRESENTATION_OVERRIDES) as Record<
+        string,
+        string
+      >;
       const override = map[entry.scenarioId];
       if (override) return resolvePublicPath(override);
     } catch {
@@ -56,4 +58,3 @@ export function resolveSnapshotUrl(entry: PresentationManifestEntry): string {
   );
   return viaPath || viaId;
 }
-
