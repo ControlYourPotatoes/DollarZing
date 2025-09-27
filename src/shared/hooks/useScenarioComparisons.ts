@@ -7,12 +7,21 @@ import {
 import { usePresentationTimelineStore } from "./presentationTimelineStore";
 import { loadPresentationSnapshot } from "@/shared/presentation";
 import { resolveSnapshotUrl } from "@/shared/presentation/url-resolver";
-import { getCoordinateKey } from "@/shared/presentation/scenario-index";
+// Remove getCoordinateKey import, add anchor imports
+import {
+  coordinatesToAnchorParams,
+  getRelativeAnchor,
+  getAnchorKey,
+} from "@/shared/presentation/anchor-config";
+import { findScenarioByAnchorKey } from "@/shared/presentation/scenario-index";
+import { useComparisonSelectionStore } from "./comparisonSelectionStore";
 
 export interface ComparisonScenarios {
   base?: NormalizedPresentationScenario;
   mid?: NormalizedPresentationScenario;
   high?: NormalizedPresentationScenario;
+  midId?: string;
+  highId?: string;
 }
 
 /**
@@ -20,26 +29,44 @@ export interface ComparisonScenarios {
  * are loaded alongside the active scenario. Returns references if present.
  */
 export function useScenarioComparisons(): ComparisonScenarios {
-  const manifest = usePresentationTimelineStore((s) => s.manifest);
+  const manifestIndex = usePresentationTimelineStore((s) => s.index); // Assuming store has updated index with byAnchorKey
   const scenarios = usePresentationTimelineStore((s) => s.scenarios);
-  const activeScenarioId = usePresentationTimelineStore((s) => s.activeScenarioId);
+  const activeScenarioId = usePresentationTimelineStore(
+    (s) => s.activeScenarioId
+  );
   const upsertScenario = usePresentationTimelineStore((s) => s.upsertScenario);
+  const selectedMidId = useComparisonSelectionStore((s) => s.midScenarioId);
+  const selectedHighId = useComparisonSelectionStore((s) => s.highScenarioId);
 
   const base = activeScenarioId ? scenarios[activeScenarioId] : undefined;
 
   useEffect(() => {
     let cancelled = false;
     async function ensureLoaded() {
-      if (!manifest || !base) return;
-      const charity = base.coordinates.charityShare;
-      const mk = (a: number, c: number) => getCoordinateKey({
-        adoptionRate: a,
-        cashOutStrategy: c,
-        charityShare: charity,
-      });
+      if (!manifestIndex || !base) return;
+
+      // Parse base coordinates to anchor params
+      const baseParams = coordinatesToAnchorParams(base.coordinates);
+
+      // Determine target entries from either explicit selections or relative defaults
       const candidates: PresentationManifestEntry[] = [];
-      const midEntry = manifest.byCoordinateKey.get(mk(0.5, 0.5));
-      const highEntry = manifest.byCoordinateKey.get(mk(1, 1));
+      let midEntry: PresentationManifestEntry | undefined;
+      let highEntry: PresentationManifestEntry | undefined;
+      if (selectedMidId) {
+        midEntry = manifestIndex.byId.get(selectedMidId);
+      } else {
+        const midParams = getRelativeAnchor(baseParams, "mid");
+        const midKey = getAnchorKey(midParams);
+        midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
+      }
+      if (selectedHighId) {
+        highEntry = manifestIndex.byId.get(selectedHighId);
+      } else {
+        const highParams = getRelativeAnchor(baseParams, "high");
+        const highKey = getAnchorKey(highParams);
+        highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
+      }
+
       if (midEntry) candidates.push(midEntry);
       if (highEntry) candidates.push(highEntry);
 
@@ -47,7 +74,9 @@ export function useScenarioComparisons(): ComparisonScenarios {
         if (cancelled) return;
         if (scenarios[entry.scenarioId]) continue;
         try {
-          const snapshot = await loadPresentationSnapshot(resolveSnapshotUrl(entry));
+          const snapshot = await loadPresentationSnapshot(
+            resolveSnapshotUrl(entry)
+          );
           if (cancelled) return;
           upsertScenario(snapshot);
         } catch (err) {
@@ -60,23 +89,43 @@ export function useScenarioComparisons(): ComparisonScenarios {
     return () => {
       cancelled = true;
     };
-  }, [manifest, base, upsertScenario, scenarios]);
+  }, [
+    manifestIndex,
+    base,
+    upsertScenario,
+    scenarios,
+    selectedMidId,
+    selectedHighId,
+  ]);
 
   return useMemo(() => {
-    if (!manifest || !base) return { base };
-    const charity = base.coordinates.charityShare;
-    const mk = (a: number, c: number) => getCoordinateKey({
-      adoptionRate: a,
-      cashOutStrategy: c,
-      charityShare: charity,
-    });
-    const midId = manifest.byCoordinateKey.get(mk(0.5, 0.5))?.scenarioId;
-    const highId = manifest.byCoordinateKey.get(mk(1, 1))?.scenarioId;
+    if (!manifestIndex || !base) return { base };
+
+    // Parse base params
+    const baseParams = coordinatesToAnchorParams(base.coordinates);
+
+    // Resolve final mid/high ids: explicit overrides first, then relative defaults
+    let midId: string | undefined = selectedMidId || undefined;
+    let highId: string | undefined = selectedHighId || undefined;
+    if (!midId) {
+      const midParams = getRelativeAnchor(baseParams, "mid");
+      const midKey = getAnchorKey(midParams);
+      const midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
+      midId = midEntry?.scenarioId;
+    }
+    if (!highId) {
+      const highParams = getRelativeAnchor(baseParams, "high");
+      const highKey = getAnchorKey(highParams);
+      const highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
+      highId = highEntry?.scenarioId;
+    }
+
     return {
       base,
       mid: midId ? scenarios[midId] : undefined,
       high: highId ? scenarios[highId] : undefined,
+      midId,
+      highId,
     };
-  }, [manifest, base, scenarios]);
+  }, [manifestIndex, base, scenarios, selectedMidId, selectedHighId]);
 }
-

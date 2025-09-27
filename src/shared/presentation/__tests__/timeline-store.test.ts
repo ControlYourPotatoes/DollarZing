@@ -37,13 +37,17 @@ const SAMPLE_MANIFEST = [
 const resetStore = () =>
   usePresentationTimelineStore.setState({
     scenarios: {},
-    manifest: undefined,
+    index: null,
     activeScenarioId: undefined,
     activeDayIndex: 0,
     isPlaying: false,
     playbackSpeed: 1,
     lastUpdatedAt: undefined,
-  });
+    hoveredNodeId: null,
+    hoveredRingKey: null,
+    nodeViewStates: {},
+    simulationPhase: "idle",
+  } as any);
 
 beforeEach(() => {
   resetStore();

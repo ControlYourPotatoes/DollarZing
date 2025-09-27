@@ -5,13 +5,17 @@ import {
   NormalizedPresentationScenario,
   PresentationWorkflowLink,
   PresentationWorkflowNode,
+  PresentationWorkflowLayer,
 } from "@/shared/presentation";
-import { layoutWorkflow } from "../layout/simpleLayout";
+import {
+  DEFAULT_LAYOUT_CONFIG,
+  layoutWorkflow,
+} from "../layout/simpleLayout";
 import {
   useActiveTimelineDay,
   useActiveTimelineScenario,
 } from "@/features/timeline";
-import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
+// import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 import { useScenarioComparisons } from "@/shared/hooks/useScenarioComparisons";
 
 interface PositionedNode extends PresentationWorkflowNode {
@@ -24,6 +28,10 @@ interface PositionedNode extends PresentationWorkflowNode {
   baseValue?: number;
   midValue?: number;
   highValue?: number;
+  baseDeltaPercent?: number;
+  midDeltaPercent?: number;
+  highDeltaPercent?: number;
+  comparisonMax?: number;
 }
 
 interface PositionedLink extends PresentationWorkflowLink {
@@ -41,25 +49,77 @@ export interface WorkflowLayoutResult {
   highlightedIds: string[];
 }
 
-const DEFAULT_NODE_RADIUS = 80;
+const DEFAULT_NODE_RADIUS = 70;
+
+const LAYOUT_CONFIG = DEFAULT_LAYOUT_CONFIG;
 
 function computePositions(
   nodes: PresentationWorkflowNode[],
   links: PresentationWorkflowLink[]
 ): Record<string, { x: number; y: number }> {
-  return layoutWorkflow(nodes, links);
+  return layoutWorkflow(nodes, links, LAYOUT_CONFIG);
 }
 
 export function useWorkflowData(): WorkflowLayoutResult {
   const scenario = useActiveTimelineScenario();
   const day = useActiveTimelineDay();
-  const manifest = usePresentationTimelineStore((s) => s.manifest);
-  const scenariosMap = usePresentationTimelineStore((s) => s.scenarios);
+  // const manifest = usePresentationTimelineStore((s) => s.index);
+  // const scenariosMap = usePresentationTimelineStore((s) => s.scenarios);
   const { mid: midScenario, high: highScenario } = useScenarioComparisons();
 
   return useMemo(() => {
     if (!day || !scenario) {
       return { scenario, day, nodes: [], links: [], highlightedIds: [] };
+    }
+
+    let globalMax = 0;
+    const nodeComparisonMax: Record<string, number> = {};
+
+    const trackMaxValue = (nodeId: string, rawValue: number | undefined) => {
+      if (rawValue === undefined || Number.isNaN(rawValue)) {
+        return;
+      }
+      const value = Math.max(0, rawValue);
+      nodeComparisonMax[nodeId] = Math.max(nodeComparisonMax[nodeId] ?? 0, value);
+    };
+    const scenariosToCheck = [scenario, midScenario, highScenario].filter(
+      Boolean
+    ) as NormalizedPresentationScenario[];
+
+    const activeDayIndex = day.dayIndex ?? 0;
+    scenariosToCheck.forEach((sc) => {
+      if (!sc?.dayLookup) return;
+      Object.entries(sc.dayLookup).forEach(([dayKey, d]) => {
+        if (!d?.timelineTick) return;
+        const idx = Number(dayKey);
+        if (!Number.isFinite(idx) || idx > activeDayIndex) return;
+        const tick = d.timelineTick;
+        globalMax = Math.max(
+          globalMax,
+          tick.cumulativeRevenue || 0,
+          tick.cumulativeFees || 0,
+          tick.cumulativeCharity || 0,
+          tick.cumulativePayouts || 0
+        );
+
+        trackMaxValue("total", tick.cumulativeRevenue || 0);
+        trackMaxValue("platform", tick.cumulativeFees || 0);
+        trackMaxValue("charity", tick.cumulativeCharity || 0);
+        trackMaxValue("players", tick.cumulativePayouts || 0);
+
+        if (d.financialWorkflow?.nodes) {
+          d.financialWorkflow.nodes.forEach((workflowNode) => {
+            trackMaxValue(workflowNode.id, workflowNode.aggregateValue);
+          });
+        }
+      });
+    });
+
+    const HEADROOM_FACTOR = 1.1;
+    if (globalMax === 0) {
+      globalMax = 1;
+    } else {
+      globalMax *= HEADROOM_FACTOR;
     }
 
     // Derive canonical nodes/links if missing from snapshot
@@ -172,20 +232,23 @@ export function useWorkflowData(): WorkflowLayoutResult {
       // Base/Mid/High values for this node id
       const collectValue = (
         sc: NormalizedPresentationScenario | undefined,
-        id: string
+        id: string,
+        overrideIndex?: number
       ) => {
         if (!sc) return undefined;
-        const d = sc.dayLookup[day.dayIndex];
+        const baseIndex = overrideIndex ?? day.dayIndex;
+        const idx = Math.min(baseIndex, Math.max(0, sc.duration - 1));
+        const d = sc.dayLookup[idx];
         if (!d) return undefined;
         switch (id) {
           case "total":
-            return Math.max(0, d.timelineTick.cumulativeRevenue || 0);
+            return d.timelineTick.cumulativeRevenue || 0;
           case "platform":
-            return Math.max(0, d.timelineTick.cumulativeFees || 0);
+            return d.timelineTick.cumulativeFees || 0;
           case "charity":
-            return Math.max(0, d.timelineTick.cumulativeCharity || 0);
+            return d.timelineTick.cumulativeCharity || 0;
           case "players":
-            return Math.max(0, d.timelineTick.cumulativePayouts || 0);
+            return d.timelineTick.cumulativePayouts || 0;
           default:
             return undefined;
         }
@@ -195,8 +258,34 @@ export function useWorkflowData(): WorkflowLayoutResult {
       const midValue = collectValue(midScenario, node.id);
       const highValue = collectValue(highScenario, node.id);
 
-      const deltaMid = midValue !== undefined ? Math.max(0, midValue - baseValue) : 0;
-      const deltaHigh = highValue !== undefined ? Math.max(0, highValue - baseValue) : 0;
+      const midDeltaAmount =
+        midValue !== undefined && baseValue !== undefined
+          ? midValue - baseValue
+          : undefined;
+      const highDeltaAmount =
+        highValue !== undefined && baseValue !== undefined
+          ? highValue - baseValue
+          : undefined;
+
+      const previousBaseValue =
+        day.dayIndex > 0
+          ? collectValue(scenario, node.id, day.dayIndex - 1)
+          : undefined;
+      const baseDeltaPercent =
+        previousBaseValue !== undefined &&
+        previousBaseValue !== 0 &&
+        baseValue !== undefined
+          ? ((baseValue - previousBaseValue) / previousBaseValue) * 100
+          : undefined;
+
+      const midDeltaPercent =
+        midValue !== undefined && baseValue !== undefined && baseValue !== 0
+          ? ((midValue - baseValue) / baseValue) * 100
+          : undefined;
+      const highDeltaPercent =
+        highValue !== undefined && baseValue !== undefined && baseValue !== 0
+          ? ((highValue - baseValue) / baseValue) * 100
+          : undefined;
 
       // Comparison mode: 'normalized' (default) or 'delta'
       const comparisonMode: "normalized" | "delta" = "normalized";
@@ -206,11 +295,15 @@ export function useWorkflowData(): WorkflowLayoutResult {
       let baseSegmentsOverride: PresentationWorkflowLayer[] | undefined;
 
       if (comparisonMode === "normalized") {
-        const maxVal = Math.max(
+        const historicalMax = nodeComparisonMax[node.id] ?? 0;
+        const immediateMax = Math.max(
           baseValue || 0,
           midValue || 0,
-          highValue || 0
+          highValue || 0,
+          0
         );
+        const baseComparisonMax = Math.max(historicalMax, immediateMax);
+        const comparisonMax = Math.max(1, baseComparisonMax * HEADROOM_FACTOR);
         const mkGauge = (
           val: number | undefined,
           max: number,
@@ -222,15 +315,40 @@ export function useWorkflowData(): WorkflowLayoutResult {
           const rest = Math.max(0, max - filled);
           return [
             { id: `${key}-filled`, label: "filled", value: filled, color },
-            { id: `${key}-rest`, label: "rest", value: rest, color: "transparent" },
+            {
+              id: `${key}-rest`,
+              label: "rest",
+              value: rest,
+              color: "transparent",
+            },
           ];
         };
 
-        // Distinct colors per ring
-        const COLORS = { base: "#e2e8f0", mid: "#38bdf8", high: "#a78bfa" } as const;
-        baseSegmentsOverride = mkGauge(baseValue, maxVal, COLORS.base, "base");
-        midSegments = mkGauge(midValue, maxVal, COLORS.mid, "mid");
-        highSegments = mkGauge(highValue, maxVal, COLORS.high, "high");
+        const COLORS = {
+          base: "#e2e8f0",
+          mid: "#38bdf8",
+          high: "#a78bfa",
+        } as const;
+        baseSegmentsOverride = mkGauge(baseValue, comparisonMax, COLORS.base, "base");
+        midSegments = mkGauge(midValue, comparisonMax, COLORS.mid, "mid");
+        highSegments = mkGauge(highValue, comparisonMax, COLORS.high, "high");
+
+        return {
+          ...node,
+          x: pos.x,
+          y: pos.y,
+          radius: DEFAULT_NODE_RADIUS,
+          midSegments,
+          highSegments,
+          baseValue,
+          midValue,
+          highValue,
+          baseDeltaPercent,
+          midDeltaPercent,
+          highDeltaPercent,
+          layers: baseSegmentsOverride ?? node.layers,
+          comparisonMax,
+        } as PositionedNode;
       } else {
         // Delta mode (previous behavior)
         // For the 'total' node, segment by category deltas (platform/charity/players)
@@ -269,11 +387,26 @@ export function useWorkflowData(): WorkflowLayoutResult {
             const dCharity = deltaCat("charity", midCats);
             const dPlayers = deltaCat("players", midCats);
             if (dPlatform > 0)
-              m.push({ id: "platform", label: "Platform", value: dPlatform, color: COLORS.platform });
+              m.push({
+                id: "platform",
+                label: "Platform",
+                value: dPlatform,
+                color: COLORS.platform,
+              });
             if (dCharity > 0)
-              m.push({ id: "charity", label: "Charity", value: dCharity, color: COLORS.charity });
+              m.push({
+                id: "charity",
+                label: "Charity",
+                value: dCharity,
+                color: COLORS.charity,
+              });
             if (dPlayers > 0)
-              m.push({ id: "players", label: "Players", value: dPlayers, color: COLORS.players });
+              m.push({
+                id: "players",
+                label: "Players",
+                value: dPlayers,
+                color: COLORS.players,
+              });
             if (m.length > 0) midSegments = m;
           }
           if (highCats) {
@@ -282,26 +415,57 @@ export function useWorkflowData(): WorkflowLayoutResult {
             const dCharity = deltaCat("charity", highCats);
             const dPlayers = deltaCat("players", highCats);
             if (dPlatform > 0)
-              h.push({ id: "platform", label: "Platform", value: dPlatform, color: COLORS.platform });
+              h.push({
+                id: "platform",
+                label: "Platform",
+                value: dPlatform,
+                color: COLORS.platform,
+              });
             if (dCharity > 0)
-              h.push({ id: "charity", label: "Charity", value: dCharity, color: COLORS.charity });
+              h.push({
+                id: "charity",
+                label: "Charity",
+                value: dCharity,
+                color: COLORS.charity,
+              });
             if (dPlayers > 0)
-              h.push({ id: "players", label: "Players", value: dPlayers, color: COLORS.players });
+              h.push({
+                id: "players",
+                label: "Players",
+                value: dPlayers,
+                color: COLORS.players,
+              });
             if (h.length > 0) highSegments = h;
           }
         } else {
           // For other nodes, single segment using node primary color
           const baseLayer = (node.layers && node.layers[0]) || undefined;
           const defaultSeg =
-            baseLayer || ({ id: "value", label: "Value", color: "#64748b", value: 0 } as PresentationWorkflowLayer);
-          if (deltaMid > 0) {
+            baseLayer ||
+            ({
+              id: "value",
+              label: "Value",
+              color: "#64748b",
+              value: 0,
+            } as PresentationWorkflowLayer);
+          if (midDeltaAmount !== undefined && midDeltaAmount > 0) {
             midSegments = [
-              { id: defaultSeg.id, label: defaultSeg.label, value: deltaMid, color: defaultSeg.color },
+              {
+                id: defaultSeg.id,
+                label: defaultSeg.label,
+                value: midDeltaAmount,
+                color: defaultSeg.color,
+              },
             ];
           }
-          if (deltaHigh > 0) {
+          if (highDeltaAmount !== undefined && highDeltaAmount > 0) {
             highSegments = [
-              { id: defaultSeg.id, label: defaultSeg.label, value: deltaHigh, color: defaultSeg.color },
+              {
+                id: defaultSeg.id,
+                label: defaultSeg.label,
+                value: highDeltaAmount,
+                color: defaultSeg.color,
+              },
             ];
           }
         }
@@ -317,9 +481,12 @@ export function useWorkflowData(): WorkflowLayoutResult {
         baseValue,
         midValue,
         highValue,
-        // Override base layers for normalized comparison to show gauge instead of category split
-        ...(baseSegmentsOverride ? { layers: baseSegmentsOverride } : {}),
-      };
+        baseDeltaPercent,
+        midDeltaPercent,
+        highDeltaPercent,
+        layers: baseSegmentsOverride ?? node.layers,
+        comparisonMax: nodeComparisonMax[node.id],
+      } as PositionedNode;
     });
 
     const nodeById = new Map<string, PositionedNode>(
@@ -350,5 +517,5 @@ export function useWorkflowData(): WorkflowLayoutResult {
       links: positionedLinks,
       highlightedIds: positionedNodes.map((node) => node.id),
     };
-  }, [day, scenario]);
+  }, [day, scenario, midScenario, highScenario]);
 }

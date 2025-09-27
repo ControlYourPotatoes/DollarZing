@@ -374,19 +374,23 @@ export class GameEngineSimulator {
     } catch (error) {
       console.error("Simulation error:", error);
 
-      const errorResults = {
+      const playerStats = this.getEmptyPlayerStats();
+      const revenueStats = this.getEmptyRevenueStats();
+      const gameStats = this.getEmptyGameStats();
+
+      const errorResults: SimulationResults = {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
         simulationDurationMs: performance.now() - this.startTime,
         config: this.config,
         summary: {
           totalDays: this.config.durationDays,
-          totalPlayers: this.config.initialPlayerCount,
+          totalPlayers: playerStats.totalPlayers,
           simulationCompleted: false,
         },
-        playerStats: this.getEmptyPlayerStats(),
-        revenueStats: this.getEmptyRevenueStats(),
-        gameStats: this.getEmptyGameStats(),
+        playerStats,
+        revenueStats,
+        gameStats,
         dailyResults: [],
         dailyAggregates: [],
         completedAt: new Date(),
@@ -487,18 +491,22 @@ export class GameEngineSimulator {
     // Generate final results
     const simulationDurationMs = performance.now() - this.startTime;
 
+    const playerStats = this.getPlayerStatisticsFromState();
+    const revenueStats = this.generateRevenueStatistics();
+    const gameStats = this.generateGameStatistics();
+
     const results: SimulationResults = {
       success: true,
       simulationDurationMs,
       config: this.config,
       summary: {
         totalDays: durationDays,
-        totalPlayers: this.config.initialPlayerCount,
+        totalPlayers: playerStats.totalPlayers,
         simulationCompleted: true,
       },
-      playerStats: this.getPlayerStatisticsFromState(),
-      revenueStats: this.generateRevenueStatistics(),
-      gameStats: this.generateGameStatistics(),
+      playerStats,
+      revenueStats,
+      gameStats,
       dailyResults,
       completedAt: new Date(),
     };

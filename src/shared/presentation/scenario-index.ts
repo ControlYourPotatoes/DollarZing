@@ -9,6 +9,7 @@ import {
   assertCoordinatesInRange,
   toValidationError,
 } from "./validation";
+import { parseAnchorKey } from "./anchor-config";
 
 const COORDINATE_PRECISION = 3;
 
@@ -26,18 +27,24 @@ function dedupeAndSort(values: number[]): number[] {
   return Array.from(new Set(values)).sort((a, b) => a - b);
 }
 
+// Note: ScenarioIndex shape is declared in ./types. This module only builds/queries it.
+
 export function buildScenarioIndex(input: unknown): ScenarioIndex {
   try {
     const manifest: PresentationManifest = validatePresentationManifest(input);
 
     const byId = new Map<string, PresentationManifestEntry>();
     const byCoordinateKey = new Map<string, PresentationManifestEntry>();
+    const byAnchorKey = new Map<string, PresentationManifestEntry>(); // New
 
     for (const entry of manifest) {
       if (byId.has(entry.scenarioId)) {
         throw new Error(`Duplicate scenarioId detected: ${entry.scenarioId}`);
       }
-      assertCoordinatesInRange(entry.coordinates, `manifest(${entry.scenarioId})`);
+      assertCoordinatesInRange(
+        entry.coordinates,
+        `manifest(${entry.scenarioId})`
+      );
 
       const key = toCoordinateKey(entry.coordinates);
       byId.set(entry.scenarioId, entry);
@@ -49,18 +56,29 @@ export function buildScenarioIndex(input: unknown): ScenarioIndex {
         );
       }
       byCoordinateKey.set(key, entry);
+
+      // New: Check if scenarioId is an anchor key and add to byAnchorKey
+      if (parseAnchorKey(entry.scenarioId)) {
+        byAnchorKey.set(entry.scenarioId, entry);
+      }
     }
 
     const axes = {
-      adoptionRate: dedupeAndSort(manifest.map((entry) => entry.coordinates.adoptionRate)),
+      adoptionRate: dedupeAndSort(
+        manifest.map((entry) => entry.coordinates.adoptionRate)
+      ),
       cashOutStrategy: dedupeAndSort(
         manifest.map((entry) => entry.coordinates.cashOutStrategy)
       ),
-      charityShare: dedupeAndSort(manifest.map((entry) => entry.coordinates.charityShare)),
+      charityShare: dedupeAndSort(
+        manifest.map((entry) => entry.coordinates.charityShare)
+      ),
     };
 
     if (axes.adoptionRate.length === 0) {
-      throw new Error("Manifest does not contain any adoptionRate coordinate values");
+      throw new Error(
+        "Manifest does not contain any adoptionRate coordinate values"
+      );
     }
 
     return {
@@ -68,6 +86,7 @@ export function buildScenarioIndex(input: unknown): ScenarioIndex {
       axes,
       byId,
       byCoordinateKey,
+      byAnchorKey, // New
     };
   } catch (error) {
     throw toValidationError(error);
@@ -152,4 +171,11 @@ export function computeCoordinateKey(
     cashOutStrategy,
     charityShare,
   });
+}
+
+export function findScenarioByAnchorKey(
+  index: ScenarioIndex,
+  anchorKey: string
+): PresentationManifestEntry | undefined {
+  return index.byAnchorKey.get(anchorKey);
 }

@@ -17,7 +17,7 @@ import {
 
 interface TimelineState {
   scenarios: Record<string, NormalizedPresentationScenario>;
-  manifest?: ScenarioIndex;
+  index: ScenarioIndex | null;
   activeScenarioId?: string;
   activeDayIndex: number;
   isPlaying: boolean;
@@ -90,9 +90,10 @@ export const usePresentationTimelineStore = create<TimelineState>()(
     hoveredRingKey: null,
     nodeViewStates: {},
     simulationPhase: "idle",
+    index: null,
     loadManifest: (manifestRaw: unknown) => {
       const manifest = buildScenarioIndex(manifestRaw);
-      set({ manifest });
+      set({ index: manifest });
       return manifest;
     },
     upsertScenario: (snapshotRaw: PresentationSnapshotFile | unknown) => {
@@ -167,10 +168,10 @@ export const usePresentationTimelineStore = create<TimelineState>()(
     },
     computeAnchors: (coordinates) => {
       const state = get();
-      if (!state.manifest) {
+      if (!state.index) {
         return undefined;
       }
-      return computeInterpolationAnchors(state.manifest, coordinates);
+      return computeInterpolationAnchors(state.index, coordinates);
     },
     getActivePoolMetrics: () => {
       const day = get().getActiveDay();

@@ -1,9 +1,11 @@
 import { resolve, dirname } from "path";
-import { createWriteStream, type WriteStream, promises as fsPromises } from "fs";
-import { format } from "util";
 import {
-  createDefaultOrchestratorConfig,
-} from "../cli/src/orchestrator/core/config";
+  createWriteStream,
+  type WriteStream,
+  promises as fsPromises,
+} from "fs";
+import { format } from "util";
+import { createDefaultOrchestratorConfig } from "../cli/src/orchestrator/core/config";
 import {
   DatasetOrchestrator,
   type ParameterMappingConfig,
@@ -33,7 +35,9 @@ type ProgressMode = "inline" | "line" | "silent";
 
 function parseArgs(argv: string[]): RunnerOptions {
   const args = new Set(argv);
-  const outputIndex = argv.findIndex((arg) => arg === "--output" || arg === "-o");
+  const outputIndex = argv.findIndex(
+    (arg) => arg === "--output" || arg === "-o"
+  );
   const outputDirectory =
     outputIndex !== -1 && argv[outputIndex + 1]
       ? argv[outputIndex + 1]
@@ -91,7 +95,11 @@ function parseArgs(argv: string[]): RunnerOptions {
 
 function parseProgressMode(input: string): ProgressMode {
   const normalized = input.toLowerCase();
-  if (normalized === "inline" || normalized === "line" || normalized === "silent") {
+  if (
+    normalized === "inline" ||
+    normalized === "line" ||
+    normalized === "silent"
+  ) {
     return normalized;
   }
   throw new Error("Progress mode must be inline, line, or silent");
@@ -134,7 +142,9 @@ function parseCombination(input: string): ParameterCombination {
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   if (argv.includes("--help") || argv.includes("-h")) {
-    console.log(`Usage: ts-node --esm scripts/run-orchestrator.ts [options]\n\nOptions:\n  -o, --output <dir>        Output directory (default: generated-datasets)\n      --days <n>            Override simulation length in days (e.g. 90)\n      --combo <g,r,c>       Run a single combination (e.g. 15,low,10)\n      --no-snapshots        Skip writing daily snapshot aggregates\n      --no-events           Skip writing event trace logs\n      --no-presentation     Skip writing presentation snapshots\n      --progress <mode>     Progress output: inline, line, or silent (default: inline)\n      --log-file <path>     Append command output to a log file\n      --verbose             Enable verbose logging\n      --help                Show this help message\n`);
+    console.log(
+      `Usage: ts-node --esm scripts/run-orchestrator.ts [options]\n\nOptions:\n  -o, --output <dir>        Output directory (default: generated-datasets)\n      --days <n>            Override simulation length in days (e.g. 90)\n      --combo <g,r,c>       Run a single combination (e.g. 15,low,10)\n      --no-snapshots        Skip writing daily snapshot aggregates\n      --no-events           Skip writing event trace logs\n      --no-presentation     Skip writing presentation snapshots\n      --progress <mode>     Progress output: inline, line, or silent (default: inline)\n      --log-file <path>     Append command output to a log file\n      --verbose             Enable verbose logging\n      --help                Show this help message\n`
+    );
     process.exit(0);
   }
 
@@ -213,7 +223,10 @@ async function main(): Promise<void> {
     const total = combinations.length;
     const start = performance.now();
     let successful = 0;
-    const failures: Array<{ combination: ParameterCombination; error?: string }> = [];
+    const failures: Array<{
+      combination: ParameterCombination;
+      error?: string;
+    }> = [];
 
     const logProgress = (message: string) => appendLog("PROGRESS", message);
 
@@ -238,7 +251,9 @@ async function main(): Promise<void> {
       if (result.success && result.simulationResults) {
         successful += 1;
         if (options.verbose) {
-          console.log(`  ✓ Completed in ${result.generationTimeMs.toFixed(0)}ms`);
+          console.log(
+            `  ✓ Completed in ${result.generationTimeMs.toFixed(0)}ms`
+          );
         }
       } else {
         const failure: { combination: ParameterCombination; error?: string } = {
@@ -248,15 +263,17 @@ async function main(): Promise<void> {
           failure.error = result.error;
         }
         failures.push(failure);
-        console.warn(
-          `  ⚠ Failed${result.error ? `: ${result.error}` : ""}`
-        );
+        console.warn(`  ⚠ Failed${result.error ? `: ${result.error}` : ""}`);
       }
     }
 
     const duration = ((performance.now() - start) / 1000).toFixed(1);
-    console.log(`\n✅ Finished ${successful}/${total} combinations in ${duration}s`);
-    console.log(`Output directory: ${resolve(orchestratorConfig.outputDirectory)}`);
+    console.log(
+      `\n✅ Finished ${successful}/${total} combinations in ${duration}s`
+    );
+    console.log(
+      `Output directory: ${resolve(orchestratorConfig.outputDirectory)}`
+    );
 
     if (failures.length > 0) {
       console.warn("\n⚠ Failures:");
@@ -294,14 +311,19 @@ function createProgressPrinter(
 
   if (mode === "line") {
     return (_combination, progress) => {
-      const percent = ((progress.currentDay / progress.totalDays) * 100).toFixed(1);
+      const percent = (
+        (progress.currentDay / progress.totalDays) *
+        100
+      ).toFixed(1);
       const message = `    ${label}: day ${progress.currentDay}/${progress.totalDays} (${percent}%)`;
       console.log(message);
     };
   }
 
   return (_combination, progress) => {
-    const percent = ((progress.currentDay / progress.totalDays) * 100).toFixed(1);
+    const percent = ((progress.currentDay / progress.totalDays) * 100).toFixed(
+      1
+    );
     const message = `    ${label}: day ${progress.currentDay}/${progress.totalDays} (${percent}%)`;
     process.stdout.write(`${message}\r`);
     logProgress?.(message);
