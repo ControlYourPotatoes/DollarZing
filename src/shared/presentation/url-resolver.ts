@@ -24,9 +24,6 @@ export function resolvePublicPath(url: string): string {
 }
 
 export function defaultDatasetsBase(): string {
-  if (import.meta.env.DEV) {
-    return joinUrl("/", "engine/generated-datasets/");
-  }
   const base = VITE_PRESENTATION_BASE_URL
     ? resolvePublicPath(VITE_PRESENTATION_BASE_URL)
     : joinUrl(DEFAULT_PUBLIC_BASE, "engine/generated-datasets/");
