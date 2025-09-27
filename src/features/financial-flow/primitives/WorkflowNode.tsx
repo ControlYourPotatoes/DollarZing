@@ -49,23 +49,19 @@ const DEFAULT_RING_SIZING_CONFIG: RingSizingConfig = {
     default: { innerOffset: 0, thickness: 10, gapToNext: 2 },
     active: { innerOffset: 1, thickness: 14, gapToNext: 4 },
     hovered: { innerOffset: -2, thickness: 20, gapToNext: 8 },
-    active: { innerOffset: 0, thickness: 14, gapToNext: 4 },
-    hovered: { innerOffset: -4, thickness: 20, gapToNext: 14 },
   },
   high: {
     default: { innerOffset: 0, thickness: 10, gapToNext: 0 },
     active: { innerOffset: 0, thickness: 18, gapToNext: 10 },
     hovered: { innerOffset: -2, thickness: 30, gapToNext: 0 },
-    active: { innerOffset: 0, thickness: 12, gapToNext: 0 },
-    hovered: { innerOffset: -2, thickness: 22, gapToNext: 0 },
   },
 };
 
-const RING_ANIMATION_DURATIONS: Record<RingSizingState, number> = {
-  default: 0.12,
-  active: 0.16,
-  hovered: 0.22,
-};
+// const RING_ANIMATION_DURATIONS: Record<RingSizingState, number> = {
+//   default: 0.12,
+//   active: 0.16,
+//   hovered: 0.22,
+// };
 
 export type WorkflowNodeProps = {
   id: string;
