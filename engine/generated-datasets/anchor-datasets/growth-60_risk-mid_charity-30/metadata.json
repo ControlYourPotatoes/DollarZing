@@ -1,0 +1,29 @@
+{
+  "generationTimestamp": "2025-09-22T03:58:42.116Z",
+  "parameters": {
+    "growthRate": 60,
+    "riskLevel": "mid",
+    "charityPercentage": 30
+  },
+  "generationTimeMs": 1410.097798,
+  "datasetSizeBytes": 12263,
+  "recordCount": 10,
+  "version": "1.0.0",
+  "generatorVersion": "orchestrator-v1.0.0",
+  "runtime": {
+    "simulatorProfileName": "anchor-60-mid-30",
+    "poolingEnabled": true
+  },
+  "artifacts": {
+    "dataset": "generated-datasets/anchor-datasets/growth-60_risk-mid_charity-30/dataset.json",
+    "metadata": "generated-datasets/anchor-datasets/growth-60_risk-mid_charity-30/metadata.json",
+    "dailySnapshots": "generated-datasets/anchor-datasets/growth-60_risk-mid_charity-30/daily-snapshots.json",
+    "events": "generated-datasets/anchor-datasets/growth-60_risk-mid_charity-30/events.ndjson",
+    "presentation": "generated-datasets/anchor-datasets/growth-60_risk-mid_charity-30/presentation-snapshots.json"
+  },
+  "aggregates": {
+    "dailySnapshotCount": 10,
+    "eventTraceCount": 0,
+    "presentationSnapshotCount": 10
+  }
+}

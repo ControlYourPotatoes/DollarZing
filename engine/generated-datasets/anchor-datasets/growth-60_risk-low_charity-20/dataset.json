@@ -1,0 +1,3304 @@
+{
+  "success": true,
+  "simulationDurationMs": 58446.233329,
+  "config": {
+    "durationDays": 90,
+    "initialPlayerCount": 2000,
+    "dailySeed": "orchestrator-60-low-20",
+    "charityPercentage": 0.2,
+    "playerStrategies": {
+      "conservative": 0.7,
+      "balanced": 0.25,
+      "aggressive": 0.05
+    },
+    "initialDonationAmount": 50,
+    "maxSimulationTimeMs": 300000,
+    "enableProgressReporting": true,
+    "growthModel": {
+      "adoptionRate": 0.6,
+      "baseMarket": 1000000,
+      "midpointDay": 90,
+      "steepnessFactor": 20
+    }
+  },
+  "summary": {
+    "totalDays": 90,
+    "totalPlayers": 2000,
+    "simulationCompleted": true
+  },
+  "playerStats": {
+    "totalPlayers": 107057,
+    "activePlayers": 31760,
+    "retiredPlayers": 75297,
+    "completedRunsPlayers": 535279,
+    "totalCharityContributions": 70725.95999981966,
+    "totalPlayerPayouts": 400780.4400016229,
+    "totalProgressionFunds": 0,
+    "averageGamesPerPlayer": 6.076930980692528,
+    "playerRetirementRate": 0.703335606265821
+  },
+  "revenueStats": {
+    "totalPlatformRevenue": 130115.59999866756,
+    "totalCharityContributions": 70725.95999981966,
+    "totalPlayerPayouts": 400780.4400016229,
+    "revenuePerGame": 0.1999999999979519,
+    "charityPercentage": 0.2,
+    "averageRevenuePerDay": 1445.728888874084,
+    "totalCashOuts": 471506.3999984267,
+    "cashOutCount": 209962
+  },
+  "gameStats": {
+    "totalGames": 650578,
+    "averageGamesPerDay": 7228.644444444444,
+    "pooledVirtualDollars": 6,
+    "totalVirtualDollars": 535285,
+    "totalRunsCreated": 535285,
+    "completedRuns": 0,
+    "activeRuns": 6,
+    "jackpotsWon": 0,
+    "averageRunLength": 108429.66666666667
+  },
+  "dailyResults": [
+    {
+      "day": 1,
+      "playerStatistics": {
+        "totalPlayers": 2092,
+        "activePlayers": 620,
+        "retiredPlayers": 1472,
+        "completedRunsPlayers": 10455,
+        "totalCharityContributions": 1369.4399999999416,
+        "totalPlayerPayouts": 7760.15999999977,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.059273422562142,
+        "playerRetirementRate": 0.7036328871892925
+      },
+      "gameStatistics": {
+        "totalGames": 12676,
+        "averageGamesPerDay": 140.84444444444443,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 10460,
+        "totalRunsCreated": 10460,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 2535.2
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 2535.199999999885,
+        "totalCharityContributions": 1369.4399999999416,
+        "totalPlayerPayouts": 7760.15999999977,
+        "revenuePerGame": 0.19999999999999094,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 28.168888888887615,
+        "totalCashOuts": 9129.600000000217,
+        "cashOutCount": 4117
+      },
+      "newPlayers": 92
+    },
+    {
+      "day": 2,
+      "playerStatistics": {
+        "totalPlayers": 2189,
+        "activePlayers": 649,
+        "retiredPlayers": 1540,
+        "completedRunsPlayers": 10940,
+        "totalCharityContributions": 1432.6199999999378,
+        "totalPlayerPayouts": 8118.179999999732,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.058474189127455,
+        "playerRetirementRate": 0.7035175879396985
+      },
+      "gameStatistics": {
+        "totalGames": 13262,
+        "averageGamesPerDay": 147.35555555555555,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 10945,
+        "totalRunsCreated": 10945,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 2652.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 2652.3999999997786,
+        "totalCharityContributions": 1432.6199999999378,
+        "totalPlayerPayouts": 8118.179999999732,
+        "revenuePerGame": 0.1999999999999833,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 29.47111111110865,
+        "totalCashOuts": 9550.800000000097,
+        "cashOutCount": 4309
+      },
+      "newPlayers": 97
+    },
+    {
+      "day": 3,
+      "playerStatistics": {
+        "totalPlayers": 2291,
+        "activePlayers": 679,
+        "retiredPlayers": 1612,
+        "completedRunsPlayers": 11449,
+        "totalCharityContributions": 1497.1499999999335,
+        "totalPlayerPayouts": 8483.849999999811,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.054997817546923,
+        "playerRetirementRate": 0.7036228721082497
+      },
+      "gameStatistics": {
+        "totalGames": 13872,
+        "averageGamesPerDay": 154.13333333333333,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 11455,
+        "totalRunsCreated": 11455,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 2312
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 2774.3999999996677,
+        "totalCharityContributions": 1497.1499999999335,
+        "totalPlayerPayouts": 8483.849999999811,
+        "revenuePerGame": 0.19999999999997603,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 30.826666666662973,
+        "totalCashOuts": 9980.999999999975,
+        "cashOutCount": 4513
+      },
+      "newPlayers": 102
+    },
+    {
+      "day": 4,
+      "playerStatistics": {
+        "totalPlayers": 2399,
+        "activePlayers": 711,
+        "retiredPlayers": 1688,
+        "completedRunsPlayers": 11989,
+        "totalCharityContributions": 1580.5799999999292,
+        "totalPlayerPayouts": 8956.619999999932,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.05585660691955,
+        "playerRetirementRate": 0.7036265110462693
+      },
+      "gameStatistics": {
+        "totalGames": 14528,
+        "averageGamesPerDay": 161.42222222222222,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 11995,
+        "totalRunsCreated": 11995,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 2421.3333333333335
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 2905.5999999995483,
+        "totalCharityContributions": 1580.5799999999292,
+        "totalPlayerPayouts": 8956.619999999932,
+        "revenuePerGame": 0.19999999999996892,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 32.28444444443942,
+        "totalCashOuts": 10537.199999999844,
+        "cashOutCount": 4725
+      },
+      "newPlayers": 108
+    },
+    {
+      "day": 5,
+      "playerStatistics": {
+        "totalPlayers": 2512,
+        "activePlayers": 745,
+        "retiredPlayers": 1767,
+        "completedRunsPlayers": 12556,
+        "totalCharityContributions": 1655.9099999999248,
+        "totalPlayerPayouts": 9383.490000000056,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.05812101910828,
+        "playerRetirementRate": 0.7034235668789809
+      },
+      "gameStatistics": {
+        "totalGames": 15218,
+        "averageGamesPerDay": 169.0888888888889,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 12560,
+        "totalRunsCreated": 12560,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 3804.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 3043.599999999423,
+        "totalCharityContributions": 1655.9099999999248,
+        "totalPlayerPayouts": 9383.490000000056,
+        "revenuePerGame": 0.19999999999996207,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 33.81777777777136,
+        "totalCashOuts": 11039.399999999707,
+        "cashOutCount": 4947
+      },
+      "newPlayers": 113
+    },
+    {
+      "day": 6,
+      "playerStatistics": {
+        "totalPlayers": 2631,
+        "activePlayers": 780,
+        "retiredPlayers": 1851,
+        "completedRunsPlayers": 13149,
+        "totalCharityContributions": 1729.6199999999203,
+        "totalPlayerPayouts": 9801.180000000186,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.0570125427594075,
+        "playerRetirementRate": 0.7035347776510832
+      },
+      "gameStatistics": {
+        "totalGames": 15936,
+        "averageGamesPerDay": 177.06666666666666,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 13155,
+        "totalRunsCreated": 13155,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 2656
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 3187.1999999992922,
+        "totalCharityContributions": 1729.6199999999203,
+        "totalPlayerPayouts": 9801.180000000186,
+        "revenuePerGame": 0.19999999999995557,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 35.41333333332547,
+        "totalCashOuts": 11530.79999999956,
+        "cashOutCount": 5181
+      },
+      "newPlayers": 119
+    },
+    {
+      "day": 7,
+      "playerStatistics": {
+        "totalPlayers": 2756,
+        "activePlayers": 817,
+        "retiredPlayers": 1939,
+        "completedRunsPlayers": 13775,
+        "totalCharityContributions": 1811.1599999999153,
+        "totalPlayerPayouts": 10263.240000000334,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.045718432510886,
+        "playerRetirementRate": 0.70355587808418
+      },
+      "gameStatistics": {
+        "totalGames": 16662,
+        "averageGamesPerDay": 185.13333333333333,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 13780,
+        "totalRunsCreated": 13780,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 3332.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 3332.39999999916,
+        "totalCharityContributions": 1811.1599999999153,
+        "totalPlayerPayouts": 10263.240000000334,
+        "revenuePerGame": 0.1999999999999496,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 37.026666666657334,
+        "totalCashOuts": 12074.399999999394,
+        "cashOutCount": 5444
+      },
+      "newPlayers": 125
+    },
+    {
+      "day": 8,
+      "playerStatistics": {
+        "totalPlayers": 2888,
+        "activePlayers": 856,
+        "retiredPlayers": 2032,
+        "completedRunsPlayers": 14436,
+        "totalCharityContributions": 1901.33999999991,
+        "totalPlayerPayouts": 10774.260000000471,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.050554016620499,
+        "playerRetirementRate": 0.703601108033241
+      },
+      "gameStatistics": {
+        "totalGames": 17474,
+        "averageGamesPerDay": 194.15555555555557,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 14440,
+        "totalRunsCreated": 14440,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 4368.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 3494.7999999990125,
+        "totalCharityContributions": 1901.33999999991,
+        "totalPlayerPayouts": 10774.260000000471,
+        "revenuePerGame": 0.19999999999994347,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 38.831111111100135,
+        "totalCashOuts": 12675.59999999924,
+        "cashOutCount": 5699
+      },
+      "newPlayers": 132
+    },
+    {
+      "day": 9,
+      "playerStatistics": {
+        "totalPlayers": 3026,
+        "activePlayers": 897,
+        "retiredPlayers": 2129,
+        "completedRunsPlayers": 15126,
+        "totalCharityContributions": 1996.6499999999048,
+        "totalPlayerPayouts": 11314.350000000635,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.044943820224719,
+        "playerRetirementRate": 0.7035690680766689
+      },
+      "gameStatistics": {
+        "totalGames": 18292,
+        "averageGamesPerDay": 203.24444444444444,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 15130,
+        "totalRunsCreated": 15130,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 4573
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 3658.3999999988637,
+        "totalCharityContributions": 1996.6499999999048,
+        "totalPlayerPayouts": 11314.350000000635,
+        "revenuePerGame": 0.19999999999993787,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 40.648888888876265,
+        "totalCashOuts": 13310.99999999906,
+        "cashOutCount": 5980
+      },
+      "newPlayers": 138
+    },
+    {
+      "day": 10,
+      "playerStatistics": {
+        "totalPlayers": 3171,
+        "activePlayers": 940,
+        "retiredPlayers": 2231,
+        "completedRunsPlayers": 15849,
+        "totalCharityContributions": 2086.559999999899,
+        "totalPlayerPayouts": 11823.840000000784,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.057395143487859,
+        "playerRetirementRate": 0.7035635446231473
+      },
+      "gameStatistics": {
+        "totalGames": 19208,
+        "averageGamesPerDay": 213.42222222222222,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 15855,
+        "totalRunsCreated": 15855,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 3201.3333333333335
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 3841.599999998697,
+        "totalCharityContributions": 2086.559999999899,
+        "totalPlayerPayouts": 11823.840000000784,
+        "revenuePerGame": 0.19999999999993218,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 42.684444444429964,
+        "totalCashOuts": 13910.399999998903,
+        "cashOutCount": 6245
+      },
+      "newPlayers": 145
+    },
+    {
+      "day": 11,
+      "playerStatistics": {
+        "totalPlayers": 3324,
+        "activePlayers": 986,
+        "retiredPlayers": 2338,
+        "completedRunsPlayers": 16615,
+        "totalCharityContributions": 2181.8699999998926,
+        "totalPlayerPayouts": 12363.93000000095,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.0619735258724425,
+        "playerRetirementRate": 0.7033694344163658
+      },
+      "gameStatistics": {
+        "totalGames": 20150,
+        "averageGamesPerDay": 223.88888888888889,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 16620,
+        "totalRunsCreated": 16620,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 4030
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 4029.9999999985257,
+        "totalCharityContributions": 2181.8699999998926,
+        "totalPlayerPayouts": 12363.93000000095,
+        "revenuePerGame": 0.19999999999992685,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 44.77777777776139,
+        "totalCashOuts": 14545.799999998717,
+        "cashOutCount": 6540
+      },
+      "newPlayers": 153
+    },
+    {
+      "day": 12,
+      "playerStatistics": {
+        "totalPlayers": 3485,
+        "activePlayers": 1033,
+        "retiredPlayers": 2452,
+        "completedRunsPlayers": 17417,
+        "totalCharityContributions": 2284.4699999998857,
+        "totalPlayerPayouts": 12945.330000001122,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.061979913916786,
+        "playerRetirementRate": 0.7035868005738881
+      },
+      "gameStatistics": {
+        "totalGames": 21126,
+        "averageGamesPerDay": 234.73333333333332,
+        "pooledVirtualDollars": 8,
+        "totalVirtualDollars": 17425,
+        "totalRunsCreated": 17425,
+        "completedRuns": 0,
+        "activeRuns": 8,
+        "jackpotsWon": 0,
+        "averageRunLength": 2640.75
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 4225.199999998348,
+        "totalCharityContributions": 2284.4699999998857,
+        "totalPlayerPayouts": 12945.330000001122,
+        "revenuePerGame": 0.19999999999992182,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 46.94666666664831,
+        "totalCashOuts": 15229.799999998524,
+        "cashOutCount": 6854
+      },
+      "newPlayers": 161
+    },
+    {
+      "day": 13,
+      "playerStatistics": {
+        "totalPlayers": 3654,
+        "activePlayers": 1084,
+        "retiredPlayers": 2570,
+        "completedRunsPlayers": 18264,
+        "totalCharityContributions": 2400.8399999998783,
+        "totalPlayerPayouts": 13604.760000001308,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.058565955117679,
+        "playerRetirementRate": 0.7033388067870826
+      },
+      "gameStatistics": {
+        "totalGames": 22138,
+        "averageGamesPerDay": 245.9777777777778,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 18270,
+        "totalRunsCreated": 18270,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 3689.6666666666665
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 4427.599999998164,
+        "totalCharityContributions": 2400.8399999998783,
+        "totalPlayerPayouts": 13604.760000001308,
+        "revenuePerGame": 0.19999999999991708,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 49.19555555553516,
+        "totalCashOuts": 16005.599999998318,
+        "cashOutCount": 7195
+      },
+      "newPlayers": 169
+    },
+    {
+      "day": 14,
+      "playerStatistics": {
+        "totalPlayers": 3831,
+        "activePlayers": 1136,
+        "retiredPlayers": 2695,
+        "completedRunsPlayers": 19153,
+        "totalCharityContributions": 2583.6299999998705,
+        "totalPlayerPayouts": 14640.570000001497,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.058992430174889,
+        "playerRetirementRate": 0.703471678412947
+      },
+      "gameStatistics": {
+        "totalGames": 23212,
+        "averageGamesPerDay": 257.9111111111111,
+        "pooledVirtualDollars": 2,
+        "totalVirtualDollars": 19155,
+        "totalRunsCreated": 19155,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 11606
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 4642.399999997969,
+        "totalCharityContributions": 2583.6299999998705,
+        "totalPlayerPayouts": 14640.570000001497,
+        "revenuePerGame": 0.1999999999999125,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 51.582222222199654,
+        "totalCashOuts": 17224.19999999808,
+        "cashOutCount": 7547
+      },
+      "newPlayers": 177
+    },
+    {
+      "day": 15,
+      "playerStatistics": {
+        "totalPlayers": 4017,
+        "activePlayers": 1191,
+        "retiredPlayers": 2826,
+        "completedRunsPlayers": 20079,
+        "totalCharityContributions": 2695.409999999863,
+        "totalPlayerPayouts": 15273.990000001686,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.066716455065969,
+        "playerRetirementRate": 0.7035100821508589
+      },
+      "gameStatistics": {
+        "totalGames": 24370,
+        "averageGamesPerDay": 270.77777777777777,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 20085,
+        "totalRunsCreated": 20085,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 4061.6666666666665
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 4873.999999997758,
+        "totalCharityContributions": 2695.409999999863,
+        "totalPlayerPayouts": 15273.990000001686,
+        "revenuePerGame": 0.199999999999908,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 54.15555555553065,
+        "totalCashOuts": 17969.39999999782,
+        "cashOutCount": 7894
+      },
+      "newPlayers": 186
+    },
+    {
+      "day": 16,
+      "playerStatistics": {
+        "totalPlayers": 4213,
+        "activePlayers": 1249,
+        "retiredPlayers": 2964,
+        "completedRunsPlayers": 21060,
+        "totalCharityContributions": 2819.3399999998546,
+        "totalPlayerPayouts": 15976.260000001905,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.065036790885355,
+        "playerRetirementRate": 0.7035366722050795
+      },
+      "gameStatistics": {
+        "totalGames": 25552,
+        "averageGamesPerDay": 283.9111111111111,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 21065,
+        "totalRunsCreated": 21065,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 5110.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 5110.399999997543,
+        "totalCharityContributions": 2819.3399999998546,
+        "totalPlayerPayouts": 15976.260000001905,
+        "revenuePerGame": 0.19999999999990384,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 56.782222222194925,
+        "totalCashOuts": 18795.59999999753,
+        "cashOutCount": 8284
+      },
+      "newPlayers": 196
+    },
+    {
+      "day": 17,
+      "playerStatistics": {
+        "totalPlayers": 4419,
+        "activePlayers": 1310,
+        "retiredPlayers": 3109,
+        "completedRunsPlayers": 22090,
+        "totalCharityContributions": 2951.909999999846,
+        "totalPlayerPayouts": 16727.49000000185,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.070151618013125,
+        "playerRetirementRate": 0.7035528400090518
+      },
+      "gameStatistics": {
+        "totalGames": 26824,
+        "averageGamesPerDay": 298.0444444444444,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 22095,
+        "totalRunsCreated": 22095,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 5364.8
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 5364.799999997312,
+        "totalCharityContributions": 2951.909999999846,
+        "totalPlayerPayouts": 16727.49000000185,
+        "revenuePerGame": 0.19999999999989979,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 59.60888888885902,
+        "totalCashOuts": 19679.399999997237,
+        "cashOutCount": 8678
+      },
+      "newPlayers": 206
+    },
+    {
+      "day": 18,
+      "playerStatistics": {
+        "totalPlayers": 4635,
+        "activePlayers": 1375,
+        "retiredPlayers": 3260,
+        "completedRunsPlayers": 23169,
+        "totalCharityContributions": 3104.999999999837,
+        "totalPlayerPayouts": 17595.000000001444,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.072491909385113,
+        "playerRetirementRate": 0.703344120819849
+      },
+      "gameStatistics": {
+        "totalGames": 28146,
+        "averageGamesPerDay": 312.73333333333335,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 23175,
+        "totalRunsCreated": 23175,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 4691
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 5629.199999997071,
+        "totalCharityContributions": 3104.999999999837,
+        "totalPlayerPayouts": 17595.000000001444,
+        "revenuePerGame": 0.19999999999989596,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 62.546666666634124,
+        "totalCashOuts": 20699.999999996937,
+        "cashOutCount": 9096
+      },
+      "newPlayers": 216
+    },
+    {
+      "day": 19,
+      "playerStatistics": {
+        "totalPlayers": 4862,
+        "activePlayers": 1442,
+        "retiredPlayers": 3420,
+        "completedRunsPlayers": 24307,
+        "totalCharityContributions": 3244.589999999828,
+        "totalPlayerPayouts": 18386.010000001,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.066227889757301,
+        "playerRetirementRate": 0.7034142328259976
+      },
+      "gameStatistics": {
+        "totalGames": 29494,
+        "averageGamesPerDay": 327.7111111111111,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 24310,
+        "totalRunsCreated": 24310,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 9831.333333333334
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 5898.799999996826,
+        "totalCharityContributions": 3244.589999999828,
+        "totalPlayerPayouts": 18386.010000001,
+        "revenuePerGame": 0.19999999999989237,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 65.54222222218695,
+        "totalCashOuts": 21630.59999999658,
+        "cashOutCount": 9560
+      },
+      "newPlayers": 227
+    },
+    {
+      "day": 20,
+      "playerStatistics": {
+        "totalPlayers": 5100,
+        "activePlayers": 1513,
+        "retiredPlayers": 3587,
+        "completedRunsPlayers": 25494,
+        "totalCharityContributions": 3384.4499999998184,
+        "totalPlayerPayouts": 19178.550000000607,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.08,
+        "playerRetirementRate": 0.7033333333333334
+      },
+      "gameStatistics": {
+        "totalGames": 31008,
+        "averageGamesPerDay": 344.53333333333336,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 25500,
+        "totalRunsCreated": 25500,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 5168
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 6201.599999996551,
+        "totalCharityContributions": 3384.4499999998184,
+        "totalPlayerPayouts": 19178.550000000607,
+        "revenuePerGame": 0.19999999999988877,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 68.90666666662834,
+        "totalCashOuts": 22562.999999996257,
+        "cashOutCount": 9990
+      },
+      "newPlayers": 238
+    },
+    {
+      "day": 21,
+      "playerStatistics": {
+        "totalPlayers": 5350,
+        "activePlayers": 1587,
+        "retiredPlayers": 3763,
+        "completedRunsPlayers": 26750,
+        "totalCharityContributions": 3542.1299999998078,
+        "totalPlayerPayouts": 20072.07000000013,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.0811214953271024,
+        "playerRetirementRate": 0.7033644859813084
+      },
+      "gameStatistics": {
+        "totalGames": 32534,
+        "averageGamesPerDay": 361.4888888888889,
+        "pooledVirtualDollars": 0,
+        "totalVirtualDollars": 26750,
+        "totalRunsCreated": 26750,
+        "completedRuns": 0,
+        "activeRuns": 0,
+        "jackpotsWon": 0,
+        "averageRunLength": 32534
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 6506.799999996273,
+        "totalCharityContributions": 3542.1299999998078,
+        "totalPlayerPayouts": 20072.07000000013,
+        "revenuePerGame": 0.19999999999988544,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 72.29777777773637,
+        "totalCashOuts": 23614.199999995897,
+        "cashOutCount": 10482
+      },
+      "newPlayers": 250
+    },
+    {
+      "day": 22,
+      "playerStatistics": {
+        "totalPlayers": 5613,
+        "activePlayers": 1665,
+        "retiredPlayers": 3948,
+        "completedRunsPlayers": 28060,
+        "totalCharityContributions": 3713.3099999997967,
+        "totalPlayerPayouts": 21042.089999999618,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.075538927489756,
+        "playerRetirementRate": 0.7033671833244255
+      },
+      "gameStatistics": {
+        "totalGames": 34102,
+        "averageGamesPerDay": 378.9111111111111,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 28065,
+        "totalRunsCreated": 28065,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 6820.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 6820.399999995988,
+        "totalCharityContributions": 3713.3099999997967,
+        "totalPlayerPayouts": 21042.089999999618,
+        "revenuePerGame": 0.19999999999988236,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 75.78222222217764,
+        "totalCashOuts": 24755.399999995512,
+        "cashOutCount": 11008
+      },
+      "newPlayers": 263
+    },
+    {
+      "day": 23,
+      "playerStatistics": {
+        "totalPlayers": 5889,
+        "activePlayers": 1747,
+        "retiredPlayers": 4142,
+        "completedRunsPlayers": 29441,
+        "totalCharityContributions": 3898.259999999785,
+        "totalPlayerPayouts": 22090.139999999086,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.070640176600442,
+        "playerRetirementRate": 0.7033452199015113
+      },
+      "gameStatistics": {
+        "totalGames": 35750,
+        "averageGamesPerDay": 397.22222222222223,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 29445,
+        "totalRunsCreated": 29445,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 8937.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 7149.999999995688,
+        "totalCharityContributions": 3898.259999999785,
+        "totalPlayerPayouts": 22090.139999999086,
+        "revenuePerGame": 0.19999999999987939,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 79.44444444439654,
+        "totalCashOuts": 25988.39999999509,
+        "cashOutCount": 11565
+      },
+      "newPlayers": 276
+    },
+    {
+      "day": 24,
+      "playerStatistics": {
+        "totalPlayers": 6178,
+        "activePlayers": 1832,
+        "retiredPlayers": 4346,
+        "completedRunsPlayers": 30885,
+        "totalCharityContributions": 4079.699999999773,
+        "totalPlayerPayouts": 23118.299999998537,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.067011977986404,
+        "playerRetirementRate": 0.7034639041761088
+      },
+      "gameStatistics": {
+        "totalGames": 37482,
+        "averageGamesPerDay": 416.46666666666664,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 30890,
+        "totalRunsCreated": 30890,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 7496.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 7496.399999995373,
+        "totalCharityContributions": 4079.699999999773,
+        "totalPlayerPayouts": 23118.299999998537,
+        "revenuePerGame": 0.19999999999987655,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 83.29333333328192,
+        "totalCashOuts": 27197.999999994656,
+        "cashOutCount": 12143
+      },
+      "newPlayers": 289
+    },
+    {
+      "day": 25,
+      "playerStatistics": {
+        "totalPlayers": 6482,
+        "activePlayers": 1922,
+        "retiredPlayers": 4560,
+        "completedRunsPlayers": 32407,
+        "totalCharityContributions": 4275.9899999999825,
+        "totalPlayerPayouts": 24230.60999999797,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.067571737118174,
+        "playerRetirementRate": 0.7034865782165998
+      },
+      "gameStatistics": {
+        "totalGames": 39330,
+        "averageGamesPerDay": 437,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 32410,
+        "totalRunsCreated": 32410,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 13110
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 7865.999999995037,
+        "totalCharityContributions": 4275.9899999999825,
+        "totalPlayerPayouts": 24230.60999999797,
+        "revenuePerGame": 0.1999999999998738,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 87.39999999994485,
+        "totalCashOuts": 28506.599999994207,
+        "cashOutCount": 12741
+      },
+      "newPlayers": 304
+    },
+    {
+      "day": 26,
+      "playerStatistics": {
+        "totalPlayers": 6801,
+        "activePlayers": 2017,
+        "retiredPlayers": 4784,
+        "completedRunsPlayers": 34002,
+        "totalCharityContributions": 4478.220000000224,
+        "totalPlayerPayouts": 25376.579999997386,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.067343037788561,
+        "playerRetirementRate": 0.7034259667695927
+      },
+      "gameStatistics": {
+        "totalGames": 41264,
+        "averageGamesPerDay": 458.4888888888889,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 34005,
+        "totalRunsCreated": 34005,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 13754.666666666666
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 8252.79999999496,
+        "totalCharityContributions": 4478.220000000224,
+        "totalPlayerPayouts": 25376.579999997386,
+        "revenuePerGame": 0.1999999999998779,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 91.69777777772178,
+        "totalCashOuts": 29854.79999999373,
+        "cashOutCount": 13369
+      },
+      "newPlayers": 319
+    },
+    {
+      "day": 27,
+      "playerStatistics": {
+        "totalPlayers": 7135,
+        "activePlayers": 2116,
+        "retiredPlayers": 5019,
+        "completedRunsPlayers": 35670,
+        "totalCharityContributions": 4685.850000000475,
+        "totalPlayerPayouts": 26553.14999999676,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.068955851436581,
+        "playerRetirementRate": 0.7034337771548703
+      },
+      "gameStatistics": {
+        "totalGames": 43302,
+        "averageGamesPerDay": 481.1333333333333,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 35675,
+        "totalRunsCreated": 35675,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 8660.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 8660.399999996444,
+        "totalCharityContributions": 4685.850000000475,
+        "totalPlayerPayouts": 26553.14999999676,
+        "revenuePerGame": 0.19999999999991785,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 96.22666666662715,
+        "totalCashOuts": 31238.999999993248,
+        "cashOutCount": 14018
+      },
+      "newPlayers": 334
+    },
+    {
+      "day": 28,
+      "playerStatistics": {
+        "totalPlayers": 7486,
+        "activePlayers": 2220,
+        "retiredPlayers": 5266,
+        "completedRunsPlayers": 37426,
+        "totalCharityContributions": 4900.230000000728,
+        "totalPlayerPayouts": 27767.96999999614,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.076409297355063,
+        "playerRetirementRate": 0.7034464333422389
+      },
+      "gameStatistics": {
+        "totalGames": 45488,
+        "averageGamesPerDay": 505.4222222222222,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 37430,
+        "totalRunsCreated": 37430,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 11372
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 9097.599999998034,
+        "totalCharityContributions": 4900.230000000728,
+        "totalPlayerPayouts": 27767.96999999614,
+        "revenuePerGame": 0.19999999999995677,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 101.0844444444226,
+        "totalCashOuts": 32668.199999992758,
+        "cashOutCount": 14680
+      },
+      "newPlayers": 351
+    },
+    {
+      "day": 29,
+      "playerStatistics": {
+        "totalPlayers": 7854,
+        "activePlayers": 2330,
+        "retiredPlayers": 5524,
+        "completedRunsPlayers": 39265,
+        "totalCharityContributions": 5130.270000000994,
+        "totalPlayerPayouts": 29071.529999995502,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.080468551056787,
+        "playerRetirementRate": 0.7033358798064681
+      },
+      "gameStatistics": {
+        "totalGames": 47756,
+        "averageGamesPerDay": 530.6222222222223,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 39270,
+        "totalRunsCreated": 39270,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 9551.2
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 9551.199999999684,
+        "totalCharityContributions": 5130.270000000994,
+        "totalPlayerPayouts": 29071.529999995502,
+        "revenuePerGame": 0.19999999999999338,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 106.12444444444094,
+        "totalCashOuts": 34201.79999999427,
+        "cashOutCount": 15385
+      },
+      "newPlayers": 368
+    },
+    {
+      "day": 30,
+      "playerStatistics": {
+        "totalPlayers": 8240,
+        "activePlayers": 2444,
+        "retiredPlayers": 5796,
+        "completedRunsPlayers": 41196,
+        "totalCharityContributions": 5375.970000001299,
+        "totalPlayerPayouts": 30463.829999994756,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.0745145631067965,
+        "playerRetirementRate": 0.7033980582524272
+      },
+      "gameStatistics": {
+        "totalGames": 50054,
+        "averageGamesPerDay": 556.1555555555556,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 41200,
+        "totalRunsCreated": 41200,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 12513.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 10010.800000001356,
+        "totalCharityContributions": 5375.970000001299,
+        "totalPlayerPayouts": 30463.829999994756,
+        "revenuePerGame": 0.2000000000000271,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 111.23111111112618,
+        "totalCashOuts": 35839.79999999623,
+        "cashOutCount": 16167
+      },
+      "newPlayers": 386
+    },
+    {
+      "day": 31,
+      "playerStatistics": {
+        "totalPlayers": 8645,
+        "activePlayers": 2564,
+        "retiredPlayers": 6081,
+        "completedRunsPlayers": 43221,
+        "totalCharityContributions": 5651.640000001597,
+        "totalPlayerPayouts": 32025.959999994044,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.0747252747252745,
+        "playerRetirementRate": 0.7034123770965877
+      },
+      "gameStatistics": {
+        "totalGames": 52516,
+        "averageGamesPerDay": 583.5111111111111,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 43225,
+        "totalRunsCreated": 43225,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 13129
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 10503.200000003148,
+        "totalCharityContributions": 5651.640000001597,
+        "totalPlayerPayouts": 32025.959999994044,
+        "revenuePerGame": 0.20000000000005994,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 116.70222222225719,
+        "totalCashOuts": 37677.59999999809,
+        "cashOutCount": 16961
+      },
+      "newPlayers": 405
+    },
+    {
+      "day": 32,
+      "playerStatistics": {
+        "totalPlayers": 9069,
+        "activePlayers": 2690,
+        "retiredPlayers": 6379,
+        "completedRunsPlayers": 45340,
+        "totalCharityContributions": 5937.30000000193,
+        "totalPlayerPayouts": 33644.69999999311,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.068144227588488,
+        "playerRetirementRate": 0.7033851582313375
+      },
+      "gameStatistics": {
+        "totalGames": 55032,
+        "averageGamesPerDay": 611.4666666666667,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 45345,
+        "totalRunsCreated": 45345,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 11006.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 11006.400000004978,
+        "totalCharityContributions": 5937.30000000193,
+        "totalPlayerPayouts": 33644.69999999311,
+        "revenuePerGame": 0.20000000000009047,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 122.29333333338865,
+        "totalCashOuts": 39582.0000000002,
+        "cashOutCount": 17822
+      },
+      "newPlayers": 424
+    },
+    {
+      "day": 33,
+      "playerStatistics": {
+        "totalPlayers": 9514,
+        "activePlayers": 2822,
+        "retiredPlayers": 6692,
+        "completedRunsPlayers": 47565,
+        "totalCharityContributions": 6218.640000002258,
+        "totalPlayerPayouts": 35238.95999999208,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.07168383434938,
+        "playerRetirementRate": 0.7033844860206012
+      },
+      "gameStatistics": {
+        "totalGames": 57766,
+        "averageGamesPerDay": 641.8444444444444,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 47570,
+        "totalRunsCreated": 47570,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 11553.2
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 11553.200000006967,
+        "totalCharityContributions": 6218.640000002258,
+        "totalPlayerPayouts": 35238.95999999208,
+        "revenuePerGame": 0.2000000000001206,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 128.3688888889663,
+        "totalCashOuts": 41457.600000002276,
+        "cashOutCount": 18680
+      },
+      "newPlayers": 445
+    },
+    {
+      "day": 34,
+      "playerStatistics": {
+        "totalPlayers": 9980,
+        "activePlayers": 2960,
+        "retiredPlayers": 7020,
+        "completedRunsPlayers": 49896,
+        "totalCharityContributions": 6501.87000000261,
+        "totalPlayerPayouts": 36843.92999999106,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.076352705410821,
+        "playerRetirementRate": 0.7034068136272545
+      },
+      "gameStatistics": {
+        "totalGames": 60642,
+        "averageGamesPerDay": 673.8,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 49900,
+        "totalRunsCreated": 49900,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 15160.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 12128.40000000906,
+        "totalCharityContributions": 6501.87000000261,
+        "totalPlayerPayouts": 36843.92999999106,
+        "revenuePerGame": 0.2000000000001494,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 134.76000000010066,
+        "totalCashOuts": 43345.800000004536,
+        "cashOutCount": 19572
+      },
+      "newPlayers": 466
+    },
+    {
+      "day": 35,
+      "playerStatistics": {
+        "totalPlayers": 10469,
+        "activePlayers": 3105,
+        "retiredPlayers": 7364,
+        "completedRunsPlayers": 52340,
+        "totalCharityContributions": 6845.310000002978,
+        "totalPlayerPayouts": 38790.089999989934,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.079090648581526,
+        "playerRetirementRate": 0.703410067819276
+      },
+      "gameStatistics": {
+        "totalGames": 63642,
+        "averageGamesPerDay": 707.1333333333333,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 52345,
+        "totalRunsCreated": 52345,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 12728.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 12728.400000011243,
+        "totalCharityContributions": 6845.310000002978,
+        "totalPlayerPayouts": 38790.089999989934,
+        "revenuePerGame": 0.20000000000017665,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 141.4266666667916,
+        "totalCashOuts": 45635.400000006885,
+        "cashOutCount": 20516
+      },
+      "newPlayers": 489
+    },
+    {
+      "day": 36,
+      "playerStatistics": {
+        "totalPlayers": 10981,
+        "activePlayers": 3257,
+        "retiredPlayers": 7724,
+        "completedRunsPlayers": 54900,
+        "totalCharityContributions": 7164.180000003352,
+        "totalPlayerPayouts": 40597.01999998881,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.084873873053456,
+        "playerRetirementRate": 0.7033967762498862
+      },
+      "gameStatistics": {
+        "totalGames": 66818,
+        "averageGamesPerDay": 742.4222222222222,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 54905,
+        "totalRunsCreated": 54905,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 13363.6
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 13363.600000013554,
+        "totalCharityContributions": 7164.180000003352,
+        "totalPlayerPayouts": 40597.01999998881,
+        "revenuePerGame": 0.20000000000020285,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 148.48444444459503,
+        "totalCashOuts": 47761.20000000923,
+        "cashOutCount": 21488
+      },
+      "newPlayers": 512
+    },
+    {
+      "day": 37,
+      "playerStatistics": {
+        "totalPlayers": 11518,
+        "activePlayers": 3417,
+        "retiredPlayers": 8101,
+        "completedRunsPlayers": 57586,
+        "totalCharityContributions": 7506.540000003753,
+        "totalPlayerPayouts": 42537.059999987556,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.085431498524049,
+        "playerRetirementRate": 0.7033339121375238
+      },
+      "gameStatistics": {
+        "totalGames": 70092,
+        "averageGamesPerDay": 778.8,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 57590,
+        "totalRunsCreated": 57590,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 17523
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 14018.400000015936,
+        "totalCharityContributions": 7506.540000003753,
+        "totalPlayerPayouts": 42537.059999987556,
+        "revenuePerGame": 0.20000000000022736,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 155.76000000017706,
+        "totalCashOuts": 50043.60000001176,
+        "cashOutCount": 22537
+      },
+      "newPlayers": 537
+    },
+    {
+      "day": 38,
+      "playerStatistics": {
+        "totalPlayers": 12080,
+        "activePlayers": 3583,
+        "retiredPlayers": 8497,
+        "completedRunsPlayers": 60394,
+        "totalCharityContributions": 7888.590000004163,
+        "totalPlayerPayouts": 44702.009999986265,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.090562913907284,
+        "playerRetirementRate": 0.7033940397350993
+      },
+      "gameStatistics": {
+        "totalGames": 73574,
+        "averageGamesPerDay": 817.4888888888889,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 60400,
+        "totalRunsCreated": 60400,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 12262.333333333334
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 14714.80000001847,
+        "totalCharityContributions": 7888.590000004163,
+        "totalPlayerPayouts": 44702.009999986265,
+        "revenuePerGame": 0.20000000000025103,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 163.497777777983,
+        "totalCashOuts": 52590.600000014376,
+        "cashOutCount": 23604
+      },
+      "newPlayers": 562
+    },
+    {
+      "day": 39,
+      "playerStatistics": {
+        "totalPlayers": 12669,
+        "activePlayers": 3758,
+        "retiredPlayers": 8911,
+        "completedRunsPlayers": 63340,
+        "totalCharityContributions": 8263.350000004622,
+        "totalPlayerPayouts": 46825.64999998486,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.091404215013024,
+        "playerRetirementRate": 0.7033704317625701
+      },
+      "gameStatistics": {
+        "totalGames": 77172,
+        "averageGamesPerDay": 857.4666666666667,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 63345,
+        "totalRunsCreated": 63345,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 15434.4
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 15434.400000021087,
+        "totalCharityContributions": 8263.350000004622,
+        "totalPlayerPayouts": 46825.64999998486,
+        "revenuePerGame": 0.20000000000027324,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 171.49333333356765,
+        "totalCashOuts": 55089.00000001716,
+        "cashOutCount": 24750
+      },
+      "newPlayers": 589
+    },
+    {
+      "day": 40,
+      "playerStatistics": {
+        "totalPlayers": 13285,
+        "activePlayers": 3941,
+        "retiredPlayers": 9344,
+        "completedRunsPlayers": 66421,
+        "totalCharityContributions": 8668.89000000519,
+        "totalPlayerPayouts": 49123.70999998338,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.086262702295822,
+        "playerRetirementRate": 0.7033496424538954
+      },
+      "gameStatistics": {
+        "totalGames": 80856,
+        "averageGamesPerDay": 898.4,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 66425,
+        "totalRunsCreated": 66425,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 20214
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 16171.200000023768,
+        "totalCharityContributions": 8668.89000000519,
+        "totalPlayerPayouts": 49123.70999998338,
+        "revenuePerGame": 0.20000000000029394,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 179.68000000026407,
+        "totalCashOuts": 57792.60000002022,
+        "cashOutCount": 25989
+      },
+      "newPlayers": 616
+    },
+    {
+      "day": 41,
+      "playerStatistics": {
+        "totalPlayers": 13930,
+        "activePlayers": 4132,
+        "retiredPlayers": 9798,
+        "completedRunsPlayers": 69648,
+        "totalCharityContributions": 9100.350000005777,
+        "totalPlayerPayouts": 51568.64999998183,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.085642498205313,
+        "playerRetirementRate": 0.7033740129217516
+      },
+      "gameStatistics": {
+        "totalGames": 84773,
+        "averageGamesPerDay": 941.9222222222222,
+        "pooledVirtualDollars": 2,
+        "totalVirtualDollars": 69650,
+        "totalRunsCreated": 69650,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 42386.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 16954.600000026618,
+        "totalCharityContributions": 9100.350000005777,
+        "totalPlayerPayouts": 51568.64999998183,
+        "revenuePerGame": 0.20000000000031398,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 188.38444444474018,
+        "totalCashOuts": 60669.00000002336,
+        "cashOutCount": 27257
+      },
+      "newPlayers": 645
+    },
+    {
+      "day": 42,
+      "playerStatistics": {
+        "totalPlayers": 14605,
+        "activePlayers": 4332,
+        "retiredPlayers": 10273,
+        "completedRunsPlayers": 73019,
+        "totalCharityContributions": 9519.930000006376,
+        "totalPlayerPayouts": 53946.269999980264,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.087983567271483,
+        "playerRetirementRate": 0.7033892502567614
+      },
+      "gameStatistics": {
+        "totalGames": 88915,
+        "averageGamesPerDay": 987.9444444444445,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 73025,
+        "totalRunsCreated": 73025,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 14819.166666666666
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 17783.00000002963,
+        "totalCharityContributions": 9519.930000006376,
+        "totalPlayerPayouts": 53946.269999980264,
+        "revenuePerGame": 0.20000000000033324,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 197.58888888921814,
+        "totalCashOuts": 63466.20000002658,
+        "cashOutCount": 28557
+      },
+      "newPlayers": 675
+    },
+    {
+      "day": 43,
+      "playerStatistics": {
+        "totalPlayers": 15311,
+        "activePlayers": 4542,
+        "retiredPlayers": 10769,
+        "completedRunsPlayers": 76550,
+        "totalCharityContributions": 10034.280000007013,
+        "totalPlayerPayouts": 56860.91999997861,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.086800339625106,
+        "playerRetirementRate": 0.7033505322970414
+      },
+      "gameStatistics": {
+        "totalGames": 93195,
+        "averageGamesPerDay": 1035.5,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 76555,
+        "totalRunsCreated": 76555,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 18639
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 18639.000000032745,
+        "totalCharityContributions": 10034.280000007013,
+        "totalPlayerPayouts": 56860.91999997861,
+        "revenuePerGame": 0.20000000000035137,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 207.10000000036385,
+        "totalCashOuts": 66895.20000003035,
+        "cashOutCount": 29948
+      },
+      "newPlayers": 706
+    },
+    {
+      "day": 44,
+      "playerStatistics": {
+        "totalPlayers": 16050,
+        "activePlayers": 4761,
+        "retiredPlayers": 11289,
+        "completedRunsPlayers": 80244,
+        "totalCharityContributions": 10506.780000007666,
+        "totalPlayerPayouts": 59538.41999997693,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.088286604361371,
+        "playerRetirementRate": 0.7033644859813084
+      },
+      "gameStatistics": {
+        "totalGames": 97717,
+        "averageGamesPerDay": 1085.7444444444445,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 80250,
+        "totalRunsCreated": 80250,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 16286.166666666666
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 19543.400000036036,
+        "totalCharityContributions": 10506.780000007666,
+        "totalPlayerPayouts": 59538.41999997693,
+        "revenuePerGame": 0.20000000000036877,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 217.14888888928928,
+        "totalCashOuts": 70045.20000003462,
+        "cashOutCount": 31381
+      },
+      "newPlayers": 739
+    },
+    {
+      "day": 45,
+      "playerStatistics": {
+        "totalPlayers": 16823,
+        "activePlayers": 4990,
+        "retiredPlayers": 11833,
+        "completedRunsPlayers": 84110,
+        "totalCharityContributions": 11017.350000008368,
+        "totalPlayerPayouts": 62431.649999975125,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.086250965939487,
+        "playerRetirementRate": 0.7033822742673721
+      },
+      "gameStatistics": {
+        "totalGames": 102389,
+        "averageGamesPerDay": 1137.6555555555556,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 84115,
+        "totalRunsCreated": 84115,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 20477.8
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 20477.800000039435,
+        "totalCharityContributions": 11017.350000008368,
+        "totalPlayerPayouts": 62431.649999975125,
+        "revenuePerGame": 0.20000000000038515,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 227.53111111154928,
+        "totalCashOuts": 73449.00000003922,
+        "cashOutCount": 32911
+      },
+      "newPlayers": 773
+    },
+    {
+      "day": 46,
+      "playerStatistics": {
+        "totalPlayers": 17631,
+        "activePlayers": 5230,
+        "retiredPlayers": 12401,
+        "completedRunsPlayers": 88152,
+        "totalCharityContributions": 11551.950000009074,
+        "totalPlayerPayouts": 65461.04999997332,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.091826895808519,
+        "playerRetirementRate": 0.7033633940218933
+      },
+      "gameStatistics": {
+        "totalGames": 107405,
+        "averageGamesPerDay": 1193.388888888889,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 88155,
+        "totalRunsCreated": 88155,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 35801.666666666664
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 21481.000000043085,
+        "totalCharityContributions": 11551.950000009074,
+        "totalPlayerPayouts": 65461.04999997332,
+        "revenuePerGame": 0.20000000000040113,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 238.67777777825648,
+        "totalCashOuts": 77013.00000004382,
+        "cashOutCount": 34444
+      },
+      "newPlayers": 808
+    },
+    {
+      "day": 47,
+      "playerStatistics": {
+        "totalPlayers": 18476,
+        "activePlayers": 5481,
+        "retiredPlayers": 12995,
+        "completedRunsPlayers": 92375,
+        "totalCharityContributions": 12109.230000009835,
+        "totalPlayerPayouts": 68618.96999997117,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.093039618965144,
+        "playerRetirementRate": 0.7033448798441221
+      },
+      "gameStatistics": {
+        "totalGames": 112575,
+        "averageGamesPerDay": 1250.8333333333333,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 92380,
+        "totalRunsCreated": 92380,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 22515
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 22515.000000046846,
+        "totalCharityContributions": 12109.230000009835,
+        "totalPlayerPayouts": 68618.96999997117,
+        "revenuePerGame": 0.20000000000041612,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 250.16666666718717,
+        "totalCashOuts": 80728.20000004885,
+        "cashOutCount": 36082
+      },
+      "newPlayers": 845
+    },
+    {
+      "day": 48,
+      "playerStatistics": {
+        "totalPlayers": 19359,
+        "activePlayers": 5743,
+        "retiredPlayers": 13616,
+        "completedRunsPlayers": 96790,
+        "totalCharityContributions": 12675.150000010637,
+        "totalPlayerPayouts": 71825.84999996892,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.091172064672762,
+        "playerRetirementRate": 0.7033421147786559
+      },
+      "gameStatistics": {
+        "totalGames": 117919,
+        "averageGamesPerDay": 1310.2111111111112,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 96795,
+        "totalRunsCreated": 96795,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 23583.8
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 23583.800000050735,
+        "totalCharityContributions": 12675.150000010637,
+        "totalPlayerPayouts": 71825.84999996892,
+        "revenuePerGame": 0.20000000000043025,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 262.04222222278594,
+        "totalCashOuts": 84501.0000000541,
+        "cashOutCount": 37825
+      },
+      "newPlayers": 883
+    },
+    {
+      "day": 49,
+      "playerStatistics": {
+        "totalPlayers": 20281,
+        "activePlayers": 6016,
+        "retiredPlayers": 14265,
+        "completedRunsPlayers": 101400,
+        "totalCharityContributions": 13282.920000011487,
+        "totalPlayerPayouts": 75269.87999996655,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.0846605196982395,
+        "playerRetirementRate": 0.7033676840392485
+      },
+      "gameStatistics": {
+        "totalGames": 123403,
+        "averageGamesPerDay": 1371.1444444444444,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 101405,
+        "totalRunsCreated": 101405,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 24680.6
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 24680.600000054725,
+        "totalCharityContributions": 13282.920000011487,
+        "totalPlayerPayouts": 75269.87999996655,
+        "revenuePerGame": 0.20000000000044346,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 274.22888888949694,
+        "totalCashOuts": 88552.8000000597,
+        "cashOutCount": 39693
+      },
+      "newPlayers": 922
+    },
+    {
+      "day": 50,
+      "playerStatistics": {
+        "totalPlayers": 21244,
+        "activePlayers": 6302,
+        "retiredPlayers": 14942,
+        "completedRunsPlayers": 106218,
+        "totalCharityContributions": 13907.160000012349,
+        "totalPlayerPayouts": 78807.23999996413,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.0855300320090375,
+        "playerRetirementRate": 0.703351534550932
+      },
+      "gameStatistics": {
+        "totalGames": 129281,
+        "averageGamesPerDay": 1436.4555555555555,
+        "pooledVirtualDollars": 2,
+        "totalVirtualDollars": 106220,
+        "totalRunsCreated": 106220,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 64640.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 25856.200000059,
+        "totalCharityContributions": 13907.160000012349,
+        "totalPlayerPayouts": 78807.23999996413,
+        "revenuePerGame": 0.20000000000045637,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 287.29111111176667,
+        "totalCashOuts": 92714.40000006536,
+        "cashOutCount": 41571
+      },
+      "newPlayers": 963
+    },
+    {
+      "day": 51,
+      "playerStatistics": {
+        "totalPlayers": 22250,
+        "activePlayers": 6600,
+        "retiredPlayers": 15650,
+        "completedRunsPlayers": 111248,
+        "totalCharityContributions": 14601.330000013239,
+        "totalPlayerPayouts": 82740.86999996167,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.087685393258427,
+        "playerRetirementRate": 0.7033707865168539
+      },
+      "gameStatistics": {
+        "totalGames": 135451,
+        "averageGamesPerDay": 1505.0111111111112,
+        "pooledVirtualDollars": 2,
+        "totalVirtualDollars": 111250,
+        "totalRunsCreated": 111250,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 67725.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 27090.20000006349,
+        "totalCharityContributions": 14601.330000013239,
+        "totalPlayerPayouts": 82740.86999996167,
+        "revenuePerGame": 0.20000000000046875,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 301.0022222229277,
+        "totalCashOuts": 97342.20000007116,
+        "cashOutCount": 43516
+      },
+      "newPlayers": 1006
+    },
+    {
+      "day": 52,
+      "playerStatistics": {
+        "totalPlayers": 23300,
+        "activePlayers": 6912,
+        "retiredPlayers": 16388,
+        "completedRunsPlayers": 116495,
+        "totalCharityContributions": 15287.670000014197,
+        "totalPlayerPayouts": 86630.12999995894,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.084163090128755,
+        "playerRetirementRate": 0.7033476394849786
+      },
+      "gameStatistics": {
+        "totalGames": 141761,
+        "averageGamesPerDay": 1575.1222222222223,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 116500,
+        "totalRunsCreated": 116500,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 28352.2
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 28352.200000068082,
+        "totalCharityContributions": 15287.670000014197,
+        "totalPlayerPayouts": 86630.12999995894,
+        "revenuePerGame": 0.20000000000048027,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 315.0244444452009,
+        "totalCashOuts": 101917.80000007746,
+        "cashOutCount": 45608
+      },
+      "newPlayers": 1050
+    },
+    {
+      "day": 53,
+      "playerStatistics": {
+        "totalPlayers": 24396,
+        "activePlayers": 7237,
+        "retiredPlayers": 17159,
+        "completedRunsPlayers": 121973,
+        "totalCharityContributions": 16001.010000015174,
+        "totalPlayerPayouts": 90672.38999995623,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.087104443351369,
+        "playerRetirementRate": 0.7033530086899492
+      },
+      "gameStatistics": {
+        "totalGames": 148501,
+        "averageGamesPerDay": 1650.0111111111112,
+        "pooledVirtualDollars": 7,
+        "totalVirtualDollars": 121980,
+        "totalRunsCreated": 121980,
+        "completedRuns": 0,
+        "activeRuns": 7,
+        "jackpotsWon": 0,
+        "averageRunLength": 21214.428571428572
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 29700.200000072986,
+        "totalCharityContributions": 16001.010000015174,
+        "totalPlayerPayouts": 90672.38999995623,
+        "revenuePerGame": 0.20000000000049148,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 330.0022222230332,
+        "totalCashOuts": 106673.40000008389,
+        "cashOutCount": 47716
+      },
+      "newPlayers": 1096
+    },
+    {
+      "day": 54,
+      "playerStatistics": {
+        "totalPlayers": 25539,
+        "activePlayers": 7576,
+        "retiredPlayers": 17963,
+        "completedRunsPlayers": 127691,
+        "totalCharityContributions": 16748.100000016213,
+        "totalPlayerPayouts": 94905.8999999534,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.088961979717295,
+        "playerRetirementRate": 0.7033556521398645
+      },
+      "gameStatistics": {
+        "totalGames": 155506,
+        "averageGamesPerDay": 1727.8444444444444,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 127695,
+        "totalRunsCreated": 127695,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 38876.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 31101.200000078083,
+        "totalCharityContributions": 16748.100000016213,
+        "totalPlayerPayouts": 94905.8999999534,
+        "revenuePerGame": 0.2000000000005021,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 345.56888888975647,
+        "totalCashOuts": 111654.00000009051,
+        "cashOutCount": 49930
+      },
+      "newPlayers": 1143
+    },
+    {
+      "day": 55,
+      "playerStatistics": {
+        "totalPlayers": 26731,
+        "activePlayers": 7930,
+        "retiredPlayers": 18801,
+        "completedRunsPlayers": 133648,
+        "totalCharityContributions": 17526.240000017366,
+        "totalPlayerPayouts": 99315.35999995033,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.085668325165538,
+        "playerRetirementRate": 0.7033406905839662
+      },
+      "gameStatistics": {
+        "totalGames": 162676,
+        "averageGamesPerDay": 1807.5111111111112,
+        "pooledVirtualDollars": 7,
+        "totalVirtualDollars": 133655,
+        "totalRunsCreated": 133655,
+        "completedRuns": 0,
+        "activeRuns": 7,
+        "jackpotsWon": 0,
+        "averageRunLength": 23239.428571428572
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 32535.2000000833,
+        "totalCharityContributions": 17526.240000017366,
+        "totalPlayerPayouts": 99315.35999995033,
+        "revenuePerGame": 0.20000000000051205,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 361.5022222231478,
+        "totalCashOuts": 116841.60000009766,
+        "cashOutCount": 52302
+      },
+      "newPlayers": 1192
+    },
+    {
+      "day": 56,
+      "playerStatistics": {
+        "totalPlayers": 27973,
+        "activePlayers": 8298,
+        "retiredPlayers": 19675,
+        "completedRunsPlayers": 139860,
+        "totalCharityContributions": 18343.53000001854,
+        "totalPlayerPayouts": 103946.66999994723,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.086511993708219,
+        "playerRetirementRate": 0.7033568083509099
+      },
+      "gameStatistics": {
+        "totalGames": 170258,
+        "averageGamesPerDay": 1891.7555555555555,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 139865,
+        "totalRunsCreated": 139865,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 34051.6
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 34051.60000006547,
+        "totalCharityContributions": 18343.53000001854,
+        "totalPlayerPayouts": 103946.66999994723,
+        "revenuePerGame": 0.2000000000003845,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 378.3511111118385,
+        "totalCashOuts": 122290.20000010492,
+        "cashOutCount": 54723
+      },
+      "newPlayers": 1242
+    },
+    {
+      "day": 57,
+      "playerStatistics": {
+        "totalPlayers": 29268,
+        "activePlayers": 8682,
+        "retiredPlayers": 20586,
+        "completedRunsPlayers": 146338,
+        "totalCharityContributions": 19201.590000019773,
+        "totalPlayerPayouts": 108809.00999994401,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.086442531091977,
+        "playerRetirementRate": 0.7033620336203362
+      },
+      "gameStatistics": {
+        "totalGames": 178138,
+        "averageGamesPerDay": 1979.3111111111111,
+        "pooledVirtualDollars": 2,
+        "totalVirtualDollars": 146340,
+        "totalRunsCreated": 146340,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 89069
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 35627.600000042534,
+        "totalCharityContributions": 19201.590000019773,
+        "totalPlayerPayouts": 108809.00999994401,
+        "revenuePerGame": 0.20000000000023876,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 395.8622222226948,
+        "totalCashOuts": 128010.60000011248,
+        "cashOutCount": 57260
+      },
+      "newPlayers": 1295
+    },
+    {
+      "day": 58,
+      "playerStatistics": {
+        "totalPlayers": 30616,
+        "activePlayers": 9082,
+        "retiredPlayers": 21534,
+        "completedRunsPlayers": 153074,
+        "totalCharityContributions": 20082.87000002109,
+        "totalPlayerPayouts": 113802.92999994056,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.083747060360595,
+        "playerRetirementRate": 0.7033577214528351
+      },
+      "gameStatistics": {
+        "totalGames": 186260,
+        "averageGamesPerDay": 2069.5555555555557,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 153080,
+        "totalRunsCreated": 153080,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 31043.333333333332
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 37252.000000018896,
+        "totalCharityContributions": 20082.87000002109,
+        "totalPlayerPayouts": 113802.92999994056,
+        "revenuePerGame": 0.20000000000010146,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 413.9111111113211,
+        "totalCashOuts": 133885.80000010406,
+        "cashOutCount": 59935
+      },
+      "newPlayers": 1348
+    },
+    {
+      "day": 59,
+      "playerStatistics": {
+        "totalPlayers": 32020,
+        "activePlayers": 9499,
+        "retiredPlayers": 22521,
+        "completedRunsPlayers": 160097,
+        "totalCharityContributions": 21047.040000022404,
+        "totalPlayerPayouts": 119266.55999993712,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.086758276077451,
+        "playerRetirementRate": 0.7033416614615865
+      },
+      "gameStatistics": {
+        "totalGames": 194898,
+        "averageGamesPerDay": 2165.5333333333333,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 160100,
+        "totalRunsCreated": 160100,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 64966
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 38979.599999993756,
+        "totalCharityContributions": 21047.040000022404,
+        "totalPlayerPayouts": 119266.55999993712,
+        "revenuePerGame": 0.19999999999996795,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 433.1066666665973,
+        "totalCashOuts": 140313.60000007754,
+        "cashOutCount": 62639
+      },
+      "newPlayers": 1404
+    },
+    {
+      "day": 60,
+      "playerStatistics": {
+        "totalPlayers": 33481,
+        "activePlayers": 9932,
+        "retiredPlayers": 23549,
+        "completedRunsPlayers": 167401,
+        "totalCharityContributions": 22001.220000023823,
+        "totalPlayerPayouts": 124673.57999993338,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.083241241301036,
+        "playerRetirementRate": 0.7033541411546848
+      },
+      "gameStatistics": {
+        "totalGames": 203673,
+        "averageGamesPerDay": 2263.0333333333333,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 167405,
+        "totalRunsCreated": 167405,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 50918.25
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 40734.59999996822,
+        "totalCharityContributions": 22001.220000023823,
+        "totalPlayerPayouts": 124673.57999993338,
+        "revenuePerGame": 0.19999999999984394,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 452.6066666663135,
+        "totalCashOuts": 146674.80000004868,
+        "cashOutCount": 65555
+      },
+      "newPlayers": 1461
+    },
+    {
+      "day": 61,
+      "playerStatistics": {
+        "totalPlayers": 35001,
+        "activePlayers": 10383,
+        "retiredPlayers": 24618,
+        "completedRunsPlayers": 175002,
+        "totalCharityContributions": 22985.640000025243,
+        "totalPlayerPayouts": 130251.95999992965,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.085911831090541,
+        "playerRetirementRate": 0.7033513328190623
+      },
+      "gameStatistics": {
+        "totalGames": 213013,
+        "averageGamesPerDay": 2366.811111111111,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 175005,
+        "totalRunsCreated": 175005,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 71004.33333333333
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 42602.599999941034,
+        "totalCharityContributions": 22985.640000025243,
+        "totalPlayerPayouts": 130251.95999992965,
+        "revenuePerGame": 0.19999999999972318,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 473.36222222156704,
+        "totalCashOuts": 153237.60000001983,
+        "cashOutCount": 68485
+      },
+      "newPlayers": 1520
+    },
+    {
+      "day": 62,
+      "playerStatistics": {
+        "totalPlayers": 36581,
+        "activePlayers": 10852,
+        "retiredPlayers": 25729,
+        "completedRunsPlayers": 182900,
+        "totalCharityContributions": 24031.890000026764,
+        "totalPlayerPayouts": 136180.70999992554,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.086465651567754,
+        "playerRetirementRate": 0.7033432656296985
+      },
+      "gameStatistics": {
+        "totalGames": 222649,
+        "averageGamesPerDay": 2473.8777777777777,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 182905,
+        "totalRunsCreated": 182905,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 44529.8
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 44529.79999991299,
+        "totalCharityContributions": 24031.890000026764,
+        "totalPlayerPayouts": 136180.70999992554,
+        "revenuePerGame": 0.1999999999996092,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 494.7755555545888,
+        "totalCashOuts": 160212.59999998996,
+        "cashOutCount": 71565
+      },
+      "newPlayers": 1580
+    },
+    {
+      "day": 63,
+      "playerStatistics": {
+        "totalPlayers": 38224,
+        "activePlayers": 11339,
+        "retiredPlayers": 26885,
+        "completedRunsPlayers": 191117,
+        "totalCharityContributions": 25102.980000028332,
+        "totalPlayerPayouts": 142250.21999992125,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.086777940560904,
+        "playerRetirementRate": 0.7033539137714525
+      },
+      "gameStatistics": {
+        "totalGames": 232661,
+        "averageGamesPerDay": 2585.1222222222223,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 191120,
+        "totalRunsCreated": 191120,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 77553.66666666667
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 46532.19999988385,
+        "totalCharityContributions": 25102.980000028332,
+        "totalPlayerPayouts": 142250.21999992125,
+        "revenuePerGame": 0.19999999999950077,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 517.0244444431539,
+        "totalCashOuts": 167353.19999995866,
+        "cashOutCount": 74775
+      },
+      "newPlayers": 1643
+    },
+    {
+      "day": 64,
+      "playerStatistics": {
+        "totalPlayers": 39930,
+        "activePlayers": 11845,
+        "retiredPlayers": 28085,
+        "completedRunsPlayers": 199645,
+        "totalCharityContributions": 26198.370000029958,
+        "totalPlayerPayouts": 148457.42999991679,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.08572501878287,
+        "playerRetirementRate": 0.7033558727773603
+      },
+      "gameStatistics": {
+        "totalGames": 243003,
+        "averageGamesPerDay": 2700.0333333333333,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 199650,
+        "totalRunsCreated": 199650,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 48600.6
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 48600.59999985375,
+        "totalCharityContributions": 26198.370000029958,
+        "totalPlayerPayouts": 148457.42999991679,
+        "revenuePerGame": 0.19999999999939816,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 540.0066666650417,
+        "totalCashOuts": 174655.7999999253,
+        "cashOutCount": 78132
+      },
+      "newPlayers": 1706
+    },
+    {
+      "day": 65,
+      "playerStatistics": {
+        "totalPlayers": 41702,
+        "activePlayers": 12371,
+        "retiredPlayers": 29331,
+        "completedRunsPlayers": 208504,
+        "totalCharityContributions": 27414.720000031648,
+        "totalPlayerPayouts": 155350.07999991212,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.085103831950506,
+        "playerRetirementRate": 0.7033475612680447
+      },
+      "gameStatistics": {
+        "totalGames": 253761,
+        "averageGamesPerDay": 2819.5666666666666,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 208510,
+        "totalRunsCreated": 208510,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 42293.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 50752.19999982244,
+        "totalCharityContributions": 27414.720000031648,
+        "totalPlayerPayouts": 155350.07999991212,
+        "revenuePerGame": 0.1999999999993003,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 563.9133333313605,
+        "totalCashOuts": 182764.79999989102,
+        "cashOutCount": 81612
+      },
+      "newPlayers": 1772
+    },
+    {
+      "day": 66,
+      "playerStatistics": {
+        "totalPlayers": 43541,
+        "activePlayers": 12917,
+        "retiredPlayers": 30624,
+        "completedRunsPlayers": 217697,
+        "totalCharityContributions": 28595.430000033408,
+        "totalPlayerPayouts": 162040.76999990726,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.085781217702855,
+        "playerRetirementRate": 0.703337084586941
+      },
+      "gameStatistics": {
+        "totalGames": 264981,
+        "averageGamesPerDay": 2944.233333333333,
+        "pooledVirtualDollars": 8,
+        "totalVirtualDollars": 217705,
+        "totalRunsCreated": 217705,
+        "completedRuns": 0,
+        "activeRuns": 8,
+        "jackpotsWon": 0,
+        "averageRunLength": 33122.625
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 52996.19999978979,
+        "totalCharityContributions": 28595.430000033408,
+        "totalPlayerPayouts": 162040.76999990726,
+        "revenuePerGame": 0.1999999999992067,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 588.846666664331,
+        "totalCashOuts": 190636.19999985618,
+        "cashOutCount": 85194
+      },
+      "newPlayers": 1839
+    },
+    {
+      "day": 67,
+      "playerStatistics": {
+        "totalPlayers": 45448,
+        "activePlayers": 13482,
+        "retiredPlayers": 31966,
+        "completedRunsPlayers": 227238,
+        "totalCharityContributions": 29915.730000035255,
+        "totalPlayerPayouts": 169522.46999990224,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.084910227072698,
+        "playerRetirementRate": 0.7033532828727337
+      },
+      "gameStatistics": {
+        "totalGames": 276547,
+        "averageGamesPerDay": 3072.7444444444445,
+        "pooledVirtualDollars": 2,
+        "totalVirtualDollars": 227240,
+        "totalRunsCreated": 227240,
+        "completedRuns": 0,
+        "activeRuns": 2,
+        "jackpotsWon": 0,
+        "averageRunLength": 138273.5
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 55309.399999756126,
+        "totalCharityContributions": 29915.730000035255,
+        "totalPlayerPayouts": 169522.46999990224,
+        "revenuePerGame": 0.19999999999911813,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 614.5488888861792,
+        "totalCashOuts": 199438.1999998195,
+        "cashOutCount": 88952
+      },
+      "newPlayers": 1907
+    },
+    {
+      "day": 68,
+      "playerStatistics": {
+        "totalPlayers": 47425,
+        "activePlayers": 14069,
+        "retiredPlayers": 33356,
+        "completedRunsPlayers": 237119,
+        "totalCharityContributions": 31188.510000037146,
+        "totalPlayerPayouts": 176734.88999989713,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.084913020558777,
+        "playerRetirementRate": 0.7033421191354771
+      },
+      "gameStatistics": {
+        "totalGames": 288577,
+        "averageGamesPerDay": 3206.411111111111,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 237125,
+        "totalRunsCreated": 237125,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 48096.166666666664
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 57715.399999721114,
+        "totalCharityContributions": 31188.510000037146,
+        "totalPlayerPayouts": 176734.88999989713,
+        "revenuePerGame": 0.1999999999990336,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 641.2822222191235,
+        "totalCashOuts": 207923.39999978145,
+        "cashOutCount": 92818
+      },
+      "newPlayers": 1977
+    },
+    {
+      "day": 69,
+      "playerStatistics": {
+        "totalPlayers": 49474,
+        "activePlayers": 14677,
+        "retiredPlayers": 34797,
+        "completedRunsPlayers": 247366,
+        "totalCharityContributions": 32581.980000039133,
+        "totalPlayerPayouts": 184631.21999989173,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.082245219711363,
+        "playerRetirementRate": 0.7033391276225897
+      },
+      "gameStatistics": {
+        "totalGames": 300913,
+        "averageGamesPerDay": 3343.4777777777776,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 247370,
+        "totalRunsCreated": 247370,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 75228.25
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 60182.59999968521,
+        "totalCharityContributions": 32581.980000039133,
+        "totalPlayerPayouts": 184631.21999989173,
+        "revenuePerGame": 0.19999999999895388,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 668.695555552058,
+        "totalCashOuts": 217213.1999997413,
+        "cashOutCount": 96897
+      },
+      "newPlayers": 2049
+    },
+    {
+      "day": 70,
+      "playerStatistics": {
+        "totalPlayers": 51596,
+        "activePlayers": 15306,
+        "retiredPlayers": 36290,
+        "completedRunsPlayers": 257975,
+        "totalCharityContributions": 33931.98000002937,
+        "totalPlayerPayouts": 192281.21999988632,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.082855260097682,
+        "playerRetirementRate": 0.7033490968292115
+      },
+      "gameStatistics": {
+        "totalGames": 313851,
+        "averageGamesPerDay": 3487.233333333333,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 257980,
+        "totalRunsCreated": 257980,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 62770.2
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 62770.19999964756,
+        "totalCharityContributions": 33931.98000002937,
+        "totalPlayerPayouts": 192281.21999988632,
+        "revenuePerGame": 0.19999999999887705,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 697.4466666627507,
+        "totalCashOuts": 226213.19999970013,
+        "cashOutCount": 101036
+      },
+      "newPlayers": 2122
+    },
+    {
+      "day": 71,
+      "playerStatistics": {
+        "totalPlayers": 53792,
+        "activePlayers": 15958,
+        "retiredPlayers": 37834,
+        "completedRunsPlayers": 268955,
+        "totalCharityContributions": 35372.4300000175,
+        "totalPlayerPayouts": 200443.76999988055,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.081554878048781,
+        "playerRetirementRate": 0.7033387864366448
+      },
+      "gameStatistics": {
+        "totalGames": 327139,
+        "averageGamesPerDay": 3634.8777777777777,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 268960,
+        "totalRunsCreated": 268960,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 65427.8
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 65427.799999608884,
+        "totalCharityContributions": 35372.4300000175,
+        "totalPlayerPayouts": 200443.76999988055,
+        "revenuePerGame": 0.19999999999880444,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 726.9755555512098,
+        "totalCashOuts": 235816.19999965798,
+        "cashOutCount": 105371
+      },
+      "newPlayers": 2196
+    },
+    {
+      "day": 72,
+      "playerStatistics": {
+        "totalPlayers": 56063,
+        "activePlayers": 16632,
+        "retiredPlayers": 39431,
+        "completedRunsPlayers": 280311,
+        "totalCharityContributions": 36854.73000000524,
+        "totalPlayerPayouts": 208843.46999987456,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.081176533542622,
+        "playerRetirementRate": 0.7033337495317767
+      },
+      "gameStatistics": {
+        "totalGames": 340929,
+        "averageGamesPerDay": 3788.1,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 280315,
+        "totalRunsCreated": 280315,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 85232.25
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 68185.79999956876,
+        "totalCharityContributions": 36854.73000000524,
+        "totalPlayerPayouts": 208843.46999987456,
+        "revenuePerGame": 0.1999999999987351,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 757.6199999952084,
+        "totalCashOuts": 245698.1999996143,
+        "cashOutCount": 109831
+      },
+      "newPlayers": 2271
+    },
+    {
+      "day": 73,
+      "playerStatistics": {
+        "totalPlayers": 58411,
+        "activePlayers": 17328,
+        "retiredPlayers": 41083,
+        "completedRunsPlayers": 292049,
+        "totalCharityContributions": 38394.269999992684,
+        "totalPlayerPayouts": 217567.5299998684,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.082193422471795,
+        "playerRetirementRate": 0.7033435483042577
+      },
+      "gameStatistics": {
+        "totalGames": 355267,
+        "averageGamesPerDay": 3947.411111111111,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 292055,
+        "totalRunsCreated": 292055,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 59211.166666666664
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 71053.39999952703,
+        "totalCharityContributions": 38394.269999992684,
+        "totalPlayerPayouts": 217567.5299998684,
+        "revenuePerGame": 0.1999999999986687,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 789.482222216967,
+        "totalCashOuts": 255961.7999995695,
+        "cashOutCount": 114400
+      },
+      "newPlayers": 2348
+    },
+    {
+      "day": 74,
+      "playerStatistics": {
+        "totalPlayers": 60836,
+        "activePlayers": 18048,
+        "retiredPlayers": 42788,
+        "completedRunsPlayers": 304176,
+        "totalCharityContributions": 39996.98999997965,
+        "totalPlayerPayouts": 226649.6099998621,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.08190873824709,
+        "playerRetirementRate": 0.7033335525018082
+      },
+      "gameStatistics": {
+        "totalGames": 369999,
+        "averageGamesPerDay": 4111.1,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 304180,
+        "totalRunsCreated": 304180,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 92499.75
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 73999.79999948415,
+        "totalCharityContributions": 39996.98999997965,
+        "totalPlayerPayouts": 226649.6099998621,
+        "revenuePerGame": 0.19999999999860582,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 822.2199999942684,
+        "totalCashOuts": 266646.59999951854,
+        "cashOutCount": 119160
+      },
+      "newPlayers": 2425
+    },
+    {
+      "day": 75,
+      "playerStatistics": {
+        "totalPlayers": 63340,
+        "activePlayers": 18790,
+        "retiredPlayers": 44550,
+        "completedRunsPlayers": 316694,
+        "totalCharityContributions": 41653.70999996611,
+        "totalPlayerPayouts": 236037.68999985556,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.081922955478371,
+        "playerRetirementRate": 0.7033470161035681
+      },
+      "gameStatistics": {
+        "totalGames": 385229,
+        "averageGamesPerDay": 4280.322222222222,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 316700,
+        "totalRunsCreated": 316700,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 64204.833333333336
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 77045.79999943983,
+        "totalCharityContributions": 41653.70999996611,
+        "totalPlayerPayouts": 236037.68999985556,
+        "revenuePerGame": 0.19999999999854587,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 856.0644444382203,
+        "totalCashOuts": 277691.3999994597,
+        "cashOutCount": 124063
+      },
+      "newPlayers": 2504
+    },
+    {
+      "day": 76,
+      "playerStatistics": {
+        "totalPlayers": 65924,
+        "activePlayers": 19557,
+        "retiredPlayers": 46367,
+        "completedRunsPlayers": 329619,
+        "totalCharityContributions": 43323.11999995216,
+        "totalPlayerPayouts": 245497.6799998488,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.081973181239002,
+        "playerRetirementRate": 0.7033402099387173
+      },
+      "gameStatistics": {
+        "totalGames": 400948,
+        "averageGamesPerDay": 4454.977777777778,
+        "pooledVirtualDollars": 1,
+        "totalVirtualDollars": 329620,
+        "totalRunsCreated": 329620,
+        "completedRuns": 0,
+        "activeRuns": 1,
+        "jackpotsWon": 0,
+        "averageRunLength": 400948
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 80189.59999939408,
+        "totalCharityContributions": 43323.11999995216,
+        "totalPlayerPayouts": 245497.6799998488,
+        "revenuePerGame": 0.19999999999848878,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 890.9955555488231,
+        "totalCashOuts": 288820.79999939876,
+        "cashOutCount": 129126
+      },
+      "newPlayers": 2584
+    },
+    {
+      "day": 77,
+      "playerStatistics": {
+        "totalPlayers": 68588,
+        "activePlayers": 20347,
+        "retiredPlayers": 48241,
+        "completedRunsPlayers": 342939,
+        "totalCharityContributions": 45121.31999993774,
+        "totalPlayerPayouts": 255687.47999984186,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.081880212282032,
+        "playerRetirementRate": 0.7033446083863066
+      },
+      "gameStatistics": {
+        "totalGames": 417144,
+        "averageGamesPerDay": 4634.933333333333,
+        "pooledVirtualDollars": 1,
+        "totalVirtualDollars": 342940,
+        "totalRunsCreated": 342940,
+        "completedRuns": 0,
+        "activeRuns": 1,
+        "jackpotsWon": 0,
+        "averageRunLength": 417144
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 83428.79999934694,
+        "totalCharityContributions": 45121.31999993774,
+        "totalPlayerPayouts": 255687.47999984186,
+        "revenuePerGame": 0.19999999999843446,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 926.9866666594105,
+        "totalCashOuts": 300808.79999933584,
+        "cashOutCount": 134348
+      },
+      "newPlayers": 2664
+    },
+    {
+      "day": 78,
+      "playerStatistics": {
+        "totalPlayers": 71333,
+        "activePlayers": 21162,
+        "retiredPlayers": 50171,
+        "completedRunsPlayers": 356659,
+        "totalCharityContributions": 46931.93999992259,
+        "totalPlayerPayouts": 265947.65999988717,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.080439628222562,
+        "playerRetirementRate": 0.7033350623133753
+      },
+      "gameStatistics": {
+        "totalGames": 433736,
+        "averageGamesPerDay": 4819.288888888889,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 356665,
+        "totalRunsCreated": 356665,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 72289.33333333333
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 86747.19999929865,
+        "totalCharityContributions": 46931.93999992259,
+        "totalPlayerPayouts": 265947.65999988717,
+        "revenuePerGame": 0.199999999998383,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 963.857777769985,
+        "totalCashOuts": 312879.5999992706,
+        "cashOutCount": 139772
+      },
+      "newPlayers": 2745
+    },
+    {
+      "day": 79,
+      "playerStatistics": {
+        "totalPlayers": 74159,
+        "activePlayers": 22000,
+        "retiredPlayers": 52159,
+        "completedRunsPlayers": 370791,
+        "totalCharityContributions": 48811.1399999072,
+        "totalPlayerPayouts": 276596.46000002493,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.079680146711795,
+        "playerRetirementRate": 0.7033401205517874
+      },
+      "gameStatistics": {
+        "totalGames": 450863,
+        "averageGamesPerDay": 5009.5888888888885,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 370795,
+        "totalRunsCreated": 370795,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 112715.75
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 90172.5999992488,
+        "totalCharityContributions": 48811.1399999072,
+        "totalPlayerPayouts": 276596.46000002493,
+        "revenuePerGame": 0.19999999999833387,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1001.9177777694312,
+        "totalCashOuts": 325407.5999992036,
+        "cashOutCount": 145339
+      },
+      "newPlayers": 2826
+    },
+    {
+      "day": 80,
+      "playerStatistics": {
+        "totalPlayers": 77067,
+        "activePlayers": 22863,
+        "retiredPlayers": 54204,
+        "completedRunsPlayers": 385331,
+        "totalCharityContributions": 50736.779999891296,
+        "totalPlayerPayouts": 287508.4200001674,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.078308484824893,
+        "playerRetirementRate": 0.7033360582350422
+      },
+      "gameStatistics": {
+        "totalGames": 468437,
+        "averageGamesPerDay": 5204.855555555556,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 385335,
+        "totalRunsCreated": 385335,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 117109.25
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 93687.39999919766,
+        "totalCharityContributions": 50736.779999891296,
+        "totalPlayerPayouts": 287508.4200001674,
+        "revenuePerGame": 0.1999999999982872,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1040.9711111021961,
+        "totalCashOuts": 338245.1999991341,
+        "cashOutCount": 151092
+      },
+      "newPlayers": 2908
+    },
+    {
+      "day": 81,
+      "playerStatistics": {
+        "totalPlayers": 80057,
+        "activePlayers": 23750,
+        "retiredPlayers": 56307,
+        "completedRunsPlayers": 400278,
+        "totalCharityContributions": 52673.75999987512,
+        "totalPlayerPayouts": 298484.64000031253,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.078081866669998,
+        "playerRetirementRate": 0.7033363728343556
+      },
+      "gameStatistics": {
+        "totalGames": 486593,
+        "averageGamesPerDay": 5406.5888888888885,
+        "pooledVirtualDollars": 7,
+        "totalVirtualDollars": 400285,
+        "totalRunsCreated": 400285,
+        "completedRuns": 0,
+        "activeRuns": 7,
+        "jackpotsWon": 0,
+        "averageRunLength": 69513.28571428571
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 97318.59999914482,
+        "totalCharityContributions": 52673.75999987512,
+        "totalPlayerPayouts": 298484.64000031253,
+        "revenuePerGame": 0.1999999999982425,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1081.3177777682758,
+        "totalCashOuts": 351158.3999990633,
+        "cashOutCount": 156960
+      },
+      "newPlayers": 2990
+    },
+    {
+      "day": 82,
+      "playerStatistics": {
+        "totalPlayers": 83057,
+        "activePlayers": 24640,
+        "retiredPlayers": 58417,
+        "completedRunsPlayers": 415279,
+        "totalCharityContributions": 54684.179999859014,
+        "totalPlayerPayouts": 309877.02000045707,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.0779223906473865,
+        "playerRetirementRate": 0.703336263048268
+      },
+      "gameStatistics": {
+        "totalGames": 504814,
+        "averageGamesPerDay": 5609.044444444445,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 415285,
+        "totalRunsCreated": 415285,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 84135.66666666667
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 100962.79999909179,
+        "totalCharityContributions": 54684.179999859014,
+        "totalPlayerPayouts": 309877.02000045707,
+        "revenuePerGame": 0.1999999999982009,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1121.8088888787977,
+        "totalCashOuts": 364561.199998992,
+        "cashOutCount": 162850
+      },
+      "newPlayers": 3000
+    },
+    {
+      "day": 83,
+      "playerStatistics": {
+        "totalPlayers": 86057,
+        "activePlayers": 25530,
+        "retiredPlayers": 60527,
+        "completedRunsPlayers": 430281,
+        "totalCharityContributions": 56678.93999984292,
+        "totalPlayerPayouts": 321180.66000060155,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.078111019440604,
+        "playerRetirementRate": 0.7033361609166018
+      },
+      "gameStatistics": {
+        "totalGames": 523064,
+        "averageGamesPerDay": 5811.822222222222,
+        "pooledVirtualDollars": 4,
+        "totalVirtualDollars": 430285,
+        "totalRunsCreated": 430285,
+        "completedRuns": 0,
+        "activeRuns": 4,
+        "jackpotsWon": 0,
+        "averageRunLength": 130766
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 104612.79999903867,
+        "totalCharityContributions": 56678.93999984292,
+        "totalPlayerPayouts": 321180.66000060155,
+        "revenuePerGame": 0.19999999999816212,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1162.364444433763,
+        "totalCashOuts": 377859.59999892086,
+        "cashOutCount": 168726
+      },
+      "newPlayers": 3000
+    },
+    {
+      "day": 84,
+      "playerStatistics": {
+        "totalPlayers": 89057,
+        "activePlayers": 26420,
+        "retiredPlayers": 62637,
+        "completedRunsPlayers": 445280,
+        "totalCharityContributions": 58685.309999826735,
+        "totalPlayerPayouts": 332550.0900007467,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.078365541170262,
+        "playerRetirementRate": 0.7033360656658095
+      },
+      "gameStatistics": {
+        "totalGames": 541321,
+        "averageGamesPerDay": 6014.677777777778,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 445285,
+        "totalRunsCreated": 445285,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 108264.2
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 108264.19999898554,
+        "totalCharityContributions": 58685.309999826735,
+        "totalPlayerPayouts": 332550.0900007467,
+        "revenuePerGame": 0.19999999999812595,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1202.9355555442837,
+        "totalCashOuts": 391235.3999988502,
+        "cashOutCount": 174596
+      },
+      "newPlayers": 3000
+    },
+    {
+      "day": 85,
+      "playerStatistics": {
+        "totalPlayers": 92057,
+        "activePlayers": 27310,
+        "retiredPlayers": 64747,
+        "completedRunsPlayers": 460282,
+        "totalCharityContributions": 60680.33999981034,
+        "totalPlayerPayouts": 343855.2600008936,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.077245619561793,
+        "playerRetirementRate": 0.7033359766231791
+      },
+      "gameStatistics": {
+        "totalGames": 559453,
+        "averageGamesPerDay": 6216.144444444444,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 460285,
+        "totalRunsCreated": 460285,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 186484.33333333334
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 111890.59999893277,
+        "totalCharityContributions": 60680.33999981034,
+        "totalPlayerPayouts": 343855.2600008936,
+        "revenuePerGame": 0.19999999999809237,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1243.2288888770308,
+        "totalCashOuts": 404535.5999987787,
+        "cashOutCount": 180531
+      },
+      "newPlayers": 3000
+    },
+    {
+      "day": 86,
+      "playerStatistics": {
+        "totalPlayers": 95057,
+        "activePlayers": 28200,
+        "retiredPlayers": 66857,
+        "completedRunsPlayers": 475280,
+        "totalCharityContributions": 62695.61999979435,
+        "totalPlayerPayouts": 355275.1800010372,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.078068948104821,
+        "playerRetirementRate": 0.7033358932009216
+      },
+      "gameStatistics": {
+        "totalGames": 577763,
+        "averageGamesPerDay": 6419.5888888888885,
+        "pooledVirtualDollars": 5,
+        "totalVirtualDollars": 475285,
+        "totalRunsCreated": 475285,
+        "completedRuns": 0,
+        "activeRuns": 5,
+        "jackpotsWon": 0,
+        "averageRunLength": 115552.6
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 115552.59999887948,
+        "totalCharityContributions": 62695.61999979435,
+        "totalPlayerPayouts": 355275.1800010372,
+        "revenuePerGame": 0.1999999999980606,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1283.9177777653276,
+        "totalCashOuts": 417970.7999987083,
+        "cashOutCount": 186374
+      },
+      "newPlayers": 3000
+    },
+    {
+      "day": 87,
+      "playerStatistics": {
+        "totalPlayers": 98057,
+        "activePlayers": 29090,
+        "retiredPlayers": 68967,
+        "completedRunsPlayers": 490282,
+        "totalCharityContributions": 64684.97999977802,
+        "totalPlayerPayouts": 366548.2200011836,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.077556931172685,
+        "playerRetirementRate": 0.7033358148831802
+      },
+      "gameStatistics": {
+        "totalGames": 595947,
+        "averageGamesPerDay": 6621.633333333333,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 490285,
+        "totalRunsCreated": 490285,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 198649
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 119189.39999882656,
+        "totalCharityContributions": 64684.97999977802,
+        "totalPlayerPayouts": 366548.2200011836,
+        "revenuePerGame": 0.19999999999803095,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1324.3266666536283,
+        "totalCashOuts": 431233.1999986379,
+        "cashOutCount": 192282
+      },
+      "newPlayers": 3000
+    },
+    {
+      "day": 88,
+      "playerStatistics": {
+        "totalPlayers": 101057,
+        "activePlayers": 29980,
+        "retiredPlayers": 71077,
+        "completedRunsPlayers": 505278,
+        "totalCharityContributions": 66649.76999978139,
+        "totalPlayerPayouts": 377682.0300013302,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.077075313931742,
+        "playerRetirementRate": 0.7033357412153537
+      },
+      "gameStatistics": {
+        "totalGames": 614131,
+        "averageGamesPerDay": 6823.677777777778,
+        "pooledVirtualDollars": 7,
+        "totalVirtualDollars": 505285,
+        "totalRunsCreated": 505285,
+        "completedRuns": 0,
+        "activeRuns": 7,
+        "jackpotsWon": 0,
+        "averageRunLength": 87733
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 122826.19999877363,
+        "totalCharityContributions": 66649.76999978139,
+        "totalPlayerPayouts": 377682.0300013302,
+        "revenuePerGame": 0.19999999999800308,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1364.7355555419292,
+        "totalCashOuts": 444331.79999856744,
+        "cashOutCount": 198185
+      },
+      "newPlayers": 3000
+    },
+    {
+      "day": 89,
+      "playerStatistics": {
+        "totalPlayers": 104057,
+        "activePlayers": 30870,
+        "retiredPlayers": 73187,
+        "completedRunsPlayers": 520282,
+        "totalCharityContributions": 68699.33999980055,
+        "totalPlayerPayouts": 389296.260001477,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.076813669431177,
+        "playerRetirementRate": 0.703335671795266
+      },
+      "gameStatistics": {
+        "totalGames": 632335,
+        "averageGamesPerDay": 7025.944444444444,
+        "pooledVirtualDollars": 3,
+        "totalVirtualDollars": 520285,
+        "totalRunsCreated": 520285,
+        "completedRuns": 0,
+        "activeRuns": 3,
+        "jackpotsWon": 0,
+        "averageRunLength": 210778.33333333334
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 126466.99999872065,
+        "totalCharityContributions": 68699.33999980055,
+        "totalPlayerPayouts": 389296.260001477,
+        "revenuePerGame": 0.1999999999979768,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1405.188888874674,
+        "totalCashOuts": 457995.5999984967,
+        "cashOutCount": 204087
+      },
+      "newPlayers": 3000
+    },
+    {
+      "day": 90,
+      "playerStatistics": {
+        "totalPlayers": 107057,
+        "activePlayers": 31760,
+        "retiredPlayers": 75297,
+        "completedRunsPlayers": 535279,
+        "totalCharityContributions": 70725.95999981966,
+        "totalPlayerPayouts": 400780.4400016229,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 6.076930980692528,
+        "playerRetirementRate": 0.703335606265821
+      },
+      "gameStatistics": {
+        "totalGames": 650578,
+        "averageGamesPerDay": 7228.644444444444,
+        "pooledVirtualDollars": 6,
+        "totalVirtualDollars": 535285,
+        "totalRunsCreated": 535285,
+        "completedRuns": 0,
+        "activeRuns": 6,
+        "jackpotsWon": 0,
+        "averageRunLength": 108429.66666666667
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 130115.59999866756,
+        "totalCharityContributions": 70725.95999981966,
+        "totalPlayerPayouts": 400780.4400016229,
+        "revenuePerGame": 0.1999999999979519,
+        "charityPercentage": 0.2,
+        "averageRevenuePerDay": 1445.728888874084,
+        "totalCashOuts": 471506.3999984267,
+        "cashOutCount": 209962
+      },
+      "newPlayers": 3000
+    }
+  ],
+  "completedAt": "2025-09-25T04:21:04.891Z"
+}
