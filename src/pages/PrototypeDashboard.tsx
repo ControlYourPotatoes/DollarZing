@@ -18,6 +18,7 @@ import {
   LevelBarometer,
   FlowBreakdownChart,
   RevenueProgressionChart,
+  PlayerEngagementChart,
 } from "@/features/distribution-charts";
 import { ImpactDisplay } from "@/features/impact";
 // import { useActiveTimelineScenario } from "@/features/timeline";
@@ -442,6 +443,10 @@ const PrototypeDashboard = () => {
                 Daily Flow Breakdown
               </h2>
               <FlowBreakdownChart />
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+              <PlayerEngagementChart />
             </div>
           </aside>
         </section>
