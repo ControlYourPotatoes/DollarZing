@@ -203,6 +203,7 @@ export interface FifoQueueUpdatedEvent extends BaseEvent {
   type: "FIFO_QUEUE_UPDATED";
   level: number;
   queueLength: number;
+  waitingPlayerIds: string[];
 }
 
 export interface PoolAddedEvent extends BaseEvent {
