@@ -5,9 +5,12 @@ import {
   PresentationSnapshotFile,
   EngineDailyResult,
   EngineDailySnapshot,
+  EngineDailySnapshotLevel,
   CohortAnalyticsPoint,
   FlowAnalyticsPoint,
   GamesAnalyticsPoint,
+  LevelAnalyticsPoint,
+  LevelAnalyticsStep,
 } from "./types";
 
 import { validatePresentationSnapshotFile } from "./validation";
@@ -44,6 +47,7 @@ export function normalizePresentationSnapshot(
   const cohortAnalytics: CohortAnalyticsPoint[] = [];
   const flowAnalytics: FlowAnalyticsPoint[] = [];
   const gamesAnalytics: GamesAnalyticsPoint[] = [];
+  const levelAnalytics: LevelAnalyticsPoint[] = [];
 
   const days: NormalizedPresentationDay[] = snapshotFile.days.map((day) => {
     const distributionPoints = day.charts.distributionSeries.map((point) => ({
@@ -130,6 +134,17 @@ export function normalizePresentationSnapshot(
       ),
     });
 
+    const levelSteps = buildLevelSteps(
+      dailyEntry?.levels,
+      datasetEntry?.gameStatistics?.totalGames,
+      datasetEntry?.playerStatistics?.totalPlayers
+    );
+    levelAnalytics.push({
+      dayIndex: day.dayIndex,
+      label,
+      steps: levelSteps,
+    });
+
     return {
       dayIndex: day.dayIndex,
       date: day.date,
@@ -201,6 +216,7 @@ export function normalizePresentationSnapshot(
       cohort: cohortAnalytics,
       flow: flowAnalytics,
       games: gamesAnalytics,
+      levels: levelAnalytics,
     },
   };
 }
@@ -239,4 +255,44 @@ function indexDailySnapshots(snapshots?: PresentationSnapshotFile["engineDailySn
 function ensureNumber(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   return 0;
+}
+
+function buildLevelSteps(
+  levels: EngineDailySnapshotLevel[] | undefined,
+  totalGames?: number,
+  totalPlayers?: number
+): LevelAnalyticsStep[] {
+  if (!Array.isArray(levels) || levels.length === 0) {
+    return [];
+  }
+
+  const baseGames = ensureNumber(totalGames);
+  const basePlayers = ensureNumber(totalPlayers);
+  const level1Games = ensureNumber(levels[0]?.gamesPlayed ?? baseGames);
+
+  return levels.map((level) => {
+    const gamesPlayed = ensureNumber(level.gamesPlayed);
+    const wins = ensureNumber(level.wins);
+    const cashouts = ensureNumber(level.cashouts);
+    const progressions = ensureNumber(level.progressions);
+    const winnings = ensureNumber(level.winnings);
+    const losses = ensureNumber(level.losses);
+
+    const survivalRate =
+      level1Games > 0 ? (gamesPlayed / level1Games) * 100 : 0;
+    const retentionRate =
+      basePlayers > 0 ? (gamesPlayed / basePlayers) * 100 : 0;
+
+    return {
+      level: level.level,
+      gamesPlayed,
+      wins,
+      cashouts,
+      progressions,
+      winnings,
+      losses,
+      survivalRate,
+      retentionRate,
+    };
+  });
 }

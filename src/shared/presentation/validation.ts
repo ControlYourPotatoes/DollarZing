@@ -9,6 +9,9 @@ import {
   PresentationWorkflowNode,
   PresentationWorkflowLink,
   PresentationScenarioCoordinates,
+  EngineScenarioDataset,
+  EngineDailySnapshot,
+  EngineDailySnapshotLevel,
 } from "./types";
 
 class ValidationError extends Error {}
@@ -440,7 +443,7 @@ export function validatePresentationSnapshotFile(
     validateSnapshot(snapshot, index)
   );
 
-  return {
+  const result: PresentationSnapshotFile = {
     scenarioId: input.scenarioId,
     generatedAt: input.generatedAt,
     parameters: {
@@ -462,6 +465,109 @@ export function validatePresentationSnapshotFile(
       cumulativePayouts: totals.cumulativePayouts,
     },
     days,
+  };
+
+  const rawDataset = (input as any).engineDataset;
+  if (rawDataset && isObject(rawDataset)) {
+    const dailyResultsRaw = rawDataset.dailyResults;
+    if (Array.isArray(dailyResultsRaw)) {
+      const dailyResults = dailyResultsRaw.map((entry, idx) => {
+        if (!isObject(entry)) {
+          throw new ValidationError(
+            `engineDataset.dailyResults[${idx}] must be an object`
+          );
+        }
+        assertNumber(
+          entry.day,
+          `engineDataset.dailyResults[${idx}].day must be a number`
+        );
+        return entry as unknown as EngineScenarioDataset["dailyResults"][number];
+      });
+      result.engineDataset = {
+        ...(rawDataset as unknown as EngineScenarioDataset),
+        dailyResults,
+      };
+    }
+  }
+
+  const rawDailySnapshots = (input as any).engineDailySnapshots;
+  if (Array.isArray(rawDailySnapshots)) {
+    const dailySnapshots = rawDailySnapshots.map((entry, idx) => {
+      if (!isObject(entry)) {
+        throw new ValidationError(
+          `engineDailySnapshots[${idx}] must be an object`
+        );
+      }
+      assertNumber(
+        entry.day,
+        `engineDailySnapshots[${idx}].day must be a number`
+      );
+      const levels = Array.isArray(entry.levels)
+        ? entry.levels.map((level, levelIdx) =>
+            validateLevel(level, idx, levelIdx)
+          )
+        : undefined;
+      return {
+        ...(entry as unknown as EngineDailySnapshot),
+        levels,
+      };
+    });
+    result.engineDailySnapshots = dailySnapshots;
+  }
+
+  return result;
+}
+
+function validateLevel(
+  level: unknown,
+  dayIndex: number,
+  levelIndex: number
+): EngineDailySnapshotLevel {
+  if (!isObject(level)) {
+    throw new ValidationError(
+      `engineDailySnapshots[${dayIndex}].levels[${levelIndex}] must be an object`
+    );
+  }
+  assertNumber(
+    level.level,
+    `engineDailySnapshots[${dayIndex}].levels[${levelIndex}].level must be a number`
+  );
+
+  const getOptionalNumber = (
+    value: unknown,
+    path: string
+  ): number | undefined => {
+    if (value === undefined) return undefined;
+    assertNumber(value, path);
+    return value;
+  };
+
+  return {
+    level: level.level,
+    gamesPlayed: getOptionalNumber(
+      level.gamesPlayed,
+      `engineDailySnapshots[${dayIndex}].levels[${levelIndex}].gamesPlayed must be a number`
+    ),
+    wins: getOptionalNumber(
+      level.wins,
+      `engineDailySnapshots[${dayIndex}].levels[${levelIndex}].wins must be a number`
+    ),
+    cashouts: getOptionalNumber(
+      level.cashouts,
+      `engineDailySnapshots[${dayIndex}].levels[${levelIndex}].cashouts must be a number`
+    ),
+    progressions: getOptionalNumber(
+      level.progressions,
+      `engineDailySnapshots[${dayIndex}].levels[${levelIndex}].progressions must be a number`
+    ),
+    winnings: getOptionalNumber(
+      level.winnings,
+      `engineDailySnapshots[${dayIndex}].levels[${levelIndex}].winnings must be a number`
+    ),
+    losses: getOptionalNumber(
+      level.losses,
+      `engineDailySnapshots[${dayIndex}].levels[${levelIndex}].losses must be a number`
+    ),
   };
 }
 
