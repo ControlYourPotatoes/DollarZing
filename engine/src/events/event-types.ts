@@ -87,7 +87,10 @@ export interface PlayerTotalWinningsUpdatedEvent extends BaseEvent {
   newTotalWinnings: number;
   winningsChange: number;
   triggeringVirtualDollarId: string;
-  triggeringEvent: "VIRTUAL_DOLLAR_ADVANCED" | "VIRTUAL_DOLLAR_RUN_COMPLETED" | "CASH_OUT_COMPLETED";
+  triggeringEvent:
+    | "VIRTUAL_DOLLAR_ADVANCED"
+    | "VIRTUAL_DOLLAR_RUN_COMPLETED"
+    | "CASH_OUT_COMPLETED";
 }
 
 // ===== LEGACY EVENT INTERFACES (DEPRECATED - use Virtual Dollar events instead) =====
@@ -563,7 +566,7 @@ export const EVENT_TYPES = {
   VIRTUAL_DOLLAR_ADVANCED: "VIRTUAL_DOLLAR_ADVANCED",
   VIRTUAL_DOLLAR_PROGRESSION_FAILED: "VIRTUAL_DOLLAR_PROGRESSION_FAILED",
   VIRTUAL_DOLLAR_RUN_COMPLETED: "VIRTUAL_DOLLAR_RUN_COMPLETED",
-  
+
   // Player aggregate events
   PLAYER_TOTAL_WINNINGS_UPDATED: "PLAYER_TOTAL_WINNINGS_UPDATED",
 
