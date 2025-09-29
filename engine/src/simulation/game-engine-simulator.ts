@@ -5,14 +5,17 @@
 import { GameMatchingEngine } from "../core/game-matching-engine";
 import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { RevenueCalculator } from "../core/revenue-calculator";
-import { CashOutStrategy } from "../types/virtual-dollar-engine";
+import { BettingLevel, CashOutStrategy } from "../types/virtual-dollar-engine";
 import { EventBus, EventSubscription } from "../events/event-bus";
 import { GameEventHandler } from "../events/handlers/game-event-handler";
 import { PlayerProgressionHandler } from "../events/handlers/player-progression-handler";
 import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-handler";
 // PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
-import { LevelTrackingHandler } from "../events/handlers/level-tracking-handler";
+import {
+  LevelTrackingHandler,
+  type LevelTrackingSnapshot,
+} from "../events/handlers/level-tracking-handler";
 import { MatchmakingEventHandler } from "../events/handlers/matchmaking-event-handler";
 import { PooledGameSessionFactory } from "../factories";
 import { EVENT_TYPES, NewRunCreatedEvent } from "../events/event-types";
@@ -28,6 +31,10 @@ import {
   generateDailyAggregates,
   type DailyAggregateSnapshot,
 } from "./post-processing/daily-aggregator";
+import {
+  type SimulationTermination,
+  type SimulationAbortReason,
+} from "../types/simulation-termination";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -109,7 +116,7 @@ export interface GameStatistics {
   jackpotsWon: number;
   averageRunLength: number;
   resolvedGames?: number;
-  gamesByLevel?: Record<number, number>;
+  gamesByLevel?: Record<BettingLevel, number>;
 }
 
 /**
@@ -141,8 +148,9 @@ export interface SimulationResults {
   gameStats: GameStatistics;
   dailyResults: DailyResult[];
   dailyAggregates?: DailyAggregateSnapshot[];
-  levelTrackingHandler?: LevelTrackingHandler; // For accessing level statistics
+  levelTrackingSnapshot?: LevelTrackingSnapshot;
   completedAt: Date;
+  termination?: SimulationTermination;
 }
 
 /**
@@ -186,6 +194,8 @@ export class GameEngineSimulator {
   private runCreatedSubscription: EventSubscription | null = null;
   private dailyNewPlayers: number = 0; // Track new players for current day
   private dayCompletedSubscription: EventSubscription | null = null;
+  private terminationState: SimulationTermination | null = null;
+  private lastAbortReason: SimulationAbortReason | null = null;
 
   constructor(
     gameMatchingEngine: GameMatchingEngine,
@@ -209,8 +219,12 @@ export class GameEngineSimulator {
       playerManager,
     };
 
-    this.components.gameMatchingEngine.setAbortCallback(() => {
+    this.components.gameMatchingEngine.setAbortCallback((reason) => {
       this.simulationAborted = true;
+      this.lastAbortReason = reason ?? {
+        code: "UNKNOWN",
+        message: "Simulation aborted without explicit reason",
+      };
     });
 
     // Initialize basic event handler system (strategy-dependent handlers created in executeSimulation)
@@ -547,19 +561,42 @@ export class GameEngineSimulator {
       revenueStats,
       gameStats: {
         ...gameStats,
-        resolvedGames: matchingStats.resolvedGames,
-        gamesByLevel: matchingStats.gamesByLevel,
+        resolvedGames: matchingStats.resolvedGames ?? 0,
+        ...(matchingStats.gamesByLevelResolved
+          ? { gamesByLevel: { ...matchingStats.gamesByLevelResolved } }
+          : {}),
       },
       dailyResults,
-      levelTrackingHandler: this.levelTrackingHandler, // Expose for level statistics access
+      levelTrackingSnapshot: this.levelTrackingHandler.exportSnapshot(),
       completedAt: new Date(),
     };
 
     if (this.runtimeOptions.collectDailySnapshots) {
       results.dailyAggregates = generateDailyAggregates(
         results,
-        this.levelTrackingHandler
+        results.levelTrackingSnapshot
       );
+    }
+
+    if (this.simulationAborted || cancellationToken?.cancelled) {
+      const completedDay = dailyResults.length;
+      this.terminationState = {
+        dayCompleted: completedDay,
+        wasGraceful: cancellationToken?.cancelled === true ? false : true,
+        reason:
+          this.lastAbortReason ??
+          (cancellationToken?.cancelled
+            ? {
+                code: "USER_CANCELLED",
+                message: "Simulation cancelled via token",
+              }
+            : {
+                code: "UNKNOWN",
+                message: "Simulation terminated before completion",
+              }),
+      };
+      results.termination = this.terminationState;
+      results.success = false;
     }
 
     // Emit SIMULATION_COMPLETED event
@@ -735,7 +772,9 @@ export class GameEngineSimulator {
           ? totalGames / Math.max(poolStats.totalDollarsInPool, 1)
           : 0,
       resolvedGames: matchingStats.resolvedGames ?? totalGames,
-      gamesByLevel: matchingStats.gamesByLevelResolved,
+      ...(matchingStats.gamesByLevelResolved
+        ? { gamesByLevel: { ...matchingStats.gamesByLevelResolved } }
+        : {}),
     };
   }
 
