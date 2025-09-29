@@ -295,7 +295,11 @@ export class DatasetOrchestrator {
             generationTimeMs,
           };
 
-          if (terminationInfo && !failureResult.error.includes("terminated")) {
+          if (
+            terminationInfo &&
+            failureResult.error &&
+            !failureResult.error.includes("terminated")
+          ) {
             failureResult.error += terminationInfo;
           }
 
@@ -391,6 +395,7 @@ export class DatasetOrchestrator {
               eventCount: eventTraces.length,
               presentationCount: presentationSnapshot?.days.length ?? 0,
               artifactPaths: outputPaths,
+              termination: simulationResults.termination || null,
             }
           );
           metadataJson = serializeDatasetMetadata(metadata);
@@ -695,6 +700,13 @@ export class DatasetOrchestrator {
       eventCount: number;
       presentationCount: number;
       artifactPaths: DatasetArtifactPaths;
+      termination?: {
+        reason: {
+          code: string;
+          message: string;
+        };
+        dayCompleted: number;
+      } | null;
     }
   ): DatasetMetadata {
     // Calculate record count from simulation results
@@ -733,6 +745,13 @@ export class DatasetOrchestrator {
           ? { presentationSnapshotCount: extras.presentationCount }
           : {}),
       };
+
+      if (extras.termination) {
+        metadata.termination = {
+          reason: extras.termination.reason,
+          dayCompleted: extras.termination.dayCompleted,
+        };
+      }
     }
 
     return metadata;
