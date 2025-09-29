@@ -518,22 +518,21 @@ export function WorkflowNode({
             </text>
           );
         })}
-        {/* Straight text for ring totals at the end of the filled arc */}
+        {/* Curved text for ring totals at the filled amount location */}
         {ringDescriptors.map((desc) => {
           const segments = desc.key === 'base' ? layers : desc.key === 'mid' ? midSegments : highSegments;
           const totalValue = segments.reduce((sum, seg) => sum + seg.value, 0);
-          const centerRadius = (desc.innerRadius + desc.outerRadius) / 2;
+          const pathId = `ring-path-${id}-${desc.key}`;
           // Dynamic color based on ring key for contrast
           const textColor = desc.key === 'base' ? 'black' : 'white';
-          // Position at the end of the filled arc
-          const angle = desc.arcs.length > 0 ? desc.arcs[desc.arcs.length - 1].endAngle : -Math.PI / 2;
-          const x = centerRadius * Math.cos(angle);
-          const y = centerRadius * Math.sin(angle);
+          // Calculate effectiveTarget as in computeArcs
+          const sum = segments.reduce((s, l) => s + l.value, 0);
+          const target = desc.key === 'base' ? baseValue : desc.key === 'mid' ? midValue : highValue;
+          const effectiveTarget = target ? target * (desc.key === 'base' ? 1.3 : desc.key === 'mid' ? 1.2 : 1.5) : sum;
+          const percentage = effectiveTarget > 0 ? Math.min((totalValue / effectiveTarget) * 100, 100) : 0;
           return (
             <motion.text
               key={`total-${desc.key}`}
-              x={x}
-              y={y}
               fontSize={10}
               fill={textColor}
               textAnchor="middle"
@@ -542,7 +541,12 @@ export function WorkflowNode({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              {formatCurrency(totalValue)}
+              <motion.textPath
+                href={`#${pathId}`}
+                startOffset={`${percentage}%`}
+              >
+                {formatCurrency(totalValue)}
+              </motion.textPath>
             </motion.text>
           );
         })}
