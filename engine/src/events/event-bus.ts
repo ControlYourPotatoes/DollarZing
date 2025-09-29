@@ -115,6 +115,11 @@ export class EventBus {
   async emit<T>(eventType: string, data: T): Promise<void> {
     return new Promise((resolve, reject) => {
       this.dispatchQueue.push({ type: eventType, data, resolve, reject });
+      if (this.traceEnabled) {
+        console.log(
+          `[EventBus][emit] queued ${eventType}, queue length now ${this.dispatchQueue.length}`
+        );
+      }
 
       if (!this.isDispatching) {
         this.isDispatching = true;
@@ -124,6 +129,11 @@ export class EventBus {
   }
 
   private processQueue(): void {
+    if (this.traceEnabled) {
+      console.log(
+        `[EventBus][processQueue] starting with queue length ${this.dispatchQueue.length}`
+      );
+    }
     const next = (): void => {
       if (this.dispatchQueue.length === 0) {
         this.isDispatching = false;
@@ -131,6 +141,11 @@ export class EventBus {
       }
 
       const { type, data, resolve, reject } = this.dispatchQueue.shift()!;
+      if (this.traceEnabled) {
+        console.log(
+          `[EventBus][processQueue] dispatching ${type}, remaining ${this.dispatchQueue.length}`
+        );
+      }
 
       try {
         const task = this.dispatchEvent(type, data);
@@ -153,6 +168,11 @@ export class EventBus {
   }
 
   private async dispatchEvent<T>(eventType: string, data: T): Promise<void> {
+    if (this.traceEnabled) {
+      console.log(
+        `[EventBus][dispatchEvent] begin ${eventType}, depth ${this.activeDispatchDepth}`
+      );
+    }
     if (this.activeDispatchDepth > this.maxDispatchDepth) {
       throw new Error(
         `Max event dispatch depth (${this.maxDispatchDepth}) exceeded for ${eventType}`
@@ -183,6 +203,11 @@ export class EventBus {
       const promises: Promise<void>[] = [];
 
       for (const { handler } of settledHandlers) {
+        if (this.traceEnabled) {
+          console.log(
+            `[EventBus][dispatchEvent] executing handler for ${eventType}`
+          );
+        }
         try {
           const result = handler(data);
           if (result instanceof Promise) {
@@ -199,6 +224,11 @@ export class EventBus {
       }
 
       if (promises.length > 0) {
+        if (this.traceEnabled) {
+          console.log(
+            `[EventBus][dispatchEvent] awaiting ${promises.length} async handlers for ${eventType}`
+          );
+        }
         try {
           await Promise.all(promises);
         } catch (error) {
@@ -214,6 +244,11 @@ export class EventBus {
         }
       }
     } finally {
+      if (this.traceEnabled) {
+        console.log(
+          `[EventBus][dispatchEvent] end ${eventType}, depth ${this.activeDispatchDepth}`
+        );
+      }
       this.activeDispatchDepth--;
     }
   }

@@ -209,6 +209,12 @@ export interface FifoQueueUpdatedEvent extends BaseEvent {
   waitingPlayerIds: string[];
 }
 
+export interface MatchmakingTerminatedEvent extends BaseEvent {
+  type: "MATCHMAKING_TERMINATED";
+  level: number;
+  reason: string;
+}
+
 export interface PoolAddedEvent extends BaseEvent {
   type: "POOL_ADDED";
   virtualDollarId: string;
@@ -524,6 +530,7 @@ export type SimulationEvent =
   | PlayerWaitingEvent
   | MatchFoundEvent
   | FifoQueueUpdatedEvent
+  | MatchmakingTerminatedEvent
   | PoolAddedEvent
   | PoolRemovedEvent
   | PoolUpdatedEvent
@@ -595,6 +602,7 @@ export const EVENT_TYPES = {
   PLAYER_WAITING: "PLAYER_WAITING",
   MATCH_FOUND: "MATCH_FOUND",
   FIFO_QUEUE_UPDATED: "FIFO_QUEUE_UPDATED",
+  MATCHMAKING_TERMINATED: "MATCHMAKING_TERMINATED",
 
   // Revenue events
   REVENUE_GAME_PROCESSED: "REVENUE_GAME_PROCESSED",
