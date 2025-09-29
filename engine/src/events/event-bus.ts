@@ -263,17 +263,6 @@ export class EventBus {
   }
 
   /**
-   * Get all active listeners for debugging
-   */
-  getListeners(): Map<string, number> {
-    const summary = new Map<string, number>();
-    for (const [eventType, handlers] of this.listeners) {
-      summary.set(eventType, handlers.length);
-    }
-    return summary;
-  }
-
-  /**
    * Get event trace for debugging (only if tracing enabled)
    */
   getEventTrace(): Array<{ type: string; timestamp: Date; data: any }> {
@@ -307,5 +296,13 @@ export class EventBus {
       total += handlers.length;
     }
     return total;
+  }
+
+  getListeners(): Map<string, number> {
+    const summary = new Map<string, number>();
+    for (const [eventType, handlers] of this.listeners.entries()) {
+      summary.set(eventType, handlers.length);
+    }
+    return summary;
   }
 }
