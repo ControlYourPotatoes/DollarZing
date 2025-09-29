@@ -7,6 +7,11 @@ import {
 } from "../event-types";
 import { BettingLevel } from "../../types/virtual-dollar-engine";
 
+interface PlayerLevelState {
+  currentLevel: BettingLevel;
+  previousLevel: BettingLevel;
+}
+
 /**
  * LevelTrackingHandler - Tracks games played at each betting level
  * Maintains daily and cumulative statistics for level-based analytics
@@ -16,6 +21,7 @@ export class LevelTrackingHandler {
   private dailyLevelStats: Map<number, Map<BettingLevel, LevelStats>> =
     new Map();
   private cumulativeLevelStats: Map<BettingLevel, LevelStats> = new Map();
+  private playerLevels: Map<string, PlayerLevelInfo> = new Map();
 
   constructor(private eventBus: EventBus) {
     this.setupEventSubscriptions();
@@ -50,6 +56,15 @@ export class LevelTrackingHandler {
     stats.gamesPlayed += 1;
 
     dayStats.set(level, stats);
+
+    this.playerLevels.set(event.player1Id, {
+      currentLevel: event.player1Level as BettingLevel,
+      previousLevel: event.player1Level as BettingLevel,
+    });
+    this.playerLevels.set(event.player2Id, {
+      currentLevel: event.player2Level as BettingLevel,
+      previousLevel: event.player2Level as BettingLevel,
+    });
   }
 
   private handleGameResolved(event: GameResolvedEvent): void {
@@ -59,32 +74,52 @@ export class LevelTrackingHandler {
 
     const dayStats = this.ensureDailyStats(day);
 
-    // Winner stats
+    const winnerState = this.playerLevels.get(event.winnerId);
+    const loserState = this.playerLevels.get(event.loserId);
+
+    const winnerBucket = winnerLevel;
+    const loserBucket = loserState?.previousLevel ?? loserLevel;
+
     const winnerStats =
-      dayStats.get(winnerLevel) || this.createEmptyLevelStats();
+      dayStats.get(winnerBucket) || this.createEmptyLevelStats();
     winnerStats.wins++;
     winnerStats.progressions++; // Winner advances to next level
     winnerStats.winnings += event.winnings;
-    dayStats.set(winnerLevel, winnerStats);
+    dayStats.set(winnerBucket, winnerStats);
 
     // Track loser stats
-    const loserStats = dayStats.get(loserLevel) || this.createEmptyLevelStats();
+    const loserStats =
+      dayStats.get(loserBucket) || this.createEmptyLevelStats();
     loserStats.losses++;
-    dayStats.set(loserLevel, loserStats);
+    dayStats.set(loserBucket, loserStats);
 
     // Update cumulative stats
     const winnerCumulativeStats =
-      this.cumulativeLevelStats.get(winnerLevel) ||
+      this.cumulativeLevelStats.get(winnerBucket) ||
       this.createEmptyLevelStats();
     winnerCumulativeStats.wins++;
     winnerCumulativeStats.progressions++;
     winnerCumulativeStats.winnings += event.winnings;
-    this.cumulativeLevelStats.set(winnerLevel, winnerCumulativeStats);
+    this.cumulativeLevelStats.set(winnerBucket, winnerCumulativeStats);
 
     const loserCumulativeStats =
-      this.cumulativeLevelStats.get(loserLevel) || this.createEmptyLevelStats();
+      this.cumulativeLevelStats.get(loserBucket) ||
+      this.createEmptyLevelStats();
     loserCumulativeStats.losses++;
-    this.cumulativeLevelStats.set(loserLevel, loserCumulativeStats);
+    this.cumulativeLevelStats.set(loserBucket, loserCumulativeStats);
+
+    if (winnerState) {
+      this.playerLevels.set(event.winnerId, {
+        currentLevel: winnerLevel,
+        previousLevel: winnerState.currentLevel,
+      });
+    }
+    if (loserState) {
+      this.playerLevels.set(event.loserId, {
+        currentLevel: loserLevel,
+        previousLevel: loserState.currentLevel,
+      });
+    }
   }
 
   private createEmptyLevelStats(): LevelStats {
@@ -147,4 +182,9 @@ interface LevelStats {
   cashouts: number;
   progressions: number;
   winnings: number;
+}
+
+interface PlayerLevelInfo {
+  currentLevel: BettingLevel;
+  previousLevel: BettingLevel;
 }

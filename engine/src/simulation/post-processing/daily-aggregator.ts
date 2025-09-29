@@ -255,32 +255,10 @@ export function generateDailyAggregates(
     });
 
     // Generate level breakdown for this day
-    const levelBreakdown = generateLevelBreakdown(
-      levelAccumulators,
-      dailyResult,
+    const levelBreakdown = buildLevelBreakdown(
       levelTracker,
       dailyResult.day ?? dayIndex + 1
     );
-
-    // Validate that level breakdown matches revenue data
-    if (levelTracker && dayIndex !== undefined) {
-      const totalLevelGames = levelBreakdown.reduce(
-        (sum, level) => sum + level.gamesPlayed,
-        0
-      );
-      const revenueGames = dailyGames;
-
-      if (Math.abs(totalLevelGames - revenueGames) > 1) {
-        // Allow for rounding differences
-        console.warn(
-          `[DailyAggregator] Level breakdown mismatch on day ${
-            dayIndex + 1
-          }: ` +
-            `Level games: ${totalLevelGames}, Revenue games: ${revenueGames}. ` +
-            `This indicates an issue with level tracking.`
-        );
-      }
-    }
 
     // Generate lifecycle data for this day
     const lifecycle = generateLifecycleData(
@@ -470,54 +448,43 @@ function clampToZero(value: number): number {
   return value < 0 ? 0 : value;
 }
 
-function generateLevelBreakdown(
-  levelAccumulators: LevelAccumulator[],
-  _dailyResult: any,
-  levelTracker?: LevelTrackingHandler,
-  day?: number
+function buildLevelBreakdown(
+  levelTracker: LevelTrackingHandler | undefined,
+  day: number
 ): LevelBreakdown[] {
-  const LEVELS = Array.from(
-    { length: 10 },
-    (_, index) => (index + 1) as number
-  );
-
-  // If level tracker is available, use real data for the specific day
-  if (levelTracker && day !== undefined) {
-    const dailyLevelStats = levelTracker.getDailyLevelStats(day);
-
-    return levelAccumulators.map((acc, index) => {
-      const level = LEVELS[index] as any; // Type assertion for BettingLevel
-      const stats = dailyLevelStats.get(level) || {
-        gamesPlayed: 0,
-        wins: 0,
-        losses: 0,
-        cashouts: 0,
-        progressions: 0,
-        winnings: 0,
-      };
-
-      return {
-        level: acc.level,
-        gamesPlayed: stats.gamesPlayed,
-        wins: stats.wins,
-        cashouts: stats.cashouts,
-        progressions: stats.progressions,
-        winnings: stats.winnings,
-        losses: stats.losses,
-      };
-    });
+  if (!levelTracker) {
+    return Array.from({ length: 10 }, (_, index) => ({
+      level: index + 1,
+      gamesPlayed: 0,
+      wins: 0,
+      cashouts: 0,
+      progressions: 0,
+      winnings: 0,
+      losses: 0,
+    }));
   }
 
-  // If no level tracker available, return zeros (no fake data)
-  return levelAccumulators.map((acc) => ({
-    level: acc.level,
-    gamesPlayed: 0,
-    wins: 0,
-    cashouts: 0,
-    progressions: 0,
-    winnings: 0,
-    losses: 0,
-  }));
+  const stats = levelTracker.getDailyLevelStats(day);
+  return Array.from({ length: 10 }, (_, index) => {
+    const level = (index + 1) as number;
+    const levelStats = stats.get(level as any) || {
+      gamesPlayed: 0,
+      wins: 0,
+      losses: 0,
+      cashouts: 0,
+      progressions: 0,
+      winnings: 0,
+    };
+    return {
+      level,
+      gamesPlayed: levelStats.gamesPlayed,
+      wins: levelStats.wins,
+      cashouts: levelStats.cashouts,
+      progressions: levelStats.progressions,
+      winnings: levelStats.winnings,
+      losses: levelStats.losses,
+    };
+  });
 }
 
 function generateLifecycleData(

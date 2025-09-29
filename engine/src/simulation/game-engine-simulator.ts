@@ -108,6 +108,8 @@ export interface GameStatistics {
   activeRuns: number; // Same as pooledVirtualDollars - runs currently in pool
   jackpotsWon: number;
   averageRunLength: number;
+  resolvedGames?: number;
+  gamesByLevel?: Record<number, number>;
 }
 
 /**
@@ -529,6 +531,7 @@ export class GameEngineSimulator {
     const playerStats = this.getPlayerStatisticsFromState();
     const revenueStats = this.generateRevenueStatistics();
     const gameStats = this.generateGameStatistics();
+    const matchingStats = this.components.gameMatchingEngine.getStatistics();
 
     const results: SimulationResults = {
       success: true,
@@ -542,7 +545,11 @@ export class GameEngineSimulator {
       },
       playerStats,
       revenueStats,
-      gameStats,
+      gameStats: {
+        ...gameStats,
+        resolvedGames: matchingStats.resolvedGames,
+        gamesByLevel: matchingStats.gamesByLevel,
+      },
       dailyResults,
       levelTrackingHandler: this.levelTrackingHandler, // Expose for level statistics access
       completedAt: new Date(),
@@ -701,7 +708,10 @@ export class GameEngineSimulator {
    * Generate game statistics from event-driven state
    */
   private generateGameStatistics(): GameStatistics {
-    const totalGames = this.components.revenueCalculator.getTotalGames();
+    const matchingStats = this.components.gameMatchingEngine.getStatistics();
+    const totalGames =
+      matchingStats.resolvedGames ??
+      this.components.revenueCalculator.getTotalGames();
     const averageGamesPerDay =
       totalGames / Math.max(this.config.durationDays, 1);
 
@@ -724,6 +734,8 @@ export class GameEngineSimulator {
         totalGames > 0
           ? totalGames / Math.max(poolStats.totalDollarsInPool, 1)
           : 0,
+      resolvedGames: matchingStats.resolvedGames ?? totalGames,
+      gamesByLevel: matchingStats.gamesByLevelResolved,
     };
   }
 
