@@ -114,6 +114,13 @@ export interface DatasetMetadata {
     eventTraceCount: number;
     presentationSnapshotCount?: number;
   };
+  termination?: {
+    reason: {
+      code: string;
+      message: string;
+    };
+    dayCompleted: number;
+  };
 }
 
 export interface DatasetArtifactPaths {
