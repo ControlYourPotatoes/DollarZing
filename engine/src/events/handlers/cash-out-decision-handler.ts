@@ -65,6 +65,7 @@ export class CashOutDecisionHandler {
     private strategyManager: IStrategyManager
   ) {
     this.setupEventSubscriptions();
+    console.log("[CashOutDecisionHandler] attached");
   }
 
   private setupEventSubscriptions(): void {
@@ -77,6 +78,12 @@ export class CashOutDecisionHandler {
   }
 
   private async handleGameResolved(event: GameResolvedEvent): Promise<void> {
+    console.log(
+      `[CashOutDecisionHandler] handleGameResolved: game ${event.gameId}, winner ${event.winnerId}, level ${event.winnerLevel}`
+    );
+    console.log(
+      `[CashOutDecisionHandler] handleGameResolved: game ${event.gameId}, winner ${event.winnerId}, level ${event.winnerLevel}`
+    );
     try {
       // Only process cash-out decisions for winners
       if (event.gameResult === "WIN") {
@@ -88,14 +95,21 @@ export class CashOutDecisionHandler {
         error
       );
 
-      await this.eventBus.emit(EVENT_TYPES.CASH_OUT_DECISION_FAILED, {
-        type: EVENT_TYPES.CASH_OUT_DECISION_FAILED,
-        timestamp: new Date(),
-        playerId: event.winnerId,
-        virtualDollarId: event.winnerDollarId,
-        reason: "Decision making failed",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      void this.eventBus
+        .emit(EVENT_TYPES.CASH_OUT_DECISION_FAILED, {
+          type: EVENT_TYPES.CASH_OUT_DECISION_FAILED,
+          timestamp: new Date(),
+          playerId: event.winnerId,
+          virtualDollarId: event.winnerDollarId,
+          reason: "Decision making failed",
+          error: error instanceof Error ? error.message : String(error),
+        })
+        .catch((emitError) =>
+          console.error(
+            `[CashOutDecisionHandler] Failed to emit CASH_OUT_DECISION_FAILED:`,
+            emitError
+          )
+        );
     }
   }
 
@@ -144,10 +158,26 @@ export class CashOutDecisionHandler {
         strategy
       );
       decision = Math.random() < probability ? "CASH_OUT" : "CONTINUE";
+    } else if (strategy === CashOutStrategy.AGGRESSIVE) {
+      // Aggressive strategy prefers to continue unless near jackpot
+      const stayInGameProbability = Math.max(
+        0.8 - event.winnerLevel * 0.05,
+        0.2
+      );
+      decision =
+        Math.random() < stayInGameProbability ? "CONTINUE" : "CASH_OUT";
+    } else if (strategy === CashOutStrategy.CONSERVATIVE) {
+      // Conservative strategy cashes out early
+      const cashOutProbability = Math.min(0.8 + event.winnerLevel * 0.05, 0.95);
+      decision = Math.random() < cashOutProbability ? "CASH_OUT" : "CONTINUE";
     } else {
-      // For other strategies, use the strategy manager's decision
+      // Fallback to strategy manager
       decision = this.strategyManager.makeCashOutDecision(context);
     }
+
+    console.log(
+      `[CashOutDecisionHandler] Winner ${event.winnerId} at level ${event.winnerLevel} with strategy ${strategy} decided to ${decision}`
+    );
 
     // Create reason string based on strategy and decision
     const reason = this.buildDecisionReason(
@@ -202,7 +232,14 @@ export class CashOutDecisionHandler {
       ...(decision === "CASH_OUT" && { amount: event.winnings }),
     };
 
-    await this.eventBus.emit(EVENT_TYPES.CASH_OUT_DECISION, decisionEvent);
+    this.eventBus
+      .emit(EVENT_TYPES.CASH_OUT_DECISION, decisionEvent)
+      .catch((error) =>
+        console.error(
+          "[CashOutDecisionHandler] Failed to emit CASH_OUT_DECISION:",
+          error
+        )
+      );
 
     // Process the decision and emit follow-up events
     if (decision === "CASH_OUT") {
@@ -238,7 +275,14 @@ export class CashOutDecisionHandler {
         wasJackpot: event.winnerLevel === 10,
       };
 
-      await this.eventBus.emit(EVENT_TYPES.CASH_OUT_COMPLETED, completedEvent);
+      this.eventBus
+        .emit(EVENT_TYPES.CASH_OUT_COMPLETED, completedEvent)
+        .catch((error) =>
+          console.error(
+            "[CashOutDecisionHandler] Failed to emit CASH_OUT_COMPLETED:",
+            error
+          )
+        );
 
       // Also emit VIRTUAL_DOLLAR_RUN_COMPLETED since cash-out is a type of run completion
       const runCompletedEvent = {
@@ -252,10 +296,14 @@ export class CashOutDecisionHandler {
         wasSuccessful: true,
       };
 
-      await this.eventBus.emit(
-        EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
-        runCompletedEvent
-      );
+      this.eventBus
+        .emit(EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED, runCompletedEvent)
+        .catch((error) =>
+          console.error(
+            "[CashOutDecisionHandler] Failed to emit VIRTUAL_DOLLAR_RUN_COMPLETED:",
+            error
+          )
+        );
     } catch (error) {
       console.error(
         `[CashOutDecisionHandler] Error processing cash-out:`,
@@ -290,7 +338,14 @@ export class CashOutDecisionHandler {
       nextPotentialWinnings,
     };
 
-    await this.eventBus.emit(EVENT_TYPES.CONTINUE_PLAY, continueEvent);
+    this.eventBus
+      .emit(EVENT_TYPES.CONTINUE_PLAY, continueEvent)
+      .catch((error) =>
+        console.error(
+          "[CashOutDecisionHandler] Failed to emit CONTINUE_PLAY:",
+          error
+        )
+      );
   }
 
   private calculateNextLevelWinnings(level: number): number {

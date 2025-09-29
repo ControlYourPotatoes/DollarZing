@@ -404,7 +404,16 @@ export class MatchmakingEventHandler {
       level,
       reason,
     });
-    this.gameMatchingEngine.abortSimulation?.();
+    this.gameMatchingEngine.abortSimulation?.({
+      code: "MATCHMAKING_STALEMATE",
+      message: reason,
+      context: {
+        level,
+        uniqueOwners: this.consecutiveNoMatchCycles,
+        poolSize:
+          this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool,
+      },
+    });
   }
 
   /**

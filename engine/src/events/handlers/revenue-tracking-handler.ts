@@ -154,19 +154,26 @@ export class RevenueTrackingHandler {
       }
 
       // Emit revenue game processed event
-      await this.eventBus.emit(EVENT_TYPES.REVENUE_GAME_PROCESSED, {
-        type: EVENT_TYPES.REVENUE_GAME_PROCESSED,
-        timestamp: new Date(),
-        gameId: event.gameId,
-        gameRevenue: gameRevenue,
-        platformRevenue: platformRevenue,
-        charityContribution: charityContribution,
-        totalGameRevenue: totalGameRevenue,
-      } as RevenueGameProcessedEvent);
+      void this.eventBus
+        .emit(EVENT_TYPES.REVENUE_GAME_PROCESSED, {
+          type: EVENT_TYPES.REVENUE_GAME_PROCESSED,
+          timestamp: new Date(),
+          gameId: event.gameId,
+          gameRevenue: gameRevenue,
+          platformRevenue: platformRevenue,
+          charityContribution: charityContribution,
+          totalGameRevenue: totalGameRevenue,
+        } as RevenueGameProcessedEvent)
+        .catch((emitError) =>
+          console.error(
+            `[RevenueTrackingHandler] Failed to emit REVENUE_GAME_PROCESSED:`,
+            emitError
+          )
+        );
 
       // Emit revenue update if real-time updates are enabled
       if (this.config.enableRealtimeUpdates) {
-        await this.emitRevenueUpdate();
+        void this.emitRevenueUpdate();
       }
 
       if (this.config.loggingEnabled) {
@@ -237,19 +244,26 @@ export class RevenueTrackingHandler {
       }
 
       // Emit revenue cash-out processed event
-      await this.eventBus.emit(EVENT_TYPES.REVENUE_CASH_OUT_PROCESSED, {
-        type: EVENT_TYPES.REVENUE_CASH_OUT_PROCESSED,
-        timestamp: new Date(),
-        playerId: event.playerId,
-        virtualDollarId: event.virtualDollarId,
-        cashOutAmount: event.cashOutAmount,
-        playerWinnings: cashOutResult.playerAmount,
-        totalPlayerWinnings: revenueStream.playerWinnings,
-      } as RevenueCashOutProcessedEvent);
+      void this.eventBus
+        .emit(EVENT_TYPES.REVENUE_CASH_OUT_PROCESSED, {
+          type: EVENT_TYPES.REVENUE_CASH_OUT_PROCESSED,
+          timestamp: new Date(),
+          playerId: event.playerId,
+          virtualDollarId: event.virtualDollarId,
+          cashOutAmount: event.cashOutAmount,
+          playerWinnings: cashOutResult.playerAmount,
+          totalPlayerWinnings: revenueStream.playerWinnings,
+        } as RevenueCashOutProcessedEvent)
+        .catch((emitError) =>
+          console.error(
+            `[RevenueTrackingHandler] Failed to emit REVENUE_CASH_OUT_PROCESSED:`,
+            emitError
+          )
+        );
 
       // Emit revenue update if real-time updates are enabled
       if (this.config.enableRealtimeUpdates) {
-        await this.emitRevenueUpdate();
+        void this.emitRevenueUpdate();
       }
 
       if (this.config.loggingEnabled) {
@@ -278,18 +292,25 @@ export class RevenueTrackingHandler {
     try {
       const revenueStream = this.revenueCalculator.getRevenueStream();
 
-      await this.eventBus.emit(EVENT_TYPES.REVENUE_UPDATE, {
-        type: EVENT_TYPES.REVENUE_UPDATE,
-        timestamp: new Date(),
-        totalPlatformRevenue: revenueStream.platformClickRevenue,
-        totalCharityContributions: revenueStream.charityContributions,
-        totalPlayerPayouts: revenueStream.playerWinnings,
-        totalGames: revenueStream.totalGames,
-        revenuePerGame:
-          revenueStream.totalGames > 0
-            ? revenueStream.platformClickRevenue / revenueStream.totalGames
-            : 0,
-      } as RevenueUpdateEvent);
+      void this.eventBus
+        .emit(EVENT_TYPES.REVENUE_UPDATE, {
+          type: EVENT_TYPES.REVENUE_UPDATE,
+          timestamp: new Date(),
+          totalPlatformRevenue: revenueStream.platformClickRevenue,
+          totalCharityContributions: revenueStream.charityContributions,
+          totalPlayerPayouts: revenueStream.playerWinnings,
+          totalGames: revenueStream.totalGames,
+          revenuePerGame:
+            revenueStream.totalGames > 0
+              ? revenueStream.platformClickRevenue / revenueStream.totalGames
+              : 0,
+        } as RevenueUpdateEvent)
+        .catch((emitError) =>
+          console.error(
+            `[RevenueTrackingHandler] Failed to emit REVENUE_UPDATE:`,
+            emitError
+          )
+        );
     } catch (error) {
       console.error(
         `[RevenueTrackingHandler] Error emitting revenue update:`,
@@ -307,13 +328,20 @@ export class RevenueTrackingHandler {
     error: string
   ): Promise<void> {
     try {
-      await this.eventBus.emit(EVENT_TYPES.EVENT_ERROR, {
-        type: EVENT_TYPES.EVENT_ERROR,
-        timestamp: new Date(),
-        eventType: eventType,
-        error: error,
-        context: { contextId },
-      } as ErrorEvent);
+      void this.eventBus
+        .emit(EVENT_TYPES.EVENT_ERROR, {
+          type: EVENT_TYPES.EVENT_ERROR,
+          timestamp: new Date(),
+          eventType: eventType,
+          error: error,
+          context: { contextId },
+        } as ErrorEvent)
+        .catch((emitError) =>
+          console.error(
+            `[RevenueTrackingHandler] Failed to emit error event:`,
+            emitError
+          )
+        );
     } catch (emitError) {
       console.error(
         `[RevenueTrackingHandler] Failed to emit error event:`,
@@ -626,7 +654,9 @@ export class RevenueTrackingHandler {
     }
 
     if (this.config.loggingEnabled) {
-      console.log("[RevenueTrackingHandler] Disposed - cleaned up subscriptions");
+      console.log(
+        "[RevenueTrackingHandler] Disposed - cleaned up subscriptions"
+      );
     }
   }
 }

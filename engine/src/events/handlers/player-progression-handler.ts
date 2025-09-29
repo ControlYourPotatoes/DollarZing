@@ -29,6 +29,7 @@ export class PlayerProgressionHandler {
     options?: { loggingEnabled?: boolean }
   ) {
     this.loggingEnabled = options?.loggingEnabled ?? true;
+    console.log("[PlayerProgressionHandler] attached");
     this.setupEventSubscriptions();
   }
 
@@ -53,6 +54,9 @@ export class PlayerProgressionHandler {
   }
 
   private async handleGameResolved(event: GameResolvedEvent): Promise<void> {
+    console.log(
+      `[PlayerProgressionHandler] handleGameResolved: game ${event.gameId}, loser ${event.loserId}, level ${event.loserLevel}`
+    );
     try {
       // Only process loser elimination - winners are processed after cash-out decision
       await this.processLoserElimination(event);
@@ -72,14 +76,24 @@ export class PlayerProgressionHandler {
         error: error instanceof Error ? error.message : String(error),
       };
 
-      await this.eventBus.emit(
-        EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
-        progressionFailedEvent
-      );
+      void this.eventBus
+        .emit(
+          EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
+          progressionFailedEvent
+        )
+        .catch((emitError) =>
+          console.error(
+            `[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_PROGRESSION_FAILED (loser):`,
+            emitError
+          )
+        );
     }
   }
 
   private async handleContinuePlay(event: ContinuePlayEvent): Promise<void> {
+    console.log(
+      `[PlayerProgressionHandler] handleContinuePlay: player ${event.playerId}, level ${event.currentLevel}`
+    );
     try {
       // Process winner progression only after they decided to continue
       await this.processWinnerProgression(event);
@@ -99,10 +113,17 @@ export class PlayerProgressionHandler {
         error: error instanceof Error ? error.message : String(error),
       };
 
-      await this.eventBus.emit(
-        EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
-        progressionFailedEvent
-      );
+      void this.eventBus
+        .emit(
+          EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
+          progressionFailedEvent
+        )
+        .catch((emitError) =>
+          console.error(
+            `[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_PROGRESSION_FAILED (winner):`,
+            emitError
+          )
+        );
     }
   }
 
@@ -132,7 +153,7 @@ export class PlayerProgressionHandler {
       }
 
       // Calculate progression using factory
-      const newLevel = Math.min(10, event.nextLevel) as BettingLevel;
+      const newLevel = Math.min(10, event.currentLevel + 1) as BettingLevel;
       const levelWinnings =
         this.virtualDollarFactory.calculateLevelWinnings(newLevel);
 
@@ -149,27 +170,41 @@ export class PlayerProgressionHandler {
         );
       }
 
+      console.log(
+        `[PlayerProgressionHandler] Advanced dollar ${updatedDollar.id} now at level ${updatedDollar.currentLevel}`
+      );
+
       // Check if run is complete (reached Level 10 = Jackpot)
       if (newLevel >= 10) {
-        await this.emitVirtualDollarRunCompleted(
+        this.emitVirtualDollarRunCompleted(
           event.playerId,
-          event.virtualDollarId,
+          vdId,
           newLevel,
           updatedDollar.currentRunWinnings,
           true // isJackpot
+        ).catch((error) =>
+          console.error(
+            "[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_RUN_COMPLETED:",
+            error
+          )
         );
       } else {
         // Re-pool the advanced winner for next level matching
-        await this.rePoolAdvancedWinner(updatedDollar);
+        void this.rePoolAdvancedWinner(updatedDollar);
 
         // Player advanced to next level - emit VIRTUAL_DOLLAR_ADVANCED event
-        await this.emitVirtualDollarAdvanced(
+        this.emitVirtualDollarAdvanced(
           event.playerId,
-          event.virtualDollarId,
+          vdId,
           event.currentLevel as BettingLevel,
           newLevel,
           updatedDollar.currentRunWinnings,
           updatedDollar.gamesInThisRun
+        ).catch((error) =>
+          console.error(
+            "[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_ADVANCED:",
+            error
+          )
         );
       }
     } catch (error) {
@@ -231,20 +266,35 @@ export class PlayerProgressionHandler {
         DollarState.POOLED
       );
 
-      // Add back to matching pool at new level
-      const addResult = await this.gameMatchingEngine.addToPool(virtualDollar);
-
-      if (!addResult.success) {
-        throw new Error(
-          `Failed to re-pool advanced winner: ${addResult.error}`
-        );
-      }
-
       if (this.loggingEnabled) {
         console.log(
-          `[PlayerProgressionHandler] Re-pooled advanced winner ${virtualDollar.ownerId} (${virtualDollar.id}) at level ${virtualDollar.currentLevel}`
+          `[PlayerProgressionHandler] Preparing to re-pool dollar ${virtualDollar.id} at level ${virtualDollar.currentLevel}`
         );
       }
+
+      // Add back to matching pool at new level
+      this.gameMatchingEngine
+        .addToPool(virtualDollar)
+        .then((result) => {
+          if (!result.success) {
+            console.warn(
+              `[PlayerProgressionHandler] Failed to re-pool advanced winner ${virtualDollar.id}: ${result.error}`
+            );
+            return;
+          }
+
+          if (this.loggingEnabled) {
+            console.log(
+              `[PlayerProgressionHandler] Re-pooled advanced winner ${virtualDollar.ownerId} (${virtualDollar.id}) at level ${virtualDollar.currentLevel}`
+            );
+          }
+        })
+        .catch((error) =>
+          console.error(
+            `[PlayerProgressionHandler] Error re-pooling advanced winner ${virtualDollar.id}:`,
+            error
+          )
+        );
     } catch (error) {
       console.error(
         `[PlayerProgressionHandler] Error re-pooling advanced winner:`,
@@ -279,17 +329,26 @@ export class PlayerProgressionHandler {
       ),
     };
 
-    await this.eventBus.emit(
-      EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
-      virtualDollarAdvancedEvent
-    );
+    this.eventBus
+      .emit(EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED, virtualDollarAdvancedEvent)
+      .catch((error) =>
+        console.error(
+          "[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_ADVANCED:",
+          error
+        )
+      );
 
     // Also emit player-level aggregate event for total winnings update
-    await this.emitPlayerTotalWinningsUpdated(
+    this.emitPlayerTotalWinningsUpdated(
       playerId,
       virtualDollarId,
       totalWinnings,
       "VIRTUAL_DOLLAR_ADVANCED"
+    ).catch((error) =>
+      console.error(
+        "[PlayerProgressionHandler] Failed to emit PLAYER_TOTAL_WINNINGS_UPDATED:",
+        error
+      )
     );
   }
 
@@ -318,13 +377,20 @@ export class PlayerProgressionHandler {
       wasSuccessful: isJackpot,
     };
 
-    await this.eventBus.emit(
-      EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
-      virtualDollarRunCompletedEvent
-    );
+    void this.eventBus
+      .emit(
+        EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
+        virtualDollarRunCompletedEvent
+      )
+      .catch((error) =>
+        console.error(
+          "[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_RUN_COMPLETED:",
+          error
+        )
+      );
 
     // Also emit player-level aggregate event for total winnings update
-    await this.emitPlayerTotalWinningsUpdated(
+    void this.emitPlayerTotalWinningsUpdated(
       playerId,
       virtualDollarId,
       totalWinnings,
@@ -359,10 +425,14 @@ export class PlayerProgressionHandler {
       triggeringEvent,
     };
 
-    await this.eventBus.emit(
-      EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED,
-      playerTotalWinningsEvent
-    );
+    void this.eventBus
+      .emit(EVENT_TYPES.PLAYER_TOTAL_WINNINGS_UPDATED, playerTotalWinningsEvent)
+      .catch((error) =>
+        console.error(
+          "[PlayerProgressionHandler] Failed to emit PLAYER_TOTAL_WINNINGS_UPDATED:",
+          error
+        )
+      );
   }
 
   /**
