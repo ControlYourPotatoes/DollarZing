@@ -167,3 +167,17 @@ Watch the serializer. The orchestrator serializes the entire SimulationResults v
 Temporarily disable extra context. As a quick test, comment out the context payload you passed into the abort reason and rerun. If the stack error disappears, we know the recursion is coming from the context you just added.
 Event debugger attachments. If the event debugger is still active, its buffers might contain circular references when we include them in simulationResults. Ensure we’re not storing the whole debugger instance (only plain JSON snapshots).
 Once we have the stack trace or isolate the offending payload, we can fix the serializer or flatten that structure. Let me know if you can capture the trace or want me to inspect run.log for it.
+
+Findings
+
+engine/run.log shows Maximum call stack size exceeded right after day-1 progress logs and just before the CLI prints “Finished 0/1 combinations”. The stack overflow happens while handling dataset orchestration events, not inside the core simulation loop.
+The CLI orchestrator (engine/cli/src/orchestrator/execution/game-engine-executor.ts) owns an EventBus instance that is reused for multiple dataset runs. Handlers for DATASET_GENERATION_PROGRESS, DAY_COMPLETED, SIMULATION_COMPLETED, etc., are registered in the adapter (DatasetOrchestrator) and simulator, but they are never torn down after a day completes.
+Because the event bus keeps every handler alive across runs, each new day emits more events into an ever-growing listener tree. When a new day or simulation completes, EventBus.dispatchEvent recurses through the entire listener stack (depth capped at 1000); with hundreds of listeners attached, it breaches the depth limit and throws the call-stack error.
+The CLI’s progress writer also assumes a single “simulation finished” event to flush logging. When the simulation rolls into a second day, the same completion event fires while day-level handlers are still active, triggering the overflow.
+Recommendations
+
+Treat day boundaries separately from full simulation completion. Introduce an explicit “day finished” callback that flushes or rotates logging without disposing the whole bus.
+After processing a day, unsubscribe handlers that are day-specific, and when a dataset run ends, dispose the EventBus (or clone a fresh bus per run) so handler stacks don’t accumulate.
+Move logging cleanup into a dedicated lifecycle module that listens for DAY_COMPLETED versus SIMULATION_COMPLETED, flushing per-day logs and only doing final shutdown work after SIMULATION_COMPLETED.
+Consider lowering EventBus.maxDispatchDepth or changing dispatchQueue to iterative dispatch, but the real fix is to release listeners and avoid re-entrant emission chains at day finish.
+I can help refactor the CLI orchestrator to create a fresh event bus per dataset run, add day-level cleanup hooks, and modularize logging so daily rollover doesn’t trigger final shutdown. Let me know if you’d like me to implement that
