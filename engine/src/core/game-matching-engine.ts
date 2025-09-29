@@ -100,6 +100,7 @@ export class GameMatchingEngine {
   private activeGames: Map<string, GameSession> = new Map();
   private completedGames: Map<string, GameSession> = new Map();
   private abortCallback: (() => void) | null = null;
+  private resolvedGameCount = 0;
 
   // Configuration
   private maxConcurrentGames: number = 1000;
@@ -457,6 +458,7 @@ export class GameMatchingEngine {
       // Remove from in-game tracking
       this.dollarsInGame.delete(winner.id);
       this.dollarsInGame.delete(loser.id);
+      this.resolvedGameCount++;
 
       // Game resolved event will be emitted by GameEventHandler
 
@@ -554,6 +556,7 @@ export class GameMatchingEngine {
       gamesByLevel,
       totalPlatformFees,
       totalWinnings,
+      resolvedGames: this.resolvedGameCount,
     };
   }
 

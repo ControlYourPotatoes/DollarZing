@@ -47,7 +47,14 @@ export class GameProcessor {
       console.log(
         `[GameProcessor] Emitting GAME_CREATED for game ${gameSession.id}`
       );
-      await this.eventBus.emit(EVENT_TYPES.GAME_CREATED, gameCreatedEvent);
+      void this.eventBus
+        .emit(EVENT_TYPES.GAME_CREATED, gameCreatedEvent)
+        .catch((error) =>
+          console.error(
+            `[GameProcessor] Failed to emit GAME_CREATED for game ${gameSession.id}:`,
+            error
+          )
+        );
     }
   }
 
