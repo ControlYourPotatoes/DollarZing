@@ -165,7 +165,7 @@ async function main(): Promise<void> {
 
   let logStream: WriteStream | undefined;
   const appendLog = (level: string, message: string): void => {
-    if (!logStream || (logStream as any).closed) {
+    if (!logStream || logStream.writableEnded || logStream.destroyed) {
       return;
     }
     const lines = message.split(/\r?\n/);
@@ -295,10 +295,15 @@ async function main(): Promise<void> {
       process.exitCode = 1;
     }
   } finally {
-    if (logStream && !(logStream as any).closed) {
+    if (logStream) {
       await new Promise<void>((resolve) => {
-        logStream.end(resolve);
+        if (logStream && !logStream.writableEnded && !logStream.destroyed) {
+          logStream.end(resolve);
+        } else {
+          resolve();
+        }
       });
+      logStream = undefined;
     }
     console.log = originalConsole.log;
     console.warn = originalConsole.warn;

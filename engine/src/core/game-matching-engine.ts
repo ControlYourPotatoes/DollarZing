@@ -18,6 +18,7 @@ import {
   PoolRemovedEvent,
   PoolUpdatedEvent,
 } from "../events/event-types";
+import type { SimulationAbortReason } from "../types/simulation-termination";
 
 // Legacy event types removed - using centralized EventBus instead
 
@@ -60,7 +61,8 @@ export interface GameStatistics {
   gamesByLevel?: Record<BettingLevel, number>;
   totalPlatformFees: number;
   totalWinnings: number;
-  averageGameDuration?: number;
+  resolvedGames?: number;
+  gamesByLevelResolved?: Record<BettingLevel, number>;
 }
 
 // Audit trail interface
@@ -101,6 +103,20 @@ export class GameMatchingEngine {
   private completedGames: Map<string, GameSession> = new Map();
   private abortCallback: (() => void) | null = null;
   private resolvedGameCount = 0;
+  private resolvedGamesByLevel: Record<BettingLevel, number> = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+    7: 0,
+    8: 0,
+    9: 0,
+    10: 0,
+  };
+  private resolvedPlatformFees = 0;
+  private resolvedWinnings = 0;
 
   // Configuration
   private maxConcurrentGames: number = 1000;
@@ -459,6 +475,10 @@ export class GameMatchingEngine {
       this.dollarsInGame.delete(winner.id);
       this.dollarsInGame.delete(loser.id);
       this.resolvedGameCount++;
+      this.resolvedGamesByLevel[game.level] =
+        (this.resolvedGamesByLevel[game.level] ?? 0) + 1;
+      this.resolvedPlatformFees += game.platformFee;
+      this.resolvedWinnings += game.winnings;
 
       // Game resolved event will be emitted by GameEventHandler
 
@@ -532,24 +552,9 @@ export class GameMatchingEngine {
    * Get comprehensive game statistics
    */
   getStatistics(): GameStatistics {
-    const gamesByLevel: Record<BettingLevel, number> = {} as Record<
-      BettingLevel,
-      number
-    >;
-    let totalPlatformFees = 0;
-    let totalWinnings = 0;
-
-    // Initialize level counts
-    for (let level = 1; level <= MAX_BETTING_LEVEL; level++) {
-      gamesByLevel[level as BettingLevel] = 0;
-    }
-
-    // Calculate statistics from completed games
-    for (const game of Array.from(this.completedGames.values())) {
-      gamesByLevel[game.level]++;
-      totalPlatformFees += game.platformFee;
-      totalWinnings += game.winnings;
-    }
+    const gamesByLevel = { ...this.resolvedGamesByLevel };
+    const totalPlatformFees = this.resolvedPlatformFees;
+    const totalWinnings = this.resolvedWinnings;
 
     return {
       totalGamesPlayed: this.completedGames.size,
@@ -557,6 +562,7 @@ export class GameMatchingEngine {
       totalPlatformFees,
       totalWinnings,
       resolvedGames: this.resolvedGameCount,
+      gamesByLevelResolved: { ...this.resolvedGamesByLevel },
     };
   }
 
@@ -621,12 +627,12 @@ export class GameMatchingEngine {
     return this.eventBus;
   }
 
-  setAbortCallback(callback: () => void): void {
+  setAbortCallback(callback: (reason?: SimulationAbortReason) => void): void {
     this.abortCallback = callback;
   }
 
-  abortSimulation(): void {
-    this.abortCallback?.();
+  abortSimulation(reason?: SimulationAbortReason): void {
+    this.abortCallback?.(reason);
   }
 
   // Legacy event system methods removed - using centralized EventBus instead
