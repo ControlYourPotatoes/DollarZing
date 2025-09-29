@@ -99,6 +99,7 @@ export class GameMatchingEngine {
   // Game management
   private activeGames: Map<string, GameSession> = new Map();
   private completedGames: Map<string, GameSession> = new Map();
+  private abortCallback: (() => void) | null = null;
 
   // Configuration
   private maxConcurrentGames: number = 1000;
@@ -615,6 +616,14 @@ export class GameMatchingEngine {
    */
   getEventBus(): EventBus {
     return this.eventBus;
+  }
+
+  setAbortCallback(callback: () => void): void {
+    this.abortCallback = callback;
+  }
+
+  abortSimulation(): void {
+    this.abortCallback?.();
   }
 
   // Legacy event system methods removed - using centralized EventBus instead
