@@ -2,6 +2,7 @@
 // Provides abstraction layer between orchestrator parameters and game engine configuration
 
 import { join } from "path";
+import { promises as fs } from "fs";
 
 import {
   SimulationConfig,
@@ -197,7 +198,8 @@ export class DatasetOrchestrator {
         parameterId,
         simulationConfig,
         shouldCollectSnapshots,
-        shouldCollectEvents
+        shouldCollectEvents,
+        !!this.orchestratorConfig.debugEvents
       );
       const { simulator, profile } = assembly;
 
@@ -316,7 +318,10 @@ export class DatasetOrchestrator {
         const recordCount = this.calculateRecordCount(simulationResults);
         const dailySnapshots: DailyAggregateSnapshot[] = requireDailySnapshots
           ? simulationResults.dailyAggregates ??
-            generateDailyAggregates(simulationResults)
+            generateDailyAggregates(
+              simulationResults,
+              simulationResults.levelTrackingHandler
+            ) // Use real level tracking
           : [];
         const presentationSnapshot: PresentationSnapshotFile | undefined =
           shouldCollectPresentation
@@ -330,6 +335,36 @@ export class DatasetOrchestrator {
         const eventTraces: EventTrace[] = shouldCollectEvents
           ? ((debugSession?.traces ?? []) as EventTrace[])
           : [];
+
+        if (
+          shouldCollectEvents &&
+          this.orchestratorConfig.debugEvents &&
+          debugSession
+        ) {
+          const debugDir = join(
+            this.orchestratorConfig.outputDirectory,
+            "anchor-datasets",
+            scenarioSlug,
+            "debug"
+          );
+          await fs.mkdir(debugDir, { recursive: true });
+
+          const traceFile = join(debugDir, "event-traces.json");
+          await fs.writeFile(
+            traceFile,
+            JSON.stringify(debugSession.traces, null, 2),
+            "utf8"
+          );
+
+          if (debugSession.logs.length > 0) {
+            const logFile = join(debugDir, "event-logs.json");
+            await fs.writeFile(
+              logFile,
+              JSON.stringify(debugSession.logs, null, 2),
+              "utf8"
+            );
+          }
+        }
 
         const datasetJson = serializeSimulationResults(simulationResults);
         const datasetSizeBytes = Buffer.byteLength(datasetJson, "utf8");
@@ -526,9 +561,10 @@ export class DatasetOrchestrator {
     parameterId: string,
     simulationConfig: SimulationConfig,
     collectDailySnapshots: boolean,
-    collectEventTraces: boolean
+    collectEventTraces: boolean,
+    debugEvents: boolean
   ): SimulatorAssembly {
-    const simulationEventBus = new EventBus();
+    const simulationEventBus = new EventBus({ enableTracing: debugEvents });
 
     return createProductionSimulator({
       eventBus: simulationEventBus,
@@ -557,19 +593,24 @@ export class DatasetOrchestrator {
               config: {
                 debugger: {
                   enabled: true,
-                  includeData: true,
-                  maxTraces: 10000,
-                  logLevel: this.orchestratorConfig.verbose ? "info" : "warn",
-                  enablePerformanceTracking: false,
-                  enableEventFlowVisualization: false,
+                  includeData: debugEvents,
+                  maxTraces: debugEvents ? 20000 : 10000,
+                  logLevel: debugEvents
+                    ? "debug"
+                    : this.orchestratorConfig.verbose
+                    ? "info"
+                    : "warn",
+                  enablePerformanceTracking: debugEvents,
+                  enableEventFlowVisualization: debugEvents,
                 },
                 logger: {
-                  enabled: false,
+                  enabled: debugEvents,
+                  level: debugEvents ? "debug" : "info",
                 },
                 performanceMonitor: {
-                  enabled: false,
+                  enabled: debugEvents,
                 },
-                autoStartMonitoring: false,
+                autoStartMonitoring: debugEvents,
               },
             },
           }
@@ -594,7 +635,7 @@ export class DatasetOrchestrator {
       baseSimulationDays: 365, // 1 year simulation
       basePlayerCount: 1000, // Base player count
       baseInitialDonation: 50, // $50 starting donation
-      maxSimulationTimeMs: 900000, // 5 minutes max per simulation
+      maxSimulationTimeMs: 1800000, // 30 minutes max per simulation
 
       growthRateScaling: {
         playerCountMultiplier: {
