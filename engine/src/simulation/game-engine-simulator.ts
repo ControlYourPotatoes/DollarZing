@@ -12,6 +12,7 @@ import { PlayerProgressionHandler } from "../events/handlers/player-progression-
 import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-handler";
 // PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
+import { LevelTrackingHandler } from "../events/handlers/level-tracking-handler";
 import { MatchmakingEventHandler } from "../events/handlers/matchmaking-event-handler";
 import { PooledGameSessionFactory } from "../factories";
 import { EVENT_TYPES, NewRunCreatedEvent } from "../events/event-types";
@@ -138,6 +139,7 @@ export interface SimulationResults {
   gameStats: GameStatistics;
   dailyResults: DailyResult[];
   dailyAggregates?: DailyAggregateSnapshot[];
+  levelTrackingHandler?: LevelTrackingHandler; // For accessing level statistics
   completedAt: Date;
 }
 
@@ -174,6 +176,7 @@ export class GameEngineSimulator {
   private eventBus: EventBus;
   private eventHandlers: any[] = [];
   private revenueTrackingHandler!: RevenueTrackingHandler;
+  private levelTrackingHandler!: LevelTrackingHandler;
   private playerProgressionHandler: PlayerProgressionHandler | null = null;
   private runMetrics = {
     totalRunsCreated: 0,
@@ -204,14 +207,18 @@ export class GameEngineSimulator {
       playerManager,
     };
 
+    this.components.gameMatchingEngine.setAbortCallback(() => {
+      this.simulationAborted = true;
+    });
+
     // Initialize basic event handler system (strategy-dependent handlers created in executeSimulation)
     this.revenueTrackingHandler = new RevenueTrackingHandler(
       this.eventBus,
-      revenueCalculator,
-      {
-        loggingEnabled: false,
-      }
+      this.components.revenueCalculator
     );
+
+    // Initialize level tracking handler
+    this.levelTrackingHandler = new LevelTrackingHandler(this.eventBus);
 
     this.eventHandlers = [
       new GameEventHandler(
@@ -352,6 +359,7 @@ export class GameEngineSimulator {
     const strategyManager = this.createStrategyManager(config.playerStrategies);
 
     // Create CashOutDecisionHandler with configured strategy manager
+    console.log("[Simulator] Attaching CashOutDecisionHandler");
     const cashOutDecisionHandler = new CashOutDecisionHandler(
       this.eventBus,
       strategyManager
@@ -360,6 +368,7 @@ export class GameEngineSimulator {
 
     // Create PlayerProgressionHandler with VirtualDollarFactory for event-driven progression
     const loggingEnabled = this.runtimeOptions.collectEventTraces;
+    console.log("[Simulator] Attaching PlayerProgressionHandler");
     this.playerProgressionHandler = new PlayerProgressionHandler(
       this.eventBus,
       this.components.virtualDollarFactory,
@@ -367,6 +376,17 @@ export class GameEngineSimulator {
       { loggingEnabled }
     );
     this.eventHandlers.push(this.playerProgressionHandler);
+
+    console.log(
+      `[Simulator] Total listener count: ${this.eventBus.getListenerCount()}`
+    );
+    console.log("[Simulator] Listener summary");
+    for (const [eventType, count] of this.eventBus.getListeners()) {
+      console.log(`  - ${eventType}: ${count}`);
+    }
+
+    // Add level tracking handler
+    this.eventHandlers.push(this.levelTrackingHandler);
     this.updateLoggingPreferences(loggingEnabled);
 
     try {
@@ -398,14 +418,21 @@ export class GameEngineSimulator {
 
       // Emit SIMULATION_COMPLETED event even on error
       try {
-        await this.eventBus.emit("SIMULATION_COMPLETED", {
-          type: "SIMULATION_COMPLETED",
-          timestamp: new Date(),
-          results: errorResults,
-          durationMs: errorResults.simulationDurationMs,
-          success: false,
-          error: errorResults.error,
-        });
+        void this.eventBus
+          .emit("SIMULATION_COMPLETED", {
+            type: "SIMULATION_COMPLETED",
+            timestamp: new Date(),
+            results: errorResults,
+            durationMs: errorResults.simulationDurationMs,
+            success: false,
+            error: errorResults.error,
+          })
+          .catch((emitError) =>
+            console.error(
+              "Failed to emit SIMULATION_COMPLETED event:",
+              emitError
+            )
+          );
       } catch (emitError) {
         console.error("Failed to emit SIMULATION_COMPLETED event:", emitError);
       }
@@ -427,13 +454,17 @@ export class GameEngineSimulator {
       this.config;
 
     // Emit SIMULATION_STARTED event
-    await this.eventBus.emit("SIMULATION_STARTED", {
-      type: "SIMULATION_STARTED",
-      timestamp: new Date(),
-      config: this.config,
-      totalDays: durationDays,
-      initialPlayerCount: this.config.initialPlayerCount,
-    });
+    void this.eventBus
+      .emit("SIMULATION_STARTED", {
+        type: "SIMULATION_STARTED",
+        timestamp: new Date(),
+        config: this.config,
+        totalDays: durationDays,
+        initialPlayerCount: this.config.initialPlayerCount,
+      })
+      .catch((error) =>
+        console.error("Failed to emit SIMULATION_STARTED event:", error)
+      );
 
     const dailyResults: DailyResult[] = [];
 
@@ -448,7 +479,7 @@ export class GameEngineSimulator {
 
       // Check for cancellation
       if (this.simulationAborted || cancellationToken?.cancelled) {
-        throw new Error("Simulation was cancelled");
+        break;
       }
 
       // Use injected components instead of creating them
@@ -486,6 +517,10 @@ export class GameEngineSimulator {
       if (day % 5 === 0) {
         await new Promise((resolve) => setTimeout(resolve, 1));
       }
+
+      if (this.simulationAborted || cancellationToken?.cancelled) {
+        break;
+      }
     }
 
     // Generate final results
@@ -502,27 +537,42 @@ export class GameEngineSimulator {
       summary: {
         totalDays: durationDays,
         totalPlayers: playerStats.totalPlayers,
-        simulationCompleted: true,
+        simulationCompleted:
+          !this.simulationAborted && !cancellationToken?.cancelled,
       },
       playerStats,
       revenueStats,
       gameStats,
       dailyResults,
+      levelTrackingHandler: this.levelTrackingHandler, // Expose for level statistics access
       completedAt: new Date(),
     };
 
     if (this.runtimeOptions.collectDailySnapshots) {
-      results.dailyAggregates = generateDailyAggregates(results);
+      results.dailyAggregates = generateDailyAggregates(
+        results,
+        this.levelTrackingHandler
+      );
     }
 
     // Emit SIMULATION_COMPLETED event
-    await this.eventBus.emit("SIMULATION_COMPLETED", {
+    const completionEvent = {
       type: "SIMULATION_COMPLETED",
       timestamp: new Date(),
-      results: results,
-      durationMs: simulationDurationMs,
+      results,
+      durationMs: results.simulationDurationMs,
       success: true,
-    });
+    };
+
+    try {
+      void this.eventBus
+        .emit("SIMULATION_COMPLETED", completionEvent)
+        .catch((error) =>
+          console.error("Failed to emit SIMULATION_COMPLETED event:", error)
+        );
+    } catch (error) {
+      console.error("Failed to emit SIMULATION_COMPLETED event:", error);
+    }
 
     return results;
   }
@@ -769,7 +819,7 @@ export class GameEngineSimulator {
         case CashOutStrategy.BALANCED:
           return 0.3;
         case CashOutStrategy.AGGRESSIVE:
-          return Math.min(0.1 + level / 100, 0.9);
+          return Math.min(0.05 + level / 50, 0.6);
         default:
           return 0.3;
       }

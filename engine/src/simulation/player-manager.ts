@@ -61,8 +61,10 @@ export class PlayerManager {
   private dayStartedSubscription: EventSubscription | null = null;
   private simulationStartedSubscription: EventSubscription | null = null;
   private runCompletedSubscription: EventSubscription | null = null;
+  private playerCreatedSubscription: EventSubscription | null = null;
   // No end-of-day clearing subscription; we clear at next DAY_STARTED to avoid race with late events
   private pendingInitialPlayers: number = 0;
+  private simulationTerminated = false;
   // Throttles to prevent runaway growth and memory pressure
   private static readonly MAX_NEW_PLAYERS_PER_DAY = 3000;
   private static readonly DAILY_ONBOARDING_RATE = 0.02; // 2% of remaining gap per day
@@ -94,10 +96,19 @@ export class PlayerManager {
       this.handleSimulationStarted.bind(this),
       10
     );
+    this.eventBus.on(EVENT_TYPES.MATCHMAKING_TERMINATED, () => {
+      this.simulationTerminated = true;
+    });
     this.dayStartedSubscription = this.eventBus.on<DayStartedEvent>(
       EVENT_TYPES.DAY_STARTED,
       this.handleDayStarted.bind(this),
       10 // High priority
+    );
+
+    this.playerCreatedSubscription = this.eventBus.on(
+      EVENT_TYPES.PLAYER_CREATED,
+      this.handlePlayerCreated.bind(this),
+      5
     );
 
     // Mark runs inactive when they complete (elimination or jackpot)
@@ -136,7 +147,19 @@ export class PlayerManager {
       const initialToCreate = this.pendingInitialPlayers;
       this.pendingInitialPlayers = 0;
       this.totalPlayersCounter += initialToCreate;
-      await this.createActives(initialToCreate, playerStrategies, true);
+      if (!this.simulationTerminated) {
+        void this.createActives(initialToCreate, playerStrategies, true).catch(
+          (error) =>
+            console.error(
+              "[PlayerManager] Failed to create initial actives:",
+              error
+            )
+        );
+      }
+    }
+
+    if (this.simulationTerminated) {
+      return;
     }
 
     // Use S-curve growth model from event
@@ -163,10 +186,16 @@ export class PlayerManager {
     );
 
     // Create new players to reach S-curve target
-    if (dailyNewPlayers > 0) {
+    if (dailyNewPlayers > 0 && !this.simulationTerminated) {
       this.totalPlayersCounter += dailyNewPlayers;
       this.dailyNewPlayersCounter += dailyNewPlayers;
-      await this.createActives(dailyNewPlayers, playerStrategies, true);
+      void this.createActives(dailyNewPlayers, playerStrategies, true).catch(
+        (error) =>
+          console.error(
+            "[PlayerManager] Failed to create daily new actives:",
+            error
+          )
+      );
     }
 
     // Note: we do not create passive players here; we only count them. Actives are created below to match DAU.
@@ -181,6 +210,10 @@ export class PlayerManager {
     const currentActive = this.getActivePlayerCount();
     const deficit = Math.max(0, totalTargetActives - currentActive);
 
+    if (this.simulationTerminated || totalTargetActives <= 0) {
+      return;
+    }
+
     if (deficit > 0) {
       const inactiveStock = Math.max(
         0,
@@ -188,13 +221,26 @@ export class PlayerManager {
       );
       const reactivations = Math.min(deficit, inactiveStock);
       if (reactivations > 0) {
-        await this.createActives(reactivations, playerStrategies, false);
+        void this.createActives(reactivations, playerStrategies, false).catch(
+          (error) =>
+            console.error(
+              "[PlayerManager] Failed to reactivate players:",
+              error
+            )
+        );
       }
 
       const remaining = deficit - reactivations;
-      if (remaining > 0) {
+      if (remaining > 0 && !this.simulationTerminated) {
         this.totalPlayersCounter += remaining;
-        await this.createActives(remaining, playerStrategies, true);
+        this.dailyNewPlayersCounter += remaining;
+        void this.createActives(remaining, playerStrategies, true).catch(
+          (error) =>
+            console.error(
+              "[PlayerManager] Failed to create remaining daily actives:",
+              error
+            )
+        );
       }
     }
   }
@@ -216,12 +262,21 @@ export class PlayerManager {
     playerStrategies: Partial<Record<CashOutStrategy, number>>,
     isNew: boolean
   ): Promise<void> {
+    if (this.simulationTerminated || count <= 0) {
+      return;
+    }
+
     const strategies = Object.keys(playerStrategies) as CashOutStrategy[];
     const weights = Object.values(playerStrategies);
 
+    const seededAt = new Date();
+    const baseIdPrefix = isNew ? "player-new" : "player-reactivated";
+
     for (let i = 0; i < count; i++) {
-      const idPrefix = isNew ? "player-new" : "player-reactivated";
-      const playerId = `${idPrefix}-${Date.now()}-${Math.random()
+      if (this.simulationTerminated) {
+        break;
+      }
+      const playerId = `${baseIdPrefix}-${seededAt.getTime()}-${Math.random()
         .toString(36)
         .slice(2, 8)}-${i}`;
 
@@ -246,38 +301,82 @@ export class PlayerManager {
         totalRunsCreated: 0,
       });
 
-      await this.eventBus.emit(EVENT_TYPES.PLAYER_CREATED, {
-        type: EVENT_TYPES.PLAYER_CREATED,
-        timestamp: new Date(),
-        playerId,
-        initialDonationAmount: 100,
-        cashOutStrategy: strategy,
-        isNewPlayer: isNew,
-      } as PlayerCreatedEvent);
+      if (this.simulationTerminated) {
+        this.playerRegistry.delete(playerId);
+        return;
+      }
+
+      void this.eventBus
+        .emit(EVENT_TYPES.PLAYER_CREATED, {
+          type: EVENT_TYPES.PLAYER_CREATED,
+          timestamp: new Date(),
+          playerId,
+          initialDonationAmount: 100,
+          cashOutStrategy: strategy,
+          isNewPlayer: isNew,
+        } as PlayerCreatedEvent)
+        .catch((error) =>
+          console.error("[PlayerManager] Failed to emit PLAYER_CREATED:", error)
+        );
 
       const runsToCreate = isNew
         ? PlayerManager.NEW_PLAYER_STARTING_DOLLARS
         : PlayerManager.ALLOWANCE_PER_DAY[strategy] ?? 3;
 
       for (let k = 0; k < runsToCreate; k++) {
+        if (this.simulationTerminated) {
+          break;
+        }
         const newRun = this.createNewRun({
           playerId,
           cashOutStrategy: strategy,
           fundingSource: "DONATION",
         });
         if (newRun) {
-          await this.eventBus.emit(EVENT_TYPES.NEW_RUN_CREATED, {
-            type: EVENT_TYPES.NEW_RUN_CREATED,
-            timestamp: new Date(),
-            playerId,
-            virtualDollarId: newRun.id,
-            fundingSource: "DONATION",
-            cashOutStrategy: strategy,
-            runCount: this.playerRegistry.get(playerId)?.totalRunsCreated ?? 1,
-          } as NewRunCreatedEvent);
+          void this.eventBus
+            .emit(EVENT_TYPES.NEW_RUN_CREATED, {
+              type: EVENT_TYPES.NEW_RUN_CREATED,
+              timestamp: new Date(),
+              playerId,
+              virtualDollarId: newRun.id,
+              fundingSource: "DONATION",
+              cashOutStrategy: strategy,
+              runCount:
+                this.playerRegistry.get(playerId)?.totalRunsCreated ?? 1,
+            } as NewRunCreatedEvent)
+            .catch((error) =>
+              console.error(
+                "[PlayerManager] Failed to emit NEW_RUN_CREATED:",
+                error
+              )
+            );
+        } else {
+          console.warn(
+            `[PlayerManager] Failed to create run ${
+              k + 1
+            }/${runsToCreate} for ${playerId}`
+          );
         }
       }
     }
+  }
+
+  private handlePlayerCreated(event: PlayerCreatedEvent): void {
+    const existing = this.playerRegistry.get(event.playerId);
+    if (existing) {
+      existing.strategy = event.cashOutStrategy;
+      existing.initialDonation = event.initialDonationAmount;
+      return;
+    }
+
+    this.playerRegistry.set(event.playerId, {
+      id: event.playerId,
+      strategy: event.cashOutStrategy,
+      initialDonation: event.initialDonationAmount,
+      createdAt: event.timestamp,
+      activeRunIds: [],
+      totalRunsCreated: 0,
+    });
   }
 
   /**
@@ -538,10 +637,12 @@ export class PlayerManager {
     this.dayStartedSubscription?.unsubscribe();
     this.simulationStartedSubscription?.unsubscribe();
     this.runCompletedSubscription?.unsubscribe();
+    this.playerCreatedSubscription?.unsubscribe();
     // no day-completed subscription
     this.dayStartedSubscription = null;
     this.simulationStartedSubscription = null;
     this.runCompletedSubscription = null;
+    this.playerCreatedSubscription = null;
     // no day-completed subscription
     this.playerRegistry.clear();
   }
