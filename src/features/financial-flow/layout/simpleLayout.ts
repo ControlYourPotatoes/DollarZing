@@ -11,10 +11,10 @@ export interface LayoutConfig {
 }
 
 export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {
-  gapX: 500,
-  gapY: 250,
+  gapX: 520,
+  gapY: 270,
   marginX: 80,
-  marginY: 60,
+  marginY: 180,
 };
 
 function computeRanks(
