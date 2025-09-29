@@ -1,77 +1,112 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ImpactMetrics, ImpactDisplayProps } from "../types";
 
-import type { ImpactDisplayProps, ImpactMetrics } from "../types";
+const DEFAULT_FOOD_CONFIG = {
+  mealsPerDollar: 10,
+  lbsPerDollar: 1,
+};
 
-interface UseImpactCalculationsOptions {
-  foodConfig: Required<ImpactDisplayProps>["foodConfig"];
-  waterConfig: Required<ImpactDisplayProps>["waterConfig"];
-}
+const DEFAULT_WATER_CONFIG = {
+  personDaysPerDollar: 20,
+  litersPerDollar: 1000,
+};
 
-export function useImpactCalculations(
-  cumulativeCharity: number | null | undefined,
-  { foodConfig, waterConfig }: UseImpactCalculationsOptions
-) {
-  const metrics = useMemo<ImpactMetrics | null>(() => {
-    if (!cumulativeCharity || cumulativeCharity <= 0) {
+export const useImpactCalculations = (
+  cumulativeCharity: number | null,
+  configs?: Pick<ImpactDisplayProps, "foodConfig" | "waterConfig">
+): { metrics: ImpactMetrics | null } => {
+  const metrics = useMemo(() => {
+    if (!cumulativeCharity) {
       return null;
     }
 
-    const meals = Math.round(cumulativeCharity * foodConfig.mealsPerDollar);
-    const lbs = Math.round(cumulativeCharity * foodConfig.lbsPerDollar);
-    const personDays = Math.round(
-      cumulativeCharity * waterConfig.personDaysPerDollar
-    );
-    const liters = Math.round(
-      cumulativeCharity * waterConfig.litersPerDollar
-    );
+    const foodConfig = { ...DEFAULT_FOOD_CONFIG, ...configs?.foodConfig };
+    const waterConfig = { ...DEFAULT_WATER_CONFIG, ...configs?.waterConfig };
 
     return {
-      meals,
-      lbs,
-      personDays,
-      liters,
+      meals: Math.round(cumulativeCharity * foodConfig.mealsPerDollar),
+      lbs: Math.round(cumulativeCharity * foodConfig.lbsPerDollar),
+      personDays: Math.round(
+        cumulativeCharity * waterConfig.personDaysPerDollar
+      ),
+      liters: Math.round(cumulativeCharity * waterConfig.litersPerDollar),
     };
-  }, [cumulativeCharity, foodConfig.lbsPerDollar, foodConfig.mealsPerDollar, waterConfig.litersPerDollar, waterConfig.personDaysPerDollar]);
+  }, [cumulativeCharity, configs?.foodConfig, configs?.waterConfig]);
 
   return { metrics };
-}
+};
 
-export function useCountUp(target: number, duration = 1500) {
-  const [value, setValue] = useState(0);
-  const startRef = useRef<number | null>(null);
-  const initialRef = useRef(0);
-  const previousTargetRef = useRef(target);
+const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+
+export const useCountUp = (target: number, duration = 1500): number => {
+  const [displayed, setDisplayed] = useState(0);
+  const previousTargetRef = useRef<number | null>(null);
+  const startValueRef = useRef(0);
+  const startTimeRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (target === previousTargetRef.current) {
+    // Cancel any ongoing animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    if (target === 0) {
+      setDisplayed(0);
+      previousTargetRef.current = 0;
+      startValueRef.current = 0;
+      startTimeRef.current = null;
       return;
     }
-    previousTargetRef.current = target;
-    initialRef.current = value;
-    startRef.current = null;
 
-    let frameId: number;
+    const previousTarget = previousTargetRef.current;
 
-    const step = (timestamp: number) => {
-      if (startRef.current === null) {
-        startRef.current = timestamp;
+    // If target changed, start new animation from current displayed value
+    if (previousTarget !== target) {
+      startValueRef.current = displayed;
+      previousTargetRef.current = target;
+      startTimeRef.current = null; // Reset start time for new animation
+    }
+
+    const startValue = startValueRef.current;
+    const valueDiff = target - startValue;
+
+    // If no change needed, just set the target value
+    if (valueDiff === 0) {
+      setDisplayed(target);
+      return;
+    }
+
+    const animate = (time: number) => {
+      if (!startTimeRef.current) {
+        startTimeRef.current = time;
       }
-      const elapsed = timestamp - startRef.current;
-      const progress = Math.min(1, duration > 0 ? elapsed / duration : 1);
-      const nextValue = Math.round(
-        initialRef.current + (target - initialRef.current) * progress
-      );
-      setValue(nextValue);
+
+      const elapsed = time - startTimeRef.current;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Animate from start value to target
+      const animatedValue = startValue + valueDiff * easeOutCubic(progress);
+      setDisplayed(Math.floor(animatedValue));
+
       if (progress < 1) {
-        frameId = requestAnimationFrame(step);
+        animationFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        // Animation complete, ensure final value is exact
+        setDisplayed(target);
+        startTimeRef.current = null;
+        animationFrameRef.current = null;
       }
     };
 
-    frameId = requestAnimationFrame(step);
+    animationFrameRef.current = requestAnimationFrame(animate);
 
-    return () => cancelAnimationFrame(frameId);
-  }, [duration, target, value]);
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [target, duration]);
 
-  return value;
-}
-
+  return displayed;
+};
