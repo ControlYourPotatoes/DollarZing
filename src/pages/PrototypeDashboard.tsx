@@ -16,7 +16,7 @@ import { TimelineScrubber, useActiveTimelineDay } from "@/features/timeline";
 import { FinancialWorkflowDiagram } from "@/features/financial-flow";
 import {
   LevelBarometer,
-  FlowBreakdownChart,
+  DailyFlow,
   RevenueProgressionChart,
   PlayerEngagementChart,
 } from "@/features/distribution-charts";
@@ -383,66 +383,13 @@ const PrototypeDashboard = () => {
             </div>
           </div>
 
-          <aside className="space-y-6">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-300">
-              {activeDay ? (
-                <div className="space-y-3">
-                  <div>
-                    <h2 className="text-base font-semibold text-slate-100">
-                      Day {activeDay.dayIndex + 1}
-                    </h2>
-                    <p className="text-xs uppercase tracking-widest text-slate-500">
-                      {activeDay.label}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p>
-                      <span className="text-slate-400">Daily Revenue:</span> $
-                      {activeDay.summary.dailyRevenue.toLocaleString(
-                        undefined,
-                        {
-                          maximumFractionDigits: 0,
-                        }
-                      )}
-                    </p>
-                    <p>
-                      <span className="text-slate-400">Daily Charity:</span> $
-                      {activeDay.summary.dailyCharity.toLocaleString(
-                        undefined,
-                        {
-                          maximumFractionDigits: 0,
-                        }
-                      )}
-                    </p>
-                    <p>
-                      <span className="text-slate-400">Daily Fees:</span> $
-                      {activeDay.summary.dailyFees.toLocaleString(undefined, {
-                        maximumFractionDigits: 0,
-                      })}
-                    </p>
-                    <p>
-                      <span className="text-slate-400">Player Payouts:</span> $
-                      {activeDay.summary.dailyPayouts.toLocaleString(
-                        undefined,
-                        {
-                          maximumFractionDigits: 0,
-                        }
-                      )}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-slate-500">
-                  Select a scenario to view per-day details.
-                </p>
-              )}
-            </div>
-
+          
+          <aside className="flex flex-col gap-6">
             <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-slate-400">
-                Daily Flow Breakdown
+                Daily Flow
               </h2>
-              <FlowBreakdownChart />
+              <DailyFlow />
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
