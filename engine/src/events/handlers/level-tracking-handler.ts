@@ -7,9 +7,19 @@ import {
 } from "../event-types";
 import { BettingLevel } from "../../types/virtual-dollar-engine";
 
-interface PlayerLevelState {
-  currentLevel: BettingLevel;
-  previousLevel: BettingLevel;
+export interface LevelStats {
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  cashouts: number;
+  progressions: number;
+  winnings: number;
+}
+
+export interface LevelTrackingSnapshot {
+  currentDay: number;
+  dailyLevelStats: Record<number, Record<BettingLevel, LevelStats>>;
+  cumulativeLevelStats: Record<BettingLevel, LevelStats>;
 }
 
 /**
@@ -133,6 +143,13 @@ export class LevelTrackingHandler {
     };
   }
 
+  private ensureDailyStats(day: number): Map<BettingLevel, LevelStats> {
+    if (!this.dailyLevelStats.has(day)) {
+      this.dailyLevelStats.set(day, new Map());
+    }
+    return this.dailyLevelStats.get(day)!;
+  }
+
   private handleDayStarted(event: DayStartedEvent): void {
     // Day events already provide 1-based indexing
     this.currentDay = event.dayNumber;
@@ -165,23 +182,35 @@ export class LevelTrackingHandler {
   }
 
   /**
-   * Ensure daily stats exist for the given day
+   * Export a serializable snapshot of tracked statistics
    */
-  private ensureDailyStats(day: number): Map<BettingLevel, LevelStats> {
-    if (!this.dailyLevelStats.has(day)) {
-      this.dailyLevelStats.set(day, new Map());
+  public exportSnapshot(): LevelTrackingSnapshot {
+    const daily: Record<number, Record<BettingLevel, LevelStats>> = {};
+    for (const [day, statsMap] of this.dailyLevelStats.entries()) {
+      const dayRecord: Record<BettingLevel, LevelStats> = {} as Record<
+        BettingLevel,
+        LevelStats
+      >;
+      for (const [level, stats] of statsMap.entries()) {
+        dayRecord[level] = { ...stats };
+      }
+      daily[day] = dayRecord;
     }
-    return this.dailyLevelStats.get(day)!;
-  }
-}
 
-interface LevelStats {
-  gamesPlayed: number;
-  wins: number;
-  losses: number;
-  cashouts: number;
-  progressions: number;
-  winnings: number;
+    const cumulative: Record<BettingLevel, LevelStats> = {} as Record<
+      BettingLevel,
+      LevelStats
+    >;
+    for (const [level, stats] of this.cumulativeLevelStats.entries()) {
+      cumulative[level] = { ...stats };
+    }
+
+    return {
+      currentDay: this.currentDay,
+      dailyLevelStats: daily,
+      cumulativeLevelStats: cumulative,
+    };
+  }
 }
 
 interface PlayerLevelInfo {

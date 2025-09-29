@@ -1,5 +1,9 @@
 import type { SimulationResults } from "../game-engine-simulator";
-import { LevelTrackingHandler } from "../../events/handlers/level-tracking-handler";
+import {
+  LevelTrackingHandler,
+  type LevelTrackingSnapshot,
+  type LevelStats,
+} from "../../events/handlers/level-tracking-handler";
 
 export interface WorkflowLayerBreakdown {
   id: string;
@@ -102,16 +106,6 @@ interface RevenueAccumulator {
   cashoutsCount: number;
 }
 
-interface LevelAccumulator {
-  level: number;
-  gamesPlayed: number;
-  wins: number;
-  cashouts: number;
-  progressions: number;
-  winnings: number;
-  losses: number;
-}
-
 interface LifecycleAccumulator {
   runsStarted: number;
   runsCompleted: number;
@@ -123,7 +117,7 @@ const BASE_SNAPSHOT_DATE = Date.UTC(2025, 0, 1);
 
 export function generateDailyAggregates(
   results: SimulationResults,
-  levelTracker?: LevelTrackingHandler
+  levelTracker?: LevelTrackingHandler | LevelTrackingSnapshot
 ): DailyAggregateSnapshot[] {
   const aggregates: DailyAggregateSnapshot[] = [];
   const accumulator: RevenueAccumulator = {
@@ -135,20 +129,6 @@ export function generateDailyAggregates(
     cashoutsAmount: 0,
     cashoutsCount: 0,
   };
-
-  // Initialize level accumulators for all 10 levels
-  const levelAccumulators: LevelAccumulator[] = Array.from(
-    { length: 10 },
-    (_, i) => ({
-      level: i + 1,
-      gamesPlayed: 0,
-      wins: 0,
-      cashouts: 0,
-      progressions: 0,
-      winnings: 0,
-      losses: 0,
-    })
-  );
 
   const lifecycleAccumulator: LifecycleAccumulator = {
     runsStarted: 0,
@@ -449,7 +429,7 @@ function clampToZero(value: number): number {
 }
 
 function buildLevelBreakdown(
-  levelTracker: LevelTrackingHandler | undefined,
+  levelTracker: LevelTrackingHandler | LevelTrackingSnapshot | undefined,
   day: number
 ): LevelBreakdown[] {
   if (!levelTracker) {
@@ -464,17 +444,10 @@ function buildLevelBreakdown(
     }));
   }
 
-  const stats = levelTracker.getDailyLevelStats(day);
+  const stats = getDailyStatsForDay(levelTracker, day);
   return Array.from({ length: 10 }, (_, index) => {
-    const level = (index + 1) as number;
-    const levelStats = stats.get(level as any) || {
-      gamesPlayed: 0,
-      wins: 0,
-      losses: 0,
-      cashouts: 0,
-      progressions: 0,
-      winnings: 0,
-    };
+    const level = index + 1;
+    const levelStats = stats[level] || createEmptyLevelStats();
     return {
       level,
       gamesPlayed: levelStats.gamesPlayed,
@@ -490,7 +463,7 @@ function buildLevelBreakdown(
 function generateLifecycleData(
   lifecycleAccumulator: LifecycleAccumulator,
   dailyResult: any,
-  levelTracker?: LevelTrackingHandler,
+  levelTracker?: LevelTrackingHandler | LevelTrackingSnapshot,
   day?: number
 ): RunLifecycle {
   const gameStats = dailyResult.gameStatistics || {};
@@ -514,8 +487,8 @@ function generateLifecycleData(
   // Estimate runs failed from losers recorded in level tracking
   let runsFailed = 0;
   if (levelTracker && day !== undefined) {
-    const dailyLevelStats = levelTracker.getDailyLevelStats(day);
-    runsFailed = Array.from(dailyLevelStats.values()).reduce(
+    const dailyLevelStats = getDailyStatsForDay(levelTracker, day);
+    runsFailed = Object.values(dailyLevelStats).reduce(
       (sum, stats) => sum + (stats.losses ?? 0),
       0
     );
@@ -526,9 +499,9 @@ function generateLifecycleData(
     if (!levelTracker || day === undefined) {
       return 0;
     }
-    const level = (index + 1) as number;
-    const levelStats = levelTracker.getDailyLevelStats(day).get(level as any);
-    return levelStats?.gamesPlayed ?? 0;
+    const level = index + 1;
+    const dailyLevelStats = getDailyStatsForDay(levelTracker, day);
+    return dailyLevelStats[level]?.gamesPlayed ?? 0;
   });
 
   return {
@@ -537,5 +510,37 @@ function generateLifecycleData(
     runsCashedOut: runsCompleted,
     runsFailed,
     levelDistribution,
+  };
+}
+
+type LevelTrackerSource = LevelTrackingHandler | LevelTrackingSnapshot;
+
+function getDailyStatsForDay(
+  source: LevelTrackerSource,
+  day: number
+): Record<number, LevelStats> {
+  if (
+    typeof (source as LevelTrackingHandler).getDailyLevelStats === "function"
+  ) {
+    const map = (source as LevelTrackingHandler).getDailyLevelStats(day);
+    const record: Record<number, LevelStats> = {};
+    for (const [level, stats] of map.entries()) {
+      record[level as unknown as number] = { ...stats };
+    }
+    return record;
+  }
+
+  const snapshot = source as LevelTrackingSnapshot;
+  return snapshot.dailyLevelStats[day] || {};
+}
+
+function createEmptyLevelStats(): LevelStats {
+  return {
+    gamesPlayed: 0,
+    wins: 0,
+    losses: 0,
+    cashouts: 0,
+    progressions: 0,
+    winnings: 0,
   };
 }
