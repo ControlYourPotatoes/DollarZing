@@ -279,17 +279,25 @@ export class DatasetOrchestrator {
         await this.performQualityAssurance(parameterId, simulationResults);
 
         // Check for simulation success
-        if (!simulationResults.success) {
+        if (!simulationResults.success || simulationResults.termination) {
+          const terminationInfo = simulationResults.termination
+            ? ` (terminated: ${simulationResults.termination.reason.code} after day ${simulationResults.termination.dayCompleted})`
+            : "";
           const generationTimeMs = performance.now() - startTime;
           const failureResult: AdapterGenerationResult = {
             combination,
             success: false,
             error:
               simulationResults.error ||
+              simulationResults.termination?.reason.message ||
               "Simulation failed without specific error",
             simulationResults,
             generationTimeMs,
           };
+
+          if (terminationInfo && !failureResult.error.includes("terminated")) {
+            failureResult.error += terminationInfo;
+          }
 
           if (this.sharedEventBus) {
             await this.sharedEventBus.emit(
@@ -320,7 +328,7 @@ export class DatasetOrchestrator {
           ? simulationResults.dailyAggregates ??
             generateDailyAggregates(
               simulationResults,
-              simulationResults.levelTrackingHandler
+              simulationResults.levelTrackingSnapshot
             ) // Use real level tracking
           : [];
         const presentationSnapshot: PresentationSnapshotFile | undefined =
