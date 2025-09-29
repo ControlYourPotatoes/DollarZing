@@ -101,7 +101,8 @@ export class GameMatchingEngine {
   // Game management
   private activeGames: Map<string, GameSession> = new Map();
   private completedGames: Map<string, GameSession> = new Map();
-  private abortCallback: (() => void) | null = null;
+  private abortCallback: ((reason?: SimulationAbortReason) => void) | null =
+    null;
   private resolvedGameCount = 0;
   private resolvedGamesByLevel: Record<BettingLevel, number> = {
     1: 0,

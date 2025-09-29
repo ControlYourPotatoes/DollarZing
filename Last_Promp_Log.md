@@ -158,3 +158,12 @@ Because everything derives from the circle radius and the config, tweaking one v
 When you want the hover behavior to “push” the base ring outward, just define the hover variant for the base ring with an expanded innerRadiusOffset and gapToNext. Mid/high rings can depend on the hover-adjusted base outcome, ensuring no overlap.
 Next Steps
 If you like this direction, I can scaffold the config shape (status quo + hover overrides), wire it into ringDescriptors, and set helpful defaults that match today’s layout. After that, you’d only touch the config to experiment with thickness/gap combos. Want me to go ahead and implement the helper + config?
+
+
+It’s very unlikely the call-stack blowup is from the debug console.logs themselves—printing that much will slow things down, but it doesn’t produce a JavaScript “Maximum call stack size exceeded.” That error still points to recursion somewhere after the SIMULATION_COMPLETED event fires.
+Given the new telemetry, here’s what I’d check next:
+Grab the actual stack trace. The snippet you pasted stops at the warning message. The Node process should also emit a stack trace showing which file/function overflowed; check the tail of /workspace/engine/run.log or re-run with node --trace-stack dist/scripts/run-orchestrator.js ... so we know exactly where it’s happening.
+Watch the serializer. The orchestrator serializes the entire SimulationResults via serializeSimulationResults → sanitizeRoot. If a new field (like termination.reason.context) still carries a structure with self-references, sanitizeRoot will recurse forever. Dump the termination object before serialization to see if any property is a class instance or circular reference.
+Temporarily disable extra context. As a quick test, comment out the context payload you passed into the abort reason and rerun. If the stack error disappears, we know the recursion is coming from the context you just added.
+Event debugger attachments. If the event debugger is still active, its buffers might contain circular references when we include them in simulationResults. Ensure we’re not storing the whole debugger instance (only plain JSON snapshots).
+Once we have the stack trace or isolate the offending payload, we can fix the serializer or flatten that structure. Let me know if you can capture the trace or want me to inspect run.log for it.
