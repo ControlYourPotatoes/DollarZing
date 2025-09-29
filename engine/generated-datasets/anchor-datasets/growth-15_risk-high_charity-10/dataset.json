@@ -1,0 +1,142 @@
+{
+  "success": true,
+  "simulationDurationMs": 1903.665535,
+  "config": {
+    "durationDays": 3,
+    "initialPlayerCount": 500,
+    "dailySeed": "orchestrator-15-high-10",
+    "charityPercentage": 0.1,
+    "playerStrategies": {
+      "conservative": 0.1,
+      "balanced": 0.3,
+      "aggressive": 0.6
+    },
+    "initialDonationAmount": 50,
+    "maxSimulationTimeMs": 1800000,
+    "enableProgressReporting": true,
+    "growthModel": {
+      "adoptionRate": 0.15,
+      "baseMarket": 1000000,
+      "midpointDay": 90,
+      "steepnessFactor": 20
+    }
+  },
+  "summary": {
+    "totalDays": 3,
+    "totalPlayers": 525,
+    "simulationCompleted": false
+  },
+  "playerStats": {
+    "totalPlayers": 525,
+    "activePlayers": 155,
+    "retiredPlayers": 370,
+    "completedRunsPlayers": 1741,
+    "totalCharityContributions": 116.36999999999956,
+    "totalPlayerPayouts": 659.429999999993,
+    "totalProgressionFunds": 0,
+    "averageGamesPerPlayer": 4.9904761904761905,
+    "playerRetirementRate": 0.7047619047619048
+  },
+  "revenueStats": {
+    "totalPlatformRevenue": 523.9999999999822,
+    "totalCharityContributions": 116.36999999999956,
+    "totalPlayerPayouts": 659.429999999993,
+    "revenuePerGame": 0.19999999999999318,
+    "charityPercentage": 0.1,
+    "averageRevenuePerDay": 174.66666666666072,
+    "totalCashOuts": 775.7999999999956,
+    "cashOutCount": 431
+  },
+  "gameStats": {
+    "totalGames": 1310,
+    "averageGamesPerDay": 436.6666666666667,
+    "pooledVirtualDollars": 884,
+    "totalVirtualDollars": 2625,
+    "totalRunsCreated": 2625,
+    "completedRuns": 0,
+    "activeRuns": 884,
+    "jackpotsWon": 0,
+    "averageRunLength": 1.4819004524886878,
+    "resolvedGames": 1310,
+    "gamesByLevel": {
+      "1": 1310,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0
+    }
+  },
+  "dailyResults": [
+    {
+      "day": 1,
+      "playerStatistics": {
+        "totalPlayers": 525,
+        "activePlayers": 155,
+        "retiredPlayers": 370,
+        "completedRunsPlayers": 1741,
+        "totalCharityContributions": 116.36999999999956,
+        "totalPlayerPayouts": 659.429999999993,
+        "totalProgressionFunds": 0,
+        "averageGamesPerPlayer": 4.9904761904761905,
+        "playerRetirementRate": 0.7047619047619048
+      },
+      "gameStatistics": {
+        "totalGames": 1310,
+        "averageGamesPerDay": 436.6666666666667,
+        "pooledVirtualDollars": 884,
+        "totalVirtualDollars": 2625,
+        "totalRunsCreated": 2625,
+        "completedRuns": 0,
+        "activeRuns": 884,
+        "jackpotsWon": 0,
+        "averageRunLength": 1.4819004524886878,
+        "resolvedGames": 1310,
+        "gamesByLevel": {
+          "1": 1310,
+          "2": 0,
+          "3": 0,
+          "4": 0,
+          "5": 0,
+          "6": 0,
+          "7": 0,
+          "8": 0,
+          "9": 0,
+          "10": 0
+        }
+      },
+      "revenueStatistics": {
+        "totalPlatformRevenue": 523.9999999999822,
+        "totalCharityContributions": 116.36999999999956,
+        "totalPlayerPayouts": 659.429999999993,
+        "revenuePerGame": 0.19999999999999318,
+        "charityPercentage": 0.1,
+        "averageRevenuePerDay": 174.66666666666072,
+        "totalCashOuts": 775.7999999999956,
+        "cashOutCount": 431
+      },
+      "newPlayers": 25
+    }
+  ],
+  "levelTrackingHandler": {
+    "eventBus": {
+      "listeners": {},
+      "eventTrace": [],
+      "dispatchQueue": [],
+      "isDispatching": false,
+      "activeDispatchDepth": 0,
+      "maxDispatchDepth": 1000,
+      "traceEnabled": false,
+      "maxListeners": 100
+    },
+    "currentDay": 1,
+    "dailyLevelStats": {},
+    "cumulativeLevelStats": {},
+    "playerLevels": {}
+  },
+  "completedAt": "2025-09-29T05:20:55.315Z"
+}
