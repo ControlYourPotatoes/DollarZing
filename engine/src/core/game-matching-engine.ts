@@ -145,7 +145,8 @@ export class GameMatchingEngine {
       return;
     }
 
-    const shouldCompact = queue.pending.size === 0 || queue.items.length > queue.pending.size * 2;
+    const shouldCompact =
+      queue.pending.size === 0 || queue.items.length > queue.pending.size * 2;
     if (shouldCompact) {
       queue.items = queue.items.filter((id) => queue.pending.has(id));
     }
@@ -180,7 +181,10 @@ export class GameMatchingEngine {
       result.push(dollar);
     }
 
-    if (staleCount > 0 && (queue.items.length > queue.pending.size * 2 || queue.pending.size === 0)) {
+    if (
+      staleCount > 0 &&
+      (queue.items.length > queue.pending.size * 2 || queue.pending.size === 0)
+    ) {
       queue.items = queue.items.filter((id) => queue.pending.has(id));
     }
 
@@ -235,6 +239,10 @@ export class GameMatchingEngine {
 
     this.enqueueDollar(dollar.currentLevel, dollar.id);
 
+    console.log(
+      `[GameMatchingEngine] Added ${dollar.id} owned by ${dollar.ownerId} into pool at level ${dollar.currentLevel}`
+    );
+
     // Emit POOL_ADDED event
     const poolAddedEvent: PoolAddedEvent = {
       type: EVENT_TYPES.POOL_ADDED,
@@ -245,7 +253,11 @@ export class GameMatchingEngine {
       poolSize: this.pooledDollars.size,
       availableForMatching: this.pooledDollars.size - this.dollarsInGame.size,
     };
-    await this.eventBus.emit(EVENT_TYPES.POOL_ADDED, poolAddedEvent);
+    void this.eventBus
+      .emit(EVENT_TYPES.POOL_ADDED, poolAddedEvent)
+      .catch((error) =>
+        console.error("[GameMatchingEngine] Failed to emit POOL_ADDED:", error)
+      );
 
     // Emit POOL_UPDATED event
     const poolUpdatedEvent: PoolUpdatedEvent = {
@@ -256,7 +268,14 @@ export class GameMatchingEngine {
       dollarsInPlay: this.dollarsInGame.size,
       levelDistribution: this.getLevelDistribution(),
     };
-    await this.eventBus.emit(EVENT_TYPES.POOL_UPDATED, poolUpdatedEvent);
+    void this.eventBus
+      .emit(EVENT_TYPES.POOL_UPDATED, poolUpdatedEvent)
+      .catch((error) =>
+        console.error(
+          "[GameMatchingEngine] Failed to emit POOL_UPDATED:",
+          error
+        )
+      );
 
     return { success: true };
   }
@@ -297,7 +316,14 @@ export class GameMatchingEngine {
       poolSize: this.pooledDollars.size,
       availableForMatching: this.pooledDollars.size - this.dollarsInGame.size,
     };
-    await this.eventBus.emit(EVENT_TYPES.POOL_REMOVED, poolRemovedEvent);
+    void this.eventBus
+      .emit(EVENT_TYPES.POOL_REMOVED, poolRemovedEvent)
+      .catch((error) =>
+        console.error(
+          "[GameMatchingEngine] Failed to emit POOL_REMOVED:",
+          error
+        )
+      );
 
     // Emit POOL_UPDATED event
     const poolUpdatedEvent: PoolUpdatedEvent = {
@@ -308,7 +334,14 @@ export class GameMatchingEngine {
       dollarsInPlay: this.dollarsInGame.size,
       levelDistribution: this.getLevelDistribution(),
     };
-    await this.eventBus.emit(EVENT_TYPES.POOL_UPDATED, poolUpdatedEvent);
+    void this.eventBus
+      .emit(EVENT_TYPES.POOL_UPDATED, poolUpdatedEvent)
+      .catch((error) =>
+        console.error(
+          "[GameMatchingEngine] Failed to emit POOL_UPDATED:",
+          error
+        )
+      );
 
     return { success: true };
   }
