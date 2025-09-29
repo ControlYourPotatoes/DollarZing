@@ -25,10 +25,11 @@ interface RunnerOptions {
   collectEvents: boolean;
   collectPresentation: boolean;
   verbose: boolean;
+  progressMode: ProgressMode;
   days?: number;
   combination?: ParameterCombination;
-  progressMode: ProgressMode;
   logFile?: string;
+  debugEvents?: boolean;
 }
 
 type ProgressMode = "inline" | "line" | "silent";
@@ -76,6 +77,7 @@ function parseArgs(argv: string[]): RunnerOptions {
     collectPresentation: !args.has("--no-presentation"),
     verbose: args.has("--verbose"),
     progressMode,
+    debugEvents: args.has("--debug-events"),
   };
 
   if (days !== undefined && !Number.isNaN(days)) {
@@ -143,7 +145,12 @@ async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   if (argv.includes("--help") || argv.includes("-h")) {
     console.log(
-      `Usage: ts-node --esm scripts/run-orchestrator.ts [options]\n\nOptions:\n  -o, --output <dir>        Output directory (default: generated-datasets)\n      --days <n>            Override simulation length in days (e.g. 90)\n      --combo <g,r,c>       Run a single combination (e.g. 15,low,10)\n      --no-snapshots        Skip writing daily snapshot aggregates\n      --no-events           Skip writing event trace logs\n      --no-presentation     Skip writing presentation snapshots\n      --progress <mode>     Progress output: inline, line, or silent (default: inline)\n      --log-file <path>     Append command output to a log file\n      --verbose             Enable verbose logging\n      --help                Show this help message\n`
+      `Usage: ts-node --esm scripts/run-orchestrator.ts [options]\n\nOptions:\n  -o, --output <dir>        Output directory (default: generated-datasets)\n      --days <n>            Override simulation length in days (e.g. 90)\n      --combo <g,r,c>       Run a single combination (e.g. 15,low,10)
+      --no-snapshots        Skip writing daily snapshot aggregates
+      --no-events           Skip writing event trace logs
+      --debug-events        Dump verbose event trace logs for debugging
+      --no-presentation     Skip writing presentation snapshots
+      --progress <mode>     Progress output: inline, line, or silent (default: inline)\n      --log-file <path>     Append command output to a log file\n      --verbose             Enable verbose logging\n      --help                Show this help message\n`
     );
     process.exit(0);
   }
@@ -198,6 +205,7 @@ async function main(): Promise<void> {
       collectDailySnapshots: options.collectSnapshots,
       collectEventTraces: options.collectEvents,
       collectPresentationSnapshots: options.collectPresentation,
+      debugEvents: options.debugEvents === true,
     });
 
     if (options.verbose) {
