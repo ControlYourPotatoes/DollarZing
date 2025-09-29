@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useCallback, useRef } from "react";
 
 import * as d3 from "d3";
+import { motion } from "framer-motion";
 
 type DefaultArcObject = d3.DefaultArcObject;
 
@@ -41,19 +42,19 @@ const RING_ORDER: WorkflowRingKey[] = ["base", "mid", "high"];
 
 const DEFAULT_RING_SIZING_CONFIG: RingSizingConfig = {
   base: {
-    default: { innerOffset: 0, thickness: 30, gapToNext: 2 },
-    active: { innerOffset: 1, thickness: 16, gapToNext: 6 },
-    hovered: { innerOffset: -2, thickness: 22, gapToNext: 10 },
+    default: { innerOffset: 0, thickness: 10, gapToNext: 2 },
+    active: { innerOffset: 1, thickness: 12, gapToNext: 4 },
+    hovered: { innerOffset: -2, thickness: 26, gapToNext: 16 },
   },
   mid: {
     default: { innerOffset: 0, thickness: 10, gapToNext: 2 },
     active: { innerOffset: 1, thickness: 14, gapToNext: 4 },
-    hovered: { innerOffset: -2, thickness: 20, gapToNext: 8 },
+    hovered: { innerOffset: -2, thickness: 30, gapToNext: 16 },
   },
   high: {
     default: { innerOffset: 0, thickness: 10, gapToNext: 0 },
     active: { innerOffset: 0, thickness: 18, gapToNext: 10 },
-    hovered: { innerOffset: -2, thickness: 30, gapToNext: 0 },
+    hovered: { innerOffset: 6, thickness: 30, gapToNext: 16 },
   },
 };
 
@@ -141,9 +142,6 @@ export function WorkflowNode({
   const setStoreHoveredNode = usePresentationTimelineStore(
     (state) => state.setHoveredNode
   );
-  // const simulationPhase = usePresentationTimelineStore(
-  //   (state) => state.simulationPhase
-  // );
 
   const ringHoverKey = hoveredRingKey ?? null;
 
@@ -464,6 +462,16 @@ export function WorkflowNode({
       }}
     >
       <g ref={svgRef} transform={`translate(${x}, ${y})`}>
+        <defs>
+          {ringDescriptors.map((desc) => {
+            const pathId = `ring-path-${id}-${desc.key}`;
+            // Path at the center of the ring for curved text
+            const centerRadius = (desc.innerRadius + desc.outerRadius) / 2;
+            // Path starting at top to match gauge direction
+            const pathD = `M 0,${-centerRadius} A ${centerRadius},${centerRadius} 0 1,1 0,${centerRadius} A ${centerRadius},${centerRadius} 0 1,1 0,${-centerRadius}`;
+            return <path key={pathId} id={pathId} d={pathD} fill="none" />;
+          })}
+        </defs>
         <circle
           cx={0}
           cy={0}
@@ -487,6 +495,57 @@ export function WorkflowNode({
         {ringDescriptors.map((desc, idx) =>
           renderRing(desc, idx, ringDescriptors)
         )}
+        {/* Curved text for ring descriptors */}
+        {ringDescriptors.map((desc) => {
+          const isHovered = ringHoverKey === desc.key;
+          const pathId = `ring-path-${id}-${desc.key}`;
+          // Dynamic color based on ring key for contrast
+          const textColor = desc.key === 'base' ? 'black' : 'white';
+          const label = desc.key === 'base' ? 'Base' : desc.key === 'mid' ? 'Mid' : 'High';
+          return (
+            <text
+              key={`text-${desc.key}`}
+              fontSize={isHovered ? 12 : 8}
+              fontWeight={isHovered ? 600 : 400}
+              fill={textColor}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              opacity={isHovered ? 1 : 0.3}
+            >
+              <textPath href={`#${pathId}`} startOffset="12.5%">
+                {label}
+              </textPath>
+            </text>
+          );
+        })}
+        {/* Straight text for ring totals at the end of the filled arc */}
+        {ringDescriptors.map((desc) => {
+          const segments = desc.key === 'base' ? layers : desc.key === 'mid' ? midSegments : highSegments;
+          const totalValue = segments.reduce((sum, seg) => sum + seg.value, 0);
+          const centerRadius = (desc.innerRadius + desc.outerRadius) / 2;
+          // Dynamic color based on ring key for contrast
+          const textColor = desc.key === 'base' ? 'black' : 'white';
+          // Position at the end of the filled arc
+          const angle = desc.arcs.length > 0 ? desc.arcs[desc.arcs.length - 1].endAngle : -Math.PI / 2;
+          const x = centerRadius * Math.cos(angle);
+          const y = centerRadius * Math.sin(angle);
+          return (
+            <motion.text
+              key={`total-${desc.key}`}
+              x={x}
+              y={y}
+              fontSize={10}
+              fill={textColor}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              {formatCurrency(totalValue)}
+            </motion.text>
+          );
+        })}
         <g transform="translate(0, -6)">
           <text
             x={0}
@@ -499,7 +558,8 @@ export function WorkflowNode({
           >
             {label}
           </text>
-          <text
+          {/* Hide the old value text since totals are now in rings */}
+          {/* <text
             x={0}
             y={14}
             textAnchor="middle"
@@ -509,11 +569,11 @@ export function WorkflowNode({
             pointerEvents="none"
           >
             {valueLabel}
-          </text>
+          </text> */}
           {baseDeltaMeta.label && (
             <text
               x={0}
-              y={34}
+              y={14}
               textAnchor="middle"
               fontSize={16}
               fontWeight={600}
