@@ -36,6 +36,7 @@ export function DailyFlow() {
   const hoveredRingKey = usePresentationTimelineStore(
     (state) => state.hoveredRingKey
   );
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const scenariosData = useMemo(() => {
     const scenarios: ScenarioData[] = [];
@@ -176,7 +177,8 @@ export function DailyFlow() {
 
               {/* Distribution Cards */}
               {scenario.items.map((item) => {
-                const [isHovered, setIsHovered] = useState(false);
+                const itemKey = `${scenario.key}-${item.id}`;
+                const isHovered = hoveredItem === itemKey;
                 const Icon = item.id === 'fees' ? DollarSign : item.id === 'charity' ? Heart : TrendingUp;
                 return (
                   <motion.div
@@ -191,8 +193,8 @@ export function DailyFlow() {
                       borderColor: "#0ea5e9",
                       boxShadow: "0 0 20px -5px rgba(14,165,233,0.5)",
                     }}
-                    onHoverStart={() => setIsHovered(true)}
-                    onHoverEnd={() => setIsHovered(false)}
+                    onHoverStart={() => setHoveredItem(itemKey)}
+                    onHoverEnd={() => setHoveredItem(null)}
                     transition={{ duration: 0.2 }}
                   >
                     <div className="flex items-center justify-center mb-1">

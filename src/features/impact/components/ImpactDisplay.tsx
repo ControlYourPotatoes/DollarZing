@@ -19,7 +19,7 @@ export const ImpactDisplay = (props: ImpactDisplayProps) => {
     ...props,
   };
 
-  const { metrics } = useImpactCalculations(cumulativeCharity, {
+  const { metrics } = useImpactCalculations(cumulativeCharity || null, {
     foodConfig,
     waterConfig,
   });
