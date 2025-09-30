@@ -665,6 +665,29 @@ export class GameMatchingEngine {
   }
 
   /**
+   * Get unique owners of pending queued dollars at a specific level
+   */
+  getQueuedOwnersAtLevel(level: BettingLevel): string[] {
+    const queue = this.getLevelQueue(level);
+    const owners: string[] = [];
+
+    for (const id of queue.items) {
+      if (!queue.pending.has(id)) {
+        continue;
+      }
+
+      const dollar = this.pooledDollars.get(id);
+      if (!dollar || dollar.state !== DollarState.POOLED) {
+        continue;
+      }
+
+      owners.push(dollar.ownerId);
+    }
+
+    return owners;
+  }
+
+  /**
    * Get level distribution for pool statistics
    */
   private getLevelDistribution(): Record<number, number> {
