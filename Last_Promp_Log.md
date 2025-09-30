@@ -181,3 +181,145 @@ After processing a day, unsubscribe handlers that are day-specific, and when a d
 Move logging cleanup into a dedicated lifecycle module that listens for DAY_COMPLETED versus SIMULATION_COMPLETED, flushing per-day logs and only doing final shutdown work after SIMULATION_COMPLETED.
 Consider lowering EventBus.maxDispatchDepth or changing dispatchQueue to iterative dispatch, but the real fix is to release listeners and avoid re-entrant emission chains at day finish.
 I can help refactor the CLI orchestrator to create a fresh event bus per dataset run, add day-level cleanup hooks, and modularize logging so daily rollover doesn’t trigger final shutdown. Let me know if you’d like me to implement that
+
+
+Findings
+
+The new loop is coming from attemptMatching re-queuing itself: the deferred stalemate branch logs “Waiting for another unique player… Cycles without match: 1647” while the GameMatchingEngine reports availableForMatching going negative (engine/run.log:24). That means dollars are stuck flagged as IN_GAME while still counted in the pool stats.
+Because we removed terminateMatchmaking, nothing ever resets that state; pendingMatchAttempt keeps flipping true, so Matchmaking keeps firing immediately and spinning.
+removeFromPool relies on this.pooledDollars shrinking, but all the negative availability entries show more dollars recorded as “in game” than exist in the pool. That’s the same “pool balloon” symptom the user mentioned earlier.
+Fix Approach
+
+We need to squash the negative accounting — either unmark stale IN_GAME dollars when we hit the cleanup threshold, or reintroduce a guard that calls back into the simulation abort hook with an informative reason rather than spinning forever. This is consistent with the guidance to avoid MATCHMAKING_TERMINATED while still respecting the engine’s abort mechanism.
+Next Step
+
+Draft a cleanup routine in MatchmakingEventHandler that, once maxStaleCyclesBeforeCleanup is reached, forcefully re-queues any dollars at that level that are still marked IN_GAME, ensuring availableForMatching returns to a sane value. Let me know if you want me to prototype that patch.
+
+
+Proposed Fix
+
+Update the engine to purge “stuck” in-game markers once a level has stalled for too long. That keeps availableForMatching from going negative and lets matchmaking resume without reintroducing the old termination behavior.
+
+diff --git a/engine/src/core/game-matching-engine.ts b/engine/src/core/game-matching-engine.ts
+index d17b1d8..873161a 100644
+--- a/engine/src/core/game-matching-engine.ts
++++ b/engine/src/core/game-matching-engine.ts
+@@
+   /** Clear all completed games (for memory management) */
+   clearCompletedGames(): void {
+@@
+   /** Mark a virtual dollar as currently engaged in a game */
+   markDollarInGame(dollarId: string): void {
+     this.dollarsInGame.add(dollarId);
+   }
++
++  /** Release pooled dollars that are still flagged as “in game” for the given level */
++  clearStaleInGameDollars(level: BettingLevel): number {
++    const activeDollarIds = new Set<string>();
++    for (const game of this.activeGames.values()) {
++      activeDollarIds.add(game.dollar1.id);
++      activeDollarIds.add(game.dollar2.id);
++    }
++
++    let cleared = 0;
++    for (const dollarId of Array.from(this.dollarsInGame)) {
++      if (activeDollarIds.has(dollarId)) {
++        continue;
++      }
++
++      const dollar = this.pooledDollars.get(dollarId);
++      if (!dollar) {
++        this.dollarsInGame.delete(dollarId);
++        continue;
++      }
++
++      if (dollar.currentLevel !== level) {
++        continue;
++      }
++
++      if (dollar.state !== DollarState.POOLED) {
++        try {
++          this.virtualDollarFactory.updateDollarState(
++            dollar.id,
++            DollarState.POOLED
++          );
++        } catch (error) {
++          console.warn(
++            `[GameMatchingEngine] Failed to reset dollar ${dollar.id} during stale cleanup:`,
++            error
++          );
++        }
++      }
++
++      this.dollarsInGame.delete(dollarId);
++      cleared++;
++    }
++
++    return cleared;
++  }
+diff --git a/engine/src/events/handlers/matchmaking-event-handler.ts b/engine/src/events/handlers/matchmaking-event-handler.ts
+index d836690..5bf5ab3 100644
+--- a/engine/src/events/handlers/matchmaking-event-handler.ts
++++ b/engine/src/events/handlers/matchmaking-event-handler.ts
+@@
+   private lastFifoSnapshot = new Map<number, string>();
+   private daySinceLastReset = 0;
+   private staleCycleStartLevel: number | null = null;
++  private readonly maxStaleCyclesBeforeCleanup = 25;
+@@
+     this.eventBus.on(EVENT_TYPES.DAY_COMPLETED, () => {
+       this.staleCycleStartLevel = null;
+       this.consecutiveNoMatchCycles = 0;
+       this.pendingFifoLevels.clear();
+       this.lastFifoSnapshot.clear();
+@@
+     this.eventBus.on(EVENT_TYPES.DAY_FRAME_COMPLETED, () => {
+       this.staleCycleStartLevel = null;
+       this.consecutiveNoMatchCycles = 0;
+       this.pendingFifoLevels.clear();
+       this.lastFifoSnapshot.clear();
+@@
+       } else if (stalemateDetected && lastStalemateLevel !== null) {
+         this.consecutiveNoMatchCycles++;
+ 
+         if (lastStalemateLevel === this.staleCycleStartLevel) {
+           if (this.consecutiveNoMatchCycles >= this.maxNoMatchCycles) {
+@@
+ 
+           if (
+             this.consecutiveNoMatchCycles >=
+             this.maxStaleCyclesBeforeCleanup
+           ) {
+             this.cleanupStaleQueueState(lastStalemateLevel);
+             return;
+           }
+         } else {
+           this.staleCycleStartLevel = lastStalemateLevel;
+         }
+@@
+       }
+     }
+   }
++
++  private cleanupStaleQueueState(level: number): void {
++    const cleared = this.gameMatchingEngine.clearStaleInGameDollars(
++      level as BettingLevel
++    );
++
++    if (cleared > 0) {
++      console.warn(
++        `[MatchmakingEventHandler] Cleared ${cleared} stale in-game dollars at level ${level} after ${this.consecutiveNoMatchCycles} idle cycles.`
++      );
++    }
++
++    this.consecutiveNoMatchCycles = 0;
++    this.staleCycleStartLevel = null;
++    this.pendingMatchAttempt = true;
++    void this.emitFifoQueueUpdated(level);
++  }
+What This Does
+
+Introduces clearStaleInGameDollars on the engine to drop orphaned “in game” flags for pooled dollars at a specific level, resetting their state if needed.
+Adds a cleanupStaleQueueState helper in the handler that runs after too many consecutive stalemate cycles, logs the cleanup, resets counters, and schedules another matchmaking pass.
+Clears the stale-level tracking on day/frame boundaries to avoid false positives.
+This should stop the runaway loop and prevent availableForMatching from diving negative while keeping matchmaking alive.
