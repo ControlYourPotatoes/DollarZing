@@ -49,7 +49,6 @@ export class MatchmakingEventHandler {
   private daySinceLastReset = 0;
   private staleCycleStartLevel: number | null = null;
   private readonly maxStaleCyclesBeforeCleanup = 25;
-  private readonly maxStaleCyclesBeforeCleanup = 25;
 
   constructor(
     private eventBus: EventBus,
@@ -364,8 +363,7 @@ export class MatchmakingEventHandler {
           }
 
           if (
-            this.consecutiveNoMatchCycles >=
-            this.maxStaleCyclesBeforeCleanup
+            this.consecutiveNoMatchCycles >= this.maxStaleCyclesBeforeCleanup
           ) {
             this.cleanupStaleQueueState(lastStalemateLevel);
             return;
@@ -397,6 +395,21 @@ export class MatchmakingEventHandler {
         this.pendingMatchAttempt = false;
       }
     }
+  }
+
+  private cleanupStaleQueueState(level: number): void {
+    const cleared = this.gameMatchingEngine.clearStaleInGameDollars(
+      level as BettingLevel
+    );
+    if (cleared > 0) {
+      console.warn(
+        `[MatchmakingEventHandler] Cleared ${cleared} stale in-game dollars at level ${level} after ${this.consecutiveNoMatchCycles} idle cycles.`
+      );
+    }
+    this.consecutiveNoMatchCycles = 0;
+    this.staleCycleStartLevel = null;
+    this.pendingMatchAttempt = true;
+    void this.emitFifoQueueUpdated(level);
   }
 
   /**
