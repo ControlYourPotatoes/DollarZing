@@ -4,6 +4,7 @@ import { EventBus, type EventSubscription } from "../events/event-bus";
 import {
   EVENT_TYPES,
   DayStartedEvent,
+  DayFrameCompletedEvent,
   PlayerCreatedEvent,
   NewRunCreatedEvent,
 } from "../events/event-types";
@@ -60,6 +61,7 @@ export class PlayerManager {
 
   private dayStartedSubscription: EventSubscription | null = null;
   private simulationStartedSubscription: EventSubscription | null = null;
+  private dayFrameCompletedSubscription: EventSubscription | null = null;
   private runCompletedSubscription: EventSubscription | null = null;
   private playerCreatedSubscription: EventSubscription | null = null;
   // No end-of-day clearing subscription; we clear at next DAY_STARTED to avoid race with late events
@@ -96,13 +98,15 @@ export class PlayerManager {
       this.handleSimulationStarted.bind(this),
       10
     );
+
     this.eventBus.on(EVENT_TYPES.MATCHMAKING_TERMINATED, () => {
       this.simulationTerminated = true;
     });
+
     this.dayStartedSubscription = this.eventBus.on<DayStartedEvent>(
       EVENT_TYPES.DAY_STARTED,
       this.handleDayStarted.bind(this),
-      10 // High priority
+      10
     );
 
     this.playerCreatedSubscription = this.eventBus.on(
@@ -131,7 +135,12 @@ export class PlayerManager {
     // Note: CASH_OUT_COMPLETED events are handled by the same VIRTUAL_DOLLAR_RUN_COMPLETED handler
     // since cash-outs should also emit VIRTUAL_DOLLAR_RUN_COMPLETED events
 
-    // Clear previous day's actives at next DAY_STARTED (safe point)
+    this.dayFrameCompletedSubscription =
+      this.eventBus.on<DayFrameCompletedEvent>(
+        EVENT_TYPES.DAY_FRAME_COMPLETED,
+        this.handleDayFrameCompleted.bind(this),
+        -10
+      );
   }
 
   /**
@@ -243,6 +252,10 @@ export class PlayerManager {
         );
       }
     }
+  }
+
+  private handleDayFrameCompleted(_event: DayFrameCompletedEvent): void {
+    this.dailyNewPlayersCounter = 0;
   }
 
   private async handleSimulationStarted(event: any): Promise<void> {
@@ -638,12 +651,12 @@ export class PlayerManager {
     this.simulationStartedSubscription?.unsubscribe();
     this.runCompletedSubscription?.unsubscribe();
     this.playerCreatedSubscription?.unsubscribe();
-    // no day-completed subscription
+    this.dayFrameCompletedSubscription?.unsubscribe();
     this.dayStartedSubscription = null;
     this.simulationStartedSubscription = null;
     this.runCompletedSubscription = null;
     this.playerCreatedSubscription = null;
-    // no day-completed subscription
+    this.dayFrameCompletedSubscription = null;
     this.playerRegistry.clear();
   }
 }

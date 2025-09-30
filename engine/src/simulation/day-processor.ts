@@ -7,6 +7,7 @@ import {
   EVENT_TYPES,
   DayStartedEvent,
   DayCompletedEvent,
+  DayFrameCompletedEvent,
   NewRunCreatedEvent,
 } from "../events/event-types";
 import { SimulationConfig } from "./game-engine-simulator";
@@ -144,7 +145,7 @@ export class DayProcessor {
     // Emit day completed event
     const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();
     const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
-    void this.eventBus.emit(EVENT_TYPES.DAY_COMPLETED, {
+    const completedPayload: DayCompletedEvent = {
       type: EVENT_TYPES.DAY_COMPLETED,
       timestamp: new Date(),
       dayNumber: eventDay,
@@ -153,7 +154,21 @@ export class DayProcessor {
       totalRevenue: 0, // Would need to track this through revenue events
       poolSize: finalPoolStats.totalDollarsInPool,
       activePlayers: 0, // Would need to track this properly
-    } as DayCompletedEvent);
+    };
+
+    void this.eventBus.emit(EVENT_TYPES.DAY_COMPLETED, completedPayload);
+
+    void this.eventBus.emit(EVENT_TYPES.DAY_FRAME_COMPLETED, {
+      type: EVENT_TYPES.DAY_FRAME_COMPLETED,
+      timestamp: new Date(),
+      dayNumber: eventDay,
+      summary: {
+        gamesProcessed: completedPayload.gamesProcessed,
+        newPlayers: completedPayload.newPlayers,
+        poolSize: completedPayload.poolSize,
+        activePlayers: completedPayload.activePlayers,
+      },
+    } as DayFrameCompletedEvent);
   }
 
   /**

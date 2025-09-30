@@ -67,6 +67,7 @@ export interface RevenueTrackingConfig {
 export class RevenueTrackingHandler {
   private gameResolvedSubscription: EventSubscription | null = null;
   private cashOutCompletedSubscription: EventSubscription | null = null;
+  private dayFrameSubscription: EventSubscription | null = null;
   private transactionHistory: TransactionRecord[] = [];
   private config: RevenueTrackingConfig;
   private transactionIdCounter = 1;
@@ -101,6 +102,12 @@ export class RevenueTrackingHandler {
       EVENT_TYPES.CASH_OUT_COMPLETED,
       this.handleCashOutCompleted.bind(this),
       15 // High priority to ensure revenue tracking happens early
+    );
+
+    this.dayFrameSubscription = this.eventBus.on(
+      EVENT_TYPES.DAY_FRAME_COMPLETED,
+      this.handleDayFrameCompleted.bind(this),
+      -5
     );
   }
 
@@ -282,6 +289,17 @@ export class RevenueTrackingHandler {
         event.virtualDollarId,
         error instanceof Error ? error.message : String(error)
       );
+    }
+  }
+
+  private handleDayFrameCompleted(): void {
+    if (!this.config.enableTransactionLogging) {
+      return;
+    }
+
+    const max = this.config.maxTransactionHistory;
+    if (this.transactionHistory.length > max) {
+      this.transactionHistory = this.transactionHistory.slice(-max);
     }
   }
 
@@ -653,10 +671,9 @@ export class RevenueTrackingHandler {
       this.cashOutCompletedSubscription = null;
     }
 
-    if (this.config.loggingEnabled) {
-      console.log(
-        "[RevenueTrackingHandler] Disposed - cleaned up subscriptions"
-      );
+    if (this.dayFrameSubscription) {
+      this.dayFrameSubscription.unsubscribe();
+      this.dayFrameSubscription = null;
     }
   }
 }

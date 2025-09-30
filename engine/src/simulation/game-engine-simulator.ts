@@ -18,7 +18,11 @@ import {
 } from "../events/handlers/level-tracking-handler";
 import { MatchmakingEventHandler } from "../events/handlers/matchmaking-event-handler";
 import { PooledGameSessionFactory } from "../factories";
-import { EVENT_TYPES, NewRunCreatedEvent } from "../events/event-types";
+import {
+  EVENT_TYPES,
+  NewRunCreatedEvent,
+  DayFrameCompletedEvent,
+} from "../events/event-types";
 import {
   DEFAULT_RUNTIME_OPTIONS,
   DEFAULT_SIMULATION_PROFILE_NAME,
@@ -193,7 +197,9 @@ export class GameEngineSimulator {
   };
   private runCreatedSubscription: EventSubscription | null = null;
   private dailyNewPlayers: number = 0; // Track new players for current day
+  private pendingDailyResults: DailyResult[] = [];
   private dayCompletedSubscription: EventSubscription | null = null;
+  private dayFrameCompletedSubscription: EventSubscription | null = null;
   private terminationState: SimulationTermination | null = null;
   private lastAbortReason: SimulationAbortReason | null = null;
 
@@ -266,6 +272,12 @@ export class GameEngineSimulator {
       EVENT_TYPES.DAY_COMPLETED,
       this.handleDayCompleted.bind(this)
     );
+
+    this.dayFrameCompletedSubscription =
+      this.eventBus.on<DayFrameCompletedEvent>(
+        EVENT_TYPES.DAY_FRAME_COMPLETED,
+        this.handleDayFrameCompleted.bind(this)
+      );
   }
 
   private handleRunCreated(_event: NewRunCreatedEvent): void {
@@ -283,6 +295,42 @@ export class GameEngineSimulator {
 
     // Capture new players count from the day completed event
     this.dailyNewPlayers = event.newPlayers || 0;
+  }
+
+  private handleDayFrameCompleted(event: DayFrameCompletedEvent): void {
+    if (!this.isRunning) {
+      return;
+    }
+
+    this.finalizeDayResults(event.dayNumber, event.summary);
+  }
+
+  private finalizeDayResults(
+    dayNumber: number,
+    summary?: DayFrameCompletedEvent["summary"]
+  ): void {
+    // Validate coherence before pushing daily result
+    if (!this.config || dayNumber < 1 || dayNumber > this.config.durationDays) {
+      return;
+    }
+
+    const existing = this.pendingDailyResults[dayNumber - 1];
+    if (!existing) {
+      return;
+    }
+
+    if (summary) {
+      existing.gameStatistics = {
+        ...existing.gameStatistics,
+        resolvedGames: summary.gamesProcessed,
+        activeRuns: summary.activePlayers,
+      };
+      existing.newPlayers = summary.newPlayers ?? existing.newPlayers;
+      existing.playerStatistics = {
+        ...existing.playerStatistics,
+        totalPlayers: summary.activePlayers,
+      };
+    }
   }
 
   private resetRunMetrics(): void {
@@ -469,6 +517,8 @@ export class GameEngineSimulator {
     const { durationDays, enableProgressReporting, maxSimulationTimeMs } =
       this.config;
 
+    this.pendingDailyResults = new Array<DailyResult>(durationDays);
+
     // Emit SIMULATION_STARTED event
     void this.eventBus
       .emit("SIMULATION_STARTED", {
@@ -519,6 +569,7 @@ export class GameEngineSimulator {
       };
 
       dailyResults.push(dailyResult);
+      this.pendingDailyResults[day] = dailyResult;
 
       // Reset daily new players count for next day
       this.dailyNewPlayers = 0;
@@ -577,6 +628,8 @@ export class GameEngineSimulator {
         results.levelTrackingSnapshot
       );
     }
+
+    this.pendingDailyResults = [];
 
     if (this.simulationAborted || cancellationToken?.cancelled) {
       const completedDay = dailyResults.length;
@@ -936,6 +989,10 @@ export class GameEngineSimulator {
     if (this.dayCompletedSubscription) {
       this.dayCompletedSubscription.unsubscribe();
       this.dayCompletedSubscription = null;
+    }
+    if (this.dayFrameCompletedSubscription) {
+      this.dayFrameCompletedSubscription.unsubscribe();
+      this.dayFrameCompletedSubscription = null;
     }
   }
 

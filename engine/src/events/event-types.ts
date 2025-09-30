@@ -371,6 +371,17 @@ export interface DayCompletedEvent extends BaseEvent {
   activePlayers: number;
 }
 
+export interface DayFrameCompletedEvent extends BaseEvent {
+  type: "DAY_FRAME_COMPLETED";
+  dayNumber: number;
+  summary: {
+    gamesProcessed: number;
+    newPlayers: number;
+    poolSize: number;
+    activePlayers: number;
+  };
+}
+
 export interface SimulationStartedEvent extends BaseEvent {
   type: "SIMULATION_STARTED";
   config: {
@@ -546,6 +557,7 @@ export type SimulationEvent =
   | NewRunCreatedEvent
   | DayStartedEvent
   | DayCompletedEvent
+  | DayFrameCompletedEvent
   | SimulationStartedEvent
   | SimulationCompletedEvent
   | RunStartedEvent
@@ -617,6 +629,7 @@ export const EVENT_TYPES = {
   // Simulation control events
   DAY_STARTED: "DAY_STARTED",
   DAY_COMPLETED: "DAY_COMPLETED",
+  DAY_FRAME_COMPLETED: "DAY_FRAME_COMPLETED",
   SIMULATION_STARTED: "SIMULATION_STARTED",
   SIMULATION_COMPLETED: "SIMULATION_COMPLETED",
 
@@ -645,3 +658,5 @@ export type EventDataFor<T extends EventType> = Extract<
   SimulationEvent,
   { type: (typeof EVENT_TYPES)[T] }
 >;
+
+export type DayFrameSummary = DayFrameCompletedEvent["summary"];

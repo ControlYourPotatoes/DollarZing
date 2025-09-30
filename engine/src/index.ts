@@ -56,9 +56,7 @@ export type {
   SimulatorFactoryOptions,
   SimulatorDebugOptions,
 } from "./simulation/simulator-factories";
-export {
-  generateDailyAggregates,
-} from "./simulation/post-processing/daily-aggregator";
+export { generateDailyAggregates } from "./simulation/post-processing/daily-aggregator";
 export type {
   DailyAggregateSnapshot,
   WorkflowNode,
@@ -113,6 +111,7 @@ export type {
   OrchestratorConfigValidationEvent,
   ParameterMatrixValidationEvent,
   QualityAssuranceEvent,
+  DayFrameCompletedEvent,
 } from "./events/event-types";
 
 // Utility functions

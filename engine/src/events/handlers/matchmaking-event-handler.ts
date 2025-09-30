@@ -100,6 +100,12 @@ export class MatchmakingEventHandler {
       this.lastFifoSnapshot.clear();
     });
 
+    this.eventBus.on(EVENT_TYPES.DAY_FRAME_COMPLETED, () => {
+      this.consecutiveNoMatchCycles = 0;
+      this.pendingFifoLevels.clear();
+      this.lastFifoSnapshot.clear();
+    });
+
     // Track new runs so we can detect when inflow stops
     this.eventBus.on(EVENT_TYPES.NEW_RUN_CREATED, () => {
       this.consecutiveNoMatchCycles = 0;
