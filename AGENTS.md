@@ -1,24 +1,153 @@
-# Repository Guidelines
+# Agent OS Orchestration Guide (AGENTS.md)
 
-## Project Structure & Module Organization
-- `src/`: Vite + React frontend in TypeScript. Key folders: `components/` (UI primitives), `features/` (screens + domain logic), `store/` (Zustand state), `shared/` (utilities/hooks), `styles/` (Tailwind presets).
-- `engine/`: Node-based simulation layer. Sources live in `src/`, CLI entry points in `cli/`, support scripts in `scripts/`, and compiled assets in `dist/`.
-- `tests/` (root) and `engine/tests/`: Vitest suites covering UI flows and engine behavior respectively. Static assets reside in `public/`; project docs in `docs/` and topic deep dives in `src/STRUCTURE.md` and `Front-End_Research.md`.
+Version: 0.2.0
+Last updated: 2025-09-30
+Owner: Platform/Agent OS
 
-## Build, Test, and Development Commands
-- Frontend: `npm run dev` for Vite HMR, `npm run build` for type-check + production bundle, `npm run preview` for smoke-testing the build, `npm test` or `npm run test:watch` for Vitest.
-- Engine: `cd engine && npm run build` bundles TypeScript with esbuild after cleaning and type-checking; `cd engine && npm test` executes threaded Vitest suites; `cd engine && npm run simulate -- --days 7 --debug-dashboard` runs a sample scenario.
-- Docker & Make: `npm run docker:dev` / `npm run docker:prod` manage compose stacks. The `Makefile` mirrors these flows (`make dev`, `make test`, `make clean`) and is handy when running inside containers.
+Purpose
+- Single source of truth for agent behavior in this monorepo.
+- Enforce project-specific overrides (Vite/React frontend, pure TS engine).
+- Prevent cross-package coupling and performance regressions.
 
-## Coding Style & Naming Conventions
-- TypeScript everywhere; adhere to the repo ESLint config (2-space indentation, semicolons, camelCase for functions/variables, PascalCase for React components). Prefer kebab-case filenames unless an existing pattern differs.
-- Use Tailwind utility classes and `class-variance-authority` helpers; keep style logic close to the component. Run `npx eslint . --fix` or rely on format-on-save before submitting changes.
+Instruction hierarchy (highest wins)
+1) Repository standards and project docs: `best-practices.md`, `code-style.md`, `STRUCTURE.md`, `Financial_WorkFlow.md`
+2) Product/spec files (sample or active): `@.agent-os/specs/**/{spec.md,technical-spec.md,tests.md,tasks.md}`
+3) This file: `AGENTS.md` (project-specific overrides)
+4) Tool guides: `context-fetcher.md`, `test-runner.md`, `git-workflow.md`, etc.
+5) Inline user instructions in requests/issues/PRs
 
-## Testing Guidelines
-- Co-locate new Vitest specs near the code or under `tests/` / `engine/tests/`. Describe intent with `describe`/`it`, reset Zustand stores between cases, and cover both happy paths and error states.
-- Aim for >80% coverage on critical modules. Run `npm test -- --coverage` at the root and `cd engine && npm test -- --coverage` for the engine prior to PRs. For simulations, assert against generated datasets to prevent regressions.
+If rules conflict, ask for clarification before proceeding. Never violate higher-level rules.
 
-## Collaboration Workflow
-- Branch naming: `feature/<slug>`, `fix/<ticket>`, or `chore/<scope>`. Write imperative commits (e.g., `Add daily balance chart`) and reference issues where applicable.
-- PR checklist: confirm lint, type-check, and relevant tests pass locally; document any TODOs inline (`// TODO(username):`) and attach UI screenshots when visuals change. Use `/status` in the CLI to confirm the current container context before running heavyweight commands.
+Project-specific overrides (authoritative for this repo)
+- Monorepo layout:
+  - Backend engine: `engine/` (pure TypeScript simulation engine + CLI, Node.js 22, containerized)
+  - Frontend app: `src/` (React 18 + TypeScript, Vite, Tailwind)
+- Do not migrate frontend to Next.js. Vite is the canonical build tool.
+- Engine is a library-first package with a clean public surface via `engine/index.ts`. Do not introduce web frameworks into `engine/`.
+- Data flow: engine generates datasets; frontend consumes via sync mechanism (see `docker-compose.yml`). No direct imports from `src/` into `engine/` and no engine calling UI code.
+
+Core context sources
+- Standards: `best-practices.md`, `code-style.md`
+- Structure & flows: `STRUCTURE.md`, `docker-compose.yml`, `Financial_WorkFlow.md`
+- Tasks/specs: `@.agent-os/specs/**/{spec.md,technical-spec.md,tests.md,tasks.md}` (use as reference when applicable)
+- Tooling: `context-fetcher.md`, `test-runner.md`, `git-workflow.md`
+
+Mandatory context retrieval
+- Always invoke `context-fetcher` first to pull only needed sections (grep/targeted).
+- If the needed content is already in context, skip fetching.
+- Missing required files → STOP and request them.
+
+Active work focus (as of 2025-09-30)
+- Task 9 only: legacy coupling removal and cleanup.
+  - Independence tests, remove direct cross-calls, event-driven DI, refactor tests.
+- Task 8 is DONE. Do not rework parameter plumbing (charity %, S-curve, risk/strategy, 1-to-1 VirtualDollar) unless fixing a confirmed bug.
+
+Repository guardrails (do-not-break rules)
+- Package boundaries:
+  - No circular dependencies between `engine/` and `src/`.
+  - Public API of engine is only via `engine/index.ts`.
+- Frontend stack: React 18, Vite, Tailwind; keep feature-based architecture with colocated components/hooks/utils.
+- Engine architecture: event-driven publisher/subscriber patterns only; no framework creep.
+- Containerization: Node.js 22 image/tag as currently configured; do not downgrade.
+- Performance budget: maintain ≥10,000 virtual dollars and ≥50,000 games processed within 5 seconds on a standard dev machine.
+- No mass reformatting or unrelated import shuffles; change only files tied to the current task.
+- Dependencies: avoid new libs unless required by spec/task; justify and get approval.
+
+Architecture enforcement
+- Engine: pure TypeScript, event-driven simulation with handlers decoupled from orchestration (e.g., `GameEngineSimulator` coordinating `DayProcessor`, `PlayerManager`, `GameProcessor` via events).
+- Deterministic execution:
+  - All randomness must be seeded (single source of seed truth).
+  - Tests and benchmarks must set seed explicitly.
+- Data structures:
+  - Prefer immutable updates; use `Map`/`Set` for hot-path lookups.
+  - Apply object pooling and batch processing where indicated.
+- Error handling:
+  - Validate inputs early; use typed errors and never swallow exceptions in handlers—emit error events or surface to caller.
+
+Frontend standards
+- Feature-based modules with colocated components, hooks, tests, and styles (see `STRUCTURE.md`).
+- Shared presentation contracts for data loading/normalization—these must remain in a shared layer and not leak engine internals.
+- SVG-first for complex visualizations and custom graphics (see `Financial_WorkFlow.md`).
+- Tailwind classes must follow the multi-line responsive format specified in `code-style.md`.
+
+Testing and fast feedback (must-do)
+- TDD default: write/adjust tests before implementation for new behavior.
+- Seeded tests: specify deterministic seeds; avoid time-based flakiness.
+- Test layers:
+  - Engine unit tests for handlers and orchestration.
+  - Integration tests for full event chains.
+  - Performance tests for throughput and memory.
+- Each PR must include a concise test plan and updated tests when behavior changes.
+
+Performance guardrails
+- Target: process ≥50,000 games and ≥10,000 virtual dollars within 5 seconds.
+- Avoid synchronous blocking in event handlers; prefer batched async or synchronous batches with back-pressure.
+- Clean up listeners to prevent leaks.
+- Provide a reproducible benchmark with fixed seed.
+
+Validation commands (adjust to your scripts)
+- Type checking: `npm run typecheck` or `pnpm -w typecheck`
+- Lint: `npm run lint`
+- Unit/Integration tests: `npm test` (allow pattern selection)
+- Perf benchmark (if present): `npm run bench` with documented seed and expected bounds
+- Build (engine): `npm run build -w engine`
+- Build (frontend): `npm run build -w web` or `npm run build` at root for Vite
+
+Task intake protocol (every agent must produce)
+1) Context
+   - Files/sections fetched via `context-fetcher`
+   - Why these are sufficient
+2) Plan
+   - Minimal change set, risks and mitigations
+3) Patch
+   - Unified diffs only, one fenced block per file
+4) Tests
+   - What’s covered, seeds used, edge cases
+5) Validation
+   - Exact commands, perf expectations (time/memory)
+6) Rollback
+   - Revert plan if acceptance signals fail
+
+Diff format requirements
+```diff
+--- a/path/to/file.ts
++++ b/path/to/file.ts
+@@ -12,6 +12,15 @@
+Only include changed hunks. No cosmetic edits. Keep diffs ≤ 300 lines when possible.
+Routing rules (who should act)
+
+Router (default): selects specialists.
+EngineAgent: engine orchestration/handlers; upholds deterministic seeding and performance.
+FrontendAgent: Vite/React app; enforces feature-based structure and SVG-first visuals.
+ContractsAgent: maintains shared data contracts and loaders without breaking consumers.
+BenchmarkAgent: authors perf benchmarks and interprets results.
+TestAgent: unit/integration/perf tests; seeds and fixtures.
+ContextFetcherAgent: only agent that may fetch context per context-fetcher.md.
+Monorepo data-flow rules
+
+Engine outputs datasets (file/stream); frontend consumes via sync defined in docker-compose.yml.
+No direct engine → frontend runtime coupling; communicate via data artifacts/contracts.
+Keep presentation contracts stable; bump version if breaking.
+MCP integration (optional)
+
+If an MCP server is available, prefer MCP tools named:
+context-fetcher, date-checker, file-creator, git-workflow, project-manager, test-runner
+If a tool is unavailable, fall back to local agent docs (*.md).
+MCP transport: stdio; default tool timeout 60s.
+Don’t add tools via MCP unless permitted by spec/task.
+When to stop and ask
+
+Conflicting directives between this file and older tech-stack docs (e.g., Next.js vs Vite).
+Proposed dependency adds not already used in repo.
+Perf budget risk (bench trending worse than ±10%).
+Unclear engine API surface or contracts changes.
+Checklist for every change
+
+ Context fetched via context-fetcher and summarized
+ Change limited to active task scope (Task 9 cleanup)
+ Code follows code-style.md and best-practices.md
+ Tests added/updated (seeded) and passing locally
+ Perf benchmark executed with fixed seed; within budget
+ No cross-package coupling introduced
+ CI passes
 
