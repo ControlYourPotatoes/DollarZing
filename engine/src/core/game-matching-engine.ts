@@ -676,6 +676,51 @@ export class GameMatchingEngine {
     this.dollarsInGame.add(dollarId);
   }
 
+  /** Release pooled dollars that are still flagged as “in game” for the given level */
+  clearStaleInGameDollars(level: BettingLevel): number {
+    const activeDollarIds = new Set<string>();
+    for (const game of this.activeGames.values()) {
+      activeDollarIds.add(game.dollar1.id);
+      activeDollarIds.add(game.dollar2.id);
+    }
+
+    let cleared = 0;
+    for (const dollarId of Array.from(this.dollarsInGame)) {
+      if (activeDollarIds.has(dollarId)) {
+        continue;
+      }
+
+      const dollar = this.pooledDollars.get(dollarId);
+      if (!dollar) {
+        this.dollarsInGame.delete(dollarId);
+        continue;
+      }
+
+      if (dollar.currentLevel !== level) {
+        continue;
+      }
+
+      if (dollar.state !== DollarState.POOLED) {
+        try {
+          this.virtualDollarFactory.updateDollarState(
+            dollar.id,
+            DollarState.POOLED
+          );
+        } catch (error) {
+          console.warn(
+            `[GameMatchingEngine] Failed to reset dollar ${dollar.id} during stale cleanup:`,
+            error
+          );
+        }
+      }
+
+      this.dollarsInGame.delete(dollarId);
+      cleared++;
+    }
+
+    return cleared;
+  }
+
   /**
    * Get max concurrent games
    */
