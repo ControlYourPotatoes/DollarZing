@@ -22,8 +22,6 @@ export class PlayerProgressionHandler {
   private continuePlaySubscription: EventSubscription | null = null;
   private loggingEnabled: boolean;
 
-  private readonly ownerRequeueBackoffMs = 50;
-
   constructor(
     private eventBus: EventBus,
     private virtualDollarFactory: VirtualDollarFactory,
@@ -255,24 +253,9 @@ export class PlayerProgressionHandler {
    * Re-pool an advanced winner for continued matching at their new level
    */
   private async rePoolAdvancedWinner(virtualDollar: VirtualDollar): Promise<void> {
-    const level = virtualDollar.currentLevel as BettingLevel;
-    const queuedOwners = this.gameMatchingEngine.getQueuedOwnersAtLevel(level);
-    const alreadyQueuedForOwner = queuedOwners.filter(
-      (ownerId) => ownerId === virtualDollar.ownerId
-    ).length;
-
-    if (alreadyQueuedForOwner > 0) {  // Changed from >= maxQueuedPerOwnerPerLevel to > 0 to enforce strict 1-per-owner
-      console.warn(
-        `[PlayerProgressionHandler] THROTTLE: Deferring re-pool of ${virtualDollar.id} at level ${level} for owner ${virtualDollar.ownerId}; ` +
-          `already has ${alreadyQueuedForOwner} slot(s). Queue owners: [${[...new Set(queuedOwners)].slice(0, 5).join(', ')}]`
-      );
-
-      setTimeout(
-        () => void this.rePoolAdvancedWinner(virtualDollar),
-        this.ownerRequeueBackoffMs
-      );
-      return;
-    }
+    // REMOVED THROTTLE: All dollars should queue normally
+    // The "different owners" matching rule will prevent same-owner pairing
+    // Cleanup only fires when truly stuck (end of day or long stalemate)
 
     try {
       if (!virtualDollar || !virtualDollar.id) {
