@@ -22,7 +22,7 @@ export class PlayerProgressionHandler {
   private continuePlaySubscription: EventSubscription | null = null;
   private loggingEnabled: boolean;
 
-  private readonly maxQueuedPerOwnerPerLevel = 2;
+  private readonly maxQueuedPerOwnerPerLevel = 1;
   private readonly ownerRequeueBackoffMs = 50;
 
   constructor(

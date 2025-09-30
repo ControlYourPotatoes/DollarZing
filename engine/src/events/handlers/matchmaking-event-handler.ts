@@ -48,7 +48,7 @@ export class MatchmakingEventHandler {
   private lastFifoSnapshot = new Map<number, string>();
   private daySinceLastReset = 0;
   private staleCycleStartLevel: number | null = null;
-  private readonly maxStaleCyclesBeforeCleanup = 25;
+  private readonly maxStaleCyclesBeforeCleanup = 5;
   private readonly stalemateRetryDelayMs = 25;
 
   constructor(
@@ -355,6 +355,8 @@ export class MatchmakingEventHandler {
       } else if (stalemateDetected && lastStalemateLevel !== null) {
         this.consecutiveNoMatchCycles++;
 
+        console.debug(`[MatchmakingEventHandler] Stalemate cycle ${this.consecutiveNoMatchCycles} at level ${lastStalemateLevel} (max cleanup: ${this.maxStaleCyclesBeforeCleanup})`);
+
         if (lastStalemateLevel === this.staleCycleStartLevel) {
           if (this.consecutiveNoMatchCycles >= this.maxNoMatchCycles) {
             console.warn(
@@ -366,6 +368,7 @@ export class MatchmakingEventHandler {
           if (
             this.consecutiveNoMatchCycles >= this.maxStaleCyclesBeforeCleanup
           ) {
+            console.debug(`[MatchmakingEventHandler] Triggering stale cleanup at level ${lastStalemateLevel} after ${this.consecutiveNoMatchCycles} cycles`);
             this.cleanupStaleQueueState(lastStalemateLevel);
             return;
           }
@@ -389,9 +392,9 @@ export class MatchmakingEventHandler {
       this.isMatching = false;
       if (!this.terminationTriggered && this.pendingMatchAttempt) {
         this.pendingMatchAttempt = false;
-        Promise.resolve().then(() => {
+        setTimeout(() => {
           void this.attemptMatching();
-        });
+        }, 50);  // Backoff to prevent tight loop
       } else {
         this.pendingMatchAttempt = false;
       }
