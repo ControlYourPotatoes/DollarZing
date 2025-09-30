@@ -403,12 +403,17 @@ export class MatchmakingEventHandler {
 
   private cleanupStaleQueueState(level: number): void {
     const requeuedIds = this.gameMatchingEngine.clearStaleInGameDollars(level as BettingLevel);
+    this.gameMatchingEngine.logGlobalAvailableForMatching();  // Debug post-cleanup
+
     if (requeuedIds.length > 0) {
       console.warn(
         `[MatchmakingEventHandler] Requeued ${requeuedIds.length} stale dollars at level ${level} after ` +
         `${this.consecutiveNoMatchCycles} idle cycles: ${requeuedIds.slice(0, 5).join(", ")}${requeuedIds.length > 5 ? "…" : ""}`
       );
+    } else {
+      console.debug(`[MatchmakingEventHandler] Cleanup triggered at level ${level} but 0 stale dollars found (global available: ${this.gameMatchingEngine.pooledDollars.size - this.gameMatchingEngine.dollarsInGame.size})`);
     }
+
     this.consecutiveNoMatchCycles = 0;
     this.staleCycleStartLevel = null;
 

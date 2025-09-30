@@ -22,7 +22,6 @@ export class PlayerProgressionHandler {
   private continuePlaySubscription: EventSubscription | null = null;
   private loggingEnabled: boolean;
 
-  private readonly maxQueuedPerOwnerPerLevel = 1;
   private readonly ownerRequeueBackoffMs = 50;
 
   constructor(
@@ -256,18 +255,18 @@ export class PlayerProgressionHandler {
    * Re-pool an advanced winner for continued matching at their new level
    */
   private async rePoolAdvancedWinner(virtualDollar: VirtualDollar): Promise<void> {
-    const queuedOwners = this.gameMatchingEngine.getQueuedOwnersAtLevel(
-      virtualDollar.currentLevel as BettingLevel
-    );
+    const level = virtualDollar.currentLevel as BettingLevel;
+    const queuedOwners = this.gameMatchingEngine.getQueuedOwnersAtLevel(level);
     const alreadyQueuedForOwner = queuedOwners.filter(
       (ownerId) => ownerId === virtualDollar.ownerId
     ).length;
+    const maxForLevel = this.getMaxQueuedPerOwnerPerLevel(level);
 
-    if (alreadyQueuedForOwner >= this.maxQueuedPerOwnerPerLevel) {
+    if (alreadyQueuedForOwner >= maxForLevel) {
       if (this.loggingEnabled) {
         console.debug(
-          `[PlayerProgressionHandler] Deferring re-pool of ${virtualDollar.id} at level ${virtualDollar.currentLevel}; ` +
-            `owner ${virtualDollar.ownerId} already has ${alreadyQueuedForOwner} slots`
+          `[PlayerProgressionHandler] Deferring re-pool of ${virtualDollar.id} at level ${level} for owner ${virtualDollar.ownerId}; ` +
+            `already has ${alreadyQueuedForOwner}/${maxForLevel} slots (queue owners: [${[...new Set(queuedOwners)].join(', ')}])`
         );
       }
 
@@ -327,6 +326,10 @@ export class PlayerProgressionHandler {
       );
       throw error; // Re-throw to trigger progression failure event
     }
+  }
+
+  private getMaxQueuedPerOwnerPerLevel(level: BettingLevel): number {
+    return level >= 2 ? 1 : 2;
   }
 
   /**
