@@ -47,8 +47,9 @@ export class MatchmakingEventHandler {
   private pendingFifoLevels = new Set<number>();
   private lastFifoSnapshot = new Map<number, string>();
   private daySinceLastReset = 0;
-  private dayStalemateCount = 0;
-  private readonly maxDayStalemates = 2;
+  private staleCycleStartLevel: number | null = null;
+  private readonly maxStaleCyclesBeforeCleanup = 25;
+  private readonly maxStaleCyclesBeforeCleanup = 25;
 
   constructor(
     private eventBus: EventBus,
@@ -90,17 +91,14 @@ export class MatchmakingEventHandler {
     });
 
     this.eventBus.on(EVENT_TYPES.DAY_COMPLETED, () => {
-      if (this.consecutiveNoMatchCycles > 0) {
-        this.dayStalemateCount++;
-      } else {
-        this.dayStalemateCount = 0;
-      }
+      this.staleCycleStartLevel = null;
       this.consecutiveNoMatchCycles = 0;
       this.pendingFifoLevels.clear();
       this.lastFifoSnapshot.clear();
     });
 
     this.eventBus.on(EVENT_TYPES.DAY_FRAME_COMPLETED, () => {
+      this.staleCycleStartLevel = null;
       this.consecutiveNoMatchCycles = 0;
       this.pendingFifoLevels.clear();
       this.lastFifoSnapshot.clear();
@@ -197,8 +195,8 @@ export class MatchmakingEventHandler {
       let stalemateDetected = false;
       let lastStalemateLevel: number | null = null;
 
-      // Try to match at each level
-      for (let level = 1; level <= 10; level++) {
+      // Try to match at each level, prioritizing higher tiers first
+      for (let level = 10; level >= 1; level--) {
         const bettingLevel = level as BettingLevel;
         const levelDollars =
           this.gameMatchingEngine.getDollarsAtLevel(bettingLevel);
@@ -267,7 +265,7 @@ export class MatchmakingEventHandler {
                 matchingQueue.length + deferredQueue.length
               })`
             );
-            break;
+            continue;
           }
 
           const partner = matchingQueue.splice(partnerIndex, 1)[0];
@@ -354,25 +352,30 @@ export class MatchmakingEventHandler {
 
       if (matchesMade > 0) {
         this.consecutiveNoMatchCycles = 0;
-      } else if (stalemateDetected) {
+      } else if (stalemateDetected && lastStalemateLevel !== null) {
         this.consecutiveNoMatchCycles++;
-        if (
-          !this.terminationTriggered &&
-          this.consecutiveNoMatchCycles >= this.maxNoMatchCycles &&
-          lastStalemateLevel !== null
-        ) {
-          if (this.dayStalemateCount >= this.maxDayStalemates) {
-            this.terminateMatchmaking(
-              lastStalemateLevel,
-              "Repeated stalemate across days: insufficient unique players"
+
+        if (lastStalemateLevel === this.staleCycleStartLevel) {
+          if (this.consecutiveNoMatchCycles >= this.maxNoMatchCycles) {
+            console.warn(
+              `[MatchmakingEventHandler] Waiting for another unique player at level ${lastStalemateLevel}. ` +
+                `Cycles without match: ${this.consecutiveNoMatchCycles}`
             );
+          }
+
+          if (
+            this.consecutiveNoMatchCycles >=
+            this.maxStaleCyclesBeforeCleanup
+          ) {
+            this.cleanupStaleQueueState(lastStalemateLevel);
             return;
           }
-          this.dayStalemateCount++;
-          return;
+        } else {
+          this.staleCycleStartLevel = lastStalemateLevel;
         }
       } else {
         this.consecutiveNoMatchCycles = 0;
+        this.staleCycleStartLevel = null;
       }
     } catch (error) {
       if (!this.terminationTriggered) {
@@ -394,32 +397,6 @@ export class MatchmakingEventHandler {
         this.pendingMatchAttempt = false;
       }
     }
-  }
-
-  private terminateMatchmaking(level: number, reason: string): void {
-    if (this.terminationTriggered) {
-      return;
-    }
-    this.terminationTriggered = true;
-    this.pendingMatchAttempt = false;
-    this.pendingFifoLevels.clear();
-    void this.emitMatchmakingError("MATCHMAKING_TERMINATED", reason);
-    void this.eventBus.emit(EVENT_TYPES.MATCHMAKING_TERMINATED, {
-      type: EVENT_TYPES.MATCHMAKING_TERMINATED,
-      timestamp: new Date(),
-      level,
-      reason,
-    });
-    this.gameMatchingEngine.abortSimulation?.({
-      code: "MATCHMAKING_STALEMATE",
-      message: reason,
-      context: {
-        level,
-        uniqueOwners: this.consecutiveNoMatchCycles,
-        poolSize:
-          this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool,
-      },
-    });
   }
 
   /**
