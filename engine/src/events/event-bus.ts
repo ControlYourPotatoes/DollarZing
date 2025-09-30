@@ -21,6 +21,10 @@ export interface EventBusOptions {
   maxListeners?: number;
 }
 
+const DEFAULT_MAX_LISTENERS = 100;
+const MAX_QUEUE_FLUSH = 2000;
+const MAX_DISPATCH_DEPTH = 400;
+
 /**
  * Central event dispatcher using publish-subscribe pattern with typed events
  */
@@ -37,11 +41,11 @@ export class EventBus {
   }> = [];
   private isDispatching = false;
   private activeDispatchDepth = 0;
-  private maxDispatchDepth = 1000;
+  private maxDispatchDepth = MAX_DISPATCH_DEPTH;
 
   constructor(options: EventBusOptions = {}) {
     this.traceEnabled = options.enableTracing ?? false;
-    this.maxListeners = options.maxListeners ?? 100;
+    this.maxListeners = options.maxListeners ?? DEFAULT_MAX_LISTENERS;
   }
 
   /**
@@ -134,7 +138,8 @@ export class EventBus {
         `[EventBus][processQueue] starting with queue length ${this.dispatchQueue.length}`
       );
     }
-    const next = (): void => {
+    let processed = 0;
+    const pump = (): void => {
       if (this.dispatchQueue.length === 0) {
         this.isDispatching = false;
         return;
@@ -147,24 +152,33 @@ export class EventBus {
         );
       }
 
+      const finish = (): void => {
+        processed += 1;
+        if (processed % MAX_QUEUE_FLUSH === 0) {
+          setTimeout(pump, 0);
+        } else {
+          pump();
+        }
+      };
+
       try {
         const task = this.dispatchEvent(type, data);
         task
           .then(() => {
             resolve();
-            next();
+            finish();
           })
           .catch((error) => {
             reject(error);
-            next();
+            finish();
           });
       } catch (error) {
         reject(error);
-        next();
+        finish();
       }
     };
 
-    next();
+    pump();
   }
 
   private async dispatchEvent<T>(eventType: string, data: T): Promise<void> {
@@ -174,9 +188,10 @@ export class EventBus {
       );
     }
     if (this.activeDispatchDepth > this.maxDispatchDepth) {
-      throw new Error(
-        `Max event dispatch depth (${this.maxDispatchDepth}) exceeded for ${eventType}`
+      console.warn(
+        `[EventBus] Dispatch depth ${this.activeDispatchDepth} exceeded max ${this.maxDispatchDepth} for ${eventType}. Switching to iterative flush.`
       );
+      return this.flushHandlersIteratively(eventType, data);
     }
 
     this.activeDispatchDepth++;
@@ -200,7 +215,7 @@ export class EventBus {
       }
 
       const settledHandlers = handlers.slice();
-      const promises: Promise<void>[] = [];
+      const asyncHandlers: Array<Promise<void>> = [];
 
       for (const { handler } of settledHandlers) {
         if (this.traceEnabled) {
@@ -211,7 +226,7 @@ export class EventBus {
         try {
           const result = handler(data);
           if (result instanceof Promise) {
-            promises.push(result);
+            asyncHandlers.push(result.then(() => undefined));
           }
         } catch (error) {
           console.error(`[EventBus] Error in handler for ${eventType}:`, error);
@@ -223,25 +238,8 @@ export class EventBus {
         }
       }
 
-      if (promises.length > 0) {
-        if (this.traceEnabled) {
-          console.log(
-            `[EventBus][dispatchEvent] awaiting ${promises.length} async handlers for ${eventType}`
-          );
-        }
-        try {
-          await Promise.all(promises);
-        } catch (error) {
-          console.error(
-            `[EventBus] Error in async handlers for ${eventType}:`,
-            error
-          );
-          this.emitSync(EVENT_TYPES.EVENT_ERROR, {
-            eventType,
-            error: error instanceof Error ? error.message : String(error),
-            timestamp: new Date(),
-          });
-        }
+      if (asyncHandlers.length > 0) {
+        await this.resolveAsyncHandlers(eventType, asyncHandlers);
       }
     } finally {
       if (this.traceEnabled) {
@@ -250,6 +248,66 @@ export class EventBus {
         );
       }
       this.activeDispatchDepth--;
+    }
+  }
+
+  private async resolveAsyncHandlers(
+    eventType: string,
+    handlers: Array<Promise<void>>
+  ): Promise<void> {
+    const chunkSize = 20;
+    let index = 0;
+    while (index < handlers.length) {
+      const slice = handlers.slice(index, index + chunkSize);
+      try {
+        await Promise.all(slice);
+      } catch (error) {
+        console.error(
+          `[EventBus] Error in async handlers for ${eventType}:`,
+          error
+        );
+        this.emitSync(EVENT_TYPES.EVENT_ERROR, {
+          eventType,
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date(),
+        });
+      }
+      index += chunkSize;
+      if (index < handlers.length) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+    }
+  }
+
+  private async flushHandlersIteratively<T>(
+    eventType: string,
+    data: T
+  ): Promise<void> {
+    const handlers = this.listeners.get(eventType);
+    if (!handlers || handlers.length === 0) {
+      return;
+    }
+
+    const queue = handlers.slice();
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      try {
+        const result = current.handler(data);
+        if (result instanceof Promise) {
+          await result;
+        }
+      } catch (error) {
+        console.error(`[EventBus] Error in handler for ${eventType}:`, error);
+        this.emitSync(EVENT_TYPES.EVENT_ERROR, {
+          eventType,
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date(),
+        });
+      }
+
+      if (queue.length > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
     }
   }
 
