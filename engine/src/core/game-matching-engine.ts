@@ -676,49 +676,54 @@ export class GameMatchingEngine {
     this.dollarsInGame.add(dollarId);
   }
 
-  /** Release pooled dollars that are still flagged as “in game” for the given level */
-  clearStaleInGameDollars(level: BettingLevel): number {
+  /** Release pooled dollars that are still flagged as “in game” for the given level and requeue them */
+  clearStaleInGameDollars(level: BettingLevel): string[] {
+    const requeueIds: string[] = [];
     const activeDollarIds = new Set<string>();
+
     for (const game of this.activeGames.values()) {
       activeDollarIds.add(game.dollar1.id);
       activeDollarIds.add(game.dollar2.id);
     }
 
-    let cleared = 0;
     for (const dollarId of Array.from(this.dollarsInGame)) {
       if (activeDollarIds.has(dollarId)) {
         continue;
       }
 
-      const dollar = this.pooledDollars.get(dollarId);
-      if (!dollar) {
+      const pooled = this.pooledDollars.get(dollarId);
+      if (pooled && pooled.currentLevel === level) {
+        // existing behaviour: snap state back to pooled
+        this.virtualDollarFactory.updateDollarState(pooled.id, DollarState.POOLED);
         this.dollarsInGame.delete(dollarId);
+        requeueIds.push(pooled.id);
         continue;
       }
 
-      if (dollar.currentLevel !== level) {
-        continue;
+      // Dollar left the pool already; fetch it from the factory and force requeue
+      const stale = this.virtualDollarFactory.getDollar(dollarId);
+      if (stale && stale.currentLevel === level) {
+        this.virtualDollarFactory.updateDollarState(stale.id, DollarState.POOLED);
+        this.forceRequeueDollar(stale);
+        this.dollarsInGame.delete(dollarId);
+        requeueIds.push(stale.id);
+      } else {
+        this.dollarsInGame.delete(dollarId);
       }
-
-      if (dollar.state !== DollarState.POOLED) {
-        try {
-          this.virtualDollarFactory.updateDollarState(
-            dollar.id,
-            DollarState.POOLED
-          );
-        } catch (error) {
-          console.warn(
-            `[GameMatchingEngine] Failed to reset dollar ${dollar.id} during stale cleanup:`,
-            error
-          );
-        }
-      }
-
-      this.dollarsInGame.delete(dollarId);
-      cleared++;
     }
 
-    return cleared;
+    return requeueIds;
+  }
+
+  /** Force requeue a dollar into the pool and level queue */
+  forceRequeueDollar(dollar: VirtualDollar): void {
+    this.pooledDollars.set(dollar.id, dollar);
+    this.getLevelQueue(dollar.currentLevel).pending.add(dollar.id);
+    this.getLevelQueue(dollar.currentLevel).items.push(dollar.id);
+    if (!this.dollarsByLevel.has(dollar.currentLevel)) {
+      this.dollarsByLevel.set(dollar.currentLevel, new Set());
+    }
+    this.dollarsByLevel.get(dollar.currentLevel)!.add(dollar.id);
   }
 
   /**
@@ -777,5 +782,15 @@ export class GameMatchingEngine {
    */
   getFactoryStatistics() {
     return this.gameSessionFactory.getStatistics();
+  }
+
+  /**
+   * Log global availableForMatching if negative (debug) - call from key methods like addToPool, removeFromPool, markDollarInGame
+   */
+  logGlobalAvailableForMatching(): void {
+    const available = this.pooledDollars.size - this.dollarsInGame.size;
+    if (available < 0) {
+      console.warn(`[GameMatchingEngine] Global availableForMatching negative: ${available} (pooled: ${this.pooledDollars.size}, inGame: ${this.dollarsInGame.size})`);
+    }
   }
 }
