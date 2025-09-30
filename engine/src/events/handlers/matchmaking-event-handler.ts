@@ -49,6 +49,7 @@ export class MatchmakingEventHandler {
   private daySinceLastReset = 0;
   private staleCycleStartLevel: number | null = null;
   private readonly maxStaleCyclesBeforeCleanup = 25;
+  private readonly stalemateRetryDelayMs = 25;
 
   constructor(
     private eventBus: EventBus,
@@ -398,17 +399,22 @@ export class MatchmakingEventHandler {
   }
 
   private cleanupStaleQueueState(level: number): void {
-    const cleared = this.gameMatchingEngine.clearStaleInGameDollars(
-      level as BettingLevel
-    );
-    if (cleared > 0) {
+    const requeuedIds = this.gameMatchingEngine.clearStaleInGameDollars(level as BettingLevel);
+    if (requeuedIds.length > 0) {
       console.warn(
-        `[MatchmakingEventHandler] Cleared ${cleared} stale in-game dollars at level ${level} after ${this.consecutiveNoMatchCycles} idle cycles.`
+        `[MatchmakingEventHandler] Requeued ${requeuedIds.length} stale dollars at level ${level} after ` +
+        `${this.consecutiveNoMatchCycles} idle cycles: ${requeuedIds.slice(0, 5).join(", ")}${requeuedIds.length > 5 ? "…" : ""}`
       );
     }
     this.consecutiveNoMatchCycles = 0;
     this.staleCycleStartLevel = null;
-    this.pendingMatchAttempt = true;
+
+    // Back off before retrying so we wait for fresh inflow or game resolutions
+    if (!this.pendingMatchAttempt) {
+      this.pendingMatchAttempt = true;
+      setTimeout(() => void this.attemptMatching(), this.stalemateRetryDelayMs);
+    }
+
     void this.emitFifoQueueUpdated(level);
   }
 
