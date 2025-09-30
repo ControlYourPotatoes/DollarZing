@@ -116,6 +116,10 @@ export class DatasetOrchestrator {
     this.sharedEventBus = eventBus;
   }
 
+  private getEventBus(): EventBus | undefined {
+    return this.sharedEventBus;
+  }
+
   /**
    * Generate a single dataset using the provided parameter combination
    */
@@ -125,11 +129,12 @@ export class DatasetOrchestrator {
   ): Promise<AdapterGenerationResult> {
     const startTime = performance.now();
     const parameterId = this.generateParameterId(combination);
+    const eventBus = this.getEventBus();
 
     try {
       // Emit dataset generation started event
-      if (this.sharedEventBus) {
-        await this.sharedEventBus.emit(EVENT_TYPES.DATASET_GENERATION_STARTED, {
+      if (eventBus) {
+        await eventBus.emit(EVENT_TYPES.DATASET_GENERATION_STARTED, {
           type: EVENT_TYPES.DATASET_GENERATION_STARTED,
           timestamp: new Date(),
           parameterId,
@@ -140,8 +145,8 @@ export class DatasetOrchestrator {
 
       // Validate parameter combination and emit validation event
       const isValid = validateParameterCombination(combination);
-      if (this.sharedEventBus) {
-        await this.sharedEventBus.emit(EVENT_TYPES.PARAMETER_VALIDATION, {
+      if (eventBus) {
+        await eventBus.emit(EVENT_TYPES.PARAMETER_VALIDATION, {
           type: EVENT_TYPES.PARAMETER_VALIDATION,
           timestamp: new Date(),
           parameterId,
@@ -164,19 +169,16 @@ export class DatasetOrchestrator {
         };
 
         // Emit completion event with failure
-        if (this.sharedEventBus) {
-          await this.sharedEventBus.emit(
-            EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-            {
-              type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-              timestamp: new Date(),
-              parameterId,
-              success: false,
-              durationMs: result.generationTimeMs,
-              recordCount: 0,
-              error: result.error,
-            } as DatasetGenerationCompletedEvent
-          );
+        if (eventBus) {
+          await eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+            type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+            timestamp: new Date(),
+            parameterId,
+            success: false,
+            durationMs: result.generationTimeMs,
+            recordCount: 0,
+            error: result.error,
+          } as DatasetGenerationCompletedEvent);
         }
 
         return result;
@@ -199,7 +201,8 @@ export class DatasetOrchestrator {
         simulationConfig,
         shouldCollectSnapshots,
         shouldCollectEvents,
-        !!this.orchestratorConfig.debugEvents
+        !!this.orchestratorConfig.debugEvents,
+        eventBus
       );
       const { simulator, profile } = assembly;
 
@@ -223,7 +226,7 @@ export class DatasetOrchestrator {
       try {
         // Create enhanced progress wrapper that emits events
         const wrappedCallback =
-          progressCallback || this.sharedEventBus
+          progressCallback || eventBus
             ? (progress: SimulationProgress) => {
                 // Call original callback if provided
                 if (progressCallback) {
@@ -231,21 +234,18 @@ export class DatasetOrchestrator {
                 }
 
                 // Emit progress event if EventBus available
-                if (this.sharedEventBus) {
-                  void this.sharedEventBus.emit(
-                    EVENT_TYPES.DATASET_GENERATION_PROGRESS,
-                    {
-                      type: EVENT_TYPES.DATASET_GENERATION_PROGRESS,
-                      timestamp: new Date(),
-                      parameterId,
-                      currentDay: progress.currentDay,
-                      totalDays: progress.totalDays,
-                      progressPercentage:
-                        (progress.currentDay / progress.totalDays) * 100,
-                      gamesProcessed: progress.gamesCompleted || 0,
-                      playersActive: progress.playersActive || 0,
-                    } as DatasetGenerationProgressEvent
-                  );
+                if (eventBus) {
+                  void eventBus.emit(EVENT_TYPES.DATASET_GENERATION_PROGRESS, {
+                    type: EVENT_TYPES.DATASET_GENERATION_PROGRESS,
+                    timestamp: new Date(),
+                    parameterId,
+                    currentDay: progress.currentDay,
+                    totalDays: progress.totalDays,
+                    progressPercentage:
+                      (progress.currentDay / progress.totalDays) * 100,
+                    gamesProcessed: progress.gamesCompleted || 0,
+                    playersActive: progress.playersActive || 0,
+                  } as DatasetGenerationProgressEvent);
                 }
               }
             : undefined;
@@ -258,8 +258,8 @@ export class DatasetOrchestrator {
 
         // Validate simulation results and emit validation event
         const validation = this.validateSimulationResults(simulationResults);
-        if (this.sharedEventBus) {
-          await this.sharedEventBus.emit(EVENT_TYPES.DATASET_VALIDATION, {
+        if (eventBus) {
+          await eventBus.emit(EVENT_TYPES.DATASET_VALIDATION, {
             type: EVENT_TYPES.DATASET_VALIDATION,
             timestamp: new Date(),
             parameterId,
@@ -303,19 +303,16 @@ export class DatasetOrchestrator {
             failureResult.error += terminationInfo;
           }
 
-          if (this.sharedEventBus) {
-            await this.sharedEventBus.emit(
-              EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-              {
-                type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-                timestamp: new Date(),
-                parameterId,
-                success: false,
-                durationMs: generationTimeMs,
-                recordCount: 0,
-                error: failureResult.error,
-              } as DatasetGenerationCompletedEvent
-            );
+          if (eventBus) {
+            await eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+              type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+              timestamp: new Date(),
+              parameterId,
+              success: false,
+              durationMs: generationTimeMs,
+              recordCount: 0,
+              error: failureResult.error,
+            } as DatasetGenerationCompletedEvent);
           }
 
           return failureResult;
@@ -463,19 +460,16 @@ export class DatasetOrchestrator {
           eventCount: eventTraces.length,
         };
 
-        if (this.sharedEventBus) {
-          await this.sharedEventBus.emit(
-            EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-            {
-              type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-              timestamp: new Date(),
-              parameterId,
-              success: true,
-              durationMs: generationTimeMs,
-              recordCount,
-              outputPaths,
-            } as DatasetGenerationCompletedEvent
-          );
+        if (eventBus) {
+          await eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+            type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+            timestamp: new Date(),
+            parameterId,
+            success: true,
+            durationMs: generationTimeMs,
+            recordCount,
+            outputPaths,
+          } as DatasetGenerationCompletedEvent);
         }
 
         return successResult;
@@ -498,19 +492,16 @@ export class DatasetOrchestrator {
       };
 
       // Emit completion event with error
-      if (this.sharedEventBus) {
-        await this.sharedEventBus.emit(
-          EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-          {
-            type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
-            timestamp: new Date(),
-            parameterId,
-            success: false,
-            durationMs: result.generationTimeMs,
-            recordCount: 0,
-            error: result.error,
-          } as DatasetGenerationCompletedEvent
-        );
+      if (eventBus) {
+        await eventBus.emit(EVENT_TYPES.DATASET_GENERATION_COMPLETED, {
+          type: EVENT_TYPES.DATASET_GENERATION_COMPLETED,
+          timestamp: new Date(),
+          parameterId,
+          success: false,
+          durationMs: result.generationTimeMs,
+          recordCount: 0,
+          error: result.error,
+        } as DatasetGenerationCompletedEvent);
       }
 
       return result;
@@ -575,9 +566,11 @@ export class DatasetOrchestrator {
     simulationConfig: SimulationConfig,
     collectDailySnapshots: boolean,
     collectEventTraces: boolean,
-    debugEvents: boolean
+    debugEvents: boolean,
+    sharedEventBus?: EventBus
   ): SimulatorAssembly {
-    const simulationEventBus = new EventBus({ enableTracing: debugEvents });
+    const simulationEventBus =
+      sharedEventBus ?? new EventBus({ enableTracing: debugEvents });
 
     return createProductionSimulator({
       eventBus: simulationEventBus,
