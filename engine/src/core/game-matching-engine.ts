@@ -676,7 +676,7 @@ export class GameMatchingEngine {
     this.dollarsInGame.add(dollarId);
   }
 
-  /** Release pooled dollars that are still flagged as “in game” for the given level and requeue them */
+  /** Release pooled dollars that are still flagged as "in game" for the given level and requeue them */
   clearStaleInGameDollars(level: BettingLevel): string[] {
     const requeueIds: string[] = [];
     const activeDollarIds = new Set<string>();
@@ -691,24 +691,27 @@ export class GameMatchingEngine {
         continue;
       }
 
-      const pooled = this.pooledDollars.get(dollarId);
-      if (pooled && pooled.currentLevel === level) {
-        // existing behaviour: snap state back to pooled
-        this.virtualDollarFactory.updateDollarState(pooled.id, DollarState.POOLED);
+      // Fetch the dollar from factory to check its level
+      const dollar = this.virtualDollarFactory.getDollar(dollarId);
+      if (!dollar || dollar.currentLevel !== level) {
+        // Wrong level or doesn't exist - just clear the flag
         this.dollarsInGame.delete(dollarId);
-        requeueIds.push(pooled.id);
         continue;
       }
 
-      // Dollar left the pool already; fetch it from the factory and force requeue
-      const stale = this.virtualDollarFactory.getDollar(dollarId);
-      if (stale && stale.currentLevel === level) {
-        this.virtualDollarFactory.updateDollarState(stale.id, DollarState.POOLED);
-        this.forceRequeueDollar(stale);
+      // Check if it's still in the pool
+      const pooled = this.pooledDollars.get(dollarId);
+      if (pooled) {
+        // In pool: reset state and keep it there
+        this.virtualDollarFactory.updateDollarState(pooled.id, DollarState.POOLED);
         this.dollarsInGame.delete(dollarId);
-        requeueIds.push(stale.id);
+        requeueIds.push(pooled.id);
       } else {
+        // Not in pool: force requeue it
+        this.virtualDollarFactory.updateDollarState(dollar.id, DollarState.POOLED);
+        this.forceRequeueDollar(dollar);
         this.dollarsInGame.delete(dollarId);
+        requeueIds.push(dollar.id);
       }
     }
 
