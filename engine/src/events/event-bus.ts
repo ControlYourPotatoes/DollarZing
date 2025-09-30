@@ -23,7 +23,7 @@ export interface EventBusOptions {
 
 const DEFAULT_MAX_LISTENERS = 100;
 const MAX_QUEUE_FLUSH = 2000;
-const MAX_DISPATCH_DEPTH = 400;
+const MAX_DISPATCH_DEPTH = 5000; // Increased from 400 to handle multi-day simulations (365 days × ~10-15 depth per day)
 
 /**
  * Central event dispatcher using publish-subscribe pattern with typed events
@@ -397,5 +397,29 @@ export class EventBus {
       summary.set(eventType, handlers.length);
     }
     return summary;
+  }
+
+  /**
+   * Clear all listeners for a specific event type
+   */
+  clearListeners(eventType: string): void {
+    this.listeners.delete(eventType);
+    if (this.traceEnabled) {
+      console.log(`[EventBus] Cleared all listeners for ${eventType}`);
+    }
+  }
+
+  /**
+   * Clear ALL listeners from the event bus (use for cleanup between days/scenarios)
+   */
+  clearAllListeners(): void {
+    const count = Array.from(this.listeners.values()).reduce(
+      (sum, handlers) => sum + handlers.length,
+      0
+    );
+    this.listeners.clear();
+    if (this.traceEnabled) {
+      console.log(`[EventBus] Cleared all ${count} listeners`);
+    }
   }
 }
