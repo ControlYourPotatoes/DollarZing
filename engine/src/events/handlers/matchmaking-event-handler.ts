@@ -48,7 +48,7 @@ export class MatchmakingEventHandler {
   private lastFifoSnapshot = new Map<number, string>();
   private daySinceLastReset = 0;
   private staleCycleStartLevel: number | null = null;
-  private readonly maxStaleCyclesBeforeCleanup = 5;
+  private readonly maxStaleCyclesBeforeCleanup = 2;  // Lowered from 5 to trigger faster
   private readonly stalemateRetryDelayMs = 25;
 
   constructor(
@@ -355,7 +355,7 @@ export class MatchmakingEventHandler {
       } else if (stalemateDetected && lastStalemateLevel !== null) {
         this.consecutiveNoMatchCycles++;
 
-        console.debug(`[MatchmakingEventHandler] Stalemate cycle ${this.consecutiveNoMatchCycles} at level ${lastStalemateLevel} (max cleanup: ${this.maxStaleCyclesBeforeCleanup})`);
+        console.warn(`[MatchmakingEventHandler] Stalemate cycle ${this.consecutiveNoMatchCycles}/${this.maxStaleCyclesBeforeCleanup} at level ${lastStalemateLevel} (staleCycleStartLevel: ${this.staleCycleStartLevel})`);
 
         if (lastStalemateLevel === this.staleCycleStartLevel) {
           if (this.consecutiveNoMatchCycles >= this.maxNoMatchCycles) {
@@ -368,11 +368,12 @@ export class MatchmakingEventHandler {
           if (
             this.consecutiveNoMatchCycles >= this.maxStaleCyclesBeforeCleanup
           ) {
-            console.debug(`[MatchmakingEventHandler] Triggering stale cleanup at level ${lastStalemateLevel} after ${this.consecutiveNoMatchCycles} cycles`);
+            console.warn(`[MatchmakingEventHandler] CLEANUP TRIGGERED at level ${lastStalemateLevel} after ${this.consecutiveNoMatchCycles} cycles`);
             this.cleanupStaleQueueState(lastStalemateLevel);
             return;
           }
         } else {
+          console.debug(`[MatchmakingEventHandler] Stalemate level changed from ${this.staleCycleStartLevel} to ${lastStalemateLevel}, resetting cycle counter`);
           this.staleCycleStartLevel = lastStalemateLevel;
         }
       } else {
@@ -411,7 +412,7 @@ export class MatchmakingEventHandler {
         `${this.consecutiveNoMatchCycles} idle cycles: ${requeuedIds.slice(0, 5).join(", ")}${requeuedIds.length > 5 ? "…" : ""}`
       );
     } else {
-      console.debug(`[MatchmakingEventHandler] Cleanup triggered at level ${level} but 0 stale dollars found (global available: ${this.gameMatchingEngine.pooledDollars.size - this.gameMatchingEngine.dollarsInGame.size})`);
+      console.debug(`[MatchmakingEventHandler] Cleanup triggered at level ${level} but 0 stale dollars found to requeue`);
     }
 
     this.consecutiveNoMatchCycles = 0;
