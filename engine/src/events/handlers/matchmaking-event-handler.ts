@@ -38,6 +38,17 @@ import {
 export class MatchmakingEventHandler {
   private poolSubscription: EventSubscription | null = null;
   private poolUpdateSubscription: EventSubscription | null = null;
+  private isMatching = false;
+  private pendingMatchAttempt = false;
+  private terminationTriggered = false;
+  private consecutiveNoMatchCycles = 0;
+  private readonly maxNoMatchCycles = 5;
+  private fifoUpdateScheduled = false;
+  private pendingFifoLevels = new Set<number>();
+  private lastFifoSnapshot = new Map<number, string>();
+  private daySinceLastReset = 0;
+  private staleCycleStartLevel: number | null = null;
+  private readonly maxStaleCyclesBeforeCleanup = 25;
 
   constructor(
     private eventBus: EventBus,
@@ -52,6 +63,10 @@ export class MatchmakingEventHandler {
    * Initialize event subscriptions
    */
   private initialize(): void {
+    if (this.terminationTriggered) {
+      return;
+    }
+
     // Subscribe to POOL_ADDED events with high priority
     this.poolSubscription = this.eventBus.on<PoolAddedEvent>(
       EVENT_TYPES.POOL_ADDED,
@@ -65,49 +80,78 @@ export class MatchmakingEventHandler {
       this.handlePoolUpdated.bind(this),
       5 // Medium priority - less urgent than new additions
     );
+
+    // Reset guards at the start of each day
+    this.eventBus.on(EVENT_TYPES.DAY_STARTED, () => {
+      this.consecutiveNoMatchCycles = 0;
+      this.pendingFifoLevels.clear();
+      this.lastFifoSnapshot.clear();
+      this.daySinceLastReset++;
+    });
+
+    this.eventBus.on(EVENT_TYPES.DAY_COMPLETED, () => {
+      this.staleCycleStartLevel = null;
+      this.consecutiveNoMatchCycles = 0;
+      this.pendingFifoLevels.clear();
+      this.lastFifoSnapshot.clear();
+    });
+
+    this.eventBus.on(EVENT_TYPES.DAY_FRAME_COMPLETED, () => {
+      this.staleCycleStartLevel = null;
+      this.consecutiveNoMatchCycles = 0;
+      this.pendingFifoLevels.clear();
+      this.lastFifoSnapshot.clear();
+    });
+
+    // Track new runs so we can detect when inflow stops
+    this.eventBus.on(EVENT_TYPES.NEW_RUN_CREATED, () => {
+      this.consecutiveNoMatchCycles = 0;
+    });
   }
 
   /**
    * Handle POOL_ADDED event - Trigger matchmaking attempt
    */
-  private async handlePoolAdded(event: PoolAddedEvent): Promise<void> {
-    try {
-      // Emit FIFO queue updated event for the specific level
-      await this.emitFifoQueueUpdated(event.currentLevel);
-
-      // Attempt matching at all levels
-      await this.attemptMatching();
-    } catch (error) {
-      await this.emitMatchmakingError(
-        "POOL_ADDED",
-        `Failed to handle pool addition: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+  private handlePoolAdded(event: PoolAddedEvent): void {
+    if (this.terminationTriggered) {
+      return;
     }
+    this.queueFifoUpdate(event.currentLevel);
+    void this.attemptMatching();
   }
 
   /**
    * Handle POOL_UPDATED event - Trigger matchmaking attempt
    */
-  private async handlePoolUpdated(event: PoolUpdatedEvent): Promise<void> {
-    try {
-      // Emit FIFO queue updated events for all levels with changes
-      for (const [level, count] of Object.entries(event.levelDistribution)) {
-        if (count > 0) {
-          await this.emitFifoQueueUpdated(parseInt(level));
-        }
-      }
+  private handlePoolUpdated(event: PoolUpdatedEvent): void {
+    if (this.terminationTriggered) {
+      return;
+    }
+    for (const level of Object.keys(event.levelDistribution)) {
+      this.queueFifoUpdate(parseInt(level, 10));
+    }
 
-      // Attempt matching at all levels
-      await this.attemptMatching();
-    } catch (error) {
-      await this.emitMatchmakingError(
-        "POOL_UPDATED",
-        `Failed to handle pool update: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+    void this.attemptMatching();
+  }
+
+  private queueFifoUpdate(level: number): void {
+    if (this.terminationTriggered) {
+      return;
+    }
+    this.pendingFifoLevels.add(level);
+    if (!this.fifoUpdateScheduled) {
+      this.fifoUpdateScheduled = true;
+      Promise.resolve().then(() => {
+        this.fifoUpdateScheduled = false;
+        if (this.terminationTriggered) {
+          this.pendingFifoLevels.clear();
+          return;
+        }
+        for (const queuedLevel of this.pendingFifoLevels) {
+          void this.emitFifoQueueUpdated(queuedLevel);
+        }
+        this.pendingFifoLevels.clear();
+      });
     }
   }
 
@@ -115,6 +159,17 @@ export class MatchmakingEventHandler {
    * Core matchmaking logic - moved from GameMatchingEngine
    */
   private async attemptMatching(): Promise<void> {
+    if (this.terminationTriggered) {
+      return;
+    }
+
+    if (this.isMatching) {
+      this.pendingMatchAttempt = true;
+      return;
+    }
+
+    this.isMatching = true;
+
     try {
       // Get current pool state
       const poolStats = this.gameMatchingEngine.getPoolStatistics();
@@ -123,7 +178,7 @@ export class MatchmakingEventHandler {
         this.gameMatchingEngine.getMaxConcurrentGames();
 
       // Emit matchmaking attempted event
-      await this.emitMatchmakingAttempted(
+      void this.emitMatchmakingAttempted(
         poolStats,
         activeGamesCount,
         maxConcurrentGames
@@ -134,19 +189,26 @@ export class MatchmakingEventHandler {
         return; // Cannot create more games
       }
 
-      // Try to match at each level
-      for (let level = 1; level <= 10; level++) {
+      // Track whether we matched anything in this run
+      let matchesMade = 0;
+      let stalemateDetected = false;
+      let lastStalemateLevel: number | null = null;
+
+      // Try to match at each level, prioritizing higher tiers first
+      for (let level = 10; level >= 1; level--) {
         const bettingLevel = level as BettingLevel;
-        const levelDollars = this.gameMatchingEngine.getDollarsAtLevel(
-          bettingLevel
-        );
+        const levelDollars =
+          this.gameMatchingEngine.getDollarsAtLevel(bettingLevel);
 
         if (!levelDollars || levelDollars.length === 0) {
           continue;
         }
 
-        const availableDollars: VirtualDollar[] = [];
-        for (const dollar of levelDollars) {
+        const availableDollars: Array<{
+          dollar: VirtualDollar;
+          position: number;
+        }> = [];
+        for (const [index, dollar] of levelDollars.entries()) {
           if (!dollar) {
             continue;
           }
@@ -155,7 +217,7 @@ export class MatchmakingEventHandler {
             dollar.state === DollarState.LOST ||
             dollar.state === DollarState.CASHED_OUT
           ) {
-            await this.evictFinalStateDollar(dollar, bettingLevel);
+            void this.evictFinalStateDollar(dollar, bettingLevel);
             continue;
           }
 
@@ -167,94 +229,187 @@ export class MatchmakingEventHandler {
             continue;
           }
 
-          availableDollars.push(dollar);
+          availableDollars.push({ dollar, position: index + 1 });
         }
 
         if (availableDollars.length < 2) {
           if (availableDollars.length === 1) {
-            await this.emitPlayerWaiting(availableDollars[0], bettingLevel, 1);
+            void this.emitPlayerWaiting(
+              availableDollars[0].dollar,
+              bettingLevel,
+              availableDollars[0].position
+            );
           }
           continue;
         }
 
-        // Match pairs
-        for (let i = 0; i < availableDollars.length - 1; i += 2) {
-          if (
-            this.gameMatchingEngine.getActiveGamesCount() >= maxConcurrentGames
-          ) {
-            break; // Hit concurrent limit
+        const matchingQueue = [...availableDollars];
+        const deferredQueue: typeof availableDollars = [];
+
+        while (
+          matchingQueue.length > 1 &&
+          this.gameMatchingEngine.getActiveGamesCount() < maxConcurrentGames
+        ) {
+          const primary = matchingQueue.shift()!;
+          const partnerIndex = matchingQueue.findIndex(
+            (candidate) => candidate.dollar.ownerId !== primary.dollar.ownerId
+          );
+
+          if (partnerIndex === -1) {
+            deferredQueue.push(primary);
+            console.debug(
+              `[MatchmakingEventHandler] No eligible partner for ${
+                primary.dollar.ownerId
+              } at level ${level} (queue length: ${
+                matchingQueue.length + deferredQueue.length
+              })`
+            );
+            continue;
           }
 
-          const dollar1 = availableDollars[i];
-          const dollar2 = availableDollars[i + 1];
+          const partner = matchingQueue.splice(partnerIndex, 1)[0];
 
           // Create game session
           try {
             const game = this.createGameSession(
-              dollar1,
-              dollar2,
+              primary.dollar,
+              partner.dollar,
               bettingLevel
             );
 
             // Mark dollars as in-game
             this.virtualDollarFactory.updateDollarState(
-              dollar1.id,
+              primary.dollar.id,
               DollarState.IN_GAME
             );
             this.virtualDollarFactory.updateDollarState(
-              dollar2.id,
+              partner.dollar.id,
               DollarState.IN_GAME
             );
-            this.gameMatchingEngine.markDollarInGame(dollar1.id);
-            this.gameMatchingEngine.markDollarInGame(dollar2.id);
+            this.gameMatchingEngine.markDollarInGame(primary.dollar.id);
+            this.gameMatchingEngine.markDollarInGame(partner.dollar.id);
 
             // Remove from pool
-            await this.gameMatchingEngine.removeFromPool(dollar1.id);
-            await this.gameMatchingEngine.removeFromPool(dollar2.id);
+            void this.gameMatchingEngine
+              .removeFromPool(primary.dollar.id)
+              .catch((error) =>
+                console.error(
+                  `[MatchmakingEventHandler] Failed to remove primary dollar ${primary.dollar.id} from pool:`,
+                  error
+                )
+              );
+            void this.gameMatchingEngine
+              .removeFromPool(partner.dollar.id)
+              .catch((error) =>
+                console.error(
+                  `[MatchmakingEventHandler] Failed to remove partner dollar ${partner.dollar.id} from pool:`,
+                  error
+                )
+              );
 
             // Track active game
             this.gameMatchingEngine.addActiveGame(game);
 
-            // Emit match found event
-            await this.emitMatchFound(
-              dollar1,
-              dollar2,
+            void this.emitMatchFound(
+              primary.dollar,
+              partner.dollar,
               bettingLevel,
-              i + 1,
-              i + 2
+              primary.position,
+              partner.position
             );
 
-            // Emit game created event
-            await this.emitGameCreated(game, dollar1, dollar2);
+            void this.emitGameCreated(game, primary.dollar, partner.dollar);
+            matchesMade++;
           } catch (error) {
             console.error(
               `[MatchmakingEventHandler] Failed to create or register game at level ${level}:`,
               error
             );
           }
-
         }
 
-        // Handle remaining odd player
-        if (availableDollars.length % 2 === 1) {
-          const waitingDollar =
-            availableDollars[availableDollars.length - 1];
-          const queuePosition = Math.floor(availableDollars.length / 2) + 1;
-          await this.emitPlayerWaiting(
-            waitingDollar,
+        const remainingQueue = [...deferredQueue, ...matchingQueue];
+        if (remainingQueue.length > 0) {
+          const waiting = remainingQueue[0];
+          void this.emitPlayerWaiting(
+            waiting.dollar,
             bettingLevel,
-            queuePosition
+            waiting.position
           );
         }
+
+        if (matchesMade === 0) {
+          const uniqueOwners = new Set(
+            remainingQueue.map((entry) => entry.dollar.ownerId)
+          );
+          if (uniqueOwners.size < 2) {
+            stalemateDetected = true;
+            lastStalemateLevel = level;
+          }
+        }
+      }
+
+      if (matchesMade > 0) {
+        this.consecutiveNoMatchCycles = 0;
+      } else if (stalemateDetected && lastStalemateLevel !== null) {
+        this.consecutiveNoMatchCycles++;
+
+        if (lastStalemateLevel === this.staleCycleStartLevel) {
+          if (this.consecutiveNoMatchCycles >= this.maxNoMatchCycles) {
+            console.warn(
+              `[MatchmakingEventHandler] Waiting for another unique player at level ${lastStalemateLevel}. ` +
+                `Cycles without match: ${this.consecutiveNoMatchCycles}`
+            );
+          }
+
+          if (
+            this.consecutiveNoMatchCycles >= this.maxStaleCyclesBeforeCleanup
+          ) {
+            this.cleanupStaleQueueState(lastStalemateLevel);
+            return;
+          }
+        } else {
+          this.staleCycleStartLevel = lastStalemateLevel;
+        }
+      } else {
+        this.consecutiveNoMatchCycles = 0;
+        this.staleCycleStartLevel = null;
       }
     } catch (error) {
-      await this.emitMatchmakingError(
-        "ATTEMPT_MATCHING",
-        `Matchmaking failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+      if (!this.terminationTriggered) {
+        void this.emitMatchmakingError(
+          "ATTEMPT_MATCHING",
+          `Matchmaking failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    } finally {
+      this.isMatching = false;
+      if (!this.terminationTriggered && this.pendingMatchAttempt) {
+        this.pendingMatchAttempt = false;
+        Promise.resolve().then(() => {
+          void this.attemptMatching();
+        });
+      } else {
+        this.pendingMatchAttempt = false;
+      }
+    }
+  }
+
+  private cleanupStaleQueueState(level: number): void {
+    const cleared = this.gameMatchingEngine.clearStaleInGameDollars(
+      level as BettingLevel
+    );
+    if (cleared > 0) {
+      console.warn(
+        `[MatchmakingEventHandler] Cleared ${cleared} stale in-game dollars at level ${level} after ${this.consecutiveNoMatchCycles} idle cycles.`
       );
     }
+    this.consecutiveNoMatchCycles = 0;
+    this.staleCycleStartLevel = null;
+    this.pendingMatchAttempt = true;
+    void this.emitFifoQueueUpdated(level);
   }
 
   /**
@@ -294,7 +449,14 @@ export class MatchmakingEventHandler {
       maxConcurrentGames,
     };
 
-    await this.eventBus.emit(EVENT_TYPES.MATCHMAKING_ATTEMPTED, event);
+    void this.eventBus
+      .emit(EVENT_TYPES.MATCHMAKING_ATTEMPTED, event)
+      .catch((error) =>
+        console.error(
+          "[MatchmakingEventHandler] Failed to emit MATCHMAKING_ATTEMPTED:",
+          error
+        )
+      );
   }
 
   /**
@@ -315,7 +477,14 @@ export class MatchmakingEventHandler {
       playersNeededForMatch: 1, // Need 1 more for pair
     };
 
-    await this.eventBus.emit(EVENT_TYPES.PLAYER_WAITING, event);
+    void this.eventBus
+      .emit(EVENT_TYPES.PLAYER_WAITING, event)
+      .catch((error) =>
+        console.error(
+          "[MatchmakingEventHandler] Failed to emit PLAYER_WAITING:",
+          error
+        )
+      );
   }
 
   /**
@@ -342,23 +511,41 @@ export class MatchmakingEventHandler {
       },
     };
 
-    await this.eventBus.emit(EVENT_TYPES.MATCH_FOUND, event);
+    void this.eventBus
+      .emit(EVENT_TYPES.MATCH_FOUND, event)
+      .catch((error) =>
+        console.error(
+          "[MatchmakingEventHandler] Failed to emit MATCH_FOUND:",
+          error
+        )
+      );
   }
 
   private async evictFinalStateDollar(
     dollar: VirtualDollar,
     level: BettingLevel
   ): Promise<void> {
-    const removal = await this.gameMatchingEngine.removeFromPool(
+    const removalPromise = this.gameMatchingEngine.removeFromPool(
       dollar.id,
       "ERROR"
     );
 
-    if (!removal.success) {
-      console.warn(
-        `[MatchmakingEventHandler] Dropped stale dollar ${dollar.id} at level ${level}: ${removal.error ?? "removeFromPool failed"}`
+    removalPromise
+      .then((removal) => {
+        if (!removal.success) {
+          console.warn(
+            `[MatchmakingEventHandler] Dropped stale dollar ${
+              dollar.id
+            } at level ${level}: ${removal.error ?? "removeFromPool failed"}`
+          );
+        }
+      })
+      .catch((error) =>
+        console.warn(
+          `[MatchmakingEventHandler] Error removing stale dollar ${dollar.id}:`,
+          error
+        )
       );
-    }
 
     try {
       this.virtualDollarFactory.releaseDollar(dollar.id);
@@ -377,11 +564,24 @@ export class MatchmakingEventHandler {
       level as BettingLevel
     );
     const waitingPlayerIds = levelDollars
-      .filter((dollar): dollar is VirtualDollar =>
-        Boolean(dollar) && dollar.state === DollarState.POOLED
+      .filter(
+        (dollar): dollar is VirtualDollar =>
+          Boolean(dollar) && dollar.state === DollarState.POOLED
       )
       .filter((dollar) => !this.gameMatchingEngine.isDollarInGame(dollar.id))
       .map((dollar) => dollar.ownerId);
+
+    const snapshotKey = JSON.stringify({
+      queueLength: waitingPlayerIds.length,
+      waitingPlayerIds,
+    });
+
+    const previous = this.lastFifoSnapshot.get(level);
+    if (previous === snapshotKey) {
+      return;
+    }
+
+    this.lastFifoSnapshot.set(level, snapshotKey);
 
     const event: FifoQueueUpdatedEvent = {
       type: EVENT_TYPES.FIFO_QUEUE_UPDATED,
@@ -391,7 +591,14 @@ export class MatchmakingEventHandler {
       waitingPlayerIds,
     };
 
-    await this.eventBus.emit(EVENT_TYPES.FIFO_QUEUE_UPDATED, event);
+    void this.eventBus
+      .emit(EVENT_TYPES.FIFO_QUEUE_UPDATED, event)
+      .catch((error) =>
+        console.error(
+          "[MatchmakingEventHandler] Failed to emit FIFO_QUEUE_UPDATED:",
+          error
+        )
+      );
   }
 
   /**
@@ -414,7 +621,14 @@ export class MatchmakingEventHandler {
       virtualDollar2Id: dollar2.id,
     };
 
-    await this.eventBus.emit(EVENT_TYPES.GAME_CREATED, event);
+    void this.eventBus
+      .emit(EVENT_TYPES.GAME_CREATED, event)
+      .catch((error) =>
+        console.error(
+          "[MatchmakingEventHandler] Failed to emit GAME_CREATED:",
+          error
+        )
+      );
   }
 
   /**
@@ -432,7 +646,14 @@ export class MatchmakingEventHandler {
       context: { operation },
     };
 
-    await this.eventBus.emit("EVENT_ERROR", errorEvent);
+    void this.eventBus
+      .emit("EVENT_ERROR", errorEvent)
+      .catch((error) =>
+        console.error(
+          "[MatchmakingEventHandler] Failed to emit EVENT_ERROR:",
+          error
+        )
+      );
   }
 
   /**
@@ -456,13 +677,9 @@ export class MatchmakingEventHandler {
    * Clean up subscriptions and resources
    */
   dispose(): void {
-    if (this.poolSubscription) {
-      this.poolSubscription.unsubscribe();
-      this.poolSubscription = null;
-    }
-    if (this.poolUpdateSubscription) {
-      this.poolUpdateSubscription.unsubscribe();
-      this.poolUpdateSubscription = null;
-    }
+    this.poolSubscription?.unsubscribe();
+    this.poolSubscription = null;
+    this.poolUpdateSubscription?.unsubscribe();
+    this.poolUpdateSubscription = null;
   }
 }

@@ -362,7 +362,12 @@ export class RevenueCalculator {
     }
 
     // Validate timestamps
-    if (!gameSession.timestamp || gameSession.timestamp > new Date()) {
+    const sessionTime =
+      gameSession.timestamp instanceof Date
+        ? gameSession.timestamp
+        : new Date(gameSession.timestamp);
+
+    if (Number.isNaN(sessionTime.getTime())) {
       errors.push("Game session timestamp is invalid");
     }
 

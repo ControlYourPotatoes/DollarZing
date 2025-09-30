@@ -7,7 +7,10 @@ import {
   PresentationWorkflowNode,
   PresentationWorkflowLayer,
 } from "@/shared/presentation";
-import { layoutWorkflow } from "../layout/simpleLayout";
+import {
+  DEFAULT_LAYOUT_CONFIG,
+  layoutWorkflow,
+} from "../layout/simpleLayout";
 import {
   useActiveTimelineDay,
   useActiveTimelineScenario,
@@ -48,11 +51,13 @@ export interface WorkflowLayoutResult {
 
 const DEFAULT_NODE_RADIUS = 70;
 
+const LAYOUT_CONFIG = DEFAULT_LAYOUT_CONFIG;
+
 function computePositions(
   nodes: PresentationWorkflowNode[],
   links: PresentationWorkflowLink[]
 ): Record<string, { x: number; y: number }> {
-  return layoutWorkflow(nodes, links);
+  return layoutWorkflow(nodes, links, LAYOUT_CONFIG);
 }
 
 export function useWorkflowData(): WorkflowLayoutResult {

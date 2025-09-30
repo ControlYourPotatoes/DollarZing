@@ -3,8 +3,8 @@
 // Growth rate levels as defined in technical spec
 export type GrowthRateLevel = 15 | 35 | 60;
 
-// Risk levels for cash-out strategy mapping  
-export type RiskLevel = 'low' | 'mid' | 'high';
+// Risk levels for cash-out strategy mapping
+export type RiskLevel = "low" | "mid" | "high";
 
 // Charity percentage levels
 export type CharityPercentageLevel = 10 | 20 | 30;
@@ -12,14 +12,14 @@ export type CharityPercentageLevel = 10 | 20 | 30;
 // Parameter matrix definition for 3x3x3 combinations
 export interface ParameterMatrix {
   readonly growthRates: readonly [15, 35, 60];
-  readonly riskLevels: readonly ['low', 'mid', 'high'];
+  readonly riskLevels: readonly ["low", "mid", "high"];
   readonly charityPercentages: readonly [10, 20, 30];
 }
 
 // Single parameter combination for dataset generation
 export interface ParameterCombination {
   growthRate: GrowthRateLevel;
-  riskLevel: RiskLevel;  
+  riskLevel: RiskLevel;
   charityPercentage: CharityPercentageLevel;
 }
 
@@ -28,21 +28,22 @@ export interface OrchestratorConfig {
   // Output configuration
   outputDirectory: string;
   generateMetadata: boolean;
-  
-  // Processing configuration  
+
+  // Processing configuration
   batchSize: number; // Number of datasets to process concurrently (1 = sequential)
   timeoutPerDataset: number; // Milliseconds before timing out a single dataset generation
-  
+
   // Reporting configuration
   enableProgressReporting: boolean;
   enableValidation: boolean;
- 
+
   // CLI configuration
   verbose: boolean;
   dryRun: boolean;
   collectDailySnapshots: boolean;
   collectEventTraces: boolean;
   collectPresentationSnapshots: boolean;
+  debugEvents?: boolean;
 }
 
 // Partial configuration for customization
@@ -112,6 +113,13 @@ export interface DatasetMetadata {
     dailySnapshotCount: number;
     eventTraceCount: number;
     presentationSnapshotCount?: number;
+  };
+  termination?: {
+    reason: {
+      code: string;
+      message: string;
+    };
+    dayCompleted: number;
   };
 }
 

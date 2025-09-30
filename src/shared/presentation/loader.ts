@@ -4,6 +4,8 @@ import {
   PresentationSnapshotFile,
   PresentationManifest,
   NormalizedPresentationScenario,
+  EngineScenarioDataset,
+  EngineDailySnapshot,
 } from "./types";
 import {
   validatePresentationSnapshotFile,
@@ -56,7 +58,41 @@ export async function loadPresentationSnapshot(
 ): Promise<PresentationSnapshotFile> {
   try {
     const raw = await fetchJson<unknown>(url, fetchImpl, useCache);
-    return validatePresentationSnapshotFile(raw);
+    const snapshot = validatePresentationSnapshotFile(raw);
+
+    const baseUrl = deriveScenarioBaseUrl(url);
+    if (baseUrl) {
+      const datasetUrl = `${baseUrl}dataset.json`;
+      const dailyUrl = `${baseUrl}daily-snapshots.json`;
+
+      try {
+        const dataset = await fetchJson<EngineScenarioDataset | undefined>(
+          datasetUrl,
+          fetchImpl,
+          useCache
+        );
+        if (dataset && Array.isArray(dataset.dailyResults)) {
+          snapshot.engineDataset = dataset;
+        }
+      } catch {
+        // Optional attachment missing – ignore.
+      }
+
+      try {
+        const dailySnapshots = await fetchJson<EngineDailySnapshot[] | undefined>(
+          dailyUrl,
+          fetchImpl,
+          useCache
+        );
+        if (Array.isArray(dailySnapshots)) {
+          snapshot.engineDailySnapshots = dailySnapshots;
+        }
+      } catch {
+        // Optional attachment missing – ignore.
+      }
+    }
+
+    return snapshot;
   } catch (error) {
     if (error instanceof Error && error.message.includes("Failed to fetch")) {
       throw error;
@@ -70,6 +106,24 @@ export async function loadPresentationSnapshot(
           error instanceof Error ? error.constructor.name : typeof error,
       }
     );
+  }
+}
+
+function deriveScenarioBaseUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url, "http://localhost/");
+    const pathname = parsed.pathname;
+    const idx = pathname.lastIndexOf("/presentation-snapshots.json");
+    if (idx === -1) {
+      return null;
+    }
+    const base = pathname.slice(0, idx + 1);
+    const origin = url.startsWith("http") ? `${parsed.origin}` : "";
+    return `${origin}${base}`;
+  } catch {
+    const manualIdx = url.indexOf("presentation-snapshots.json");
+    if (manualIdx === -1) return null;
+    return url.slice(0, manualIdx);
   }
 }
 

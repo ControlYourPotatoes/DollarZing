@@ -1,21 +1,40 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { loadPresentationManifest, loadPresentationSnapshot } from "@/shared/presentation";
+import {
+  loadPresentationManifest,
+  loadPresentationSnapshot,
+} from "@/shared/presentation";
 import type { PresentationManifestEntry } from "@/shared/presentation";
-import { resolveSnapshotUrl, resolvePublicPath, joinUrl, defaultDatasetsBase } from "@/shared/presentation/url-resolver";
+import {
+  resolveSnapshotUrl,
+  resolvePublicPath,
+  joinUrl,
+  defaultDatasetsBase,
+} from "@/shared/presentation/url-resolver";
 import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 import { TimelineScrubber, useActiveTimelineDay } from "@/features/timeline";
 import { FinancialWorkflowDiagram } from "@/features/financial-flow";
+import {
+  LevelBarometer,
+  DailyFlow,
+  RevenueProgressionChart,
+  PlayerEngagementChart,
+} from "@/features/distribution-charts";
+import { ImpactDisplay } from "@/features/impact";
 // import { useActiveTimelineScenario } from "@/features/timeline";
 import { useComparisonSelectionStore } from "@/shared/hooks/comparisonSelectionStore";
 
 // Optional runtime overrides to fetch manifest/snapshots from an external base or per-scenario URLs
-const { VITE_PRESENTATION_MANIFEST_URL } = (
-  (import.meta as any).env ?? {}
-) as Record<string, string | undefined>;
+const { VITE_PRESENTATION_MANIFEST_URL } = ((
+  import.meta as unknown as {
+    env?: Record<string, string | undefined>;
+  }
+).env ?? {}) as Record<string, string | undefined>;
 
 const MANIFEST_CANDIDATES: string[] = [
-  VITE_PRESENTATION_MANIFEST_URL ? resolvePublicPath(VITE_PRESENTATION_MANIFEST_URL) : "",
+  VITE_PRESENTATION_MANIFEST_URL
+    ? resolvePublicPath(VITE_PRESENTATION_MANIFEST_URL)
+    : "",
   joinUrl(defaultDatasetsBase(), "anchor-datasets/presentation-manifest.json"),
   joinUrl(defaultDatasetsBase(), "presentation-manifest.json"),
 ].filter(Boolean);
@@ -46,24 +65,40 @@ const PrototypeDashboard = () => {
   // const activeScenario = useActiveTimelineScenario();
   const midSelection = useComparisonSelectionStore((s) => s.midScenarioId);
   const highSelection = useComparisonSelectionStore((s) => s.highScenarioId);
-  const setMidSelection = useComparisonSelectionStore((s) => s.setMidScenarioId);
-  const setHighSelection = useComparisonSelectionStore((s) => s.setHighScenarioId);
+  const setMidSelection = useComparisonSelectionStore(
+    (s) => s.setMidScenarioId
+  );
+  const setHighSelection = useComparisonSelectionStore(
+    (s) => s.setHighScenarioId
+  );
 
   const manifestEntries = useMemo(
     () => manifestIndex?.manifest ?? [],
     [manifestIndex]
   );
 
-  const sortOrder = { low: 0, mid: 1, high: 2 } as const;
   const sortedManifestEntries = useMemo(() => {
+    const sortOrder = { low: 0, mid: 1, high: 2 } as const;
     const list = [...manifestEntries];
     list.sort((a, b) => {
-      const ag = sortOrder[(a.parameters.adoptionRate as "low" | "mid" | "high") ?? "low"] ?? 0;
-      const bg = sortOrder[(b.parameters.adoptionRate as "low" | "mid" | "high") ?? "low"] ?? 0;
+      const ag =
+        sortOrder[
+          (a.parameters.adoptionRate as "low" | "mid" | "high") ?? "low"
+        ] ?? 0;
+      const bg =
+        sortOrder[
+          (b.parameters.adoptionRate as "low" | "mid" | "high") ?? "low"
+        ] ?? 0;
       if (ag !== bg) return ag - bg; // growth: low → mid → high
 
-      const ar = sortOrder[(a.parameters.cashOutStrategy as "low" | "mid" | "high") ?? "low"] ?? 0;
-      const br = sortOrder[(b.parameters.cashOutStrategy as "low" | "mid" | "high") ?? "low"] ?? 0;
+      const ar =
+        sortOrder[
+          (a.parameters.cashOutStrategy as "low" | "mid" | "high") ?? "low"
+        ] ?? 0;
+      const br =
+        sortOrder[
+          (b.parameters.cashOutStrategy as "low" | "mid" | "high") ?? "low"
+        ] ?? 0;
       if (ar !== br) return ar - br; // risk: low → mid → high
 
       const ac = parseInt(String(a.parameters.charityShare ?? "0"), 10);
@@ -75,15 +110,19 @@ const PrototypeDashboard = () => {
   const selectedScenarioId =
     activeScenarioId ?? sortedManifestEntries[0]?.scenarioId ?? "";
 
-  const formatScenarioLabel = useCallback((entry: PresentationManifestEntry) => {
-    const growth = String(entry.parameters.adoptionRate || "").toUpperCase();
-    const risk = String(entry.parameters.cashOutStrategy || "");
-    const charity = String(entry.parameters.charityShare || "");
-    return `${growth} growth · ${risk} risk · ${charity}% charity`;
-  }, []);
+  const formatScenarioLabel = useCallback(
+    (entry: PresentationManifestEntry) => {
+      const growth = String(entry.parameters.adoptionRate || "").toUpperCase();
+      const risk = String(entry.parameters.cashOutStrategy || "");
+      const charity = String(entry.parameters.charityShare || "");
+      return `${growth} growth · ${risk} risk · ${charity}% charity`;
+    },
+    []
+  );
 
   const comparisonOptions = useMemo(
-    () => sortedManifestEntries.filter((e) => e.scenarioId !== selectedScenarioId),
+    () =>
+      sortedManifestEntries.filter((e) => e.scenarioId !== selectedScenarioId),
     [sortedManifestEntries, selectedScenarioId]
   );
 
@@ -106,7 +145,7 @@ const PrototypeDashboard = () => {
       setStatus("loading");
       setError(null);
       try {
-        let manifest: any = null;
+        let manifest: PresentationManifestEntry[] | null = null;
         let lastErr: unknown = null;
         for (const url of MANIFEST_CANDIDATES) {
           try {
@@ -208,7 +247,13 @@ const PrototypeDashboard = () => {
   useEffect(() => {
     if (midSelection === selectedScenarioId) setMidSelection(null);
     if (highSelection === selectedScenarioId) setHighSelection(null);
-  }, [highSelection, midSelection, selectedScenarioId, setHighSelection, setMidSelection]);
+  }, [
+    highSelection,
+    midSelection,
+    selectedScenarioId,
+    setHighSelection,
+    setMidSelection,
+  ]);
 
   return (
     <div className="min-h-screen bg-slate-950 px-6 py-10 pb-28 text-slate-100">
@@ -252,7 +297,9 @@ const PrototypeDashboard = () => {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">
-              <span className="block text-sm font-bold uppercase tracking-widest text-slate-400">Comparisons</span>
+              <span className="block text-sm font-bold uppercase tracking-widest text-slate-400">
+                Comparisons
+              </span>
               <div className="mt-2 flex gap-3 items-center">
                 <label className="text-sm text-slate-400">Mid</label>
                 <select
@@ -310,58 +357,44 @@ const PrototypeDashboard = () => {
           )}
         </header>
 
+        {/* Impact Display */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+          <ImpactDisplay
+            cumulativeCharity={
+              activeDay?.timelineTick.cumulativeCharity ?? null
+            }
+          />
+        </div>
+
         {/* Floating TimelineScrubber is rendered globally; remove embedded card */}
 
-        {/* Financial Workflow - Full Width */}
-        <section className="mb-6 h-full">
-          <FinancialWorkflowDiagram />
-        </section>
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="space-y-6">
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+              <FinancialWorkflowDiagram />
+            </div>
 
-        {/* Daily Increments Card - Separate */}
-        <section className="mb-6 w-72">
-          <aside className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 text-sm text-slate-300">
-            {activeDay ? (
-              <div className="space-y-3">
-                <div>
-                  <h2 className="text-base font-semibold text-slate-100">
-                    Day {activeDay.dayIndex + 1}
-                  </h2>
-                  <p className="text-xs uppercase tracking-widest text-slate-500">
-                    {activeDay.label}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p>
-                    <span className="text-slate-400">Daily Revenue:</span> $
-                    {activeDay.summary.dailyRevenue.toLocaleString(undefined, {
-                      maximumFractionDigits: 0,
-                    })}
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Daily Charity:</span> $
-                    {activeDay.summary.dailyCharity.toLocaleString(undefined, {
-                      maximumFractionDigits: 0,
-                    })}
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Daily Fees:</span> $
-                    {activeDay.summary.dailyFees.toLocaleString(undefined, {
-                      maximumFractionDigits: 0,
-                    })}
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Player Payouts:</span> $
-                    {activeDay.summary.dailyPayouts.toLocaleString(undefined, {
-                      maximumFractionDigits: 0,
-                    })}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-slate-500">
-                Select a scenario to view per-day details.
-              </p>
-            )}
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+              <LevelBarometer />
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+              <RevenueProgressionChart />
+            </div>
+          </div>
+
+          
+          <aside className="flex flex-col gap-6">
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-slate-400">
+                Daily Flow
+              </h2>
+              <DailyFlow />
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+              <PlayerEngagementChart />
+            </div>
           </aside>
         </section>
       </div>

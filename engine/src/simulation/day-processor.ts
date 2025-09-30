@@ -7,6 +7,7 @@ import {
   EVENT_TYPES,
   DayStartedEvent,
   DayCompletedEvent,
+  DayFrameCompletedEvent,
   NewRunCreatedEvent,
 } from "../events/event-types";
 import { SimulationConfig } from "./game-engine-simulator";
@@ -74,12 +75,15 @@ export class DayProcessor {
       );
     }
 
-    const addResult = await this.gameMatchingEngine.addToPool(virtualDollar);
-    if (!addResult.success) {
-      console.warn(
-        `[DayProcessor] Failed to add dollar ${event.virtualDollarId} to pool: ${addResult.error}`
+    void this.gameMatchingEngine
+      .addToPool(virtualDollar)
+      .catch((error) =>
+        console.warn(
+          `[DayProcessor] Failed to add dollar ${
+            event.virtualDollarId
+          } to pool: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
-    }
   }
 
   dispose(): void {
@@ -100,12 +104,13 @@ export class DayProcessor {
       console.log(`DEBUG: [DayProcessor] ===== PROCESSING DAY ${day} =====`);
     }
 
-    // Emit day started event
+    // Emit day started event using 1-based day numbering
+    const eventDay = day + 1;
     const initialPoolStats = this.gameMatchingEngine.getPoolStatistics();
-    await this.eventBus.emit(EVENT_TYPES.DAY_STARTED, {
+    void this.eventBus.emit(EVENT_TYPES.DAY_STARTED, {
       type: EVENT_TYPES.DAY_STARTED,
       timestamp: new Date(),
-      dayNumber: day,
+      dayNumber: eventDay,
       totalPlayers: 0, // Will need to track this properly
       activePlayers: 0, // Will need to track this properly
       poolSize: initialPoolStats.totalDollarsInPool,
@@ -140,16 +145,30 @@ export class DayProcessor {
     // Emit day completed event
     const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();
     const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
-    await this.eventBus.emit(EVENT_TYPES.DAY_COMPLETED, {
+    const completedPayload: DayCompletedEvent = {
       type: EVENT_TYPES.DAY_COMPLETED,
       timestamp: new Date(),
-      dayNumber: day,
+      dayNumber: eventDay,
       gamesProcessed: maxGamesPerDay, // Approximate
       newPlayers: dailyNewPlayers, // Track new players added today
       totalRevenue: 0, // Would need to track this through revenue events
       poolSize: finalPoolStats.totalDollarsInPool,
       activePlayers: 0, // Would need to track this properly
-    } as DayCompletedEvent);
+    };
+
+    void this.eventBus.emit(EVENT_TYPES.DAY_COMPLETED, completedPayload);
+
+    void this.eventBus.emit(EVENT_TYPES.DAY_FRAME_COMPLETED, {
+      type: EVENT_TYPES.DAY_FRAME_COMPLETED,
+      timestamp: new Date(),
+      dayNumber: eventDay,
+      summary: {
+        gamesProcessed: completedPayload.gamesProcessed,
+        newPlayers: completedPayload.newPlayers,
+        poolSize: completedPayload.poolSize,
+        activePlayers: completedPayload.activePlayers,
+      },
+    } as DayFrameCompletedEvent);
   }
 
   /**

@@ -1,0 +1,324 @@
+import { useMemo } from "react";
+
+import { motion } from "framer-motion";
+import * as d3 from "d3";
+
+type DefaultArcObject = d3.DefaultArcObject;
+
+import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
+import { PresentationWorkflowLayer } from "@/shared/presentation";
+
+import { useWorkflowNodeAnimation } from "../hooks/useWorkflowNodeAnimation";
+import {
+  WorkflowNodeViewState,
+  WorkflowRingKey,
+  WorkflowRingMetrics,
+} from "../types";
+
+type ArcData = {
+  data: PresentationWorkflowLayer;
+  startAngle: number;
+  endAngle: number;
+};
+
+type RingDescriptor = {
+  key: WorkflowRingKey;
+  arcs: ArcData[];
+  radius: number;
+};
+
+export interface WorkflowNodeProps {
+  id: string;
+  label: string;
+  aggregateValue: number;
+  layers?: PresentationWorkflowLayer[];
+  midSegments?: PresentationWorkflowLayer[];
+  highSegments?: PresentationWorkflowLayer[];
+  baseValue?: number;
+  midValue?: number;
+  highValue?: number;
+  baseDeltaPercent?: number;
+  midDeltaPercent?: number;
+  highDeltaPercent?: number;
+  x: number;
+  y: number;
+  radius: number;
+  isActive?: boolean;
+  onHover?: (id: string | null) => void;
+  viewState?: WorkflowNodeViewState;
+}
+
+function formatCurrency(value: number): string {
+  return value.toLocaleString(undefined, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+}
+
+function computeArcs(layers?: PresentationWorkflowLayer[]): ArcData[] {
+  if (!layers || layers.length === 0) {
+    return [];
+  }
+  const total = layers.reduce((sum, layer) => sum + layer.value, 0);
+  if (total === 0) return [];
+  const sorted = [...layers].sort((a, b) => a.id.localeCompare(b.id));
+  let startAngle = -Math.PI / 2;
+  const arcs: ArcData[] = [];
+  for (const seg of sorted) {
+    const fraction = seg.value / total;
+    const arcLengthRadians = 2 * Math.PI * fraction;
+    const endAngle = startAngle + arcLengthRadians;
+    arcs.push({ data: seg, startAngle, endAngle });
+    startAngle = endAngle;
+  }
+  return arcs;
+}
+
+export function WorkflowNode({
+  id,
+  label,
+  aggregateValue,
+  layers = [],
+  midSegments = [],
+  highSegments = [],
+  baseValue,
+  midValue,
+  highValue,
+  baseDeltaPercent,
+  midDeltaPercent,
+  highDeltaPercent,
+  x,
+  y,
+  radius,
+  isActive = false,
+  onHover,
+  viewState = "standard",
+}: WorkflowNodeProps) {
+  const valueLabel = formatCurrency(aggregateValue);
+  const renderDelta = (
+    percent: number | undefined,
+    positiveColor = "#22c55e"
+  ): { label: string | null; color: string } => {
+    if (percent === undefined || Number.isNaN(percent)) {
+      return { label: null, color: "rgba(148,163,184,0.65)" };
+    }
+    const rounded = percent.toFixed(1);
+    const labelText = `${percent > 0 ? "+" : ""}${rounded}%`;
+    const color = percent > 0 ? positiveColor : percent < 0 ? "#f87171" : "rgba(148,163,184,0.65)";
+    return { label: labelText, color };
+  };
+  const baseDeltaMeta = renderDelta(baseDeltaPercent);
+
+  const rings: WorkflowRingMetrics[] = useMemo(
+    () => {
+      const base = baseValue ?? aggregateValue ?? 0;
+      const mid = midValue ?? 0;
+      const high = highValue ?? 0;
+      const total = Math.max(base, mid, high, 1);
+      return [
+        { key: "base", value: base, percent: base / total },
+        { key: "mid", value: mid, percent: mid / total },
+        { key: "high", value: high, percent: high / total },
+      ];
+    },
+    [aggregateValue, baseValue, midValue, highValue]
+  );
+
+  const hoveredRingKey = usePresentationTimelineStore(
+    (state) => state.hoveredRingKey
+  );
+  const simulationPhase = usePresentationTimelineStore(
+    (state) => state.simulationPhase
+  );
+  const setStoreHoveredNode = usePresentationTimelineStore(
+    (state) => state.setHoveredNode
+  );
+  const setHoveredRing = usePresentationTimelineStore(
+    (state) => state.setHoveredRing
+  );
+  const ringHoverKey = hoveredRingKey ?? null;
+
+  const {
+    nodeControls,
+    ringControls,
+  } = useWorkflowNodeAnimation({
+    nodeId: id,
+    isActive,
+    viewState,
+    rings,
+    ringHoverKey,
+    phase: simulationPhase,
+  });
+
+  const ringDescriptors: RingDescriptor[] = useMemo(() => {
+    const baseRadius = Math.max(0, radius - 12);
+    const midRadius = Math.max(radius, baseRadius + 8);
+    const highRadius = midRadius + 12;
+    return [
+      { key: "base", arcs: computeArcs(layers), radius: baseRadius },
+      { key: "mid", arcs: computeArcs(midSegments), radius: midRadius },
+      { key: "high", arcs: computeArcs(highSegments), radius: highRadius },
+    ];
+  }, [layers, midSegments, highSegments, radius]);
+
+  const arcGenerator = useMemo(() => d3.arc<DefaultArcObject>(), []);
+  const interactiveRadius = Math.max(radius + 30, radius * 1.3);
+
+  const renderRing = (descriptor: RingDescriptor) => {
+    if (!descriptor.arcs.length) return null;
+    const { key, arcs } = descriptor;
+    const controls = ringControls[key];
+    if (!controls) return null;
+    const outerRadius = descriptor.radius;
+    if (outerRadius <= 0) return null;
+    const innerRadius = Math.max(0, outerRadius - 10);
+    return (
+      <motion.g
+        key={key}
+        animate={controls}
+        initial={{ opacity: 0, scale: 0.95 }}
+        onMouseEnter={() => setHoveredRing(key)}
+        onMouseLeave={() => setHoveredRing(null)}
+        role="presentation"
+      >
+        {arcs.map((arc) => {
+          const arcShape: DefaultArcObject = {
+            innerRadius,
+            outerRadius,
+            startAngle: arc.startAngle,
+            endAngle: arc.endAngle,
+          };
+          const path = arcGenerator(arcShape);
+          const isHovered = ringHoverKey === key;
+          return (
+            <path
+              key={`${key}-${arc.data.id}`}
+              d={path || undefined}
+              fill={
+                arc.data.color && arc.data.color !== "transparent"
+                  ? arc.data.color
+                  : "rgba(148,163,184,0.2)"
+              }
+              fillOpacity={isHovered ? 0.95 : 0.75}
+              stroke="#0f172a"
+              strokeWidth={0.8}
+            />
+          );
+        })}
+      </motion.g>
+    );
+  };
+
+  const baseRing = ringDescriptors.find((descriptor) => descriptor.key === "base");
+  const midRing = ringDescriptors.find((descriptor) => descriptor.key === "mid");
+  const highRing = ringDescriptors.find((descriptor) => descriptor.key === "high");
+
+  const innerRingNodes = baseRing ? renderRing(baseRing) : null;
+  const outerRingNodes = (
+    <>
+      {midRing ? renderRing(midRing) : null}
+      {highRing ? renderRing(highRing) : null}
+    </>
+  );
+
+  return (
+    <motion.g
+      role="button"
+      tabIndex={0}
+      aria-label={
+        baseDeltaMeta.label
+          ? `${label}: ${valueLabel}, ${baseDeltaMeta.label} change vs previous day`
+          : `${label}: ${valueLabel}`
+      }
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={nodeControls}
+      transition={{ type: "spring", stiffness: 220, damping: 18 }}
+      onFocus={() => {
+        onHover?.(id);
+        setStoreHoveredNode(id);
+      }}
+      onBlur={() => {
+        onHover?.(null);
+        setStoreHoveredNode(null);
+      }}
+      onMouseEnter={() => {
+        onHover?.(id);
+        setStoreHoveredNode(id);
+      }}
+      onMouseLeave={() => {
+        onHover?.(null);
+        setStoreHoveredNode(null);
+        setHoveredRing(null);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onHover?.(id);
+          setStoreHoveredNode(id);
+        }
+        if (e.key === "Escape") {
+          onHover?.(null);
+          setStoreHoveredNode(null);
+          setHoveredRing(null);
+        }
+      }}
+    >
+      <g transform={`translate(${x}, ${y})`}>
+        <circle
+          cx={0}
+          cy={0}
+          r={interactiveRadius}
+          fill="transparent"
+          stroke="none"
+          pointerEvents="all"
+        />
+        <motion.circle
+          cx={0}
+          cy={0}
+          r={radius}
+          fill="rgba(15, 23, 42, 0.85)" 
+          stroke={isActive ? "#38bdf8" : "rgba(148, 163, 184, 0.35)"}
+          strokeWidth={isActive ? 4 : 3}
+        />
+        {/* Inner stacked rings anchor to the node and size themselves to prevent overlap */}
+        {innerRingNodes}
+        {/* Outer stacked rings radiate outward without colliding */}
+        {outerRingNodes}
+        <motion.text
+          x={0}
+          y={-radius - 24}
+          textAnchor="middle"
+          fontSize={24}
+          fill="rgba(148,163,184,0.85)"
+        >
+          {label}
+        </motion.text>
+        <motion.text
+          x={0}
+          y={8}
+          textAnchor="middle"
+          fontSize={20}
+          fontWeight={500}
+          fill="#f8fafc"
+        >
+          {valueLabel}
+        </motion.text>
+        {baseDeltaMeta.label && (
+          <motion.text
+            x={0}
+            y={32}
+            textAnchor="middle"
+            fontSize={18}
+            fontWeight={500}
+            fill={baseDeltaMeta.color}
+          >
+            {baseDeltaMeta.label}
+          </motion.text>
+        )}
+      </g>
+    </motion.g>
+  );
+}
+
+export default WorkflowNode;

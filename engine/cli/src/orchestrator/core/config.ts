@@ -1,15 +1,14 @@
 // Configuration utilities for dataset orchestrator
 
-import type {
-  OrchestratorConfig,
-  OrchestratorConfigOverrides
-} from './types';
-import { validateOrchestratorConfig } from '../parameters/validation';
+import type { OrchestratorConfig, OrchestratorConfigOverrides } from "./types";
+import { validateOrchestratorConfig } from "../parameters/validation";
 
 // Create default orchestrator configuration
-export function createDefaultOrchestratorConfig(overrides?: OrchestratorConfigOverrides): OrchestratorConfig {
+export function createDefaultOrchestratorConfig(
+  overrides?: OrchestratorConfigOverrides
+): OrchestratorConfig {
   const defaults: OrchestratorConfig = {
-    outputDirectory: 'engine/generated-datasets',
+    outputDirectory: "engine/generated-datasets",
     generateMetadata: true,
     batchSize: 1, // Sequential processing to avoid resource conflicts
     timeoutPerDataset: 300000, // 5 minutes per dataset
@@ -19,13 +18,14 @@ export function createDefaultOrchestratorConfig(overrides?: OrchestratorConfigOv
     dryRun: false,
     collectDailySnapshots: true,
     collectEventTraces: true,
-    collectPresentationSnapshots: true
+    collectPresentationSnapshots: true,
+    debugEvents: false,
   };
-  
+
   const config = { ...defaults, ...overrides };
-  
+
   // Validate configuration
   validateOrchestratorConfig(config);
-  
+
   return config;
 }

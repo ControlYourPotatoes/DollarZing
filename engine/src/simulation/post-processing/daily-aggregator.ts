@@ -1,4 +1,9 @@
 import type { SimulationResults } from "../game-engine-simulator";
+import {
+  LevelTrackingHandler,
+  type LevelTrackingSnapshot,
+  type LevelStats,
+} from "../../events/handlers/level-tracking-handler";
 
 export interface WorkflowLayerBreakdown {
   id: string;
@@ -101,28 +106,18 @@ interface RevenueAccumulator {
   cashoutsCount: number;
 }
 
-interface LevelAccumulator {
-  level: number;
-  gamesPlayed: number;
-  wins: number;
-  cashouts: number;
-  progressions: number;
-  winnings: number;
-  losses: number;
-}
-
 interface LifecycleAccumulator {
   runsStarted: number;
   runsCompleted: number;
   runsCashedOut: number;
   runsFailed: number;
-  levelDistribution: number[]; // Array of 10 numbers for levels 1-10
 }
 
 const BASE_SNAPSHOT_DATE = Date.UTC(2025, 0, 1);
 
 export function generateDailyAggregates(
-  results: SimulationResults
+  results: SimulationResults,
+  levelTracker?: LevelTrackingHandler | LevelTrackingSnapshot
 ): DailyAggregateSnapshot[] {
   const aggregates: DailyAggregateSnapshot[] = [];
   const accumulator: RevenueAccumulator = {
@@ -135,26 +130,11 @@ export function generateDailyAggregates(
     cashoutsCount: 0,
   };
 
-  // Initialize level accumulators for all 10 levels
-  const levelAccumulators: LevelAccumulator[] = Array.from(
-    { length: 10 },
-    (_, i) => ({
-      level: i + 1,
-      gamesPlayed: 0,
-      wins: 0,
-      cashouts: 0,
-      progressions: 0,
-      winnings: 0,
-      losses: 0,
-    })
-  );
-
   const lifecycleAccumulator: LifecycleAccumulator = {
     runsStarted: 0,
     runsCompleted: 0,
     runsCashedOut: 0,
     runsFailed: 0,
-    levelDistribution: Array(10).fill(0),
   };
 
   if (!results.dailyResults || results.dailyResults.length === 0) {
@@ -162,7 +142,8 @@ export function generateDailyAggregates(
   }
 
   for (const dailyResult of results.dailyResults) {
-    const dayIndex = dailyResult.day ?? aggregates.length + 1;
+    // Convert from 1-based day to 0-based for level tracking
+    const dayIndex = (dailyResult.day ?? aggregates.length + 1) - 1;
     const revenueStats = dailyResult.revenueStatistics;
     const gameStats = dailyResult.gameStatistics;
 
@@ -230,7 +211,7 @@ export function generateDailyAggregates(
     );
 
     const timelineTick = buildTimelineTick({
-      dayIndex,
+      dayIndex: dailyResult.day ?? dayIndex + 1, // Use 1-based day for timeline
       dailyPlatformFees,
       dailyCharity,
       dailyPayouts,
@@ -242,7 +223,7 @@ export function generateDailyAggregates(
     });
 
     const charts = buildChartSeriesPoints({
-      dayIndex,
+      dayIndex: dailyResult.day ?? dayIndex + 1, // Use 1-based day for charts
       dailyPlatformFees,
       dailyCharity,
       dailyPayouts,
@@ -254,17 +235,23 @@ export function generateDailyAggregates(
     });
 
     // Generate level breakdown for this day
-    const levelBreakdown = generateLevelBreakdown(
-      levelAccumulators,
-      dailyResult
+    const levelBreakdown = buildLevelBreakdown(
+      levelTracker,
+      dailyResult.day ?? dayIndex + 1
     );
 
     // Generate lifecycle data for this day
-    const lifecycle = generateLifecycleData(lifecycleAccumulator, dailyResult);
+    const lifecycle = generateLifecycleData(
+      lifecycleAccumulator,
+      dailyResult,
+      levelTracker,
+      dailyResult.day ?? dayIndex + 1
+    );
 
+    const snapshotDay = dailyResult.day ?? dayIndex + 1; // Keep original 1-based day for snapshot
     aggregates.push({
-      day: dayIndex,
-      date: buildSnapshotDate(dayIndex),
+      day: snapshotDay,
+      date: buildSnapshotDate(snapshotDay),
       totals,
       pool: {
         depositedToday: dailyRuns,
@@ -441,63 +428,119 @@ function clampToZero(value: number): number {
   return value < 0 ? 0 : value;
 }
 
-function generateLevelBreakdown(
-  levelAccumulators: LevelAccumulator[],
-  dailyResult: any
+function buildLevelBreakdown(
+  levelTracker: LevelTrackingHandler | LevelTrackingSnapshot | undefined,
+  day: number
 ): LevelBreakdown[] {
-  // This function processes level data from the simulation results
-  // Currently returns placeholder data - will be enhanced when simulation provides level data
+  if (!levelTracker) {
+    return Array.from({ length: 10 }, (_, index) => ({
+      level: index + 1,
+      gamesPlayed: 0,
+      wins: 0,
+      cashouts: 0,
+      progressions: 0,
+      winnings: 0,
+      losses: 0,
+    }));
+  }
 
-  const LEVELS = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
-
-  return levelAccumulators.map((acc, index) => {
-    const levelValue = LEVELS[index];
-    const totalGames = dailyResult.gameStatistics?.totalGames || 0;
-
-    // Placeholder logic - in real implementation, this would come from simulation
-    // For now, distribute games across levels with decreasing frequency
-    const gamesAtLevel = Math.floor(totalGames / Math.pow(2, index));
-    const wins = Math.floor(gamesAtLevel / 2);
-    const cashouts = Math.floor(wins * (0.1 + index * 0.05)); // Increasing cashout rate
-    const progressions = wins - cashouts;
-
+  const stats = getDailyStatsForDay(levelTracker, day);
+  return Array.from({ length: 10 }, (_, index) => {
+    const level = index + 1;
+    const levelStats = stats[level] || createEmptyLevelStats();
     return {
-      level: acc.level,
-      gamesPlayed: gamesAtLevel,
-      wins: wins,
-      cashouts: cashouts,
-      progressions: progressions,
-      winnings: cashouts * levelValue * 1.8, // Match existing winnings structure
-      losses: gamesAtLevel - wins, // Per-level losses, not cumulative
+      level,
+      gamesPlayed: levelStats.gamesPlayed,
+      wins: levelStats.wins,
+      cashouts: levelStats.cashouts,
+      progressions: levelStats.progressions,
+      winnings: levelStats.winnings,
+      losses: levelStats.losses,
     };
   });
 }
 
 function generateLifecycleData(
-  _lifecycleAccumulator: LifecycleAccumulator,
-  dailyResult: any
+  lifecycleAccumulator: LifecycleAccumulator,
+  dailyResult: any,
+  levelTracker?: LevelTrackingHandler | LevelTrackingSnapshot,
+  day?: number
 ): RunLifecycle {
-  // This function processes run lifecycle data from the simulation results
-  // Currently returns placeholder data - will be enhanced when simulation provides lifecycle data
-
   const gameStats = dailyResult.gameStatistics || {};
 
-  // Placeholder logic - in real implementation, this would come from simulation
-  const runsStarted = gameStats.totalRunsCreated || 0;
-  const runsCompleted = gameStats.jackpotsWon || 0;
-  const runsCashedOut = Math.floor(runsStarted * 0.3); // 30% cashout rate
-  const runsFailed = runsStarted - runsCompleted - runsCashedOut;
-
-  // Distribute runs across levels (more at lower levels)
-  const levelDistribution = Array.from({ length: 10 }, (_, i) =>
-    Math.floor(runsStarted / Math.pow(2, i + 1))
+  // Calculate daily runs created
+  const runsStarted = clampToZero(
+    (gameStats.totalRunsCreated ?? 0) - lifecycleAccumulator.runsStarted
   );
 
+  // Update lifecycle accumulator totals for runs started
+  lifecycleAccumulator.runsStarted += runsStarted;
+
+  // Determine runs completed based on cash-out count when available
+  const revenueStats = dailyResult.revenueStatistics || {};
+  const cashOutCount = revenueStats.cashOutCount ?? 0;
+  const runsCompleted = clampToZero(
+    cashOutCount - lifecycleAccumulator.runsCompleted
+  );
+  lifecycleAccumulator.runsCompleted += runsCompleted;
+
+  // Estimate runs failed from losers recorded in level tracking
+  let runsFailed = 0;
+  if (levelTracker && day !== undefined) {
+    const dailyLevelStats = getDailyStatsForDay(levelTracker, day);
+    runsFailed = Object.values(dailyLevelStats).reduce(
+      (sum, stats) => sum + (stats.losses ?? 0),
+      0
+    );
+  }
+
+  // Build per-level distribution using tracked games
+  const levelDistribution = Array.from({ length: 10 }, (_, index) => {
+    if (!levelTracker || day === undefined) {
+      return 0;
+    }
+    const level = index + 1;
+    const dailyLevelStats = getDailyStatsForDay(levelTracker, day);
+    return dailyLevelStats[level]?.gamesPlayed ?? 0;
+  });
+
   return {
-    runsStarted: runsStarted,
-    runsCompleted: runsCompleted,
-    runsCashedOut: runsCashedOut,
-    runsFailed: runsFailed,
-    levelDistribution: levelDistribution,
+    runsStarted,
+    runsCompleted,
+    runsCashedOut: runsCompleted,
+    runsFailed,
+    levelDistribution,
+  };
+}
+
+type LevelTrackerSource = LevelTrackingHandler | LevelTrackingSnapshot;
+
+function getDailyStatsForDay(
+  source: LevelTrackerSource,
+  day: number
+): Record<number, LevelStats> {
+  if (
+    typeof (source as LevelTrackingHandler).getDailyLevelStats === "function"
+  ) {
+    const map = (source as LevelTrackingHandler).getDailyLevelStats(day);
+    const record: Record<number, LevelStats> = {};
+    for (const [level, stats] of map.entries()) {
+      record[level as unknown as number] = { ...stats };
+    }
+    return record;
+  }
+
+  const snapshot = source as LevelTrackingSnapshot;
+  return snapshot.dailyLevelStats[day] || {};
+}
+
+function createEmptyLevelStats(): LevelStats {
+  return {
+    gamesPlayed: 0,
+    wins: 0,
+    losses: 0,
+    cashouts: 0,
+    progressions: 0,
+    winnings: 0,
   };
 }

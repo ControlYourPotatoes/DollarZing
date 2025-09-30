@@ -106,6 +106,90 @@ export interface PresentationSnapshotFile {
     cumulativePayouts: number;
   };
   days: PresentationSnapshot[];
+  engineDataset?: EngineScenarioDataset;
+  engineDailySnapshots?: EngineDailySnapshot[];
+}
+
+export interface EngineScenarioDataset {
+  success?: boolean;
+  simulationDurationMs?: number;
+  summary?: {
+    totalDays?: number;
+    totalPlayers?: number;
+    simulationCompleted?: boolean;
+  };
+  revenueStats?: {
+    totalPlatformRevenue?: number;
+    totalCharityContributions?: number;
+    totalPlayerPayouts?: number;
+  };
+  playerStats?: {
+    totalPlayers?: number;
+    activePlayers?: number;
+  };
+  dailyResults: EngineDailyResult[];
+}
+
+export interface EngineDailyResult {
+  day: number;
+  playerStatistics?: {
+    totalPlayers?: number;
+    activePlayers?: number;
+    retiredPlayers?: number;
+  };
+  revenueStatistics?: {
+    totalPlatformRevenue?: number;
+    totalCharityContributions?: number;
+    totalPlayerPayouts?: number;
+  };
+  gameStatistics?: {
+    totalGames?: number;
+    totalRunsCreated?: number;
+  };
+  newPlayers?: number;
+}
+
+export interface EngineDailySnapshotLevel {
+  level: number;
+  gamesPlayed?: number;
+  wins?: number;
+  cashouts?: number;
+  progressions?: number;
+  winnings?: number;
+  losses?: number;
+}
+
+export interface EngineDailySnapshotTotals {
+  revenue?: number;
+  platformFees?: number;
+  charity?: number;
+  playerPayouts?: number;
+  gamesPlayed?: number;
+  activePlayers?: number;
+  totalPlayers?: number;
+  newPlayers?: number;
+}
+
+export interface EngineDailySnapshotTimelineTick {
+  id?: string;
+  label?: string;
+  day?: number;
+  cumulativePlatformFees?: number;
+  cumulativeCharity?: number;
+  cumulativePlayerPayouts?: number;
+  cumulativeRevenue?: number;
+  dailyPlatformFees?: number;
+  dailyCharity?: number;
+  dailyPlayerPayouts?: number;
+  dailyRevenue?: number;
+}
+
+export interface EngineDailySnapshot {
+  day: number;
+  date?: string;
+  totals?: EngineDailySnapshotTotals;
+  timelineTicks?: EngineDailySnapshotTimelineTick[];
+  levels?: EngineDailySnapshotLevel[];
 }
 
 export interface PresentationManifestEntry {
@@ -170,6 +254,59 @@ export interface NormalizedPresentationScenario {
     totalPayouts: number;
     maxPlayers: number;
   };
+  analytics: NormalizedScenarioAnalytics;
+}
+
+export interface CohortAnalyticsPoint {
+  dayIndex: number;
+  label: string;
+  totalPlayers: number;
+  activePlayers: number;
+  survivalRate: number;
+  cumulativeRevenue: number;
+  cumulativePayouts: number;
+  netValue: number;
+}
+
+export interface FlowAnalyticsPoint {
+  dayIndex: number;
+  label: string;
+  cumulativeRevenue: number;
+  cumulativePlatformFees: number;
+  cumulativeCharity: number;
+  cumulativePayouts: number;
+}
+
+export interface GamesAnalyticsPoint {
+  dayIndex: number;
+  label: string;
+  totalGames: number;
+  newPlayers: number;
+}
+
+export interface NormalizedScenarioAnalytics {
+  cohort: CohortAnalyticsPoint[];
+  flow: FlowAnalyticsPoint[];
+  games: GamesAnalyticsPoint[];
+  levels: LevelAnalyticsPoint[];
+}
+
+export interface LevelAnalyticsPoint {
+  dayIndex: number;
+  label: string;
+  steps: LevelAnalyticsStep[];
+}
+
+export interface LevelAnalyticsStep {
+  level: number;
+  gamesPlayed: number;
+  wins: number;
+  cashouts: number;
+  progressions: number;
+  winnings: number;
+  losses: number;
+  survivalRate: number;
+  retentionRate: number;
 }
 
 export interface ScenarioIndex {

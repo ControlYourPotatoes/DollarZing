@@ -481,6 +481,10 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
     // Update state to WON
     this.updateDollarState(dollarId, DollarState.WON);
 
+    console.log(
+      `[VirtualDollarFactory] advancePlayerLevel -> ${dollarId} now at level ${dollar.currentLevel}`
+    );
+
     return dollar;
   }
 

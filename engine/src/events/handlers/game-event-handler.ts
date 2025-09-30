@@ -66,10 +66,17 @@ export class GameEventHandler {
    */
   private async handleGameCreated(event: GameCreatedEvent): Promise<void> {
     try {
+      console.log(
+        `[GameEventHandler] Resolving game ${event.gameId} at level ${event.player1Level}`
+      );
       // Generate daily seed in proper format (YYYY-MM-DD)
       const dailySeed = this.generateDailySeed();
 
       // Resolve game through GameMatchingEngine
+      console.log(
+        `[GameEventHandler] Resolving game ${event.gameId} at level ${event.player1Level}`
+      );
+
       const resolutionResult = this.gameMatchingEngine.resolveGame(
         event.gameId,
         dailySeed
@@ -125,7 +132,17 @@ export class GameEventHandler {
         gameResult: "WIN",
       };
 
-      await this.eventBus.emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent);
+      console.log(
+        `[GameEventHandler] Emitting GAME_RESOLVED for ${event.gameId} winner ${winnerDollar.id} at level ${winnerDollar.currentLevel}`
+      );
+      void this.eventBus
+        .emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent)
+        .catch((error) =>
+          console.error(
+            `[GameEventHandler] Failed to emit GAME_RESOLVED for ${event.gameId}:`,
+            error
+          )
+        );
 
       // Process revenue tracking
       await this.processGameRevenue(gameSession, winnings);
@@ -183,10 +200,14 @@ export class GameEventHandler {
         totalGameRevenue: gameRevenue,
       };
 
-      await this.eventBus.emit(
-        EVENT_TYPES.REVENUE_GAME_PROCESSED,
-        revenueEvent
-      );
+      void this.eventBus
+        .emit(EVENT_TYPES.REVENUE_GAME_PROCESSED, revenueEvent)
+        .catch((error) =>
+          console.error(
+            `[GameEventHandler] Failed to emit REVENUE_GAME_PROCESSED for ${gameSession.id}:`,
+            error
+          )
+        );
     } catch (error) {
       await this.emitGameResolutionError(
         gameSession.id,
@@ -220,7 +241,14 @@ export class GameEventHandler {
       context: { gameId },
     };
 
-    await this.eventBus.emit("EVENT_ERROR", errorEvent);
+    void this.eventBus
+      .emit("EVENT_ERROR", errorEvent)
+      .catch((error) =>
+        console.error(
+          `[GameEventHandler] Failed to emit EVENT_ERROR for ${gameId}:`,
+          error
+        )
+      );
   }
 
   /**

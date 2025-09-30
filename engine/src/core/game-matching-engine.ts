@@ -18,6 +18,7 @@ import {
   PoolRemovedEvent,
   PoolUpdatedEvent,
 } from "../events/event-types";
+import type { SimulationAbortReason } from "../types/simulation-termination";
 
 // Legacy event types removed - using centralized EventBus instead
 
@@ -60,7 +61,8 @@ export interface GameStatistics {
   gamesByLevel?: Record<BettingLevel, number>;
   totalPlatformFees: number;
   totalWinnings: number;
-  averageGameDuration?: number;
+  resolvedGames?: number;
+  gamesByLevelResolved?: Record<BettingLevel, number>;
 }
 
 // Audit trail interface
@@ -99,6 +101,23 @@ export class GameMatchingEngine {
   // Game management
   private activeGames: Map<string, GameSession> = new Map();
   private completedGames: Map<string, GameSession> = new Map();
+  private abortCallback: ((reason?: SimulationAbortReason) => void) | null =
+    null;
+  private resolvedGameCount = 0;
+  private resolvedGamesByLevel: Record<BettingLevel, number> = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+    7: 0,
+    8: 0,
+    9: 0,
+    10: 0,
+  };
+  private resolvedPlatformFees = 0;
+  private resolvedWinnings = 0;
 
   // Configuration
   private maxConcurrentGames: number = 1000;
@@ -145,7 +164,8 @@ export class GameMatchingEngine {
       return;
     }
 
-    const shouldCompact = queue.pending.size === 0 || queue.items.length > queue.pending.size * 2;
+    const shouldCompact =
+      queue.pending.size === 0 || queue.items.length > queue.pending.size * 2;
     if (shouldCompact) {
       queue.items = queue.items.filter((id) => queue.pending.has(id));
     }
@@ -180,7 +200,10 @@ export class GameMatchingEngine {
       result.push(dollar);
     }
 
-    if (staleCount > 0 && (queue.items.length > queue.pending.size * 2 || queue.pending.size === 0)) {
+    if (
+      staleCount > 0 &&
+      (queue.items.length > queue.pending.size * 2 || queue.pending.size === 0)
+    ) {
       queue.items = queue.items.filter((id) => queue.pending.has(id));
     }
 
@@ -235,6 +258,10 @@ export class GameMatchingEngine {
 
     this.enqueueDollar(dollar.currentLevel, dollar.id);
 
+    console.log(
+      `[GameMatchingEngine] Added ${dollar.id} owned by ${dollar.ownerId} into pool at level ${dollar.currentLevel}`
+    );
+
     // Emit POOL_ADDED event
     const poolAddedEvent: PoolAddedEvent = {
       type: EVENT_TYPES.POOL_ADDED,
@@ -245,7 +272,11 @@ export class GameMatchingEngine {
       poolSize: this.pooledDollars.size,
       availableForMatching: this.pooledDollars.size - this.dollarsInGame.size,
     };
-    await this.eventBus.emit(EVENT_TYPES.POOL_ADDED, poolAddedEvent);
+    void this.eventBus
+      .emit(EVENT_TYPES.POOL_ADDED, poolAddedEvent)
+      .catch((error) =>
+        console.error("[GameMatchingEngine] Failed to emit POOL_ADDED:", error)
+      );
 
     // Emit POOL_UPDATED event
     const poolUpdatedEvent: PoolUpdatedEvent = {
@@ -256,7 +287,14 @@ export class GameMatchingEngine {
       dollarsInPlay: this.dollarsInGame.size,
       levelDistribution: this.getLevelDistribution(),
     };
-    await this.eventBus.emit(EVENT_TYPES.POOL_UPDATED, poolUpdatedEvent);
+    void this.eventBus
+      .emit(EVENT_TYPES.POOL_UPDATED, poolUpdatedEvent)
+      .catch((error) =>
+        console.error(
+          "[GameMatchingEngine] Failed to emit POOL_UPDATED:",
+          error
+        )
+      );
 
     return { success: true };
   }
@@ -297,7 +335,14 @@ export class GameMatchingEngine {
       poolSize: this.pooledDollars.size,
       availableForMatching: this.pooledDollars.size - this.dollarsInGame.size,
     };
-    await this.eventBus.emit(EVENT_TYPES.POOL_REMOVED, poolRemovedEvent);
+    void this.eventBus
+      .emit(EVENT_TYPES.POOL_REMOVED, poolRemovedEvent)
+      .catch((error) =>
+        console.error(
+          "[GameMatchingEngine] Failed to emit POOL_REMOVED:",
+          error
+        )
+      );
 
     // Emit POOL_UPDATED event
     const poolUpdatedEvent: PoolUpdatedEvent = {
@@ -308,7 +353,14 @@ export class GameMatchingEngine {
       dollarsInPlay: this.dollarsInGame.size,
       levelDistribution: this.getLevelDistribution(),
     };
-    await this.eventBus.emit(EVENT_TYPES.POOL_UPDATED, poolUpdatedEvent);
+    void this.eventBus
+      .emit(EVENT_TYPES.POOL_UPDATED, poolUpdatedEvent)
+      .catch((error) =>
+        console.error(
+          "[GameMatchingEngine] Failed to emit POOL_UPDATED:",
+          error
+        )
+      );
 
     return { success: true };
   }
@@ -423,6 +475,11 @@ export class GameMatchingEngine {
       // Remove from in-game tracking
       this.dollarsInGame.delete(winner.id);
       this.dollarsInGame.delete(loser.id);
+      this.resolvedGameCount++;
+      this.resolvedGamesByLevel[game.level] =
+        (this.resolvedGamesByLevel[game.level] ?? 0) + 1;
+      this.resolvedPlatformFees += game.platformFee;
+      this.resolvedWinnings += game.winnings;
 
       // Game resolved event will be emitted by GameEventHandler
 
@@ -496,30 +553,17 @@ export class GameMatchingEngine {
    * Get comprehensive game statistics
    */
   getStatistics(): GameStatistics {
-    const gamesByLevel: Record<BettingLevel, number> = {} as Record<
-      BettingLevel,
-      number
-    >;
-    let totalPlatformFees = 0;
-    let totalWinnings = 0;
-
-    // Initialize level counts
-    for (let level = 1; level <= MAX_BETTING_LEVEL; level++) {
-      gamesByLevel[level as BettingLevel] = 0;
-    }
-
-    // Calculate statistics from completed games
-    for (const game of Array.from(this.completedGames.values())) {
-      gamesByLevel[game.level]++;
-      totalPlatformFees += game.platformFee;
-      totalWinnings += game.winnings;
-    }
+    const gamesByLevel = { ...this.resolvedGamesByLevel };
+    const totalPlatformFees = this.resolvedPlatformFees;
+    const totalWinnings = this.resolvedWinnings;
 
     return {
       totalGamesPlayed: this.completedGames.size,
       gamesByLevel,
       totalPlatformFees,
       totalWinnings,
+      resolvedGames: this.resolvedGameCount,
+      gamesByLevelResolved: { ...this.resolvedGamesByLevel },
     };
   }
 
@@ -584,6 +628,14 @@ export class GameMatchingEngine {
     return this.eventBus;
   }
 
+  setAbortCallback(callback: (reason?: SimulationAbortReason) => void): void {
+    this.abortCallback = callback;
+  }
+
+  abortSimulation(reason?: SimulationAbortReason): void {
+    this.abortCallback?.(reason);
+  }
+
   // Legacy event system methods removed - using centralized EventBus instead
 
   /**
@@ -622,6 +674,51 @@ export class GameMatchingEngine {
    */
   markDollarInGame(dollarId: string): void {
     this.dollarsInGame.add(dollarId);
+  }
+
+  /** Release pooled dollars that are still flagged as “in game” for the given level */
+  clearStaleInGameDollars(level: BettingLevel): number {
+    const activeDollarIds = new Set<string>();
+    for (const game of this.activeGames.values()) {
+      activeDollarIds.add(game.dollar1.id);
+      activeDollarIds.add(game.dollar2.id);
+    }
+
+    let cleared = 0;
+    for (const dollarId of Array.from(this.dollarsInGame)) {
+      if (activeDollarIds.has(dollarId)) {
+        continue;
+      }
+
+      const dollar = this.pooledDollars.get(dollarId);
+      if (!dollar) {
+        this.dollarsInGame.delete(dollarId);
+        continue;
+      }
+
+      if (dollar.currentLevel !== level) {
+        continue;
+      }
+
+      if (dollar.state !== DollarState.POOLED) {
+        try {
+          this.virtualDollarFactory.updateDollarState(
+            dollar.id,
+            DollarState.POOLED
+          );
+        } catch (error) {
+          console.warn(
+            `[GameMatchingEngine] Failed to reset dollar ${dollar.id} during stale cleanup:`,
+            error
+          );
+        }
+      }
+
+      this.dollarsInGame.delete(dollarId);
+      cleared++;
+    }
+
+    return cleared;
   }
 
   /**

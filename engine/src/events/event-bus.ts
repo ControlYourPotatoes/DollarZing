@@ -3,6 +3,8 @@
  * Provides typed event publishing, subscription management, and error handling
  */
 
+import { EVENT_TYPES } from "./event-types";
+
 export type EventHandler<T = any> = (event: T) => void | Promise<void>;
 export type EventHandlerWithPriority<T = any> = {
   handler: EventHandler<T>;
@@ -19,6 +21,10 @@ export interface EventBusOptions {
   maxListeners?: number;
 }
 
+const DEFAULT_MAX_LISTENERS = 100;
+const MAX_QUEUE_FLUSH = 2000;
+const MAX_DISPATCH_DEPTH = 400;
+
 /**
  * Central event dispatcher using publish-subscribe pattern with typed events
  */
@@ -27,18 +33,27 @@ export class EventBus {
   private traceEnabled: boolean;
   private maxListeners: number;
   private eventTrace: Array<{ type: string; timestamp: Date; data: any }> = [];
+  private dispatchQueue: Array<{
+    type: string;
+    data: unknown;
+    resolve: () => void;
+    reject: (reason: unknown) => void;
+  }> = [];
+  private isDispatching = false;
+  private activeDispatchDepth = 0;
+  private maxDispatchDepth = MAX_DISPATCH_DEPTH;
 
   constructor(options: EventBusOptions = {}) {
     this.traceEnabled = options.enableTracing ?? false;
-    this.maxListeners = options.maxListeners ?? 100;
+    this.maxListeners = options.maxListeners ?? DEFAULT_MAX_LISTENERS;
   }
 
   /**
    * Subscribe to events of a specific type with optional priority
    */
   on<T>(
-    eventType: string, 
-    handler: EventHandler<T>, 
+    eventType: string,
+    handler: EventHandler<T>,
     priority: number = 0
   ): EventSubscription {
     if (!this.listeners.has(eventType)) {
@@ -46,26 +61,33 @@ export class EventBus {
     }
 
     const handlers = this.listeners.get(eventType)!;
-    
+
     // Check listener limit
     if (handlers.length >= this.maxListeners) {
-      throw new Error(`Maximum listener limit (${this.maxListeners}) reached for event type: ${eventType}`);
+      throw new Error(
+        `Maximum listener limit (${this.maxListeners}) reached for event type: ${eventType}`
+      );
     }
 
-    const handlerWithPriority: EventHandlerWithPriority<T> = { handler, priority };
+    const handlerWithPriority: EventHandlerWithPriority<T> = {
+      handler,
+      priority,
+    };
     handlers.push(handlerWithPriority);
-    
+
     // Sort by priority (higher numbers first)
     handlers.sort((a, b) => b.priority - a.priority);
 
     if (this.traceEnabled) {
-      console.log(`[EventBus] Subscribed to ${eventType} with priority ${priority}`);
+      console.log(
+        `[EventBus] Subscribed to ${eventType} with priority ${priority}`
+      );
     }
 
     // Return subscription object
     return {
       eventType,
-      unsubscribe: () => this.off(eventType, handler)
+      unsubscribe: () => this.off(eventType, handler),
     };
   }
 
@@ -76,10 +98,10 @@ export class EventBus {
     const handlers = this.listeners.get(eventType);
     if (!handlers) return;
 
-    const index = handlers.findIndex(h => h.handler === handler);
+    const index = handlers.findIndex((h) => h.handler === handler);
     if (index !== -1) {
       handlers.splice(index, 1);
-      
+
       // Remove empty arrays to prevent memory leaks
       if (handlers.length === 0) {
         this.listeners.delete(eventType);
@@ -95,53 +117,196 @@ export class EventBus {
    * Emit an event to all subscribers
    */
   async emit<T>(eventType: string, data: T): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.dispatchQueue.push({ type: eventType, data, resolve, reject });
+      if (this.traceEnabled) {
+        console.log(
+          `[EventBus][emit] queued ${eventType}, queue length now ${this.dispatchQueue.length}`
+        );
+      }
+
+      if (!this.isDispatching) {
+        this.isDispatching = true;
+        this.processQueue();
+      }
+    });
+  }
+
+  private processQueue(): void {
     if (this.traceEnabled) {
-      console.log(`[EventBus] Emitting ${eventType}:`, data);
-      this.eventTrace.push({
-        type: eventType,
-        timestamp: new Date(),
-        data
-      });
+      console.log(
+        `[EventBus][processQueue] starting with queue length ${this.dispatchQueue.length}`
+      );
+    }
+    let processed = 0;
+    const pump = (): void => {
+      if (this.dispatchQueue.length === 0) {
+        this.isDispatching = false;
+        return;
+      }
+
+      const { type, data, resolve, reject } = this.dispatchQueue.shift()!;
+      if (this.traceEnabled) {
+        console.log(
+          `[EventBus][processQueue] dispatching ${type}, remaining ${this.dispatchQueue.length}`
+        );
+      }
+
+      const finish = (): void => {
+        processed += 1;
+        if (processed % MAX_QUEUE_FLUSH === 0) {
+          setTimeout(pump, 0);
+        } else {
+          pump();
+        }
+      };
+
+      try {
+        const task = this.dispatchEvent(type, data);
+        task
+          .then(() => {
+            resolve();
+            finish();
+          })
+          .catch((error) => {
+            reject(error);
+            finish();
+          });
+      } catch (error) {
+        reject(error);
+        finish();
+      }
+    };
+
+    pump();
+  }
+
+  private async dispatchEvent<T>(eventType: string, data: T): Promise<void> {
+    if (this.traceEnabled) {
+      console.log(
+        `[EventBus][dispatchEvent] begin ${eventType}, depth ${this.activeDispatchDepth}`
+      );
+    }
+    if (this.activeDispatchDepth > this.maxDispatchDepth) {
+      console.warn(
+        `[EventBus] Dispatch depth ${this.activeDispatchDepth} exceeded max ${this.maxDispatchDepth} for ${eventType}. Switching to iterative flush.`
+      );
+      return this.flushHandlersIteratively(eventType, data);
     }
 
+    this.activeDispatchDepth++;
+
+    try {
+      if (this.traceEnabled) {
+        console.log(`[EventBus] Emitting ${eventType}:`, data);
+        this.eventTrace.push({
+          type: eventType,
+          timestamp: new Date(),
+          data,
+        });
+      }
+
+      const handlers = this.listeners.get(eventType);
+      if (!handlers || handlers.length === 0) {
+        if (this.traceEnabled) {
+          console.log(`[EventBus] No handlers for ${eventType}`);
+        }
+        return;
+      }
+
+      const settledHandlers = handlers.slice();
+      const asyncHandlers: Array<Promise<void>> = [];
+
+      for (const { handler } of settledHandlers) {
+        if (this.traceEnabled) {
+          console.log(
+            `[EventBus][dispatchEvent] executing handler for ${eventType}`
+          );
+        }
+        try {
+          const result = handler(data);
+          if (result instanceof Promise) {
+            asyncHandlers.push(result.then(() => undefined));
+          }
+        } catch (error) {
+          console.error(`[EventBus] Error in handler for ${eventType}:`, error);
+          this.emitSync(EVENT_TYPES.EVENT_ERROR, {
+            eventType,
+            error: error instanceof Error ? error.message : String(error),
+            timestamp: new Date(),
+          });
+        }
+      }
+
+      if (asyncHandlers.length > 0) {
+        await this.resolveAsyncHandlers(eventType, asyncHandlers);
+      }
+    } finally {
+      if (this.traceEnabled) {
+        console.log(
+          `[EventBus][dispatchEvent] end ${eventType}, depth ${this.activeDispatchDepth}`
+        );
+      }
+      this.activeDispatchDepth--;
+    }
+  }
+
+  private async resolveAsyncHandlers(
+    eventType: string,
+    handlers: Array<Promise<void>>
+  ): Promise<void> {
+    const chunkSize = 20;
+    let index = 0;
+    while (index < handlers.length) {
+      const slice = handlers.slice(index, index + chunkSize);
+      try {
+        await Promise.all(slice);
+      } catch (error) {
+        console.error(
+          `[EventBus] Error in async handlers for ${eventType}:`,
+          error
+        );
+        this.emitSync(EVENT_TYPES.EVENT_ERROR, {
+          eventType,
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date(),
+        });
+      }
+      index += chunkSize;
+      if (index < handlers.length) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+    }
+  }
+
+  private async flushHandlersIteratively<T>(
+    eventType: string,
+    data: T
+  ): Promise<void> {
     const handlers = this.listeners.get(eventType);
     if (!handlers || handlers.length === 0) {
-      if (this.traceEnabled) {
-        console.log(`[EventBus] No handlers for ${eventType}`);
-      }
       return;
     }
 
-    // Execute handlers in priority order
-    const promises: Promise<void>[] = [];
-    for (const { handler } of handlers) {
+    const queue = handlers.slice();
+    while (queue.length > 0) {
+      const current = queue.shift()!;
       try {
-        const result = handler(data);
+        const result = current.handler(data);
         if (result instanceof Promise) {
-          promises.push(result);
+          await result;
         }
       } catch (error) {
         console.error(`[EventBus] Error in handler for ${eventType}:`, error);
-        // Emit error event for debugging
-        this.emitSync('EVENT_ERROR', {
+        this.emitSync(EVENT_TYPES.EVENT_ERROR, {
           eventType,
           error: error instanceof Error ? error.message : String(error),
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
-    }
 
-    // Wait for all async handlers to complete
-    if (promises.length > 0) {
-      try {
-        await Promise.all(promises);
-      } catch (error) {
-        console.error(`[EventBus] Error in async handlers for ${eventType}:`, error);
-        this.emitSync('EVENT_ERROR', {
-          eventType,
-          error: error instanceof Error ? error.message : String(error),
-          timestamp: new Date()
-        });
+      if (queue.length > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
   }
@@ -157,12 +322,18 @@ export class EventBus {
       try {
         const result = handler(data);
         if (result instanceof Promise) {
-          result.catch(error => 
-            console.error(`[EventBus] Unhandled async error in ${eventType}:`, error)
+          result.catch((error) =>
+            console.error(
+              `[EventBus] Unhandled async error in ${eventType}:`,
+              error
+            )
           );
         }
       } catch (error) {
-        console.error(`[EventBus] Error in sync handler for ${eventType}:`, error);
+        console.error(
+          `[EventBus] Error in sync handler for ${eventType}:`,
+          error
+        );
       }
     }
   }
@@ -170,7 +341,11 @@ export class EventBus {
   /**
    * Subscribe to an event once, then automatically unsubscribe
    */
-  once<T>(eventType: string, handler: EventHandler<T>, priority: number = 0): EventSubscription {
+  once<T>(
+    eventType: string,
+    handler: EventHandler<T>,
+    priority: number = 0
+  ): EventSubscription {
     const onceHandler: EventHandler<T> = (data) => {
       subscription.unsubscribe();
       return handler(data);
@@ -178,17 +353,6 @@ export class EventBus {
 
     const subscription = this.on(eventType, onceHandler, priority);
     return subscription;
-  }
-
-  /**
-   * Get all active listeners for debugging
-   */
-  getListeners(): Map<string, number> {
-    const summary = new Map<string, number>();
-    for (const [eventType, handlers] of this.listeners) {
-      summary.set(eventType, handlers.length);
-    }
-    return summary;
   }
 
   /**
@@ -210,7 +374,7 @@ export class EventBus {
    */
   dispose(): void {
     if (this.traceEnabled) {
-      console.log('[EventBus] Disposing - clearing all listeners');
+      console.log("[EventBus] Disposing - clearing all listeners");
     }
     this.listeners.clear();
     this.eventTrace = [];
@@ -225,5 +389,13 @@ export class EventBus {
       total += handlers.length;
     }
     return total;
+  }
+
+  getListeners(): Map<string, number> {
+    const summary = new Map<string, number>();
+    for (const [eventType, handlers] of this.listeners.entries()) {
+      summary.set(eventType, handlers.length);
+    }
+    return summary;
   }
 }

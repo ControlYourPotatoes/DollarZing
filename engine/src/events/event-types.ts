@@ -87,7 +87,10 @@ export interface PlayerTotalWinningsUpdatedEvent extends BaseEvent {
   newTotalWinnings: number;
   winningsChange: number;
   triggeringVirtualDollarId: string;
-  triggeringEvent: "VIRTUAL_DOLLAR_ADVANCED" | "VIRTUAL_DOLLAR_RUN_COMPLETED" | "CASH_OUT_COMPLETED";
+  triggeringEvent:
+    | "VIRTUAL_DOLLAR_ADVANCED"
+    | "VIRTUAL_DOLLAR_RUN_COMPLETED"
+    | "CASH_OUT_COMPLETED";
 }
 
 // ===== LEGACY EVENT INTERFACES (DEPRECATED - use Virtual Dollar events instead) =====
@@ -203,6 +206,13 @@ export interface FifoQueueUpdatedEvent extends BaseEvent {
   type: "FIFO_QUEUE_UPDATED";
   level: number;
   queueLength: number;
+  waitingPlayerIds: string[];
+}
+
+export interface MatchmakingTerminatedEvent extends BaseEvent {
+  type: "MATCHMAKING_TERMINATED";
+  level: number;
+  reason: string;
 }
 
 export interface PoolAddedEvent extends BaseEvent {
@@ -359,6 +369,17 @@ export interface DayCompletedEvent extends BaseEvent {
   totalRevenue: number;
   poolSize: number;
   activePlayers: number;
+}
+
+export interface DayFrameCompletedEvent extends BaseEvent {
+  type: "DAY_FRAME_COMPLETED";
+  dayNumber: number;
+  summary: {
+    gamesProcessed: number;
+    newPlayers: number;
+    poolSize: number;
+    activePlayers: number;
+  };
 }
 
 export interface SimulationStartedEvent extends BaseEvent {
@@ -520,6 +541,7 @@ export type SimulationEvent =
   | PlayerWaitingEvent
   | MatchFoundEvent
   | FifoQueueUpdatedEvent
+  | MatchmakingTerminatedEvent
   | PoolAddedEvent
   | PoolRemovedEvent
   | PoolUpdatedEvent
@@ -535,6 +557,7 @@ export type SimulationEvent =
   | NewRunCreatedEvent
   | DayStartedEvent
   | DayCompletedEvent
+  | DayFrameCompletedEvent
   | SimulationStartedEvent
   | SimulationCompletedEvent
   | RunStartedEvent
@@ -562,7 +585,7 @@ export const EVENT_TYPES = {
   VIRTUAL_DOLLAR_ADVANCED: "VIRTUAL_DOLLAR_ADVANCED",
   VIRTUAL_DOLLAR_PROGRESSION_FAILED: "VIRTUAL_DOLLAR_PROGRESSION_FAILED",
   VIRTUAL_DOLLAR_RUN_COMPLETED: "VIRTUAL_DOLLAR_RUN_COMPLETED",
-  
+
   // Player aggregate events
   PLAYER_TOTAL_WINNINGS_UPDATED: "PLAYER_TOTAL_WINNINGS_UPDATED",
 
@@ -591,6 +614,7 @@ export const EVENT_TYPES = {
   PLAYER_WAITING: "PLAYER_WAITING",
   MATCH_FOUND: "MATCH_FOUND",
   FIFO_QUEUE_UPDATED: "FIFO_QUEUE_UPDATED",
+  MATCHMAKING_TERMINATED: "MATCHMAKING_TERMINATED",
 
   // Revenue events
   REVENUE_GAME_PROCESSED: "REVENUE_GAME_PROCESSED",
@@ -605,6 +629,7 @@ export const EVENT_TYPES = {
   // Simulation control events
   DAY_STARTED: "DAY_STARTED",
   DAY_COMPLETED: "DAY_COMPLETED",
+  DAY_FRAME_COMPLETED: "DAY_FRAME_COMPLETED",
   SIMULATION_STARTED: "SIMULATION_STARTED",
   SIMULATION_COMPLETED: "SIMULATION_COMPLETED",
 
@@ -633,3 +658,5 @@ export type EventDataFor<T extends EventType> = Extract<
   SimulationEvent,
   { type: (typeof EVENT_TYPES)[T] }
 >;
+
+export type DayFrameSummary = DayFrameCompletedEvent["summary"];

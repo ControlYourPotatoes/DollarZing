@@ -3,6 +3,14 @@ import {
   NormalizedPresentationScenario,
   NormalizedPresentationDay,
   PresentationSnapshotFile,
+  EngineDailyResult,
+  EngineDailySnapshot,
+  EngineDailySnapshotLevel,
+  CohortAnalyticsPoint,
+  FlowAnalyticsPoint,
+  GamesAnalyticsPoint,
+  LevelAnalyticsPoint,
+  LevelAnalyticsStep,
 } from "./types";
 
 import { validatePresentationSnapshotFile } from "./validation";
@@ -33,6 +41,14 @@ export function normalizePresentationSnapshot(
 ): NormalizedPresentationScenario {
   const snapshotFile = validatePresentationSnapshotFile(raw);
 
+  const datasetByDay = indexEngineDataset(snapshotFile.engineDataset);
+  const dailyByDay = indexDailySnapshots(snapshotFile.engineDailySnapshots);
+
+  const cohortAnalytics: CohortAnalyticsPoint[] = [];
+  const flowAnalytics: FlowAnalyticsPoint[] = [];
+  const gamesAnalytics: GamesAnalyticsPoint[] = [];
+  const levelAnalytics: LevelAnalyticsPoint[] = [];
+
   const days: NormalizedPresentationDay[] = snapshotFile.days.map((day) => {
     const distributionPoints = day.charts.distributionSeries.map((point) => ({
       ...point,
@@ -53,10 +69,86 @@ export function normalizePresentationSnapshot(
       {}
     );
 
+    const datasetEntry = datasetByDay.get(day.dayIndex + 1);
+    const dailyEntry = dailyByDay.get(day.dayIndex + 1);
+    const label = day.timelineTick.label ?? `Day ${day.dayIndex + 1}`;
+
+    const totalPlayers = ensureNumber(
+      datasetEntry?.playerStatistics?.totalPlayers ??
+        dailyEntry?.totals?.totalPlayers ??
+        day.timelineTick.cumulativePlayers
+    );
+    const activePlayers = ensureNumber(
+      datasetEntry?.playerStatistics?.activePlayers ??
+        dailyEntry?.totals?.activePlayers ??
+        totalPlayers
+    );
+    const survivalRate =
+      totalPlayers > 0 ? (activePlayers / totalPlayers) * 100 : 0;
+
+    const cumulativeRevenue = ensureNumber(
+      day.timelineTick.cumulativeRevenue
+    );
+    const cumulativePayouts = ensureNumber(
+      day.timelineTick.cumulativePayouts
+    );
+    const netValue = cumulativeRevenue - cumulativePayouts;
+
+    cohortAnalytics.push({
+      dayIndex: day.dayIndex,
+      label,
+      totalPlayers,
+      activePlayers,
+      survivalRate,
+      cumulativeRevenue,
+      cumulativePayouts,
+      netValue,
+    });
+
+    flowAnalytics.push({
+      dayIndex: day.dayIndex,
+      label,
+      cumulativeRevenue,
+      cumulativePlatformFees: ensureNumber(
+        day.timelineTick.cumulativeFees ??
+          datasetEntry?.revenueStatistics?.totalPlatformRevenue ??
+          dailyEntry?.timelineTicks?.[0]?.cumulativePlatformFees
+      ),
+      cumulativeCharity: ensureNumber(
+        day.timelineTick.cumulativeCharity ??
+          datasetEntry?.revenueStatistics?.totalCharityContributions ??
+          dailyEntry?.timelineTicks?.[0]?.cumulativeCharity
+      ),
+      cumulativePayouts,
+    });
+
+    gamesAnalytics.push({
+      dayIndex: day.dayIndex,
+      label,
+      totalGames: ensureNumber(
+        dailyEntry?.totals?.gamesPlayed ??
+          datasetEntry?.gameStatistics?.totalGames
+      ),
+      newPlayers: ensureNumber(
+        datasetEntry?.newPlayers ?? dailyEntry?.totals?.newPlayers
+      ),
+    });
+
+    const levelSteps = buildLevelSteps(
+      dailyEntry?.levels,
+      datasetEntry?.gameStatistics?.totalGames,
+      datasetEntry?.playerStatistics?.totalPlayers
+    );
+    levelAnalytics.push({
+      dayIndex: day.dayIndex,
+      label,
+      steps: levelSteps,
+    });
+
     return {
       dayIndex: day.dayIndex,
       date: day.date,
-      label: day.timelineTick.label,
+      label,
       summary: day.summary,
       timelineTick: day.timelineTick,
       financialWorkflow: day.financialWorkflow,
@@ -120,6 +212,12 @@ export function normalizePresentationSnapshot(
     dayLookup,
     timelineSeries,
     summary,
+    analytics: {
+      cohort: cohortAnalytics,
+      flow: flowAnalytics,
+      games: gamesAnalytics,
+      levels: levelAnalytics,
+    },
   };
 }
 
@@ -132,4 +230,69 @@ export function assertSnapshotMatchesScenario(
       `Snapshot scenario mismatch: expected ${scenarioId}, received ${snapshot.scenarioId}`
     );
   }
+}
+
+function indexEngineDataset(dataset?: PresentationSnapshotFile["engineDataset"]): Map<number, EngineDailyResult> {
+  const map = new Map<number, EngineDailyResult>();
+  if (!dataset?.dailyResults) return map;
+  dataset.dailyResults.forEach((entry) => {
+    if (!entry || !Number.isFinite(entry.day)) return;
+    map.set(entry.day, entry);
+  });
+  return map;
+}
+
+function indexDailySnapshots(snapshots?: PresentationSnapshotFile["engineDailySnapshots"]): Map<number, EngineDailySnapshot> {
+  const map = new Map<number, EngineDailySnapshot>();
+  if (!Array.isArray(snapshots)) return map;
+  snapshots.forEach((entry) => {
+    if (!entry || !Number.isFinite(entry.day)) return;
+    map.set(entry.day, entry);
+  });
+  return map;
+}
+
+function ensureNumber(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  return 0;
+}
+
+function buildLevelSteps(
+  levels: EngineDailySnapshotLevel[] | undefined,
+  totalGames?: number,
+  totalPlayers?: number
+): LevelAnalyticsStep[] {
+  if (!Array.isArray(levels) || levels.length === 0) {
+    return [];
+  }
+
+  const baseGames = ensureNumber(totalGames);
+  const basePlayers = ensureNumber(totalPlayers);
+  const level1Games = ensureNumber(levels[0]?.gamesPlayed ?? baseGames);
+
+  return levels.map((level) => {
+    const gamesPlayed = ensureNumber(level.gamesPlayed);
+    const wins = ensureNumber(level.wins);
+    const cashouts = ensureNumber(level.cashouts);
+    const progressions = ensureNumber(level.progressions);
+    const winnings = ensureNumber(level.winnings);
+    const losses = ensureNumber(level.losses);
+
+    const survivalRate =
+      level1Games > 0 ? (gamesPlayed / level1Games) * 100 : 0;
+    const retentionRate =
+      basePlayers > 0 ? (gamesPlayed / basePlayers) * 100 : 0;
+
+    return {
+      level: level.level,
+      gamesPlayed,
+      wins,
+      cashouts,
+      progressions,
+      winnings,
+      losses,
+      survivalRate,
+      retentionRate,
+    };
+  });
 }
