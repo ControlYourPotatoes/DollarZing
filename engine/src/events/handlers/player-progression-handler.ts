@@ -260,15 +260,12 @@ export class PlayerProgressionHandler {
     const alreadyQueuedForOwner = queuedOwners.filter(
       (ownerId) => ownerId === virtualDollar.ownerId
     ).length;
-    const maxForLevel = this.getMaxQueuedPerOwnerPerLevel(level);
 
-    if (alreadyQueuedForOwner >= maxForLevel) {
-      if (this.loggingEnabled) {
-        console.debug(
-          `[PlayerProgressionHandler] Deferring re-pool of ${virtualDollar.id} at level ${level} for owner ${virtualDollar.ownerId}; ` +
-            `already has ${alreadyQueuedForOwner}/${maxForLevel} slots (queue owners: [${[...new Set(queuedOwners)].join(', ')}])`
-        );
-      }
+    if (alreadyQueuedForOwner > 0) {  // Changed from >= maxQueuedPerOwnerPerLevel to > 0 to enforce strict 1-per-owner
+      console.warn(
+        `[PlayerProgressionHandler] THROTTLE: Deferring re-pool of ${virtualDollar.id} at level ${level} for owner ${virtualDollar.ownerId}; ` +
+          `already has ${alreadyQueuedForOwner} slot(s). Queue owners: [${[...new Set(queuedOwners)].slice(0, 5).join(', ')}]`
+      );
 
       setTimeout(
         () => void this.rePoolAdvancedWinner(virtualDollar),
@@ -326,10 +323,6 @@ export class PlayerProgressionHandler {
       );
       throw error; // Re-throw to trigger progression failure event
     }
-  }
-
-  private getMaxQueuedPerOwnerPerLevel(level: BettingLevel): number {
-    return level >= 2 ? 1 : 2;
   }
 
   /**
