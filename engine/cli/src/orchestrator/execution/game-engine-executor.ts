@@ -111,7 +111,7 @@ class ProgressTracker {
  */
 export class GameEngineExecutor {
   private config: ExecutorConfig;
-  private adapter: DatasetOrchestrator;
+  private adapterFactory: (bus?: EventBus) => DatasetOrchestrator;
   private factoryManager: OrchestratorFactoryManager;
   private isExecuting: boolean = false;
   private aborted: boolean = false;
@@ -119,14 +119,12 @@ export class GameEngineExecutor {
   constructor(config: ExecutorConfig) {
     this.config = config;
 
-    const eventBus = new EventBus();
-
-    // Create DatasetOrchestrator with EventBus integration
-    this.adapter = new DatasetOrchestrator(
-      config.orchestratorConfig,
-      undefined, // Use default mapping config
-      eventBus
-    );
+    this.adapterFactory = (bus?: EventBus) =>
+      new DatasetOrchestrator(
+        this.config.orchestratorConfig,
+        undefined,
+        bus ?? new EventBus()
+      );
 
     this.factoryManager = createOrchestratorFactoryManager(
       config.factoryPreset
@@ -367,7 +365,7 @@ export class GameEngineExecutor {
       combination,
       attemptNumber: attempt,
       startTime: performance.now(),
-      adapter: this.adapter,
+      adapter: this.adapterFactory(),
       factoryManager: this.factoryManager,
     };
   }
@@ -504,13 +502,14 @@ export class GameEngineExecutor {
 
     // Recreate adapter if orchestrator config changed
     if (updates.orchestratorConfig) {
-      const eventBus = new EventBus();
+      const baseFactory = (bus?: EventBus) =>
+        new DatasetOrchestrator(
+          this.config.orchestratorConfig,
+          undefined,
+          bus ?? new EventBus()
+        );
 
-      this.adapter = new DatasetOrchestrator(
-        this.config.orchestratorConfig,
-        undefined, // Use default mapping config
-        eventBus
-      );
+      this.adapterFactory = baseFactory;
     }
 
     // Recreate factory manager if preset changed
