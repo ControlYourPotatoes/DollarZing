@@ -48,7 +48,7 @@ export class MatchmakingEventHandler {
   private lastFifoSnapshot = new Map<number, string>();
   private daySinceLastReset = 0;
   private staleCycleStartLevel: number | null = null;
-  private readonly maxStaleCyclesBeforeCleanup = 2;  // Lowered from 5 to trigger faster
+  private readonly maxStaleCyclesBeforeCleanup = 50;  // Increased from 2 - only cleanup when truly stuck
   private readonly stalemateRetryDelayMs = 25;
 
   constructor(
@@ -64,6 +64,23 @@ export class MatchmakingEventHandler {
    * Initialize event subscriptions
    */
   private initialize(): void {
+    // Clear stale state at simulation start (handles EventBus reuse across runs)
+    this.eventBus.on(EVENT_TYPES.SIMULATION_STARTED, () => {
+      console.log("[MatchmakingEventHandler] Simulation started - clearing stale IN_GAME flags");
+      this.consecutiveNoMatchCycles = 0;
+      this.staleCycleStartLevel = null;
+      this.pendingFifoLevels.clear();
+      this.lastFifoSnapshot.clear();
+      
+      // Force clear all IN_GAME flags from previous runs
+      for (const level of [1, 2, 3, 4, 5] as BettingLevel[]) {
+        const cleared = this.gameMatchingEngine.clearStaleInGameDollars(level as BettingLevel);
+        if (cleared.length > 0) {
+          console.warn(`[MatchmakingEventHandler] Simulation start cleanup: cleared ${cleared.length} stale dollars at level ${level}`);
+        }
+      }
+    });
+
     if (this.terminationTriggered) {
       return;
     }
@@ -91,10 +108,19 @@ export class MatchmakingEventHandler {
     });
 
     this.eventBus.on(EVENT_TYPES.DAY_COMPLETED, () => {
+      console.log("[MatchmakingEventHandler] Day completed - resetting stalemate tracking and clearing stale state");
       this.staleCycleStartLevel = null;
       this.consecutiveNoMatchCycles = 0;
       this.pendingFifoLevels.clear();
       this.lastFifoSnapshot.clear();
+      
+      // End-of-day cleanup: clear any remaining IN_GAME flags across all levels
+      for (const level of [1, 2, 3, 4, 5] as BettingLevel[]) {
+        const cleared = this.gameMatchingEngine.clearStaleInGameDollars(level as BettingLevel);
+        if (cleared.length > 0) {
+          console.warn(`[MatchmakingEventHandler] End-of-day cleanup: cleared ${cleared.length} stale dollars at level ${level}`);
+        }
+      }
     });
 
     this.eventBus.on(EVENT_TYPES.DAY_FRAME_COMPLETED, () => {
@@ -355,7 +381,9 @@ export class MatchmakingEventHandler {
       } else if (stalemateDetected && lastStalemateLevel !== null) {
         this.consecutiveNoMatchCycles++;
 
-        console.warn(`[MatchmakingEventHandler] Stalemate cycle ${this.consecutiveNoMatchCycles}/${this.maxStaleCyclesBeforeCleanup} at level ${lastStalemateLevel} (staleCycleStartLevel: ${this.staleCycleStartLevel})`);
+        if (this.consecutiveNoMatchCycles % 10 === 0) {  // Log every 10 cycles to reduce spam
+          console.warn(`[MatchmakingEventHandler] Stalemate cycle ${this.consecutiveNoMatchCycles}/${this.maxStaleCyclesBeforeCleanup} at level ${lastStalemateLevel}`);
+        }
 
         if (lastStalemateLevel === this.staleCycleStartLevel) {
           if (this.consecutiveNoMatchCycles >= this.maxNoMatchCycles) {
@@ -368,7 +396,49 @@ export class MatchmakingEventHandler {
           if (
             this.consecutiveNoMatchCycles >= this.maxStaleCyclesBeforeCleanup
           ) {
-            console.warn(`[MatchmakingEventHandler] CLEANUP TRIGGERED at level ${lastStalemateLevel} after ${this.consecutiveNoMatchCycles} cycles`);
+            console.warn(`[MatchmakingEventHandler] CLEANUP TRIGGERED at level ${lastStalemateLevel} after ${this.consecutiveNoMatchCycles} cycles - likely end of day or single player remaining`);
+            
+            // Check if this is a last-player-standing scenario
+            const queueSnapshot = this.gameMatchingEngine.getDollarsAtLevel(lastStalemateLevel as BettingLevel);
+            const uniqueOwners = new Set(queueSnapshot.map(d => d.ownerId));
+            
+            if (uniqueOwners.size === 1 && queueSnapshot.length > 0) {
+              const lastOwner = Array.from(uniqueOwners)[0];
+              console.warn(`[MatchmakingEventHandler] Last player standing: ${lastOwner} with ${queueSnapshot.length} dollars at level ${lastStalemateLevel}. Auto-advancing to next level.`);
+              
+              // Auto-advance all dollars from the last player
+              for (const dollar of queueSnapshot) {
+                try {
+                  // Remove from current pool
+                  await this.gameMatchingEngine.removeFromPool(dollar.id, "MATCHED_FOR_GAME");
+                  
+                  // Advance to next level (simulate a win)
+                  const nextLevel = (lastStalemateLevel + 1) as BettingLevel;
+                  if (nextLevel <= 5) {
+                    const advanced = this.virtualDollarFactory.advancePlayerLevel(
+                      dollar.id,
+                      nextLevel,
+                      0 // No winnings for auto-advance
+                    );
+                    
+                    // Re-pool at next level
+                    await this.gameMatchingEngine.addToPool(advanced);
+                    console.log(`[MatchmakingEventHandler] Auto-advanced ${dollar.id} from level ${lastStalemateLevel} to ${nextLevel}`);
+                  } else {
+                    // Level 5 - they've won the jackpot by default
+                    console.log(`[MatchmakingEventHandler] ${dollar.id} reached jackpot by being last player standing`);
+                  }
+                } catch (error) {
+                  console.error(`[MatchmakingEventHandler] Failed to auto-advance ${dollar.id}:`, error);
+                }
+              }
+              
+              this.consecutiveNoMatchCycles = 0;
+              this.staleCycleStartLevel = null;
+              this.pendingMatchAttempt = false;
+              return;
+            }
+            
             this.cleanupStaleQueueState(lastStalemateLevel);
             return;
           }
@@ -402,9 +472,10 @@ export class MatchmakingEventHandler {
     }
   }
 
-  private cleanupStaleQueueState(level: number): void {
+  private async cleanupStaleQueueState(level: number): Promise<void> {
+    // First, try to clear any stale IN_GAME flags
     const requeuedIds = this.gameMatchingEngine.clearStaleInGameDollars(level as BettingLevel);
-    this.gameMatchingEngine.logGlobalAvailableForMatching();  // Debug post-cleanup
+    this.gameMatchingEngine.logGlobalAvailableForMatching();
 
     if (requeuedIds.length > 0) {
       console.warn(
@@ -412,17 +483,42 @@ export class MatchmakingEventHandler {
         `${this.consecutiveNoMatchCycles} idle cycles: ${requeuedIds.slice(0, 5).join(", ")}${requeuedIds.length > 5 ? "…" : ""}`
       );
     } else {
-      console.debug(`[MatchmakingEventHandler] Cleanup triggered at level ${level} but 0 stale dollars found to requeue`);
+      // No stale dollars found - check if we have a single-owner queue (last player standing)
+      const queueSnapshot = this.gameMatchingEngine.getDollarsAtLevel(level as BettingLevel);
+      const uniqueOwners = new Set(queueSnapshot.map(d => d.ownerId));
+      
+      if (uniqueOwners.size === 1 && queueSnapshot.length > 0) {
+        const lastOwner = Array.from(uniqueOwners)[0];
+        console.warn(
+          `[MatchmakingEventHandler] Single owner (${lastOwner}) remaining at level ${level} with ${queueSnapshot.length} dollars. ` +
+          `Eliminating as no matches possible (acceptable daily inaccuracy).`
+        );
+        
+        // Eliminate all dollars from the last player standing
+        for (const dollar of queueSnapshot) {
+          try {
+            this.virtualDollarFactory.eliminatePlayer(dollar.id, level as BettingLevel);
+            await this.gameMatchingEngine.removeFromPool(dollar.id, "ERROR");
+          } catch (error) {
+            console.error(`[MatchmakingEventHandler] Failed to eliminate last-standing dollar ${dollar.id}:`, error);
+          }
+        }
+        
+        console.log(`[MatchmakingEventHandler] Eliminated ${queueSnapshot.length} dollars from last player at level ${level}`);
+      } else {
+        console.debug(`[MatchmakingEventHandler] Cleanup triggered at level ${level} but 0 stale dollars found to requeue`);
+      }
     }
 
     this.consecutiveNoMatchCycles = 0;
     this.staleCycleStartLevel = null;
+    this.pendingMatchAttempt = false;
 
     // Back off before retrying so we wait for fresh inflow or game resolutions
-    if (!this.pendingMatchAttempt) {
+    setTimeout(() => {
       this.pendingMatchAttempt = true;
-      setTimeout(() => void this.attemptMatching(), this.stalemateRetryDelayMs);
-    }
+      void this.attemptMatching();
+    }, this.stalemateRetryDelayMs);
 
     void this.emitFifoQueueUpdated(level);
   }
