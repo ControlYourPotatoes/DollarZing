@@ -600,7 +600,7 @@ export class DatasetOrchestrator {
                 debugger: {
                   enabled: true,
                   includeData: debugEvents,
-                  maxTraces: debugEvents ? 20000 : 10000,
+                  maxTraces: debugEvents ? 2000 : 1000, // Reduced from 20000/10000 to prevent stack overflow
                   logLevel: debugEvents
                     ? "debug"
                     : this.orchestratorConfig.verbose
