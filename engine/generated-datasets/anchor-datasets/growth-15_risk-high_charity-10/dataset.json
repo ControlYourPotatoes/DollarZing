@@ -1,6 +1,6 @@
 {
   "success": true,
-  "simulationDurationMs": 3119.621932,
+  "simulationDurationMs": 4405.522616,
   "config": {
     "durationDays": 10,
     "initialPlayerCount": 500,
@@ -610,5 +610,5 @@
       }
     }
   },
-  "completedAt": "2025-10-01T13:23:10.586Z"
+  "completedAt": "2025-10-01T14:00:09.478Z"
 }
