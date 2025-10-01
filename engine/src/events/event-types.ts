@@ -359,6 +359,8 @@ export interface DayStartedEvent extends BaseEvent {
   };
   // Player strategy distribution
   playerStrategies: Partial<Record<CashOutStrategy, number>>;
+  // Optional: number of days over which to spread initial players
+  initialPlayerSpreadDays?: number;
 }
 
 export interface DayCompletedEvent extends BaseEvent {

@@ -323,3 +323,115 @@ Introduces clearStaleInGameDollars on the engine to drop orphaned “in game” 
 Adds a cleanupStaleQueueState helper in the handler that runs after too many consecutive stalemate cycles, logs the cleanup, resets counters, and schedules another matchmaking pass.
 Clears the stale-level tracking on day/frame boundaries to avoid false positives.
 This should stop the runaway loop and prevent availableForMatching from diving negative while keeping matchmaking alive.
+
+
+
+EXCELLENT PROGRESS! The snapshot is now being exported at the right time (after all 3 days), and it HAS data! But you're right - the structure looks weird:
+
+The issue is that:
+
+✅ Day 1 tracked 1,310 games at level 1
+❌ Day 2 shows 0 gamesPlayed but 310 wins (inconsistent!)
+❌ Day 3 is completely empty
+This suggests that handleGameCreated and handleGameResolved are being called on different days than expected. Let me check the logs to see what's happening:
+
+
+cd /workspaces/DollarZing/engine && grep "LevelTrackingHandler #1.*Game created" run.log | grep -oE "day [0-9]+" | sort | uniq -c
+
+cd /workspaces/DollarZing/engine && grep "LevelTrackingHandler #1.*Day.*has.*levels tracked" run.log
+Auto approved by rules cd, grep
+
+
+cd /workspaces/DollarZing/engine && grep "Event processing complete" run.log
+Auto approved by rules cd, grep
+
+FOUND IT!
+
+5,310 games created on day 1 ✅
+0 games created on day 2 ❌ (skipped!)
+5,535 games created on day 3 ✅
+And the export shows:
+
+Day 1 has 1 level tracked (level 1)
+Day 2 has 1 level tracked (level 1)
+Day 3 has 0 levels tracked (empty!)
+But we know games were created on days 1 and 3. This means day 2 is being skipped entirely in the game creation, and day 3's games aren't being tracked.
+
+The issue is that waitForEventProcessing() is timing out or returning too early. Let me check if there are timeout warnings:
+
+
+cd /workspaces/DollarZing/engine && grep "Event processing timeout\|Event processing complete" run.log
+
+cd /workspaces/DollarZing/engine && grep -A2 "Day 2 started" run.log | tail -10
+Auto approved by rules cd, grep, tail
+
+THERE'S THE PROBLEM!
+
+All 3 days are hitting the 5-second timeout in waitForEventProcessing(). The event processing is taking longer than 5 seconds, so the day loop gives up and moves on before events finish.
+
+But also notice: Day 2 and Day 3 start immediately (within milliseconds of each other at 20:09:59.991 and 20:10:06). This means day 1 timed out, then day 2 started and immediately timed out, then day 3 started.
+
+The real issue is that games are still being created/resolved from previous days when the next day starts. The event-driven architecture is fully async, so games from day 1 are still resolving when day 2 begins.
+
+The Proper Fix:
+Instead of a fixed timeout, we need to wait for the matchmaking to actually stop (no more pending matches). Let me add a better synchronization mechanism:
+
+day-processor.ts+12-6
+
+cd /workspaces/DollarZing/engine && npm run build
+Perfect! Now run it again with the improved synchronization:
+
+The changes:
+
+✅ 30-second timeout (up from 5 seconds) - gives more time for complex scenarios
+✅ Tracks both pool size AND active games - ensures both are stable
+✅ 5 consecutive stable polls (500ms total) - more confident that events finished
+✅ Better timeout logging - shows pool and active game counts
+This should allow each day to fully complete before moving to the next, fixing the "day 2 skipped" and "day 3 empty" issues.
+
+
+
+
+Checked background terminal output
+
+
+cd /workspaces/DollarZing && npm run -s build
+Done — I implemented Option A (spread initial players across the first N days) and validated the build.
+
+What I changed
+
+game-engine-simulator.ts
+Added optional config field: initialPlayerSpreadDays?: number
+event-types.ts
+Added optional DayStartedEvent property: initialPlayerSpreadDays?: number
+player-manager.ts
+Added fields:
+initialPlayerSpreadDays (default 14)
+initialPlayersSeededSoFar
+Updated handleSimulationStarted to read initialPlayerSpreadDays from the SIMULATION_STARTED event/config and reset pending/seeded counters
+Replaced the old "seed all initial players on day 1" behavior with a spread-aware seeding block in handleDayStarted:
+It now seeds roughly floor(pendingInitialPlayers / spreadDays) per day, and puts the remainder on the final spread day.
+Ensures at least 1 player is created on early days if basePerDay is 0 (to avoid creating zero players on a small initial count).
+Safely decrements pendingInitialPlayers and tracks seeded count.
+Added logging-style console.error warnings on failures already used in the file; preserved existing defensive guards.
+Build verification
+
+Ran project build (root npm run build). Build completed successfully (vite build produced dist artifacts).
+Notes, assumptions, and edge cases
+
+Assumptions:
+The simulator passes initialPlayerSpreadDays either in the top-level config (config.initialPlayerSpreadDays) or directly on the SIMULATION_STARTED event (event.initialPlayerSpreadDays). handleSimulationStarted checks both.
+The existing event-driven flow remains: GameEngineSimulator emits SIMULATION_STARTED, DayProcessor emits DAY_STARTED, PlayerManager responds and creates NEW_RUN_CREATED events which the DayProcessor pools.
+Edge cases handled:
+If basePerDay is 0 (small initial count, large spreadDays), we still create at least one player per day until pending players are exhausted, to avoid a zero-creation stall.
+If the spread window passes (dayIndex > spreadDays) and some initial players remain (shouldn't normally happen), remaining players are created immediately.
+Seeding is skipped if simulationTerminated is true.
+Potential follow-ups:
+Expose initialPlayerSpreadDays via CLI flags or profiles so you can control it when running simulations.
+Add tests for the PlayerManager seeding behavior (happy path + small initial counts + large spreadDays).
+Add an explicit log (info-level) for how many initial players were seeded each day for easier simulation debugging.
+If you want, I can:
+
+Run a quick 3-day simulation run (with events enabled) and show the Day 1/2/3 seed counts and level-tracking outputs.
+Add a CLI option to control initialPlayerSpreadDays and wire it into the orchestrator profiles.
+Add tests covering the new seeding logic.

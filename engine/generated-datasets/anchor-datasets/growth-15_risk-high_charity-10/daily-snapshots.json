@@ -3,89 +3,89 @@
     "day": 1,
     "date": "2025-01-01T00:00:00.000Z",
     "totals": {
-      "revenue": 2928.4,
-      "platformFees": 790,
-      "charity": 320.76,
-      "playerPayouts": 1817.64,
-      "gamesPlayed": 1975,
-      "activePlayers": 155,
-      "totalPlayers": 525,
-      "newPlayers": 25
+      "revenue": 367.2,
+      "platformFees": 104.4,
+      "charity": 39.42,
+      "playerPayouts": 223.38,
+      "gamesPlayed": 261,
+      "activePlayers": 20,
+      "totalPlayers": 69,
+      "newPlayers": 34
     },
     "pool": {
-      "depositedToday": 2625,
-      "consumedToday": 3950,
-      "outstanding": 5
+      "depositedToday": 345,
+      "consumedToday": 522,
+      "outstanding": 2
     },
     "cashouts": {
-      "countToday": 640,
-      "amountToday": 2138.4,
-      "cumulativeAmount": 2138.4,
-      "cumulativeCount": 640
+      "countToday": 75,
+      "amountToday": 262.8,
+      "cumulativeAmount": 262.8,
+      "cumulativeCount": 75
     },
     "levels": [
       {
         "level": 1,
-        "gamesPlayed": 1310,
-        "wins": 1310,
+        "gamesPlayed": 170,
+        "wins": 170,
         "cashouts": 0,
-        "progressions": 1310,
-        "winnings": 2357.999999999995,
-        "losses": 1310
+        "progressions": 170,
+        "winnings": 306.00000000000097,
+        "losses": 170
       },
       {
         "level": 2,
-        "gamesPlayed": 444,
-        "wins": 444,
+        "gamesPlayed": 63,
+        "wins": 63,
         "cashouts": 0,
-        "progressions": 444,
-        "winnings": 1598.39999999999,
-        "losses": 444
+        "progressions": 63,
+        "winnings": 226.79999999999976,
+        "losses": 63
       },
       {
         "level": 3,
-        "gamesPlayed": 149,
-        "wins": 149,
+        "gamesPlayed": 20,
+        "wins": 20,
         "cashouts": 0,
-        "progressions": 149,
-        "winnings": 1072.800000000003,
-        "losses": 149
+        "progressions": 20,
+        "winnings": 144,
+        "losses": 20
       },
       {
         "level": 4,
-        "gamesPlayed": 51,
-        "wins": 51,
+        "gamesPlayed": 6,
+        "wins": 6,
         "cashouts": 0,
-        "progressions": 51,
-        "winnings": 734.3999999999993,
-        "losses": 51
+        "progressions": 6,
+        "winnings": 86.4,
+        "losses": 6
       },
       {
         "level": 5,
-        "gamesPlayed": 15,
-        "wins": 15,
+        "gamesPlayed": 2,
+        "wins": 2,
         "cashouts": 0,
-        "progressions": 15,
-        "winnings": 432.0000000000001,
-        "losses": 15
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
       },
       {
         "level": 6,
-        "gamesPlayed": 5,
-        "wins": 5,
+        "gamesPlayed": 0,
+        "wins": 0,
         "cashouts": 0,
-        "progressions": 5,
-        "winnings": 288,
-        "losses": 5
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
       },
       {
         "level": 7,
-        "gamesPlayed": 1,
-        "wins": 1,
+        "gamesPlayed": 0,
+        "wins": 0,
         "cashouts": 0,
-        "progressions": 1,
-        "winnings": 115.2,
-        "losses": 1
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
       },
       {
         "level": 8,
@@ -116,18 +116,18 @@
       }
     ],
     "lifecycle": {
-      "runsStarted": 2625,
-      "runsCompleted": 640,
-      "runsCashedOut": 640,
-      "runsFailed": 1975,
+      "runsStarted": 345,
+      "runsCompleted": 75,
+      "runsCashedOut": 75,
+      "runsFailed": 261,
       "levelDistribution": [
-        1310,
-        444,
-        149,
-        51,
-        15,
-        5,
-        1,
+        170,
+        63,
+        20,
+        6,
+        2,
+        0,
+        0,
         0,
         0,
         0
@@ -138,15 +138,15 @@
         "id": "platform",
         "label": "Platform Fees",
         "category": "platform",
-        "amount": 790,
-        "cumulativeAmount": 790,
-        "percentageOfTotal": 27,
+        "amount": 104.4,
+        "cumulativeAmount": 104.4,
+        "percentageOfTotal": 28.4,
         "layers": [
           {
             "id": "fees",
             "label": "Click Fees",
-            "amount": 790,
-            "percentage": 27
+            "amount": 104.4,
+            "percentage": 28.4
           }
         ]
       },
@@ -154,15 +154,15 @@
         "id": "charity",
         "label": "Charity",
         "category": "charity",
-        "amount": 320.76,
-        "cumulativeAmount": 320.76,
-        "percentageOfTotal": 11,
+        "amount": 39.42,
+        "cumulativeAmount": 39.42,
+        "percentageOfTotal": 10.7,
         "layers": [
           {
             "id": "donations",
             "label": "Donations",
-            "amount": 320.76,
-            "percentage": 11
+            "amount": 39.42,
+            "percentage": 10.7
           }
         ]
       },
@@ -170,15 +170,15 @@
         "id": "players",
         "label": "Player Payouts",
         "category": "players",
-        "amount": 1817.64,
-        "cumulativeAmount": 1817.64,
-        "percentageOfTotal": 62.1,
+        "amount": 223.38,
+        "cumulativeAmount": 223.38,
+        "percentageOfTotal": 60.8,
         "layers": [
           {
             "id": "winnings",
             "label": "Winnings",
-            "amount": 1817.64,
-            "percentage": 62.1
+            "amount": 223.38,
+            "percentage": 60.8
           }
         ]
       }
@@ -188,36 +188,36 @@
         "id": "day-1",
         "label": "Day 1",
         "day": 1,
-        "cumulativePlatformFees": 790,
-        "cumulativeCharity": 320.76,
-        "cumulativePlayerPayouts": 1817.64,
-        "cumulativeRevenue": 2928.4,
-        "dailyPlatformFees": 790,
-        "dailyCharity": 320.76,
-        "dailyPlayerPayouts": 1817.64,
-        "dailyRevenue": 2928.4
+        "cumulativePlatformFees": 104.4,
+        "cumulativeCharity": 39.42,
+        "cumulativePlayerPayouts": 223.38,
+        "cumulativeRevenue": 367.2,
+        "dailyPlatformFees": 104.4,
+        "dailyCharity": 39.42,
+        "dailyPlayerPayouts": 223.38,
+        "dailyRevenue": 367.2
       }
     ],
     "charts": {
       "platformFees": {
         "day": 1,
-        "dailyValue": 790,
-        "cumulativeValue": 790
+        "dailyValue": 104.4,
+        "cumulativeValue": 104.4
       },
       "charity": {
         "day": 1,
-        "dailyValue": 320.76,
-        "cumulativeValue": 320.76
+        "dailyValue": 39.42,
+        "cumulativeValue": 39.42
       },
       "playerPayouts": {
         "day": 1,
-        "dailyValue": 1817.64,
-        "cumulativeValue": 1817.64
+        "dailyValue": 223.38,
+        "cumulativeValue": 223.38
       },
       "totalRevenue": {
         "day": 1,
-        "dailyValue": 2928.4,
-        "cumulativeValue": 2928.4
+        "dailyValue": 367.2,
+        "cumulativeValue": 367.2
       }
     }
   },
@@ -225,44 +225,44 @@
     "day": 2,
     "date": "2025-01-02T00:00:00.000Z",
     "totals": {
-      "revenue": 152.6,
-      "platformFees": 39.2,
-      "charity": 17.01,
-      "playerPayouts": 96.39,
-      "gamesPlayed": 98,
-      "activePlayers": 163,
-      "totalPlayers": 551,
-      "newPlayers": 26
+      "revenue": 174.2,
+      "platformFees": 50,
+      "charity": 18.63,
+      "playerPayouts": 105.57,
+      "gamesPlayed": 125,
+      "activePlayers": 30,
+      "totalPlayers": 104,
+      "newPlayers": 35
     },
     "pool": {
-      "depositedToday": 130,
-      "consumedToday": 196,
-      "outstanding": 5
+      "depositedToday": 175,
+      "consumedToday": 250,
+      "outstanding": 1
     },
     "cashouts": {
-      "countToday": 32,
-      "amountToday": 113.4,
-      "cumulativeAmount": 2251.8,
-      "cumulativeCount": 672
+      "countToday": 44,
+      "amountToday": 124.2,
+      "cumulativeAmount": 387,
+      "cumulativeCount": 119
     },
     "levels": [
       {
         "level": 1,
-        "gamesPlayed": 65,
-        "wins": 65,
+        "gamesPlayed": 85,
+        "wins": 85,
         "cashouts": 0,
-        "progressions": 65,
-        "winnings": 116.99999999999987,
-        "losses": 65
+        "progressions": 85,
+        "winnings": 153,
+        "losses": 85
       },
       {
         "level": 2,
-        "gamesPlayed": 21,
-        "wins": 21,
+        "gamesPlayed": 26,
+        "wins": 26,
         "cashouts": 0,
-        "progressions": 21,
-        "winnings": 75.6,
-        "losses": 21
+        "progressions": 26,
+        "winnings": 93.59999999999997,
+        "losses": 26
       },
       {
         "level": 3,
@@ -275,234 +275,12 @@
       },
       {
         "level": 4,
-        "gamesPlayed": 2,
-        "wins": 2,
+        "gamesPlayed": 3,
+        "wins": 3,
         "cashouts": 0,
-        "progressions": 2,
-        "winnings": 28.8,
-        "losses": 2
-      },
-      {
-        "level": 5,
-        "gamesPlayed": 1,
-        "wins": 1,
-        "cashouts": 0,
-        "progressions": 1,
-        "winnings": 28.8,
-        "losses": 1
-      },
-      {
-        "level": 6,
-        "gamesPlayed": 0,
-        "wins": 0,
-        "cashouts": 0,
-        "progressions": 0,
-        "winnings": 0,
-        "losses": 0
-      },
-      {
-        "level": 7,
-        "gamesPlayed": 0,
-        "wins": 0,
-        "cashouts": 0,
-        "progressions": 0,
-        "winnings": 0,
-        "losses": 0
-      },
-      {
-        "level": 8,
-        "gamesPlayed": 0,
-        "wins": 0,
-        "cashouts": 0,
-        "progressions": 0,
-        "winnings": 0,
-        "losses": 0
-      },
-      {
-        "level": 9,
-        "gamesPlayed": 0,
-        "wins": 0,
-        "cashouts": 0,
-        "progressions": 0,
-        "winnings": 0,
-        "losses": 0
-      },
-      {
-        "level": 10,
-        "gamesPlayed": 0,
-        "wins": 0,
-        "cashouts": 0,
-        "progressions": 0,
-        "winnings": 0,
-        "losses": 0
-      }
-    ],
-    "lifecycle": {
-      "runsStarted": 130,
-      "runsCompleted": 32,
-      "runsCashedOut": 32,
-      "runsFailed": 98,
-      "levelDistribution": [
-        65,
-        21,
-        9,
-        2,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0
-      ]
-    },
-    "workflowNodes": [
-      {
-        "id": "platform",
-        "label": "Platform Fees",
-        "category": "platform",
-        "amount": 39.2,
-        "cumulativeAmount": 829.2,
-        "percentageOfTotal": 25.7,
-        "layers": [
-          {
-            "id": "fees",
-            "label": "Click Fees",
-            "amount": 39.2,
-            "percentage": 25.7
-          }
-        ]
-      },
-      {
-        "id": "charity",
-        "label": "Charity",
-        "category": "charity",
-        "amount": 17.01,
-        "cumulativeAmount": 337.77,
-        "percentageOfTotal": 11.1,
-        "layers": [
-          {
-            "id": "donations",
-            "label": "Donations",
-            "amount": 17.01,
-            "percentage": 11.1
-          }
-        ]
-      },
-      {
-        "id": "players",
-        "label": "Player Payouts",
-        "category": "players",
-        "amount": 96.39,
-        "cumulativeAmount": 1914.03,
-        "percentageOfTotal": 63.2,
-        "layers": [
-          {
-            "id": "winnings",
-            "label": "Winnings",
-            "amount": 96.39,
-            "percentage": 63.2
-          }
-        ]
-      }
-    ],
-    "timelineTicks": [
-      {
-        "id": "day-2",
-        "label": "Day 2",
-        "day": 2,
-        "cumulativePlatformFees": 829.2,
-        "cumulativeCharity": 337.77,
-        "cumulativePlayerPayouts": 1914.03,
-        "cumulativeRevenue": 3081,
-        "dailyPlatformFees": 39.2,
-        "dailyCharity": 17.01,
-        "dailyPlayerPayouts": 96.39,
-        "dailyRevenue": 152.6
-      }
-    ],
-    "charts": {
-      "platformFees": {
-        "day": 2,
-        "dailyValue": 39.2,
-        "cumulativeValue": 829.2
-      },
-      "charity": {
-        "day": 2,
-        "dailyValue": 17.01,
-        "cumulativeValue": 337.77
-      },
-      "playerPayouts": {
-        "day": 2,
-        "dailyValue": 96.39,
-        "cumulativeValue": 1914.03
-      },
-      "totalRevenue": {
-        "day": 2,
-        "dailyValue": 152.6,
-        "cumulativeValue": 3081
-      }
-    }
-  },
-  {
-    "day": 3,
-    "date": "2025-01-03T00:00:00.000Z",
-    "totals": {
-      "revenue": 207.2,
-      "platformFees": 38,
-      "charity": 25.38,
-      "playerPayouts": 143.82,
-      "gamesPlayed": 95,
-      "activePlayers": 171,
-      "totalPlayers": 579,
-      "newPlayers": 28
-    },
-    "pool": {
-      "depositedToday": 140,
-      "consumedToday": 190,
-      "outstanding": 3
-    },
-    "cashouts": {
-      "countToday": 45,
-      "amountToday": 169.2,
-      "cumulativeAmount": 2421,
-      "cumulativeCount": 717
-    },
-    "levels": [
-      {
-        "level": 1,
-        "gamesPlayed": 70,
-        "wins": 70,
-        "cashouts": 0,
-        "progressions": 70,
-        "winnings": 125.99999999999986,
-        "losses": 70
-      },
-      {
-        "level": 2,
-        "gamesPlayed": 16,
-        "wins": 16,
-        "cashouts": 0,
-        "progressions": 16,
-        "winnings": 57.600000000000016,
-        "losses": 16
-      },
-      {
-        "level": 3,
-        "gamesPlayed": 5,
-        "wins": 5,
-        "cashouts": 0,
-        "progressions": 5,
-        "winnings": 36,
-        "losses": 5
-      },
-      {
-        "level": 4,
-        "gamesPlayed": 2,
-        "wins": 2,
-        "cashouts": 0,
-        "progressions": 2,
-        "winnings": 28.8,
-        "losses": 2
+        "progressions": 3,
+        "winnings": 43.2,
+        "losses": 3
       },
       {
         "level": 5,
@@ -560,15 +338,15 @@
       }
     ],
     "lifecycle": {
-      "runsStarted": 140,
-      "runsCompleted": 45,
-      "runsCashedOut": 45,
-      "runsFailed": 95,
+      "runsStarted": 175,
+      "runsCompleted": 44,
+      "runsCashedOut": 44,
+      "runsFailed": 125,
       "levelDistribution": [
-        70,
-        16,
-        5,
-        2,
+        85,
+        26,
+        9,
+        3,
         1,
         1,
         0,
@@ -582,15 +360,15 @@
         "id": "platform",
         "label": "Platform Fees",
         "category": "platform",
-        "amount": 38,
-        "cumulativeAmount": 867.2,
-        "percentageOfTotal": 18.3,
+        "amount": 50,
+        "cumulativeAmount": 154.4,
+        "percentageOfTotal": 28.7,
         "layers": [
           {
             "id": "fees",
             "label": "Click Fees",
-            "amount": 38,
-            "percentage": 18.3
+            "amount": 50,
+            "percentage": 28.7
           }
         ]
       },
@@ -598,15 +376,15 @@
         "id": "charity",
         "label": "Charity",
         "category": "charity",
-        "amount": 25.38,
-        "cumulativeAmount": 363.15,
-        "percentageOfTotal": 12.2,
+        "amount": 18.63,
+        "cumulativeAmount": 58.05,
+        "percentageOfTotal": 10.7,
         "layers": [
           {
             "id": "donations",
             "label": "Donations",
-            "amount": 25.38,
-            "percentage": 12.2
+            "amount": 18.63,
+            "percentage": 10.7
           }
         ]
       },
@@ -614,15 +392,237 @@
         "id": "players",
         "label": "Player Payouts",
         "category": "players",
-        "amount": 143.82,
-        "cumulativeAmount": 2057.85,
-        "percentageOfTotal": 69.4,
+        "amount": 105.57,
+        "cumulativeAmount": 328.95,
+        "percentageOfTotal": 60.6,
         "layers": [
           {
             "id": "winnings",
             "label": "Winnings",
-            "amount": 143.82,
-            "percentage": 69.4
+            "amount": 105.57,
+            "percentage": 60.6
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-2",
+        "label": "Day 2",
+        "day": 2,
+        "cumulativePlatformFees": 154.4,
+        "cumulativeCharity": 58.05,
+        "cumulativePlayerPayouts": 328.95,
+        "cumulativeRevenue": 541.4,
+        "dailyPlatformFees": 50,
+        "dailyCharity": 18.63,
+        "dailyPlayerPayouts": 105.57,
+        "dailyRevenue": 174.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 2,
+        "dailyValue": 50,
+        "cumulativeValue": 154.4
+      },
+      "charity": {
+        "day": 2,
+        "dailyValue": 18.63,
+        "cumulativeValue": 58.05
+      },
+      "playerPayouts": {
+        "day": 2,
+        "dailyValue": 105.57,
+        "cumulativeValue": 328.95
+      },
+      "totalRevenue": {
+        "day": 2,
+        "dailyValue": 174.2,
+        "cumulativeValue": 541.4
+      }
+    }
+  },
+  {
+    "day": 3,
+    "date": "2025-01-03T00:00:00.000Z",
+    "totals": {
+      "revenue": 187,
+      "platformFees": 52,
+      "charity": 20.25,
+      "playerPayouts": 114.75,
+      "gamesPlayed": 130,
+      "activePlayers": 41,
+      "totalPlayers": 141,
+      "newPlayers": 37
+    },
+    "pool": {
+      "depositedToday": 185,
+      "consumedToday": 260,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 46,
+      "amountToday": 135,
+      "cumulativeAmount": 522,
+      "cumulativeCount": 165
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 90,
+        "wins": 90,
+        "cashouts": 0,
+        "progressions": 90,
+        "winnings": 162.00000000000006,
+        "losses": 90
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 30,
+        "wins": 30,
+        "cashouts": 0,
+        "progressions": 30,
+        "winnings": 107.99999999999994,
+        "losses": 30
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 8,
+        "wins": 8,
+        "cashouts": 0,
+        "progressions": 8,
+        "winnings": 57.60000000000001,
+        "losses": 8
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 28.8,
+        "losses": 2
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 185,
+      "runsCompleted": 46,
+      "runsCashedOut": 46,
+      "runsFailed": 130,
+      "levelDistribution": [
+        90,
+        30,
+        8,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 52,
+        "cumulativeAmount": 206.4,
+        "percentageOfTotal": 27.8,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 52,
+            "percentage": 27.8
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 20.25,
+        "cumulativeAmount": 78.3,
+        "percentageOfTotal": 10.8,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 20.25,
+            "percentage": 10.8
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 114.75,
+        "cumulativeAmount": 443.7,
+        "percentageOfTotal": 61.4,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 114.75,
+            "percentage": 61.4
           }
         ]
       }
@@ -632,36 +632,6030 @@
         "id": "day-3",
         "label": "Day 3",
         "day": 3,
-        "cumulativePlatformFees": 867.2,
-        "cumulativeCharity": 363.15,
-        "cumulativePlayerPayouts": 2057.85,
-        "cumulativeRevenue": 3288.2,
-        "dailyPlatformFees": 38,
-        "dailyCharity": 25.38,
-        "dailyPlayerPayouts": 143.82,
-        "dailyRevenue": 207.2
+        "cumulativePlatformFees": 206.4,
+        "cumulativeCharity": 78.3,
+        "cumulativePlayerPayouts": 443.7,
+        "cumulativeRevenue": 728.4,
+        "dailyPlatformFees": 52,
+        "dailyCharity": 20.25,
+        "dailyPlayerPayouts": 114.75,
+        "dailyRevenue": 187
       }
     ],
     "charts": {
       "platformFees": {
         "day": 3,
-        "dailyValue": 38,
-        "cumulativeValue": 867.2
+        "dailyValue": 52,
+        "cumulativeValue": 206.4
       },
       "charity": {
         "day": 3,
-        "dailyValue": 25.38,
-        "cumulativeValue": 363.15
+        "dailyValue": 20.25,
+        "cumulativeValue": 78.3
       },
       "playerPayouts": {
         "day": 3,
-        "dailyValue": 143.82,
-        "cumulativeValue": 2057.85
+        "dailyValue": 114.75,
+        "cumulativeValue": 443.7
       },
       "totalRevenue": {
         "day": 3,
-        "dailyValue": 207.2,
-        "cumulativeValue": 3288.2
+        "dailyValue": 187,
+        "cumulativeValue": 728.4
+      }
+    }
+  },
+  {
+    "day": 4,
+    "date": "2025-01-04T00:00:00.000Z",
+    "totals": {
+      "revenue": 195.4,
+      "platformFees": 56.8,
+      "charity": 20.79,
+      "playerPayouts": 117.81,
+      "gamesPlayed": 142,
+      "activePlayers": 53,
+      "totalPlayers": 179,
+      "newPlayers": 38
+    },
+    "pool": {
+      "depositedToday": 190,
+      "consumedToday": 284,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 45,
+      "amountToday": 138.6,
+      "cumulativeAmount": 660.6,
+      "cumulativeCount": 210
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 95,
+        "wins": 95,
+        "cashouts": 0,
+        "progressions": 95,
+        "winnings": 171.0000000000001,
+        "losses": 95
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 31,
+        "wins": 31,
+        "cashouts": 0,
+        "progressions": 31,
+        "winnings": 111.59999999999994,
+        "losses": 31
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 11,
+        "wins": 11,
+        "cashouts": 0,
+        "progressions": 11,
+        "winnings": 79.20000000000002,
+        "losses": 11
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 4,
+        "wins": 4,
+        "cashouts": 0,
+        "progressions": 4,
+        "winnings": 57.6,
+        "losses": 4
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 190,
+      "runsCompleted": 45,
+      "runsCashedOut": 45,
+      "runsFailed": 142,
+      "levelDistribution": [
+        95,
+        31,
+        11,
+        4,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 56.8,
+        "cumulativeAmount": 263.2,
+        "percentageOfTotal": 29.1,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 56.8,
+            "percentage": 29.1
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 20.79,
+        "cumulativeAmount": 99.09,
+        "percentageOfTotal": 10.6,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 20.79,
+            "percentage": 10.6
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 117.81,
+        "cumulativeAmount": 561.51,
+        "percentageOfTotal": 60.3,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 117.81,
+            "percentage": 60.3
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-4",
+        "label": "Day 4",
+        "day": 4,
+        "cumulativePlatformFees": 263.2,
+        "cumulativeCharity": 99.09,
+        "cumulativePlayerPayouts": 561.51,
+        "cumulativeRevenue": 923.8,
+        "dailyPlatformFees": 56.8,
+        "dailyCharity": 20.79,
+        "dailyPlayerPayouts": 117.81,
+        "dailyRevenue": 195.4
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 4,
+        "dailyValue": 56.8,
+        "cumulativeValue": 263.2
+      },
+      "charity": {
+        "day": 4,
+        "dailyValue": 20.79,
+        "cumulativeValue": 99.09
+      },
+      "playerPayouts": {
+        "day": 4,
+        "dailyValue": 117.81,
+        "cumulativeValue": 561.51
+      },
+      "totalRevenue": {
+        "day": 4,
+        "dailyValue": 195.4,
+        "cumulativeValue": 923.8
+      }
+    }
+  },
+  {
+    "day": 5,
+    "date": "2025-01-05T00:00:00.000Z",
+    "totals": {
+      "revenue": 261,
+      "platformFees": 57.6,
+      "charity": 30.51,
+      "playerPayouts": 172.89,
+      "gamesPlayed": 144,
+      "activePlayers": 64,
+      "totalPlayers": 218,
+      "newPlayers": 39
+    },
+    "pool": {
+      "depositedToday": 195,
+      "consumedToday": 288,
+      "outstanding": 3
+    },
+    "cashouts": {
+      "countToday": 46,
+      "amountToday": 203.4,
+      "cumulativeAmount": 864,
+      "cumulativeCount": 256
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 95,
+        "wins": 95,
+        "cashouts": 0,
+        "progressions": 95,
+        "winnings": 171.0000000000001,
+        "losses": 95
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 34,
+        "wins": 34,
+        "cashouts": 0,
+        "progressions": 34,
+        "winnings": 122.39999999999992,
+        "losses": 34
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 9,
+        "wins": 9,
+        "cashouts": 0,
+        "progressions": 9,
+        "winnings": 64.80000000000001,
+        "losses": 9
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 4,
+        "wins": 4,
+        "cashouts": 0,
+        "progressions": 4,
+        "winnings": 57.6,
+        "losses": 4
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 195,
+      "runsCompleted": 46,
+      "runsCashedOut": 46,
+      "runsFailed": 144,
+      "levelDistribution": [
+        95,
+        34,
+        9,
+        4,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 57.6,
+        "cumulativeAmount": 320.8,
+        "percentageOfTotal": 22.1,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 57.6,
+            "percentage": 22.1
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 30.51,
+        "cumulativeAmount": 129.6,
+        "percentageOfTotal": 11.7,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 30.51,
+            "percentage": 11.7
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 172.89,
+        "cumulativeAmount": 734.4,
+        "percentageOfTotal": 66.2,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 172.89,
+            "percentage": 66.2
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-5",
+        "label": "Day 5",
+        "day": 5,
+        "cumulativePlatformFees": 320.8,
+        "cumulativeCharity": 129.6,
+        "cumulativePlayerPayouts": 734.4,
+        "cumulativeRevenue": 1184.8,
+        "dailyPlatformFees": 57.6,
+        "dailyCharity": 30.51,
+        "dailyPlayerPayouts": 172.89,
+        "dailyRevenue": 261
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 5,
+        "dailyValue": 57.6,
+        "cumulativeValue": 320.8
+      },
+      "charity": {
+        "day": 5,
+        "dailyValue": 30.51,
+        "cumulativeValue": 129.6
+      },
+      "playerPayouts": {
+        "day": 5,
+        "dailyValue": 172.89,
+        "cumulativeValue": 734.4
+      },
+      "totalRevenue": {
+        "day": 5,
+        "dailyValue": 261,
+        "cumulativeValue": 1184.8
+      }
+    }
+  },
+  {
+    "day": 6,
+    "date": "2025-01-06T00:00:00.000Z",
+    "totals": {
+      "revenue": 242.2,
+      "platformFees": 64,
+      "charity": 26.73,
+      "playerPayouts": 151.47,
+      "gamesPlayed": 160,
+      "activePlayers": 76,
+      "totalPlayers": 258,
+      "newPlayers": 40
+    },
+    "pool": {
+      "depositedToday": 200,
+      "consumedToday": 320,
+      "outstanding": 4
+    },
+    "cashouts": {
+      "countToday": 39,
+      "amountToday": 178.2,
+      "cumulativeAmount": 1042.2,
+      "cumulativeCount": 295
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 100,
+        "wins": 100,
+        "cashouts": 0,
+        "progressions": 100,
+        "winnings": 180.00000000000017,
+        "losses": 100
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 37,
+        "wins": 37,
+        "cashouts": 0,
+        "progressions": 37,
+        "winnings": 133.1999999999999,
+        "losses": 37
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 15,
+        "wins": 15,
+        "cashouts": 0,
+        "progressions": 15,
+        "winnings": 108.00000000000003,
+        "losses": 15
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 72,
+        "losses": 5
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 200,
+      "runsCompleted": 39,
+      "runsCashedOut": 39,
+      "runsFailed": 160,
+      "levelDistribution": [
+        100,
+        37,
+        15,
+        5,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 64,
+        "cumulativeAmount": 384.8,
+        "percentageOfTotal": 26.4,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 64,
+            "percentage": 26.4
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 26.73,
+        "cumulativeAmount": 156.33,
+        "percentageOfTotal": 11,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 26.73,
+            "percentage": 11
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 151.47,
+        "cumulativeAmount": 885.87,
+        "percentageOfTotal": 62.5,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 151.47,
+            "percentage": 62.5
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-6",
+        "label": "Day 6",
+        "day": 6,
+        "cumulativePlatformFees": 384.8,
+        "cumulativeCharity": 156.33,
+        "cumulativePlayerPayouts": 885.87,
+        "cumulativeRevenue": 1427,
+        "dailyPlatformFees": 64,
+        "dailyCharity": 26.73,
+        "dailyPlayerPayouts": 151.47,
+        "dailyRevenue": 242.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 6,
+        "dailyValue": 64,
+        "cumulativeValue": 384.8
+      },
+      "charity": {
+        "day": 6,
+        "dailyValue": 26.73,
+        "cumulativeValue": 156.33
+      },
+      "playerPayouts": {
+        "day": 6,
+        "dailyValue": 151.47,
+        "cumulativeValue": 885.87
+      },
+      "totalRevenue": {
+        "day": 6,
+        "dailyValue": 242.2,
+        "cumulativeValue": 1427
+      }
+    }
+  },
+  {
+    "day": 7,
+    "date": "2025-01-07T00:00:00.000Z",
+    "totals": {
+      "revenue": 236,
+      "platformFees": 59.6,
+      "charity": 26.46,
+      "playerPayouts": 149.94,
+      "gamesPlayed": 149,
+      "activePlayers": 89,
+      "totalPlayers": 300,
+      "newPlayers": 42
+    },
+    "pool": {
+      "depositedToday": 210,
+      "consumedToday": 298,
+      "outstanding": 4
+    },
+    "cashouts": {
+      "countToday": 59,
+      "amountToday": 176.4,
+      "cumulativeAmount": 1218.6,
+      "cumulativeCount": 354
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 105,
+        "wins": 105,
+        "cashouts": 0,
+        "progressions": 105,
+        "winnings": 189.00000000000023,
+        "losses": 105
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 30,
+        "wins": 30,
+        "cashouts": 0,
+        "progressions": 30,
+        "winnings": 107.99999999999994,
+        "losses": 30
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 11,
+        "wins": 11,
+        "cashouts": 0,
+        "progressions": 11,
+        "winnings": 79.20000000000002,
+        "losses": 11
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 28.8,
+        "losses": 2
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 210,
+      "runsCompleted": 59,
+      "runsCashedOut": 59,
+      "runsFailed": 149,
+      "levelDistribution": [
+        105,
+        30,
+        11,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 59.6,
+        "cumulativeAmount": 444.4,
+        "percentageOfTotal": 25.3,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 59.6,
+            "percentage": 25.3
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 26.46,
+        "cumulativeAmount": 182.79,
+        "percentageOfTotal": 11.2,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 26.46,
+            "percentage": 11.2
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 149.94,
+        "cumulativeAmount": 1035.81,
+        "percentageOfTotal": 63.5,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 149.94,
+            "percentage": 63.5
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-7",
+        "label": "Day 7",
+        "day": 7,
+        "cumulativePlatformFees": 444.4,
+        "cumulativeCharity": 182.79,
+        "cumulativePlayerPayouts": 1035.81,
+        "cumulativeRevenue": 1663,
+        "dailyPlatformFees": 59.6,
+        "dailyCharity": 26.46,
+        "dailyPlayerPayouts": 149.94,
+        "dailyRevenue": 236
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 7,
+        "dailyValue": 59.6,
+        "cumulativeValue": 444.4
+      },
+      "charity": {
+        "day": 7,
+        "dailyValue": 26.46,
+        "cumulativeValue": 182.79
+      },
+      "playerPayouts": {
+        "day": 7,
+        "dailyValue": 149.94,
+        "cumulativeValue": 1035.81
+      },
+      "totalRevenue": {
+        "day": 7,
+        "dailyValue": 236,
+        "cumulativeValue": 1663
+      }
+    }
+  },
+  {
+    "day": 8,
+    "date": "2025-01-08T00:00:00.000Z",
+    "totals": {
+      "revenue": 253.2,
+      "platformFees": 62.4,
+      "charity": 28.62,
+      "playerPayouts": 162.18,
+      "gamesPlayed": 156,
+      "activePlayers": 101,
+      "totalPlayers": 343,
+      "newPlayers": 43
+    },
+    "pool": {
+      "depositedToday": 215,
+      "consumedToday": 312,
+      "outstanding": 2
+    },
+    "cashouts": {
+      "countToday": 49,
+      "amountToday": 190.8,
+      "cumulativeAmount": 1409.4,
+      "cumulativeCount": 403
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 105,
+        "wins": 105,
+        "cashouts": 0,
+        "progressions": 105,
+        "winnings": 189.00000000000023,
+        "losses": 105
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 34,
+        "wins": 34,
+        "cashouts": 0,
+        "progressions": 34,
+        "winnings": 122.39999999999992,
+        "losses": 34
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 12,
+        "wins": 12,
+        "cashouts": 0,
+        "progressions": 12,
+        "winnings": 86.40000000000002,
+        "losses": 12
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 3,
+        "wins": 3,
+        "cashouts": 0,
+        "progressions": 3,
+        "winnings": 43.2,
+        "losses": 3
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 215,
+      "runsCompleted": 49,
+      "runsCashedOut": 49,
+      "runsFailed": 156,
+      "levelDistribution": [
+        105,
+        34,
+        12,
+        3,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 62.4,
+        "cumulativeAmount": 506.8,
+        "percentageOfTotal": 24.6,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 62.4,
+            "percentage": 24.6
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 28.62,
+        "cumulativeAmount": 211.41,
+        "percentageOfTotal": 11.3,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 28.62,
+            "percentage": 11.3
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 162.18,
+        "cumulativeAmount": 1197.99,
+        "percentageOfTotal": 64.1,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 162.18,
+            "percentage": 64.1
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-8",
+        "label": "Day 8",
+        "day": 8,
+        "cumulativePlatformFees": 506.8,
+        "cumulativeCharity": 211.41,
+        "cumulativePlayerPayouts": 1197.99,
+        "cumulativeRevenue": 1916.2,
+        "dailyPlatformFees": 62.4,
+        "dailyCharity": 28.62,
+        "dailyPlayerPayouts": 162.18,
+        "dailyRevenue": 253.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 8,
+        "dailyValue": 62.4,
+        "cumulativeValue": 506.8
+      },
+      "charity": {
+        "day": 8,
+        "dailyValue": 28.62,
+        "cumulativeValue": 211.41
+      },
+      "playerPayouts": {
+        "day": 8,
+        "dailyValue": 162.18,
+        "cumulativeValue": 1197.99
+      },
+      "totalRevenue": {
+        "day": 8,
+        "dailyValue": 253.2,
+        "cumulativeValue": 1916.2
+      }
+    }
+  },
+  {
+    "day": 9,
+    "date": "2025-01-09T00:00:00.000Z",
+    "totals": {
+      "revenue": 216.2,
+      "platformFees": 66.8,
+      "charity": 22.41,
+      "playerPayouts": 126.99,
+      "gamesPlayed": 167,
+      "activePlayers": 115,
+      "totalPlayers": 388,
+      "newPlayers": 45
+    },
+    "pool": {
+      "depositedToday": 225,
+      "consumedToday": 334,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 50,
+      "amountToday": 149.4,
+      "cumulativeAmount": 1558.8,
+      "cumulativeCount": 453
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 110,
+        "wins": 110,
+        "cashouts": 0,
+        "progressions": 110,
+        "winnings": 198.00000000000028,
+        "losses": 110
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 37,
+        "wins": 37,
+        "cashouts": 0,
+        "progressions": 37,
+        "winnings": 133.1999999999999,
+        "losses": 37
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 14,
+        "wins": 14,
+        "cashouts": 0,
+        "progressions": 14,
+        "winnings": 100.80000000000003,
+        "losses": 14
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 72,
+        "losses": 5
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 225,
+      "runsCompleted": 50,
+      "runsCashedOut": 50,
+      "runsFailed": 167,
+      "levelDistribution": [
+        110,
+        37,
+        14,
+        5,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 66.8,
+        "cumulativeAmount": 573.6,
+        "percentageOfTotal": 30.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 66.8,
+            "percentage": 30.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 22.41,
+        "cumulativeAmount": 233.82,
+        "percentageOfTotal": 10.4,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 22.41,
+            "percentage": 10.4
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 126.99,
+        "cumulativeAmount": 1324.98,
+        "percentageOfTotal": 58.7,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 126.99,
+            "percentage": 58.7
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-9",
+        "label": "Day 9",
+        "day": 9,
+        "cumulativePlatformFees": 573.6,
+        "cumulativeCharity": 233.82,
+        "cumulativePlayerPayouts": 1324.98,
+        "cumulativeRevenue": 2132.4,
+        "dailyPlatformFees": 66.8,
+        "dailyCharity": 22.41,
+        "dailyPlayerPayouts": 126.99,
+        "dailyRevenue": 216.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 9,
+        "dailyValue": 66.8,
+        "cumulativeValue": 573.6
+      },
+      "charity": {
+        "day": 9,
+        "dailyValue": 22.41,
+        "cumulativeValue": 233.82
+      },
+      "playerPayouts": {
+        "day": 9,
+        "dailyValue": 126.99,
+        "cumulativeValue": 1324.98
+      },
+      "totalRevenue": {
+        "day": 9,
+        "dailyValue": 216.2,
+        "cumulativeValue": 2132.4
+      }
+    }
+  },
+  {
+    "day": 10,
+    "date": "2025-01-10T00:00:00.000Z",
+    "totals": {
+      "revenue": 356.2,
+      "platformFees": 70,
+      "charity": 42.93,
+      "playerPayouts": 243.27,
+      "gamesPlayed": 175,
+      "activePlayers": 129,
+      "totalPlayers": 435,
+      "newPlayers": 47
+    },
+    "pool": {
+      "depositedToday": 235,
+      "consumedToday": 350,
+      "outstanding": 2
+    },
+    "cashouts": {
+      "countToday": 58,
+      "amountToday": 286.2,
+      "cumulativeAmount": 1845,
+      "cumulativeCount": 511
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 115,
+        "wins": 115,
+        "cashouts": 0,
+        "progressions": 115,
+        "winnings": 207.00000000000034,
+        "losses": 115
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 37,
+        "wins": 37,
+        "cashouts": 0,
+        "progressions": 37,
+        "winnings": 133.1999999999999,
+        "losses": 37
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 13,
+        "wins": 13,
+        "cashouts": 0,
+        "progressions": 13,
+        "winnings": 93.60000000000002,
+        "losses": 13
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 72,
+        "losses": 5
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 3,
+        "wins": 3,
+        "cashouts": 0,
+        "progressions": 3,
+        "winnings": 86.4,
+        "losses": 3
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 115.2,
+        "losses": 1
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 235,
+      "runsCompleted": 58,
+      "runsCashedOut": 58,
+      "runsFailed": 175,
+      "levelDistribution": [
+        115,
+        37,
+        13,
+        5,
+        3,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 70,
+        "cumulativeAmount": 643.6,
+        "percentageOfTotal": 19.7,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 70,
+            "percentage": 19.7
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 42.93,
+        "cumulativeAmount": 276.75,
+        "percentageOfTotal": 12.1,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 42.93,
+            "percentage": 12.1
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 243.27,
+        "cumulativeAmount": 1568.25,
+        "percentageOfTotal": 68.3,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 243.27,
+            "percentage": 68.3
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-10",
+        "label": "Day 10",
+        "day": 10,
+        "cumulativePlatformFees": 643.6,
+        "cumulativeCharity": 276.75,
+        "cumulativePlayerPayouts": 1568.25,
+        "cumulativeRevenue": 2488.6,
+        "dailyPlatformFees": 70,
+        "dailyCharity": 42.93,
+        "dailyPlayerPayouts": 243.27,
+        "dailyRevenue": 356.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 10,
+        "dailyValue": 70,
+        "cumulativeValue": 643.6
+      },
+      "charity": {
+        "day": 10,
+        "dailyValue": 42.93,
+        "cumulativeValue": 276.75
+      },
+      "playerPayouts": {
+        "day": 10,
+        "dailyValue": 243.27,
+        "cumulativeValue": 1568.25
+      },
+      "totalRevenue": {
+        "day": 10,
+        "dailyValue": 356.2,
+        "cumulativeValue": 2488.6
+      }
+    }
+  },
+  {
+    "day": 11,
+    "date": "2025-01-11T00:00:00.000Z",
+    "totals": {
+      "revenue": 287.2,
+      "platformFees": 71.2,
+      "charity": 32.4,
+      "playerPayouts": 183.6,
+      "gamesPlayed": 178,
+      "activePlayers": 143,
+      "totalPlayers": 483,
+      "newPlayers": 48
+    },
+    "pool": {
+      "depositedToday": 240,
+      "consumedToday": 356,
+      "outstanding": 2
+    },
+    "cashouts": {
+      "countToday": 62,
+      "amountToday": 216,
+      "cumulativeAmount": 2061,
+      "cumulativeCount": 573
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 120,
+        "wins": 120,
+        "cashouts": 0,
+        "progressions": 120,
+        "winnings": 216.0000000000004,
+        "losses": 120
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 41,
+        "wins": 41,
+        "cashouts": 0,
+        "progressions": 41,
+        "winnings": 147.59999999999988,
+        "losses": 41
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 14,
+        "wins": 14,
+        "cashouts": 0,
+        "progressions": 14,
+        "winnings": 100.80000000000003,
+        "losses": 14
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 3,
+        "wins": 3,
+        "cashouts": 0,
+        "progressions": 3,
+        "winnings": 43.2,
+        "losses": 3
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 240,
+      "runsCompleted": 62,
+      "runsCashedOut": 62,
+      "runsFailed": 178,
+      "levelDistribution": [
+        120,
+        41,
+        14,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 71.2,
+        "cumulativeAmount": 714.8,
+        "percentageOfTotal": 24.8,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 71.2,
+            "percentage": 24.8
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 32.4,
+        "cumulativeAmount": 309.15,
+        "percentageOfTotal": 11.3,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 32.4,
+            "percentage": 11.3
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 183.6,
+        "cumulativeAmount": 1751.85,
+        "percentageOfTotal": 63.9,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 183.6,
+            "percentage": 63.9
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-11",
+        "label": "Day 11",
+        "day": 11,
+        "cumulativePlatformFees": 714.8,
+        "cumulativeCharity": 309.15,
+        "cumulativePlayerPayouts": 1751.85,
+        "cumulativeRevenue": 2775.8,
+        "dailyPlatformFees": 71.2,
+        "dailyCharity": 32.4,
+        "dailyPlayerPayouts": 183.6,
+        "dailyRevenue": 287.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 11,
+        "dailyValue": 71.2,
+        "cumulativeValue": 714.8
+      },
+      "charity": {
+        "day": 11,
+        "dailyValue": 32.4,
+        "cumulativeValue": 309.15
+      },
+      "playerPayouts": {
+        "day": 11,
+        "dailyValue": 183.6,
+        "cumulativeValue": 1751.85
+      },
+      "totalRevenue": {
+        "day": 11,
+        "dailyValue": 287.2,
+        "cumulativeValue": 2775.8
+      }
+    }
+  },
+  {
+    "day": 12,
+    "date": "2025-01-12T00:00:00.000Z",
+    "totals": {
+      "revenue": 273.4,
+      "platformFees": 73.6,
+      "charity": 29.97,
+      "playerPayouts": 169.83,
+      "gamesPlayed": 184,
+      "activePlayers": 158,
+      "totalPlayers": 533,
+      "newPlayers": 50
+    },
+    "pool": {
+      "depositedToday": 250,
+      "consumedToday": 368,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 63,
+      "amountToday": 199.8,
+      "cumulativeAmount": 2260.8,
+      "cumulativeCount": 636
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 125,
+        "wins": 125,
+        "cashouts": 0,
+        "progressions": 125,
+        "winnings": 225.00000000000045,
+        "losses": 125
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 39,
+        "wins": 39,
+        "cashouts": 0,
+        "progressions": 39,
+        "winnings": 140.3999999999999,
+        "losses": 39
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 15,
+        "wins": 15,
+        "cashouts": 0,
+        "progressions": 15,
+        "winnings": 108.00000000000003,
+        "losses": 15
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 4,
+        "wins": 4,
+        "cashouts": 0,
+        "progressions": 4,
+        "winnings": 57.6,
+        "losses": 4
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 250,
+      "runsCompleted": 63,
+      "runsCashedOut": 63,
+      "runsFailed": 184,
+      "levelDistribution": [
+        125,
+        39,
+        15,
+        4,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 73.6,
+        "cumulativeAmount": 788.4,
+        "percentageOfTotal": 26.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 73.6,
+            "percentage": 26.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 29.97,
+        "cumulativeAmount": 339.12,
+        "percentageOfTotal": 11,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 29.97,
+            "percentage": 11
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 169.83,
+        "cumulativeAmount": 1921.68,
+        "percentageOfTotal": 62.1,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 169.83,
+            "percentage": 62.1
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-12",
+        "label": "Day 12",
+        "day": 12,
+        "cumulativePlatformFees": 788.4,
+        "cumulativeCharity": 339.12,
+        "cumulativePlayerPayouts": 1921.68,
+        "cumulativeRevenue": 3049.2,
+        "dailyPlatformFees": 73.6,
+        "dailyCharity": 29.97,
+        "dailyPlayerPayouts": 169.83,
+        "dailyRevenue": 273.4
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 12,
+        "dailyValue": 73.6,
+        "cumulativeValue": 788.4
+      },
+      "charity": {
+        "day": 12,
+        "dailyValue": 29.97,
+        "cumulativeValue": 339.12
+      },
+      "playerPayouts": {
+        "day": 12,
+        "dailyValue": 169.83,
+        "cumulativeValue": 1921.68
+      },
+      "totalRevenue": {
+        "day": 12,
+        "dailyValue": 273.4,
+        "cumulativeValue": 3049.2
+      }
+    }
+  },
+  {
+    "day": 13,
+    "date": "2025-01-13T00:00:00.000Z",
+    "totals": {
+      "revenue": 369.4,
+      "platformFees": 83.2,
+      "charity": 42.93,
+      "playerPayouts": 243.27,
+      "gamesPlayed": 208,
+      "activePlayers": 173,
+      "totalPlayers": 585,
+      "newPlayers": 52
+    },
+    "pool": {
+      "depositedToday": 260,
+      "consumedToday": 416,
+      "outstanding": 0
+    },
+    "cashouts": {
+      "countToday": 55,
+      "amountToday": 286.2,
+      "cumulativeAmount": 2547,
+      "cumulativeCount": 691
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 130,
+        "wins": 130,
+        "cashouts": 0,
+        "progressions": 130,
+        "winnings": 234.0000000000005,
+        "losses": 130
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 50,
+        "wins": 50,
+        "cashouts": 0,
+        "progressions": 50,
+        "winnings": 179.99999999999983,
+        "losses": 50
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 20,
+        "wins": 20,
+        "cashouts": 0,
+        "progressions": 20,
+        "winnings": 144,
+        "losses": 20
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 72,
+        "losses": 5
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 260,
+      "runsCompleted": 55,
+      "runsCashedOut": 55,
+      "runsFailed": 208,
+      "levelDistribution": [
+        130,
+        50,
+        20,
+        5,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 83.2,
+        "cumulativeAmount": 871.6,
+        "percentageOfTotal": 22.5,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 83.2,
+            "percentage": 22.5
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 42.93,
+        "cumulativeAmount": 382.05,
+        "percentageOfTotal": 11.6,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 42.93,
+            "percentage": 11.6
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 243.27,
+        "cumulativeAmount": 2164.95,
+        "percentageOfTotal": 65.9,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 243.27,
+            "percentage": 65.9
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-13",
+        "label": "Day 13",
+        "day": 13,
+        "cumulativePlatformFees": 871.6,
+        "cumulativeCharity": 382.05,
+        "cumulativePlayerPayouts": 2164.95,
+        "cumulativeRevenue": 3418.6,
+        "dailyPlatformFees": 83.2,
+        "dailyCharity": 42.93,
+        "dailyPlayerPayouts": 243.27,
+        "dailyRevenue": 369.4
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 13,
+        "dailyValue": 83.2,
+        "cumulativeValue": 871.6
+      },
+      "charity": {
+        "day": 13,
+        "dailyValue": 42.93,
+        "cumulativeValue": 382.05
+      },
+      "playerPayouts": {
+        "day": 13,
+        "dailyValue": 243.27,
+        "cumulativeValue": 2164.95
+      },
+      "totalRevenue": {
+        "day": 13,
+        "dailyValue": 369.4,
+        "cumulativeValue": 3418.6
+      }
+    }
+  },
+  {
+    "day": 14,
+    "date": "2025-01-14T00:00:00.000Z",
+    "totals": {
+      "revenue": 271.2,
+      "platformFees": 80.4,
+      "charity": 28.62,
+      "playerPayouts": 162.18,
+      "gamesPlayed": 201,
+      "activePlayers": 189,
+      "totalPlayers": 639,
+      "newPlayers": 54
+    },
+    "pool": {
+      "depositedToday": 270,
+      "consumedToday": 402,
+      "outstanding": 3
+    },
+    "cashouts": {
+      "countToday": 63,
+      "amountToday": 190.8,
+      "cumulativeAmount": 2737.8,
+      "cumulativeCount": 754
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 135,
+        "wins": 135,
+        "cashouts": 0,
+        "progressions": 135,
+        "winnings": 243.00000000000057,
+        "losses": 135
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 48,
+        "wins": 48,
+        "cashouts": 0,
+        "progressions": 48,
+        "winnings": 172.79999999999984,
+        "losses": 48
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 13,
+        "wins": 13,
+        "cashouts": 0,
+        "progressions": 13,
+        "winnings": 93.60000000000002,
+        "losses": 13
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 4,
+        "wins": 4,
+        "cashouts": 0,
+        "progressions": 4,
+        "winnings": 57.6,
+        "losses": 4
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 270,
+      "runsCompleted": 63,
+      "runsCashedOut": 63,
+      "runsFailed": 201,
+      "levelDistribution": [
+        135,
+        48,
+        13,
+        4,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 80.4,
+        "cumulativeAmount": 952,
+        "percentageOfTotal": 29.6,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 80.4,
+            "percentage": 29.6
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 28.62,
+        "cumulativeAmount": 410.67,
+        "percentageOfTotal": 10.6,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 28.62,
+            "percentage": 10.6
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 162.18,
+        "cumulativeAmount": 2327.13,
+        "percentageOfTotal": 59.8,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 162.18,
+            "percentage": 59.8
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-14",
+        "label": "Day 14",
+        "day": 14,
+        "cumulativePlatformFees": 952,
+        "cumulativeCharity": 410.67,
+        "cumulativePlayerPayouts": 2327.13,
+        "cumulativeRevenue": 3689.8,
+        "dailyPlatformFees": 80.4,
+        "dailyCharity": 28.62,
+        "dailyPlayerPayouts": 162.18,
+        "dailyRevenue": 271.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 14,
+        "dailyValue": 80.4,
+        "cumulativeValue": 952
+      },
+      "charity": {
+        "day": 14,
+        "dailyValue": 28.62,
+        "cumulativeValue": 410.67
+      },
+      "playerPayouts": {
+        "day": 14,
+        "dailyValue": 162.18,
+        "cumulativeValue": 2327.13
+      },
+      "totalRevenue": {
+        "day": 14,
+        "dailyValue": 271.2,
+        "cumulativeValue": 3689.8
+      }
+    }
+  },
+  {
+    "day": 15,
+    "date": "2025-01-15T00:00:00.000Z",
+    "totals": {
+      "revenue": 360.8,
+      "platformFees": 83.6,
+      "charity": 41.58,
+      "playerPayouts": 235.62,
+      "gamesPlayed": 209,
+      "activePlayers": 206,
+      "totalPlayers": 696,
+      "newPlayers": 57
+    },
+    "pool": {
+      "depositedToday": 285,
+      "consumedToday": 418,
+      "outstanding": 2
+    },
+    "cashouts": {
+      "countToday": 70,
+      "amountToday": 277.2,
+      "cumulativeAmount": 3015,
+      "cumulativeCount": 824
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 140,
+        "wins": 140,
+        "cashouts": 0,
+        "progressions": 140,
+        "winnings": 252.00000000000063,
+        "losses": 140
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 47,
+        "wins": 47,
+        "cashouts": 0,
+        "progressions": 47,
+        "winnings": 169.19999999999985,
+        "losses": 47
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 15,
+        "wins": 15,
+        "cashouts": 0,
+        "progressions": 15,
+        "winnings": 108.00000000000003,
+        "losses": 15
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 72,
+        "losses": 5
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 285,
+      "runsCompleted": 70,
+      "runsCashedOut": 70,
+      "runsFailed": 209,
+      "levelDistribution": [
+        140,
+        47,
+        15,
+        5,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 83.6,
+        "cumulativeAmount": 1035.6,
+        "percentageOfTotal": 23.2,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 83.6,
+            "percentage": 23.2
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 41.58,
+        "cumulativeAmount": 452.25,
+        "percentageOfTotal": 11.5,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 41.58,
+            "percentage": 11.5
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 235.62,
+        "cumulativeAmount": 2562.75,
+        "percentageOfTotal": 65.3,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 235.62,
+            "percentage": 65.3
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-15",
+        "label": "Day 15",
+        "day": 15,
+        "cumulativePlatformFees": 1035.6,
+        "cumulativeCharity": 452.25,
+        "cumulativePlayerPayouts": 2562.75,
+        "cumulativeRevenue": 4050.6,
+        "dailyPlatformFees": 83.6,
+        "dailyCharity": 41.58,
+        "dailyPlayerPayouts": 235.62,
+        "dailyRevenue": 360.8
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 15,
+        "dailyValue": 83.6,
+        "cumulativeValue": 1035.6
+      },
+      "charity": {
+        "day": 15,
+        "dailyValue": 41.58,
+        "cumulativeValue": 452.25
+      },
+      "playerPayouts": {
+        "day": 15,
+        "dailyValue": 235.62,
+        "cumulativeValue": 2562.75
+      },
+      "totalRevenue": {
+        "day": 15,
+        "dailyValue": 360.8,
+        "cumulativeValue": 4050.6
+      }
+    }
+  },
+  {
+    "day": 16,
+    "date": "2025-01-16T00:00:00.000Z",
+    "totals": {
+      "revenue": 350,
+      "platformFees": 87.2,
+      "charity": 39.42,
+      "playerPayouts": 223.38,
+      "gamesPlayed": 218,
+      "activePlayers": 223,
+      "totalPlayers": 755,
+      "newPlayers": 59
+    },
+    "pool": {
+      "depositedToday": 295,
+      "consumedToday": 436,
+      "outstanding": 2
+    },
+    "cashouts": {
+      "countToday": 72,
+      "amountToday": 262.8,
+      "cumulativeAmount": 3277.8,
+      "cumulativeCount": 896
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 145,
+        "wins": 145,
+        "cashouts": 0,
+        "progressions": 145,
+        "winnings": 261.0000000000007,
+        "losses": 145
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 50,
+        "wins": 50,
+        "cashouts": 0,
+        "progressions": 50,
+        "winnings": 179.99999999999983,
+        "losses": 50
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 17,
+        "wins": 17,
+        "cashouts": 0,
+        "progressions": 17,
+        "winnings": 122.40000000000003,
+        "losses": 17
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 72,
+        "losses": 5
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 295,
+      "runsCompleted": 72,
+      "runsCashedOut": 72,
+      "runsFailed": 218,
+      "levelDistribution": [
+        145,
+        50,
+        17,
+        5,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 87.2,
+        "cumulativeAmount": 1122.8,
+        "percentageOfTotal": 24.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 87.2,
+            "percentage": 24.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 39.42,
+        "cumulativeAmount": 491.67,
+        "percentageOfTotal": 11.3,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 39.42,
+            "percentage": 11.3
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 223.38,
+        "cumulativeAmount": 2786.13,
+        "percentageOfTotal": 63.8,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 223.38,
+            "percentage": 63.8
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-16",
+        "label": "Day 16",
+        "day": 16,
+        "cumulativePlatformFees": 1122.8,
+        "cumulativeCharity": 491.67,
+        "cumulativePlayerPayouts": 2786.13,
+        "cumulativeRevenue": 4400.6,
+        "dailyPlatformFees": 87.2,
+        "dailyCharity": 39.42,
+        "dailyPlayerPayouts": 223.38,
+        "dailyRevenue": 350
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 16,
+        "dailyValue": 87.2,
+        "cumulativeValue": 1122.8
+      },
+      "charity": {
+        "day": 16,
+        "dailyValue": 39.42,
+        "cumulativeValue": 491.67
+      },
+      "playerPayouts": {
+        "day": 16,
+        "dailyValue": 223.38,
+        "cumulativeValue": 2786.13
+      },
+      "totalRevenue": {
+        "day": 16,
+        "dailyValue": 350,
+        "cumulativeValue": 4400.6
+      }
+    }
+  },
+  {
+    "day": 17,
+    "date": "2025-01-17T00:00:00.000Z",
+    "totals": {
+      "revenue": 322.2,
+      "platformFees": 90,
+      "charity": 34.83,
+      "playerPayouts": 197.37,
+      "gamesPlayed": 225,
+      "activePlayers": 242,
+      "totalPlayers": 816,
+      "newPlayers": 61
+    },
+    "pool": {
+      "depositedToday": 305,
+      "consumedToday": 450,
+      "outstanding": 3
+    },
+    "cashouts": {
+      "countToday": 72,
+      "amountToday": 232.2,
+      "cumulativeAmount": 3510,
+      "cumulativeCount": 968
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 150,
+        "wins": 150,
+        "cashouts": 0,
+        "progressions": 150,
+        "winnings": 270.00000000000074,
+        "losses": 150
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 48,
+        "wins": 48,
+        "cashouts": 0,
+        "progressions": 48,
+        "winnings": 172.79999999999984,
+        "losses": 48
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 20,
+        "wins": 20,
+        "cashouts": 0,
+        "progressions": 20,
+        "winnings": 144,
+        "losses": 20
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 72,
+        "losses": 5
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 305,
+      "runsCompleted": 72,
+      "runsCashedOut": 72,
+      "runsFailed": 225,
+      "levelDistribution": [
+        150,
+        48,
+        20,
+        5,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 90,
+        "cumulativeAmount": 1212.8,
+        "percentageOfTotal": 27.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 90,
+            "percentage": 27.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 34.83,
+        "cumulativeAmount": 526.5,
+        "percentageOfTotal": 10.8,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 34.83,
+            "percentage": 10.8
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 197.37,
+        "cumulativeAmount": 2983.5,
+        "percentageOfTotal": 61.3,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 197.37,
+            "percentage": 61.3
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-17",
+        "label": "Day 17",
+        "day": 17,
+        "cumulativePlatformFees": 1212.8,
+        "cumulativeCharity": 526.5,
+        "cumulativePlayerPayouts": 2983.5,
+        "cumulativeRevenue": 4722.8,
+        "dailyPlatformFees": 90,
+        "dailyCharity": 34.83,
+        "dailyPlayerPayouts": 197.37,
+        "dailyRevenue": 322.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 17,
+        "dailyValue": 90,
+        "cumulativeValue": 1212.8
+      },
+      "charity": {
+        "day": 17,
+        "dailyValue": 34.83,
+        "cumulativeValue": 526.5
+      },
+      "playerPayouts": {
+        "day": 17,
+        "dailyValue": 197.37,
+        "cumulativeValue": 2983.5
+      },
+      "totalRevenue": {
+        "day": 17,
+        "dailyValue": 322.2,
+        "cumulativeValue": 4722.8
+      }
+    }
+  },
+  {
+    "day": 18,
+    "date": "2025-01-18T00:00:00.000Z",
+    "totals": {
+      "revenue": 395.8,
+      "platformFees": 98.8,
+      "charity": 44.55,
+      "playerPayouts": 252.45,
+      "gamesPlayed": 247,
+      "activePlayers": 261,
+      "totalPlayers": 880,
+      "newPlayers": 64
+    },
+    "pool": {
+      "depositedToday": 320,
+      "consumedToday": 494,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 71,
+      "amountToday": 297,
+      "cumulativeAmount": 3807,
+      "cumulativeCount": 1039
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 160,
+        "wins": 160,
+        "cashouts": 0,
+        "progressions": 160,
+        "winnings": 288.00000000000085,
+        "losses": 160
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 56,
+        "wins": 56,
+        "cashouts": 0,
+        "progressions": 56,
+        "winnings": 201.5999999999998,
+        "losses": 56
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 21,
+        "wins": 21,
+        "cashouts": 0,
+        "progressions": 21,
+        "winnings": 151.2,
+        "losses": 21
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 7,
+        "wins": 7,
+        "cashouts": 0,
+        "progressions": 7,
+        "winnings": 100.80000000000001,
+        "losses": 7
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 320,
+      "runsCompleted": 71,
+      "runsCashedOut": 71,
+      "runsFailed": 247,
+      "levelDistribution": [
+        160,
+        56,
+        21,
+        7,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 98.8,
+        "cumulativeAmount": 1311.6,
+        "percentageOfTotal": 25,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 98.8,
+            "percentage": 25
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 44.55,
+        "cumulativeAmount": 571.05,
+        "percentageOfTotal": 11.3,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 44.55,
+            "percentage": 11.3
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 252.45,
+        "cumulativeAmount": 3235.95,
+        "percentageOfTotal": 63.8,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 252.45,
+            "percentage": 63.8
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-18",
+        "label": "Day 18",
+        "day": 18,
+        "cumulativePlatformFees": 1311.6,
+        "cumulativeCharity": 571.05,
+        "cumulativePlayerPayouts": 3235.95,
+        "cumulativeRevenue": 5118.6,
+        "dailyPlatformFees": 98.8,
+        "dailyCharity": 44.55,
+        "dailyPlayerPayouts": 252.45,
+        "dailyRevenue": 395.8
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 18,
+        "dailyValue": 98.8,
+        "cumulativeValue": 1311.6
+      },
+      "charity": {
+        "day": 18,
+        "dailyValue": 44.55,
+        "cumulativeValue": 571.05
+      },
+      "playerPayouts": {
+        "day": 18,
+        "dailyValue": 252.45,
+        "cumulativeValue": 3235.95
+      },
+      "totalRevenue": {
+        "day": 18,
+        "dailyValue": 395.8,
+        "cumulativeValue": 5118.6
+      }
+    }
+  },
+  {
+    "day": 19,
+    "date": "2025-01-19T00:00:00.000Z",
+    "totals": {
+      "revenue": 348,
+      "platformFees": 99.6,
+      "charity": 37.26,
+      "playerPayouts": 211.14,
+      "gamesPlayed": 249,
+      "activePlayers": 280,
+      "totalPlayers": 947,
+      "newPlayers": 67
+    },
+    "pool": {
+      "depositedToday": 335,
+      "consumedToday": 498,
+      "outstanding": 3
+    },
+    "cashouts": {
+      "countToday": 79,
+      "amountToday": 248.4,
+      "cumulativeAmount": 4055.4,
+      "cumulativeCount": 1118
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 165,
+        "wins": 165,
+        "cashouts": 0,
+        "progressions": 165,
+        "winnings": 297.0000000000009,
+        "losses": 165
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 56,
+        "wins": 56,
+        "cashouts": 0,
+        "progressions": 56,
+        "winnings": 201.5999999999998,
+        "losses": 56
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 19,
+        "wins": 19,
+        "cashouts": 0,
+        "progressions": 19,
+        "winnings": 136.8,
+        "losses": 19
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 7,
+        "wins": 7,
+        "cashouts": 0,
+        "progressions": 7,
+        "winnings": 100.80000000000001,
+        "losses": 7
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 335,
+      "runsCompleted": 79,
+      "runsCashedOut": 79,
+      "runsFailed": 249,
+      "levelDistribution": [
+        165,
+        56,
+        19,
+        7,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 99.6,
+        "cumulativeAmount": 1411.2,
+        "percentageOfTotal": 28.6,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 99.6,
+            "percentage": 28.6
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 37.26,
+        "cumulativeAmount": 608.31,
+        "percentageOfTotal": 10.7,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 37.26,
+            "percentage": 10.7
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 211.14,
+        "cumulativeAmount": 3447.09,
+        "percentageOfTotal": 60.7,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 211.14,
+            "percentage": 60.7
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-19",
+        "label": "Day 19",
+        "day": 19,
+        "cumulativePlatformFees": 1411.2,
+        "cumulativeCharity": 608.31,
+        "cumulativePlayerPayouts": 3447.09,
+        "cumulativeRevenue": 5466.6,
+        "dailyPlatformFees": 99.6,
+        "dailyCharity": 37.26,
+        "dailyPlayerPayouts": 211.14,
+        "dailyRevenue": 348
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 19,
+        "dailyValue": 99.6,
+        "cumulativeValue": 1411.2
+      },
+      "charity": {
+        "day": 19,
+        "dailyValue": 37.26,
+        "cumulativeValue": 608.31
+      },
+      "playerPayouts": {
+        "day": 19,
+        "dailyValue": 211.14,
+        "cumulativeValue": 3447.09
+      },
+      "totalRevenue": {
+        "day": 19,
+        "dailyValue": 348,
+        "cumulativeValue": 5466.6
+      }
+    }
+  },
+  {
+    "day": 20,
+    "date": "2025-01-20T00:00:00.000Z",
+    "totals": {
+      "revenue": 366.2,
+      "platformFees": 101.6,
+      "charity": 39.69,
+      "playerPayouts": 224.91,
+      "gamesPlayed": 254,
+      "activePlayers": 301,
+      "totalPlayers": 1016,
+      "newPlayers": 69
+    },
+    "pool": {
+      "depositedToday": 345,
+      "consumedToday": 508,
+      "outstanding": 2
+    },
+    "cashouts": {
+      "countToday": 82,
+      "amountToday": 264.6,
+      "cumulativeAmount": 4320,
+      "cumulativeCount": 1200
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 170,
+        "wins": 170,
+        "cashouts": 0,
+        "progressions": 170,
+        "winnings": 306.00000000000097,
+        "losses": 170
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 58,
+        "wins": 58,
+        "cashouts": 0,
+        "progressions": 58,
+        "winnings": 208.79999999999978,
+        "losses": 58
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 19,
+        "wins": 19,
+        "cashouts": 0,
+        "progressions": 19,
+        "winnings": 136.8,
+        "losses": 19
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 72,
+        "losses": 5
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 28.8,
+        "losses": 1
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 345,
+      "runsCompleted": 82,
+      "runsCashedOut": 82,
+      "runsFailed": 254,
+      "levelDistribution": [
+        170,
+        58,
+        19,
+        5,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 101.6,
+        "cumulativeAmount": 1512.8,
+        "percentageOfTotal": 27.7,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 101.6,
+            "percentage": 27.7
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 39.69,
+        "cumulativeAmount": 648,
+        "percentageOfTotal": 10.8,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 39.69,
+            "percentage": 10.8
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 224.91,
+        "cumulativeAmount": 3672,
+        "percentageOfTotal": 61.4,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 224.91,
+            "percentage": 61.4
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-20",
+        "label": "Day 20",
+        "day": 20,
+        "cumulativePlatformFees": 1512.8,
+        "cumulativeCharity": 648,
+        "cumulativePlayerPayouts": 3672,
+        "cumulativeRevenue": 5832.8,
+        "dailyPlatformFees": 101.6,
+        "dailyCharity": 39.69,
+        "dailyPlayerPayouts": 224.91,
+        "dailyRevenue": 366.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 20,
+        "dailyValue": 101.6,
+        "cumulativeValue": 1512.8
+      },
+      "charity": {
+        "day": 20,
+        "dailyValue": 39.69,
+        "cumulativeValue": 648
+      },
+      "playerPayouts": {
+        "day": 20,
+        "dailyValue": 224.91,
+        "cumulativeValue": 3672
+      },
+      "totalRevenue": {
+        "day": 20,
+        "dailyValue": 366.2,
+        "cumulativeValue": 5832.8
+      }
+    }
+  },
+  {
+    "day": 21,
+    "date": "2025-01-21T00:00:00.000Z",
+    "totals": {
+      "revenue": 404,
+      "platformFees": 108.8,
+      "charity": 44.28,
+      "playerPayouts": 250.92,
+      "gamesPlayed": 272,
+      "activePlayers": 322,
+      "totalPlayers": 1088,
+      "newPlayers": 72
+    },
+    "pool": {
+      "depositedToday": 360,
+      "consumedToday": 544,
+      "outstanding": 2
+    },
+    "cashouts": {
+      "countToday": 86,
+      "amountToday": 295.2,
+      "cumulativeAmount": 4615.2,
+      "cumulativeCount": 1286
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 180,
+        "wins": 180,
+        "cashouts": 0,
+        "progressions": 180,
+        "winnings": 324.0000000000011,
+        "losses": 180
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 62,
+        "wins": 62,
+        "cashouts": 0,
+        "progressions": 62,
+        "winnings": 223.19999999999976,
+        "losses": 62
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 20,
+        "wins": 20,
+        "cashouts": 0,
+        "progressions": 20,
+        "winnings": 144,
+        "losses": 20
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 7,
+        "wins": 7,
+        "cashouts": 0,
+        "progressions": 7,
+        "winnings": 100.80000000000001,
+        "losses": 7
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 3,
+        "wins": 3,
+        "cashouts": 0,
+        "progressions": 3,
+        "winnings": 86.4,
+        "losses": 3
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 360,
+      "runsCompleted": 86,
+      "runsCashedOut": 86,
+      "runsFailed": 272,
+      "levelDistribution": [
+        180,
+        62,
+        20,
+        7,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 108.8,
+        "cumulativeAmount": 1621.6,
+        "percentageOfTotal": 26.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 108.8,
+            "percentage": 26.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 44.28,
+        "cumulativeAmount": 692.28,
+        "percentageOfTotal": 11,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 44.28,
+            "percentage": 11
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 250.92,
+        "cumulativeAmount": 3922.92,
+        "percentageOfTotal": 62.1,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 250.92,
+            "percentage": 62.1
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-21",
+        "label": "Day 21",
+        "day": 21,
+        "cumulativePlatformFees": 1621.6,
+        "cumulativeCharity": 692.28,
+        "cumulativePlayerPayouts": 3922.92,
+        "cumulativeRevenue": 6236.8,
+        "dailyPlatformFees": 108.8,
+        "dailyCharity": 44.28,
+        "dailyPlayerPayouts": 250.92,
+        "dailyRevenue": 404
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 21,
+        "dailyValue": 108.8,
+        "cumulativeValue": 1621.6
+      },
+      "charity": {
+        "day": 21,
+        "dailyValue": 44.28,
+        "cumulativeValue": 692.28
+      },
+      "playerPayouts": {
+        "day": 21,
+        "dailyValue": 250.92,
+        "cumulativeValue": 3922.92
+      },
+      "totalRevenue": {
+        "day": 21,
+        "dailyValue": 404,
+        "cumulativeValue": 6236.8
+      }
+    }
+  },
+  {
+    "day": 22,
+    "date": "2025-01-22T00:00:00.000Z",
+    "totals": {
+      "revenue": 422.2,
+      "platformFees": 118,
+      "charity": 45.63,
+      "playerPayouts": 258.57,
+      "gamesPlayed": 295,
+      "activePlayers": 345,
+      "totalPlayers": 1164,
+      "newPlayers": 76
+    },
+    "pool": {
+      "depositedToday": 380,
+      "consumedToday": 590,
+      "outstanding": 3
+    },
+    "cashouts": {
+      "countToday": 84,
+      "amountToday": 304.2,
+      "cumulativeAmount": 4919.4,
+      "cumulativeCount": 1370
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 190,
+        "wins": 190,
+        "cashouts": 0,
+        "progressions": 190,
+        "winnings": 342.0000000000012,
+        "losses": 190
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 65,
+        "wins": 65,
+        "cashouts": 0,
+        "progressions": 65,
+        "winnings": 233.99999999999974,
+        "losses": 65
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 25,
+        "wins": 25,
+        "cashouts": 0,
+        "progressions": 25,
+        "winnings": 179.99999999999994,
+        "losses": 25
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 9,
+        "wins": 9,
+        "cashouts": 0,
+        "progressions": 9,
+        "winnings": 129.60000000000002,
+        "losses": 9
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 4,
+        "wins": 4,
+        "cashouts": 0,
+        "progressions": 4,
+        "winnings": 115.2,
+        "losses": 4
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 115.2,
+        "losses": 1
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 380,
+      "runsCompleted": 84,
+      "runsCashedOut": 84,
+      "runsFailed": 295,
+      "levelDistribution": [
+        190,
+        65,
+        25,
+        9,
+        4,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 118,
+        "cumulativeAmount": 1739.6,
+        "percentageOfTotal": 27.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 118,
+            "percentage": 27.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 45.63,
+        "cumulativeAmount": 737.91,
+        "percentageOfTotal": 10.8,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 45.63,
+            "percentage": 10.8
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 258.57,
+        "cumulativeAmount": 4181.49,
+        "percentageOfTotal": 61.2,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 258.57,
+            "percentage": 61.2
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-22",
+        "label": "Day 22",
+        "day": 22,
+        "cumulativePlatformFees": 1739.6,
+        "cumulativeCharity": 737.91,
+        "cumulativePlayerPayouts": 4181.49,
+        "cumulativeRevenue": 6659,
+        "dailyPlatformFees": 118,
+        "dailyCharity": 45.63,
+        "dailyPlayerPayouts": 258.57,
+        "dailyRevenue": 422.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 22,
+        "dailyValue": 118,
+        "cumulativeValue": 1739.6
+      },
+      "charity": {
+        "day": 22,
+        "dailyValue": 45.63,
+        "cumulativeValue": 737.91
+      },
+      "playerPayouts": {
+        "day": 22,
+        "dailyValue": 258.57,
+        "cumulativeValue": 4181.49
+      },
+      "totalRevenue": {
+        "day": 22,
+        "dailyValue": 422.2,
+        "cumulativeValue": 6659
+      }
+    }
+  },
+  {
+    "day": 23,
+    "date": "2025-01-23T00:00:00.000Z",
+    "totals": {
+      "revenue": 402.4,
+      "platformFees": 114.4,
+      "charity": 43.2,
+      "playerPayouts": 244.8,
+      "gamesPlayed": 286,
+      "activePlayers": 368,
+      "totalPlayers": 1243,
+      "newPlayers": 79
+    },
+    "pool": {
+      "depositedToday": 395,
+      "consumedToday": 572,
+      "outstanding": 3
+    },
+    "cashouts": {
+      "countToday": 104,
+      "amountToday": 288,
+      "cumulativeAmount": 5207.4,
+      "cumulativeCount": 1474
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 195,
+        "wins": 195,
+        "cashouts": 0,
+        "progressions": 195,
+        "winnings": 351.00000000000125,
+        "losses": 195
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 62,
+        "wins": 62,
+        "cashouts": 0,
+        "progressions": 62,
+        "winnings": 223.19999999999976,
+        "losses": 62
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 20,
+        "wins": 20,
+        "cashouts": 0,
+        "progressions": 20,
+        "winnings": 144,
+        "losses": 20
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 6,
+        "wins": 6,
+        "cashouts": 0,
+        "progressions": 6,
+        "winnings": 86.4,
+        "losses": 6
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 395,
+      "runsCompleted": 104,
+      "runsCashedOut": 104,
+      "runsFailed": 286,
+      "levelDistribution": [
+        195,
+        62,
+        20,
+        6,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 114.4,
+        "cumulativeAmount": 1854,
+        "percentageOfTotal": 28.4,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 114.4,
+            "percentage": 28.4
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 43.2,
+        "cumulativeAmount": 781.11,
+        "percentageOfTotal": 10.7,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 43.2,
+            "percentage": 10.7
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 244.8,
+        "cumulativeAmount": 4426.29,
+        "percentageOfTotal": 60.8,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 244.8,
+            "percentage": 60.8
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-23",
+        "label": "Day 23",
+        "day": 23,
+        "cumulativePlatformFees": 1854,
+        "cumulativeCharity": 781.11,
+        "cumulativePlayerPayouts": 4426.29,
+        "cumulativeRevenue": 7061.4,
+        "dailyPlatformFees": 114.4,
+        "dailyCharity": 43.2,
+        "dailyPlayerPayouts": 244.8,
+        "dailyRevenue": 402.4
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 23,
+        "dailyValue": 114.4,
+        "cumulativeValue": 1854
+      },
+      "charity": {
+        "day": 23,
+        "dailyValue": 43.2,
+        "cumulativeValue": 781.11
+      },
+      "playerPayouts": {
+        "day": 23,
+        "dailyValue": 244.8,
+        "cumulativeValue": 4426.29
+      },
+      "totalRevenue": {
+        "day": 23,
+        "dailyValue": 402.4,
+        "cumulativeValue": 7061.4
+      }
+    }
+  },
+  {
+    "day": 24,
+    "date": "2025-01-24T00:00:00.000Z",
+    "totals": {
+      "revenue": 462.4,
+      "platformFees": 120.4,
+      "charity": 51.3,
+      "playerPayouts": 290.7,
+      "gamesPlayed": 301,
+      "activePlayers": 393,
+      "totalPlayers": 1325,
+      "newPlayers": 82
+    },
+    "pool": {
+      "depositedToday": 410,
+      "consumedToday": 602,
+      "outstanding": 6
+    },
+    "cashouts": {
+      "countToday": 106,
+      "amountToday": 342,
+      "cumulativeAmount": 5549.4,
+      "cumulativeCount": 1580
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 205,
+        "wins": 205,
+        "cashouts": 0,
+        "progressions": 205,
+        "winnings": 369.00000000000136,
+        "losses": 205
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 67,
+        "wins": 67,
+        "cashouts": 0,
+        "progressions": 67,
+        "winnings": 241.19999999999973,
+        "losses": 67
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 20,
+        "wins": 20,
+        "cashouts": 0,
+        "progressions": 20,
+        "winnings": 144,
+        "losses": 20
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 7,
+        "wins": 7,
+        "cashouts": 0,
+        "progressions": 7,
+        "winnings": 100.80000000000001,
+        "losses": 7
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 410,
+      "runsCompleted": 106,
+      "runsCashedOut": 106,
+      "runsFailed": 301,
+      "levelDistribution": [
+        205,
+        67,
+        20,
+        7,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 120.4,
+        "cumulativeAmount": 1974.4,
+        "percentageOfTotal": 26,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 120.4,
+            "percentage": 26
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 51.3,
+        "cumulativeAmount": 832.41,
+        "percentageOfTotal": 11.1,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 51.3,
+            "percentage": 11.1
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 290.7,
+        "cumulativeAmount": 4716.99,
+        "percentageOfTotal": 62.9,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 290.7,
+            "percentage": 62.9
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-24",
+        "label": "Day 24",
+        "day": 24,
+        "cumulativePlatformFees": 1974.4,
+        "cumulativeCharity": 832.41,
+        "cumulativePlayerPayouts": 4716.99,
+        "cumulativeRevenue": 7523.8,
+        "dailyPlatformFees": 120.4,
+        "dailyCharity": 51.3,
+        "dailyPlayerPayouts": 290.7,
+        "dailyRevenue": 462.4
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 24,
+        "dailyValue": 120.4,
+        "cumulativeValue": 1974.4
+      },
+      "charity": {
+        "day": 24,
+        "dailyValue": 51.3,
+        "cumulativeValue": 832.41
+      },
+      "playerPayouts": {
+        "day": 24,
+        "dailyValue": 290.7,
+        "cumulativeValue": 4716.99
+      },
+      "totalRevenue": {
+        "day": 24,
+        "dailyValue": 462.4,
+        "cumulativeValue": 7523.8
+      }
+    }
+  },
+  {
+    "day": 25,
+    "date": "2025-01-25T00:00:00.000Z",
+    "totals": {
+      "revenue": 580.4,
+      "platformFees": 130.4,
+      "charity": 67.5,
+      "playerPayouts": 382.5,
+      "gamesPlayed": 326,
+      "activePlayers": 418,
+      "totalPlayers": 1411,
+      "newPlayers": 86
+    },
+    "pool": {
+      "depositedToday": 430,
+      "consumedToday": 652,
+      "outstanding": 3
+    },
+    "cashouts": {
+      "countToday": 105,
+      "amountToday": 450,
+      "cumulativeAmount": 5999.4,
+      "cumulativeCount": 1685
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 215,
+        "wins": 215,
+        "cashouts": 0,
+        "progressions": 215,
+        "winnings": 387.0000000000015,
+        "losses": 215
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 73,
+        "wins": 73,
+        "cashouts": 0,
+        "progressions": 73,
+        "winnings": 262.7999999999997,
+        "losses": 73
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 25,
+        "wins": 25,
+        "cashouts": 0,
+        "progressions": 25,
+        "winnings": 179.99999999999994,
+        "losses": 25
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 9,
+        "wins": 9,
+        "cashouts": 0,
+        "progressions": 9,
+        "winnings": 129.60000000000002,
+        "losses": 9
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 115.2,
+        "losses": 1
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 430,
+      "runsCompleted": 105,
+      "runsCashedOut": 105,
+      "runsFailed": 326,
+      "levelDistribution": [
+        215,
+        73,
+        25,
+        9,
+        2,
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 130.4,
+        "cumulativeAmount": 2104.8,
+        "percentageOfTotal": 22.5,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 130.4,
+            "percentage": 22.5
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 67.5,
+        "cumulativeAmount": 899.91,
+        "percentageOfTotal": 11.6,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 67.5,
+            "percentage": 11.6
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 382.5,
+        "cumulativeAmount": 5099.49,
+        "percentageOfTotal": 65.9,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 382.5,
+            "percentage": 65.9
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-25",
+        "label": "Day 25",
+        "day": 25,
+        "cumulativePlatformFees": 2104.8,
+        "cumulativeCharity": 899.91,
+        "cumulativePlayerPayouts": 5099.49,
+        "cumulativeRevenue": 8104.2,
+        "dailyPlatformFees": 130.4,
+        "dailyCharity": 67.5,
+        "dailyPlayerPayouts": 382.5,
+        "dailyRevenue": 580.4
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 25,
+        "dailyValue": 130.4,
+        "cumulativeValue": 2104.8
+      },
+      "charity": {
+        "day": 25,
+        "dailyValue": 67.5,
+        "cumulativeValue": 899.91
+      },
+      "playerPayouts": {
+        "day": 25,
+        "dailyValue": 382.5,
+        "cumulativeValue": 5099.49
+      },
+      "totalRevenue": {
+        "day": 25,
+        "dailyValue": 580.4,
+        "cumulativeValue": 8104.2
+      }
+    }
+  },
+  {
+    "day": 26,
+    "date": "2025-01-26T00:00:00.000Z",
+    "totals": {
+      "revenue": 489.6,
+      "platformFees": 136.8,
+      "charity": 52.92,
+      "playerPayouts": 299.88,
+      "gamesPlayed": 342,
+      "activePlayers": 445,
+      "totalPlayers": 1501,
+      "newPlayers": 90
+    },
+    "pool": {
+      "depositedToday": 450,
+      "consumedToday": 684,
+      "outstanding": 4
+    },
+    "cashouts": {
+      "countToday": 104,
+      "amountToday": 352.8,
+      "cumulativeAmount": 6352.2,
+      "cumulativeCount": 1789
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 225,
+        "wins": 225,
+        "cashouts": 0,
+        "progressions": 225,
+        "winnings": 405.0000000000016,
+        "losses": 225
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 78,
+        "wins": 78,
+        "cashouts": 0,
+        "progressions": 78,
+        "winnings": 280.79999999999984,
+        "losses": 78
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 29,
+        "wins": 29,
+        "cashouts": 0,
+        "progressions": 29,
+        "winnings": 208.7999999999999,
+        "losses": 29
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 7,
+        "wins": 7,
+        "cashouts": 0,
+        "progressions": 7,
+        "winnings": 100.80000000000001,
+        "losses": 7
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 450,
+      "runsCompleted": 104,
+      "runsCashedOut": 104,
+      "runsFailed": 342,
+      "levelDistribution": [
+        225,
+        78,
+        29,
+        7,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 136.8,
+        "cumulativeAmount": 2241.6,
+        "percentageOfTotal": 27.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 136.8,
+            "percentage": 27.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 52.92,
+        "cumulativeAmount": 952.83,
+        "percentageOfTotal": 10.8,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 52.92,
+            "percentage": 10.8
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 299.88,
+        "cumulativeAmount": 5399.37,
+        "percentageOfTotal": 61.2,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 299.88,
+            "percentage": 61.2
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-26",
+        "label": "Day 26",
+        "day": 26,
+        "cumulativePlatformFees": 2241.6,
+        "cumulativeCharity": 952.83,
+        "cumulativePlayerPayouts": 5399.37,
+        "cumulativeRevenue": 8593.8,
+        "dailyPlatformFees": 136.8,
+        "dailyCharity": 52.92,
+        "dailyPlayerPayouts": 299.88,
+        "dailyRevenue": 489.6
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 26,
+        "dailyValue": 136.8,
+        "cumulativeValue": 2241.6
+      },
+      "charity": {
+        "day": 26,
+        "dailyValue": 52.92,
+        "cumulativeValue": 952.83
+      },
+      "playerPayouts": {
+        "day": 26,
+        "dailyValue": 299.88,
+        "cumulativeValue": 5399.37
+      },
+      "totalRevenue": {
+        "day": 26,
+        "dailyValue": 489.6,
+        "cumulativeValue": 8593.8
+      }
+    }
+  },
+  {
+    "day": 27,
+    "date": "2025-01-27T00:00:00.000Z",
+    "totals": {
+      "revenue": 537,
+      "platformFees": 139.2,
+      "charity": 59.67,
+      "playerPayouts": 338.13,
+      "gamesPlayed": 348,
+      "activePlayers": 473,
+      "totalPlayers": 1595,
+      "newPlayers": 94
+    },
+    "pool": {
+      "depositedToday": 470,
+      "consumedToday": 696,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 121,
+      "amountToday": 397.8,
+      "cumulativeAmount": 6750,
+      "cumulativeCount": 1910
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 235,
+        "wins": 235,
+        "cashouts": 0,
+        "progressions": 235,
+        "winnings": 423.0000000000017,
+        "losses": 235
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 77,
+        "wins": 77,
+        "cashouts": 0,
+        "progressions": 77,
+        "winnings": 277.1999999999998,
+        "losses": 77
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 25,
+        "wins": 25,
+        "cashouts": 0,
+        "progressions": 25,
+        "winnings": 179.99999999999994,
+        "losses": 25
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 9,
+        "wins": 9,
+        "cashouts": 0,
+        "progressions": 9,
+        "winnings": 129.60000000000002,
+        "losses": 9
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 470,
+      "runsCompleted": 121,
+      "runsCashedOut": 121,
+      "runsFailed": 348,
+      "levelDistribution": [
+        235,
+        77,
+        25,
+        9,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 139.2,
+        "cumulativeAmount": 2380.8,
+        "percentageOfTotal": 25.9,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 139.2,
+            "percentage": 25.9
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 59.67,
+        "cumulativeAmount": 1012.5,
+        "percentageOfTotal": 11.1,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 59.67,
+            "percentage": 11.1
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 338.13,
+        "cumulativeAmount": 5737.5,
+        "percentageOfTotal": 63,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 338.13,
+            "percentage": 63
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-27",
+        "label": "Day 27",
+        "day": 27,
+        "cumulativePlatformFees": 2380.8,
+        "cumulativeCharity": 1012.5,
+        "cumulativePlayerPayouts": 5737.5,
+        "cumulativeRevenue": 9130.8,
+        "dailyPlatformFees": 139.2,
+        "dailyCharity": 59.67,
+        "dailyPlayerPayouts": 338.13,
+        "dailyRevenue": 537
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 27,
+        "dailyValue": 139.2,
+        "cumulativeValue": 2380.8
+      },
+      "charity": {
+        "day": 27,
+        "dailyValue": 59.67,
+        "cumulativeValue": 1012.5
+      },
+      "playerPayouts": {
+        "day": 27,
+        "dailyValue": 338.13,
+        "cumulativeValue": 5737.5
+      },
+      "totalRevenue": {
+        "day": 27,
+        "dailyValue": 537,
+        "cumulativeValue": 9130.8
+      }
+    }
+  },
+  {
+    "day": 28,
+    "date": "2025-01-28T00:00:00.000Z",
+    "totals": {
+      "revenue": 597.2,
+      "platformFees": 147.2,
+      "charity": 67.5,
+      "playerPayouts": 382.5,
+      "gamesPlayed": 368,
+      "activePlayers": 502,
+      "totalPlayers": 1693,
+      "newPlayers": 98
+    },
+    "pool": {
+      "depositedToday": 490,
+      "consumedToday": 736,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 122,
+      "amountToday": 450,
+      "cumulativeAmount": 7200,
+      "cumulativeCount": 2032
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 245,
+        "wins": 245,
+        "cashouts": 0,
+        "progressions": 245,
+        "winnings": 441.0000000000018,
+        "losses": 245
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 81,
+        "wins": 81,
+        "cashouts": 0,
+        "progressions": 81,
+        "winnings": 291.5999999999999,
+        "losses": 81
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 28,
+        "wins": 28,
+        "cashouts": 0,
+        "progressions": 28,
+        "winnings": 201.5999999999999,
+        "losses": 28
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 10,
+        "wins": 10,
+        "cashouts": 0,
+        "progressions": 10,
+        "winnings": 144.00000000000003,
+        "losses": 10
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 3,
+        "wins": 3,
+        "cashouts": 0,
+        "progressions": 3,
+        "winnings": 86.4,
+        "losses": 3
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 490,
+      "runsCompleted": 122,
+      "runsCashedOut": 122,
+      "runsFailed": 368,
+      "levelDistribution": [
+        245,
+        81,
+        28,
+        10,
+        3,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 147.2,
+        "cumulativeAmount": 2528,
+        "percentageOfTotal": 24.6,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 147.2,
+            "percentage": 24.6
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 67.5,
+        "cumulativeAmount": 1080,
+        "percentageOfTotal": 11.3,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 67.5,
+            "percentage": 11.3
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 382.5,
+        "cumulativeAmount": 6120,
+        "percentageOfTotal": 64,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 382.5,
+            "percentage": 64
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-28",
+        "label": "Day 28",
+        "day": 28,
+        "cumulativePlatformFees": 2528,
+        "cumulativeCharity": 1080,
+        "cumulativePlayerPayouts": 6120,
+        "cumulativeRevenue": 9728,
+        "dailyPlatformFees": 147.2,
+        "dailyCharity": 67.5,
+        "dailyPlayerPayouts": 382.5,
+        "dailyRevenue": 597.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 28,
+        "dailyValue": 147.2,
+        "cumulativeValue": 2528
+      },
+      "charity": {
+        "day": 28,
+        "dailyValue": 67.5,
+        "cumulativeValue": 1080
+      },
+      "playerPayouts": {
+        "day": 28,
+        "dailyValue": 382.5,
+        "cumulativeValue": 6120
+      },
+      "totalRevenue": {
+        "day": 28,
+        "dailyValue": 597.2,
+        "cumulativeValue": 9728
+      }
+    }
+  },
+  {
+    "day": 29,
+    "date": "2025-01-29T00:00:00.000Z",
+    "totals": {
+      "revenue": 623.8,
+      "platformFees": 150.4,
+      "charity": 71.01,
+      "playerPayouts": 402.39,
+      "gamesPlayed": 376,
+      "activePlayers": 532,
+      "totalPlayers": 1795,
+      "newPlayers": 102
+    },
+    "pool": {
+      "depositedToday": 510,
+      "consumedToday": 752,
+      "outstanding": 5
+    },
+    "cashouts": {
+      "countToday": 134,
+      "amountToday": 473.4,
+      "cumulativeAmount": 7673.4,
+      "cumulativeCount": 2166
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 255,
+        "wins": 255,
+        "cashouts": 0,
+        "progressions": 255,
+        "winnings": 459.00000000000193,
+        "losses": 255
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 82,
+        "wins": 82,
+        "cashouts": 0,
+        "progressions": 82,
+        "winnings": 295.19999999999993,
+        "losses": 82
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 28,
+        "wins": 28,
+        "cashouts": 0,
+        "progressions": 28,
+        "winnings": 201.5999999999999,
+        "losses": 28
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 8,
+        "wins": 8,
+        "cashouts": 0,
+        "progressions": 8,
+        "winnings": 115.20000000000002,
+        "losses": 8
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 57.6,
+        "losses": 2
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 57.6,
+        "losses": 1
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 510,
+      "runsCompleted": 134,
+      "runsCashedOut": 134,
+      "runsFailed": 376,
+      "levelDistribution": [
+        255,
+        82,
+        28,
+        8,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 150.4,
+        "cumulativeAmount": 2678.4,
+        "percentageOfTotal": 24.1,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 150.4,
+            "percentage": 24.1
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 71.01,
+        "cumulativeAmount": 1151.01,
+        "percentageOfTotal": 11.4,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 71.01,
+            "percentage": 11.4
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 402.39,
+        "cumulativeAmount": 6522.39,
+        "percentageOfTotal": 64.5,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 402.39,
+            "percentage": 64.5
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-29",
+        "label": "Day 29",
+        "day": 29,
+        "cumulativePlatformFees": 2678.4,
+        "cumulativeCharity": 1151.01,
+        "cumulativePlayerPayouts": 6522.39,
+        "cumulativeRevenue": 10351.8,
+        "dailyPlatformFees": 150.4,
+        "dailyCharity": 71.01,
+        "dailyPlayerPayouts": 402.39,
+        "dailyRevenue": 623.8
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 29,
+        "dailyValue": 150.4,
+        "cumulativeValue": 2678.4
+      },
+      "charity": {
+        "day": 29,
+        "dailyValue": 71.01,
+        "cumulativeValue": 1151.01
+      },
+      "playerPayouts": {
+        "day": 29,
+        "dailyValue": 402.39,
+        "cumulativeValue": 6522.39
+      },
+      "totalRevenue": {
+        "day": 29,
+        "dailyValue": 623.8,
+        "cumulativeValue": 10351.8
+      }
+    }
+  },
+  {
+    "day": 30,
+    "date": "2025-01-30T00:00:00.000Z",
+    "totals": {
+      "revenue": 682.2,
+      "platformFees": 158.4,
+      "charity": 78.57,
+      "playerPayouts": 445.23,
+      "gamesPlayed": 396,
+      "activePlayers": 564,
+      "totalPlayers": 1902,
+      "newPlayers": 107
+    },
+    "pool": {
+      "depositedToday": 535,
+      "consumedToday": 792,
+      "outstanding": 4
+    },
+    "cashouts": {
+      "countToday": 135,
+      "amountToday": 523.8,
+      "cumulativeAmount": 8197.2,
+      "cumulativeCount": 2301
+    },
+    "levels": [
+      {
+        "level": 1,
+        "gamesPlayed": 265,
+        "wins": 265,
+        "cashouts": 0,
+        "progressions": 265,
+        "winnings": 477.00000000000205,
+        "losses": 265
+      },
+      {
+        "level": 2,
+        "gamesPlayed": 81,
+        "wins": 81,
+        "cashouts": 0,
+        "progressions": 81,
+        "winnings": 291.5999999999999,
+        "losses": 81
+      },
+      {
+        "level": 3,
+        "gamesPlayed": 31,
+        "wins": 31,
+        "cashouts": 0,
+        "progressions": 31,
+        "winnings": 223.19999999999987,
+        "losses": 31
+      },
+      {
+        "level": 4,
+        "gamesPlayed": 11,
+        "wins": 11,
+        "cashouts": 0,
+        "progressions": 11,
+        "winnings": 158.40000000000003,
+        "losses": 11
+      },
+      {
+        "level": 5,
+        "gamesPlayed": 5,
+        "wins": 5,
+        "cashouts": 0,
+        "progressions": 5,
+        "winnings": 144,
+        "losses": 5
+      },
+      {
+        "level": 6,
+        "gamesPlayed": 2,
+        "wins": 2,
+        "cashouts": 0,
+        "progressions": 2,
+        "winnings": 115.2,
+        "losses": 2
+      },
+      {
+        "level": 7,
+        "gamesPlayed": 1,
+        "wins": 1,
+        "cashouts": 0,
+        "progressions": 1,
+        "winnings": 115.2,
+        "losses": 1
+      },
+      {
+        "level": 8,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 9,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      },
+      {
+        "level": 10,
+        "gamesPlayed": 0,
+        "wins": 0,
+        "cashouts": 0,
+        "progressions": 0,
+        "winnings": 0,
+        "losses": 0
+      }
+    ],
+    "lifecycle": {
+      "runsStarted": 535,
+      "runsCompleted": 135,
+      "runsCashedOut": 135,
+      "runsFailed": 396,
+      "levelDistribution": [
+        265,
+        81,
+        31,
+        11,
+        5,
+        2,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "workflowNodes": [
+      {
+        "id": "platform",
+        "label": "Platform Fees",
+        "category": "platform",
+        "amount": 158.4,
+        "cumulativeAmount": 2836.8,
+        "percentageOfTotal": 23.2,
+        "layers": [
+          {
+            "id": "fees",
+            "label": "Click Fees",
+            "amount": 158.4,
+            "percentage": 23.2
+          }
+        ]
+      },
+      {
+        "id": "charity",
+        "label": "Charity",
+        "category": "charity",
+        "amount": 78.57,
+        "cumulativeAmount": 1229.58,
+        "percentageOfTotal": 11.5,
+        "layers": [
+          {
+            "id": "donations",
+            "label": "Donations",
+            "amount": 78.57,
+            "percentage": 11.5
+          }
+        ]
+      },
+      {
+        "id": "players",
+        "label": "Player Payouts",
+        "category": "players",
+        "amount": 445.23,
+        "cumulativeAmount": 6967.62,
+        "percentageOfTotal": 65.3,
+        "layers": [
+          {
+            "id": "winnings",
+            "label": "Winnings",
+            "amount": 445.23,
+            "percentage": 65.3
+          }
+        ]
+      }
+    ],
+    "timelineTicks": [
+      {
+        "id": "day-30",
+        "label": "Day 30",
+        "day": 30,
+        "cumulativePlatformFees": 2836.8,
+        "cumulativeCharity": 1229.58,
+        "cumulativePlayerPayouts": 6967.62,
+        "cumulativeRevenue": 11034,
+        "dailyPlatformFees": 158.4,
+        "dailyCharity": 78.57,
+        "dailyPlayerPayouts": 445.23,
+        "dailyRevenue": 682.2
+      }
+    ],
+    "charts": {
+      "platformFees": {
+        "day": 30,
+        "dailyValue": 158.4,
+        "cumulativeValue": 2836.8
+      },
+      "charity": {
+        "day": 30,
+        "dailyValue": 78.57,
+        "cumulativeValue": 1229.58
+      },
+      "playerPayouts": {
+        "day": 30,
+        "dailyValue": 445.23,
+        "cumulativeValue": 6967.62
+      },
+      "totalRevenue": {
+        "day": 30,
+        "dailyValue": 682.2,
+        "cumulativeValue": 11034
       }
     }
   }

@@ -54,6 +54,8 @@ export interface SimulationConfig {
   initialDonationAmount: number;
   maxSimulationTimeMs: number;
   enableProgressReporting: boolean;
+  // Number of days to spread initial player seeding across (optional)
+  initialPlayerSpreadDays?: number;
   // Add S-curve growth model parameters
   growthModel: {
     adoptionRate: number; // 0.01, 0.1, or 0.5 for Conservative/Market/Viral

@@ -66,6 +66,10 @@ export class PlayerManager {
   private playerCreatedSubscription: EventSubscription | null = null;
   // No end-of-day clearing subscription; we clear at next DAY_STARTED to avoid race with late events
   private pendingInitialPlayers: number = 0;
+  // Number of days to spread initial player seeding across (default: 14)
+  private initialPlayerSpreadDays: number = 14;
+  // Track how many initial players have been seeded so far
+  private initialPlayersSeededSoFar: number = 0;
   private simulationTerminated = false;
   // Throttles to prevent runaway growth and memory pressure
   private static readonly MAX_NEW_PLAYERS_PER_DAY = 3000;
@@ -151,19 +155,39 @@ export class PlayerManager {
 
     // Note: do not clear here; we clear at DAY_COMPLETED to avoid racing in-flight events
 
-    // Seed initial players on first day as actives; count them globally, but only keep actives in memory
+    // Spread initial players across the configured initialPlayerSpreadDays window
     if (this.pendingInitialPlayers > 0 && this.playerRegistry.size === 0) {
-      const initialToCreate = this.pendingInitialPlayers;
-      this.pendingInitialPlayers = 0;
-      this.totalPlayersCounter += initialToCreate;
-      if (!this.simulationTerminated) {
-        void this.createActives(initialToCreate, playerStrategies, true).catch(
-          (error) =>
-            console.error(
-              "[PlayerManager] Failed to create initial actives:",
-              error
-            )
-        );
+      const remaining = this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
+      if (remaining > 0) {
+        const dayIndex = Math.max(1, dayNumber);
+        if (dayIndex <= this.initialPlayerSpreadDays) {
+          const basePerDay = Math.floor(this.pendingInitialPlayers / this.initialPlayerSpreadDays);
+          const remainder = this.pendingInitialPlayers % this.initialPlayerSpreadDays;
+          const toCreate = dayIndex < this.initialPlayerSpreadDays ? basePerDay : basePerDay + remainder;
+          // Ensure we create at least 1 on early days if basePerDay is 0
+          const createNow = Math.min(Math.max(1, toCreate), remaining);
+          this.initialPlayersSeededSoFar += createNow;
+          this.totalPlayersCounter += createNow;
+          if (!this.simulationTerminated) {
+            void this.createActives(createNow, playerStrategies, true).catch((error) =>
+              console.error("[PlayerManager] Failed to create initial actives:", error)
+            );
+          }
+        } else {
+          // Spread window passed; create remaining now
+          const createNow = remaining;
+          this.initialPlayersSeededSoFar += createNow;
+          this.pendingInitialPlayers = 0;
+          this.totalPlayersCounter += createNow;
+          if (!this.simulationTerminated) {
+            void this.createActives(createNow, playerStrategies, true).catch((error) =>
+              console.error("[PlayerManager] Failed to create leftover initial actives:", error)
+            );
+          }
+        }
+      }
+      if (this.initialPlayersSeededSoFar >= this.pendingInitialPlayers) {
+        this.pendingInitialPlayers = 0;
       }
     }
 
@@ -262,8 +286,20 @@ export class PlayerManager {
     // Store initial player count for seeding when strategies are available on DAY_STARTED
     const initial =
       event?.initialPlayerCount || event?.config?.initialPlayerCount || 0;
+    const spread =
+      typeof event?.config?.initialPlayerSpreadDays === "number"
+        ? event.config.initialPlayerSpreadDays
+        : typeof event?.initialPlayerSpreadDays === "number"
+        ? event.initialPlayerSpreadDays
+        : undefined;
+
+    if (typeof spread === "number" && spread > 0) {
+      this.initialPlayerSpreadDays = Math.max(1, Math.floor(spread));
+    }
+
     if (typeof initial === "number" && initial > 0) {
       this.pendingInitialPlayers = initial;
+      this.initialPlayersSeededSoFar = 0;
     }
   }
 
