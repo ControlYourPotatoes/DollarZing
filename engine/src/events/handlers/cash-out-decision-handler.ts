@@ -159,15 +159,12 @@ export class CashOutDecisionHandler {
       );
       decision = Math.random() < probability ? "CASH_OUT" : "CONTINUE";
     } else if (strategy === CashOutStrategy.AGGRESSIVE) {
-      // Aggressive strategy prefers to continue unless near jackpot
-      const stayInGameProbability = Math.max(
-        0.8 - event.winnerLevel * 0.05,
-        0.2
-      );
-      decision =
-        Math.random() < stayInGameProbability ? "CONTINUE" : "CASH_OUT";
+      // Aggressive (high-risk) strategy prefers to continue - LOW cash-out probability
+      // Start at 20% cash-out at level 1, increase to max 60% at level 8+
+      const cashOutProbability = Math.min(0.2 + event.winnerLevel * 0.05, 0.6);
+      decision = Math.random() < cashOutProbability ? "CASH_OUT" : "CONTINUE";
     } else if (strategy === CashOutStrategy.CONSERVATIVE) {
-      // Conservative strategy cashes out early
+      // Conservative (low-risk) strategy cashes out early - HIGH cash-out probability
       const cashOutProbability = Math.min(0.8 + event.winnerLevel * 0.05, 0.95);
       decision = Math.random() < cashOutProbability ? "CASH_OUT" : "CONTINUE";
     } else {

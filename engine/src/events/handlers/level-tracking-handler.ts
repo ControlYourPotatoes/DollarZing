@@ -27,6 +27,8 @@ export interface LevelTrackingSnapshot {
  * Maintains daily and cumulative statistics for level-based analytics
  */
 export class LevelTrackingHandler {
+  private static instanceCounter = 0;
+  private instanceId: number;
   private currentDay: number = 1;
   private dailyLevelStats: Map<number, Map<BettingLevel, LevelStats>> =
     new Map();
@@ -34,6 +36,8 @@ export class LevelTrackingHandler {
   private playerLevels: Map<string, PlayerLevelInfo> = new Map();
 
   constructor(private eventBus: EventBus) {
+    this.instanceId = ++LevelTrackingHandler.instanceCounter;
+    console.log(`[LevelTrackingHandler #${this.instanceId}] Initializing level tracking`);
     this.setupEventSubscriptions();
   }
 
@@ -52,11 +56,15 @@ export class LevelTrackingHandler {
       EVENT_TYPES.GAME_RESOLVED,
       this.handleGameResolved.bind(this)
     );
+    
+    console.log(`[LevelTrackingHandler #${this.instanceId}] Event subscriptions established`);
   }
 
   private handleGameCreated(event: GameCreatedEvent): void {
     const day = this.getCurrentDay();
-    const level = event.player1Level as BettingLevel; // Both players enter at same level
+    const level = event.player1Level as BettingLevel;
+
+    console.log(`[LevelTrackingHandler #${this.instanceId}] Game created at level ${level} on day ${day}`);
 
     const dayStats = this.ensureDailyStats(day);
     // Initialize once to avoid double-counting when processing both players
@@ -154,6 +162,7 @@ export class LevelTrackingHandler {
     // Day events already provide 1-based indexing
     this.currentDay = event.dayNumber;
     this.ensureDailyStats(this.currentDay);
+    console.log(`[LevelTrackingHandler #${this.instanceId}] Day ${this.currentDay} started - daily stats initialized`);
   }
 
   private getCurrentDay(): number {
@@ -185,6 +194,8 @@ export class LevelTrackingHandler {
    * Export a serializable snapshot of tracked statistics
    */
   public exportSnapshot(): LevelTrackingSnapshot {
+    console.log(`[LevelTrackingHandler #${this.instanceId}] Exporting snapshot - currentDay: ${this.currentDay}, dailyStats days: ${Array.from(this.dailyLevelStats.keys()).join(',')}, cumulative levels: ${Array.from(this.cumulativeLevelStats.keys()).join(',')}`);
+    
     const daily: Record<number, Record<BettingLevel, LevelStats>> = {};
     for (const [day, statsMap] of this.dailyLevelStats.entries()) {
       const dayRecord: Record<BettingLevel, LevelStats> = {} as Record<
@@ -195,6 +206,7 @@ export class LevelTrackingHandler {
         dayRecord[level] = { ...stats };
       }
       daily[day] = dayRecord;
+      console.log(`[LevelTrackingHandler #${this.instanceId}] Day ${day} has ${statsMap.size} levels tracked`);
     }
 
     const cumulative: Record<BettingLevel, LevelStats> = {} as Record<
@@ -204,6 +216,8 @@ export class LevelTrackingHandler {
     for (const [level, stats] of this.cumulativeLevelStats.entries()) {
       cumulative[level] = { ...stats };
     }
+
+    console.log(`[LevelTrackingHandler #${this.instanceId}] Snapshot exported with ${Object.keys(daily).length} days and ${Object.keys(cumulative).length} cumulative levels`);
 
     return {
       currentDay: this.currentDay,

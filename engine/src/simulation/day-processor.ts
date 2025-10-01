@@ -140,7 +140,33 @@ export class DayProcessor {
     }
 
     // Small delay to allow event processing
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Increased from 10ms to allow async event chains to complete
+
+    // Wait for all async event processing to complete before ending the day
+    // This ensures matchmaking, game resolution, and cash-outs all finish
+    await this.waitForEventProcessing();
+
+    // Wait for event processing to complete
+    // Keep checking until no new games are being resolved
+    let lastGameCount = this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
+    let stableCount = 0;
+    const maxWaitMs = 5000; // Max 5 seconds per day
+    const startWait = Date.now();
+
+    while (stableCount < 3 && (Date.now() - startWait) < maxWaitMs) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const currentGameCount = this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
+      if (currentGameCount === lastGameCount) {
+        stableCount++;
+      } else {
+        stableCount = 0;
+        lastGameCount = currentGameCount;
+      }
+    }
+
+    if (this.loggingEnabled) {
+      console.log(`DEBUG: Day ${day} - Event processing stabilized after ${Date.now() - startWait}ms (${lastGameCount} resolved games)`);
+    }
 
     // Emit day completed event
     const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();
@@ -169,6 +195,59 @@ export class DayProcessor {
         activePlayers: completedPayload.activePlayers,
       },
     } as DayFrameCompletedEvent);
+  }
+
+  /**
+   * Wait for all pending async events to complete
+   * This ensures all matchmaking, game resolution, and cash-out events are processed
+   * before capturing the daily stats and moving to the next day
+   */
+  private async waitForEventProcessing(): Promise<void> {
+    const maxWaitMs = 30000;  // Increased to 30 seconds for complex scenarios
+    const pollIntervalMs = 100;
+    const startTime = Date.now();
+
+    let lastPoolSize = -1;
+    let lastActiveGames = -1;
+    let stableCount = 0;
+    const requiredStablePolls = 5; // Need 5 consecutive stable polls (500ms total)
+
+    while (Date.now() - startTime < maxWaitMs) {
+      const poolStats = this.gameMatchingEngine.getPoolStatistics();
+      const activeGames = this.gameMatchingEngine.getActiveGameCount();
+      const poolSize = poolStats.totalDollarsInPool;
+
+      // Check if state is stable (no active games, pool not changing)
+      if (
+        activeGames === 0 &&
+        poolSize === lastPoolSize &&
+        activeGames === lastActiveGames
+      ) {
+        stableCount++;
+        if (stableCount >= requiredStablePolls) {
+          const elapsed = Date.now() - startTime;
+          if (this.loggingEnabled) {
+            console.log(
+              `[DayProcessor] Event processing complete after ${elapsed}ms - pool stable at ${poolSize}, no active games`
+            );
+          }
+          return;
+        }
+      } else {
+        stableCount = 0;
+      }
+
+      lastPoolSize = poolSize;
+      lastActiveGames = activeGames;
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+    }
+
+    // Timeout reached - log warning but continue
+    const poolStats = this.gameMatchingEngine.getPoolStatistics();
+    const activeGames = this.gameMatchingEngine.getActiveGameCount();
+    console.warn(
+      `[DayProcessor] Event processing timeout after ${maxWaitMs}ms - continuing anyway (pool: ${poolStats.totalDollarsInPool}, active games: ${activeGames})`
+    );
   }
 
   /**
