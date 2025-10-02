@@ -173,12 +173,12 @@ describe('PlayerProgressionHandler', () => {
         currentLevel: 10,
         state: 'POOLED',
         isActive: true,
-        currentRunWinnings: 1024
+        currentRunWinnings: 921.6
       };
 
       mockVirtualDollarFactory.getDollar.mockReturnValue(mockJackpotDollar);
       mockVirtualDollarFactory.advancePlayerLevel.mockReturnValue(mockJackpotDollar);
-      mockVirtualDollarFactory.calculateLevelWinnings.mockReturnValue(1024);
+      mockVirtualDollarFactory.calculateLevelWinnings.mockReturnValue(921.6);
 
       const runCompletedSpy = vi.fn();
       const subscription = eventBus.on(EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED, runCompletedSpy);
@@ -189,9 +189,9 @@ describe('PlayerProgressionHandler', () => {
         playerId: 'player-jackpot',
         virtualDollarId: 'dollar-jackpot',
         currentLevel: 10,
-        potentialWinnings: 1024,
+        potentialWinnings: 921.6,
         nextLevel: 10,
-        nextPotentialWinnings: 1024
+        nextPotentialWinnings: 921.6
       };
 
       await eventBus.emit(EVENT_TYPES.CONTINUE_PLAY, continuePlayEvent);

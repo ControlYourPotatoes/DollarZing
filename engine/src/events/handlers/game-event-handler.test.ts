@@ -162,7 +162,7 @@ describe("GameEventHandler", () => {
       );
     });
 
-    it("should handle jackpot level (10) with special $1024 winnings", async () => {
+    it("should handle jackpot level (10) with standard winnings formula", async () => {
       // Arrange - Level 10 (jackpot level, value = $512)
       const dollar1 = createMockVirtualDollar("dollar-1", "player-1", 10);
       const dollar2 = createMockVirtualDollar("dollar-2", "player-2", 10);
@@ -173,20 +173,20 @@ describe("GameEventHandler", () => {
         10
       );
 
-      // Mock jackpot resolution - both players get jackpot in the rules
+      // Mock jackpot resolution using standard winnings formula
       (mockGameMatchingEngine.resolveGame as any).mockReturnValue({
         success: true,
         gameId: "game-jackpot",
         winner: dollar1,
         loser: dollar2,
-        winnings: 1024, // Jackpot amount from game rules
+        winnings: 921.6,
       });
 
       (mockGameMatchingEngine.getGameSession as any).mockReturnValue({
         ...gameSession,
         winner: dollar1,
         loser: dollar2,
-        winnings: 1024,
+        winnings: 921.6,
       });
 
       const gameResolvedHandler = vi.fn();
@@ -213,7 +213,7 @@ describe("GameEventHandler", () => {
       // Assert
       expect(gameResolvedHandler).toHaveBeenCalledWith(
         expect.objectContaining({
-          winnings: 1024, // Jackpot winnings
+          winnings: 921.6,
           winnerLevel: 10,
           loserLevel: 10,
         })
@@ -358,7 +358,7 @@ describe("GameEventHandler", () => {
         const dollar1 = createMockVirtualDollar("dollar-1", "player-1", level);
         const dollar2 = createMockVirtualDollar("dollar-2", "player-2", level);
         const expectedWinnings =
-          level === 10 ? 1024 : getBettingLevelValue(level) * 1.8;
+          getBettingLevelValue(level) * 1.8;
 
         (mockGameMatchingEngine.resolveGame as any).mockReturnValue({
           success: true,

@@ -25,7 +25,7 @@ const BETTING_LEVELS: BettingLevel[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Betti
 const PLATFORM_FEE = 0.2; // $0.20 per game (10c per player × 2 players)
 const WINNINGS_MULTIPLIER = 1.8; // CryptoZing winnings formula
 const JACKPOT_LEVEL: BettingLevel = 10; // Level 10 (value = $512)
-const JACKPOT_AMOUNT = 1024; // $1024 jackpot
+const JACKPOT_AMOUNT = getBettingLevelValue(JACKPOT_LEVEL) * WINNINGS_MULTIPLIER;
 
 /**
  * GameEventHandler - Handles game resolution through event-driven architecture
@@ -164,12 +164,7 @@ export class GameEventHandler {
    * Calculate winnings based on CryptoZing game rules
    */
   private calculateWinnings(level: BettingLevel): number {
-    // Special case: Jackpot level (10, value=$512) = $1024
-    if (level === JACKPOT_LEVEL) {
-      return JACKPOT_AMOUNT;
-    }
-
-    // Regular levels: getBettingLevelValue(level) × 1.8 (CryptoZing formula)
+    // All levels, including jackpot, follow the standard winnings multiplier
     return getBettingLevelValue(level) * WINNINGS_MULTIPLIER;
   }
 

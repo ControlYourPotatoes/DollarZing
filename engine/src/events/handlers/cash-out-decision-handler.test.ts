@@ -279,7 +279,7 @@ describe("CashOutDecisionHandler", () => {
         virtualDollarId: "dollar-jackpot",
         previousLevel: 9,
         currentLevel: 10,
-        totalWinnings: 1024, // Jackpot amount
+        totalWinnings: 921.6,
         gamesWonInRun: 10,
         nextBettingAmount: 1.0,
       };
@@ -292,7 +292,7 @@ describe("CashOutDecisionHandler", () => {
         expect.objectContaining({
           decision: "CASH_OUT",
           currentLevel: 10,
-          totalWinnings: 1024,
+          totalWinnings: 921.6,
           reason: expect.stringContaining("Jackpot reached"),
         })
       );
