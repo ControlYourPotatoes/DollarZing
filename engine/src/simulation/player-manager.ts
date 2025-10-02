@@ -704,6 +704,14 @@ export class PlayerManager {
     }
   }
 
+  /**
+   * Get the current winnings for a virtual dollar (used by cash-out decision logic)
+   */
+  getVirtualDollarCurrentWinnings(virtualDollarId: string): number {
+    const virtualDollar = this.virtualDollarFactory.getDollar(virtualDollarId);
+    return virtualDollar?.currentRunWinnings || 0;
+  }
+
   dispose(): void {
     this.dayStartedSubscription?.unsubscribe();
     this.simulationStartedSubscription?.unsubscribe();

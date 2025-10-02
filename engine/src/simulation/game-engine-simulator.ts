@@ -950,11 +950,24 @@ export class GameEngineSimulator {
       },
       makeCashOutDecision: () => "CONTINUE",
       getCashOutProbability: () => 0.5,
-      processDecision: () => ({
-        finalLevel: 1,
-        totalWinnings: 0,
-        completed: false,
-      }),
+      processDecision: (context: DecisionProcessContext) => {
+        if (context.decision === "CASH_OUT") {
+          // Get the virtual dollar's current winnings
+          const currentWinnings = this.components.playerManager.getVirtualDollarCurrentWinnings(context.virtualDollarId);
+          return {
+            finalLevel: context.currentLevel,
+            totalWinnings: context.totalWinnings,
+            cashOutAmount: currentWinnings,
+            completed: true,
+          };
+        }
+        return {
+          finalLevel: context.currentLevel,
+          totalWinnings: context.totalWinnings,
+          cashOutAmount: 0,
+          completed: false,
+        };
+      },
     };
   }
 
