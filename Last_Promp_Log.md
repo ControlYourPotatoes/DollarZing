@@ -455,3 +455,37 @@ This has been a tough issue to resolve due to the hard rule of unique players. S
 Another thought is like i said the match making priority handles higher levels first but maybe add a condition for having more than one unique player. Since this issue happens in level 1 too, switching the priority order seems like a bandaid solution for one of my suspected edge cases. 
 
 Feel free to ask question for any doubt or asumption when you look throught the events. 
+
+
+Perfect! Now I can see the issue clearly. Let me trace through what happens:
+
+Player at level 9 wins a game
+GameEventHandler emits GAME_RESOLVED with winnerLevel: 9 (line 127 of game-event-handler.ts)
+CashOutDecisionHandler checks if winnerLevel === 10 (line 139 of cash-out-decision-handler.ts) - FALSE, it's 9
+Makes a cash-out decision based on strategy - might decide to CONTINUE
+If CONTINUE, emits CONTINUE_PLAY event
+PlayerProgressionHandler.handleContinuePlay advances the level from 9 to 10
+But then at line 136 of player-progression-handler.ts, there's a guard: if (event.currentLevel >= 10) that prevents progression
+And at line 189, if newLevel >= 10, it completes the run
+So the issue is: Players never PLAY at level 10. They advance TO level 10 after winning at level 9, but then immediately complete their run without playing a level 10 game.
+
+Let me create a test to confirm this and then propose a fix:
+
+Created level-10-progression.test.ts
+
+Now let me build and run this test:
+
+
+cd /workspace/engine && npm run build
+
+cd /workspace/engine && npm test -- level-10-progression.test.ts
+Let me fix the import path:
+
+level-10-progression.test.ts+9-9
+Let me check what factories are available:
+
+Read factories
+
+Read index.ts
+
+Let me check what other tests use:

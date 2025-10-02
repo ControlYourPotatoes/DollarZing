@@ -475,7 +475,7 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
 
     // Update level and winnings
     dollar.currentLevel = newLevel;
-    dollar.currentRunWinnings = additionalWinnings;
+    dollar.currentRunWinnings += additionalWinnings;
     dollar.gamesInThisRun += 1;
 
     // Update state to WON

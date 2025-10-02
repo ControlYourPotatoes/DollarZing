@@ -465,7 +465,7 @@ export class GameMatchingEngine {
       loser.gameHistory.push(game);
       winner.gamesInThisRun++;
       loser.gamesInThisRun++;
-      winner.currentRunWinnings = game.winnings;
+      winner.currentRunWinnings += game.winnings;
       // Note: loser loses their currentRunWinnings (already implied by LOST state)
 
       // Move game from active to completed

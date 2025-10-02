@@ -154,14 +154,13 @@ export class PlayerProgressionHandler {
 
       // Calculate progression using factory
       const newLevel = Math.min(10, event.currentLevel + 1) as BettingLevel;
-      const levelWinnings =
-        this.virtualDollarFactory.calculateLevelWinnings(newLevel);
+      const additionalWinnings = 0; // Winnings already added in resolution; preserve cumulative
 
       // Use factory to advance player - handles all validation and state management
       const updatedDollar = this.virtualDollarFactory.advancePlayerLevel(
         vdId,
         newLevel,
-        levelWinnings
+        additionalWinnings
       );
 
       if (this.loggingEnabled) {
@@ -174,39 +173,25 @@ export class PlayerProgressionHandler {
         `[PlayerProgressionHandler] Advanced dollar ${updatedDollar.id} now at level ${updatedDollar.currentLevel}`
       );
 
-      // Check if run is complete (reached Level 10 = Jackpot)
-      if (newLevel >= 10) {
-        this.emitVirtualDollarRunCompleted(
-          event.playerId,
-          vdId,
-          newLevel,
-          updatedDollar.currentRunWinnings,
-          true // isJackpot
-        ).catch((error) =>
-          console.error(
-            "[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_RUN_COMPLETED:",
-            error
-          )
-        );
-      } else {
-        // Re-pool the advanced winner for next level matching
-        void this.rePoolAdvancedWinner(updatedDollar);
+      // Always re-pool the advanced winner for next level matching (including level 10)
+      void this.rePoolAdvancedWinner(updatedDollar);
 
-        // Player advanced to next level - emit VIRTUAL_DOLLAR_ADVANCED event
-        this.emitVirtualDollarAdvanced(
-          event.playerId,
-          vdId,
-          event.currentLevel as BettingLevel,
-          newLevel,
-          updatedDollar.currentRunWinnings,
-          updatedDollar.gamesInThisRun
-        ).catch((error) =>
-          console.error(
-            "[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_ADVANCED:",
-            error
-          )
-        );
-      }
+      // Player advanced to next level - emit VIRTUAL_DOLLAR_ADVANCED event
+      this.emitVirtualDollarAdvanced(
+        event.playerId,
+        vdId,
+        event.currentLevel as BettingLevel,
+        newLevel,
+        updatedDollar.currentRunWinnings,
+        updatedDollar.gamesInThisRun
+      ).catch((error) =>
+        console.error(
+          "[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_ADVANCED:",
+          error
+        )
+      );
+
+      // For level 10, completion (cashout/jackpot) will be handled after the level 10 game resolves
     } catch (error) {
       throw new Error(
         `Winner progression failed: ${

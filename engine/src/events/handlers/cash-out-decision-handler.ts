@@ -96,6 +96,14 @@ export class CashOutDecisionHandler {
     try {
       // Only process cash-out decisions for winners
       if (event.gameResult === "WIN") {
+        // Force cash-out at level 10 (jackpot level)
+        // Check if winner will reach level 10 after this win
+        const nextLevel = event.winnerLevel + 1;
+        if (nextLevel > 10) {
+          await this.processCashOutDecision(event);
+          return;
+        }
+
         await this.processCashOutDecision(event);
       }
     } catch (error) {
