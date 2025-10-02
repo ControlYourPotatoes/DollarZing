@@ -1,0 +1,23 @@
+[
+  {
+    "timestamp": 1759365176893,
+    "level": "info",
+    "eventType": "SESSION",
+    "message": "Started debugging session: dataset-15-high-10",
+    "data": {
+      "sessionId": "session_1759365176893_v3my0o92b"
+    }
+  },
+  {
+    "timestamp": 1759365176890,
+    "level": "info",
+    "eventType": "SYSTEM",
+    "message": "EventDebugInterface attached to EventBus"
+  },
+  {
+    "timestamp": 1759365176890,
+    "level": "debug",
+    "eventType": "SYSTEM",
+    "message": "Performance hooks setup (placeholder)"
+  }
+]
