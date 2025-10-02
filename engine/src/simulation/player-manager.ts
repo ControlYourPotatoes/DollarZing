@@ -7,6 +7,7 @@ import {
   DayFrameCompletedEvent,
   PlayerCreatedEvent,
   NewRunCreatedEvent,
+  CashOutCompletedEvent,
 } from "../events/event-types";
 
 /**
@@ -64,6 +65,7 @@ export class PlayerManager {
   private dayFrameCompletedSubscription: EventSubscription | null = null;
   private runCompletedSubscription: EventSubscription | null = null;
   private playerCreatedSubscription: EventSubscription | null = null;
+  private cashOutCompletedSubscription: EventSubscription | null = null;
   // No end-of-day clearing subscription; we clear at next DAY_STARTED to avoid race with late events
   private pendingInitialPlayers: number = 0;
   // Number of days to spread initial player seeding across (default: 14)
@@ -138,6 +140,12 @@ export class PlayerManager {
 
     // Note: CASH_OUT_COMPLETED events are handled by the same VIRTUAL_DOLLAR_RUN_COMPLETED handler
     // since cash-outs should also emit VIRTUAL_DOLLAR_RUN_COMPLETED events
+
+    this.cashOutCompletedSubscription = this.eventBus.on(
+      EVENT_TYPES.CASH_OUT_COMPLETED,
+      this.handleCashOutCompleted.bind(this),
+      5
+    );
 
     this.dayFrameCompletedSubscription =
       this.eventBus.on<DayFrameCompletedEvent>(
@@ -450,6 +458,11 @@ export class PlayerManager {
     });
   }
 
+  private handleCashOutCompleted(_event: CashOutCompletedEvent): void {
+    // Player balance updates are handled by RevenueTrackingHandler
+    // This handler ensures the event is processed for consistency
+  }
+
   /**
    * Initialize players with starting donation balance
    * DEPRECATED: This method bypasses event-driven architecture
@@ -717,11 +730,13 @@ export class PlayerManager {
     this.simulationStartedSubscription?.unsubscribe();
     this.runCompletedSubscription?.unsubscribe();
     this.playerCreatedSubscription?.unsubscribe();
+    this.cashOutCompletedSubscription?.unsubscribe();
     this.dayFrameCompletedSubscription?.unsubscribe();
     this.dayStartedSubscription = null;
     this.simulationStartedSubscription = null;
     this.runCompletedSubscription = null;
     this.playerCreatedSubscription = null;
+    this.cashOutCompletedSubscription = null;
     this.dayFrameCompletedSubscription = null;
     this.playerRegistry.clear();
   }
