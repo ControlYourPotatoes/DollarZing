@@ -1,6 +1,4 @@
-import {
-  GameEngineSimulator,
-} from "./game-engine-simulator";
+import { GameEngineSimulator } from "./game-engine-simulator";
 import {
   createSimulationProfile,
   type SimulationProfile,
@@ -130,7 +128,11 @@ function assembleSimulator(
   const poolingEnabled = resolvePooling(defaults.poolingDefault, options);
   applyPoolingEnvironment(poolingEnabled);
 
-  const profile = createProfile(defaults, poolingEnabled, options.profileOverrides);
+  const profile = createProfile(
+    defaults,
+    poolingEnabled,
+    options.profileOverrides
+  );
   const eventBus = options.eventBus ?? new EventBus();
   const debugInterface =
     options.debug?.enableEventTracing === true
@@ -175,7 +177,8 @@ function assembleSimulator(
     revenueCalculator,
     dayProcessor,
     playerManager,
-    eventBus
+    eventBus,
+    debugInterface
   );
 
   const dispose = (): void => {
@@ -231,7 +234,8 @@ function createProfile(
     attachDebugger:
       runtimeOverrides.attachDebugger ?? defaults.runtime.attachDebugger,
     enableSanityMetrics:
-      runtimeOverrides.enableSanityMetrics ?? defaults.runtime.enableSanityMetrics,
+      runtimeOverrides.enableSanityMetrics ??
+      defaults.runtime.enableSanityMetrics,
     virtualDollarsPerPlayer:
       runtimeOverrides.virtualDollarsPerPlayer ??
       defaults.runtime.virtualDollarsPerPlayer,
