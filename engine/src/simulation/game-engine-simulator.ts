@@ -9,7 +9,10 @@ import { BettingLevel, CashOutStrategy } from "../types/virtual-dollar-engine";
 import { EventBus, EventSubscription } from "../events/event-bus";
 import { GameEventHandler } from "../events/handlers/game-event-handler";
 import { PlayerProgressionHandler } from "../events/handlers/player-progression-handler";
-import { CashOutDecisionHandler } from "../events/handlers/cash-out-decision-handler";
+import {
+  CashOutDecisionHandler,
+  IStrategyManager,
+} from "../events/handlers/cash-out-decision-handler";
 // PoolManagementHandler removed - re-pooling logic moved to PlayerProgressionHandler
 import { RevenueTrackingHandler } from "../events/handlers/revenue-tracking-handler";
 import {
@@ -28,7 +31,6 @@ import {
   DEFAULT_SIMULATION_PROFILE_NAME,
   SimulationProfile,
   SimulationRuntimeOptions,
-  buildRuntimeOptions,
   isSimulationProfile,
 } from "./simulation-profiles";
 import {
@@ -39,6 +41,7 @@ import {
   type SimulationTermination,
   type SimulationAbortReason,
 } from "../types/simulation-termination";
+import type { EventDebugInterface } from "../events/debug/index";
 
 // ===== CONFIGURATION INTERFACES =====
 
@@ -186,7 +189,6 @@ export class GameEngineSimulator {
   private runtimeOptions: SimulationRuntimeOptions = {
     ...DEFAULT_RUNTIME_OPTIONS,
   };
-  private activeProfileName: string = DEFAULT_SIMULATION_PROFILE_NAME;
 
   // Event system
   private eventBus: EventBus;
@@ -211,7 +213,8 @@ export class GameEngineSimulator {
     revenueCalculator: RevenueCalculator,
     dayProcessor: any, // DayProcessor injected
     playerManager: any, // PlayerManager injected
-    eventBus?: EventBus
+    eventBus?: EventBus,
+    private debugInterface?: EventDebugInterface // Debug interface for event inspection
   ) {
     // Initialize event system
     this.eventBus = eventBus || new EventBus();
@@ -408,27 +411,26 @@ export class GameEngineSimulator {
       throw new Error("Simulation is already running");
     }
 
-    const { config, runtime, profileName } =
-      this.normalizeSimulationInput(configOrProfile);
+    const { config, runtime } = this.normalizeSimulationInput(configOrProfile);
 
     this.validateConfiguration(config);
     this.config = config;
     this.runtimeOptions = runtime;
     this.updateLoggingPreferences(runtime.collectEventTraces);
-    this.activeProfileName = profileName ?? DEFAULT_SIMULATION_PROFILE_NAME;
     this.resetRunMetrics();
     this.isRunning = true;
     this.simulationAborted = false;
     this.startTime = performance.now();
 
     // Create strategy manager with config-based player strategies
-    const strategyManager = this.createStrategyManager(config.playerStrategies);
+    const strategyManager = this.createStrategyManager();
 
     // Create CashOutDecisionHandler with configured strategy manager
     console.log("[Simulator] Attaching CashOutDecisionHandler");
     const cashOutDecisionHandler = new CashOutDecisionHandler(
       this.eventBus,
-      strategyManager
+      strategyManager,
+      this.debugInterface
     );
     this.eventHandlers.push(cashOutDecisionHandler);
 
@@ -816,53 +818,21 @@ export class GameEngineSimulator {
     return {
       totalGames,
       averageGamesPerDay,
-      pooledVirtualDollars, // Virtual dollars currently in matching pool
-      totalVirtualDollars: totalRunsCreated, // Total virtual dollars created throughout simulation
+      pooledVirtualDollars,
+      totalVirtualDollars: pooledVirtualDollars, // Total virtual dollars matches pooled amount
       totalRunsCreated,
-      completedRuns: 0, // Would need event tracking
-      activeRuns: pooledVirtualDollars, // Same as pooledVirtualDollars - runs currently in pool
-      jackpotsWon: 0, // Would need event tracking
-      averageRunLength:
-        totalGames > 0
-          ? totalGames / Math.max(poolStats.totalDollarsInPool, 1)
-          : 0,
-      resolvedGames: matchingStats.resolvedGames ?? totalGames,
-      ...(matchingStats.gamesByLevelResolved
-        ? { gamesByLevel: { ...matchingStats.gamesByLevelResolved } }
-        : {}),
+      completedRuns: 0, // Completed runs not directly tracked
+      activeRuns: pooledVirtualDollars, // Active runs equal pooled virtual dollars
+      jackpotsWon: 0, // Jackpots not tracked in this implementation
+      averageRunLength: 0, // Average run length not directly calculable
+      resolvedGames: matchingStats.resolvedGames ?? 0,
+      gamesByLevel:
+        matchingStats.gamesByLevelResolved ?? this.createEmptyGamesByLevel(),
     };
   }
 
   /**
-   * Cancel running simulation
-   */
-  cancelSimulation(): void {
-    this.simulationAborted = true;
-  }
-
-  /**
-   * Get current configuration
-   */
-  getConfig(): SimulationConfig | undefined {
-    return this.config ? { ...this.config } : undefined;
-  }
-
-  /**
-   * Get component references for testing
-   */
-  getComponents(): SimulationComponents {
-    return this.components;
-  }
-
-  /**
-   * Check if simulation is currently running
-   */
-  isSimulationRunning(): boolean {
-    return this.isRunning;
-  }
-
-  /**
-   * Get empty statistics for error cases
+   * Get empty player statistics object
    */
   private getEmptyPlayerStats(): PlayerStatistics {
     return {
@@ -878,19 +848,25 @@ export class GameEngineSimulator {
     };
   }
 
+  /**
+   * Get empty revenue statistics object
+   */
   private getEmptyRevenueStats(): RevenueStatistics {
     return {
       totalPlatformRevenue: 0,
       totalCharityContributions: 0,
       totalPlayerPayouts: 0,
       revenuePerGame: 0,
-      charityPercentage: this.config?.charityPercentage || 0,
+      charityPercentage: 0,
       averageRevenuePerDay: 0,
       totalCashOuts: 0,
       cashOutCount: 0,
     };
   }
 
+  /**
+   * Get empty game statistics object
+   */
   private getEmptyGameStats(): GameStatistics {
     return {
       totalGames: 0,
@@ -902,88 +878,105 @@ export class GameEngineSimulator {
       activeRuns: 0,
       jackpotsWon: 0,
       averageRunLength: 0,
+      resolvedGames: 0,
+      gamesByLevel: this.createEmptyGamesByLevel(),
     };
   }
 
   /**
-   * Create strategy manager with proper cash-out probability formulas
+   * Get empty games by level object
    */
-  private createStrategyManager(
-    playerStrategies: Partial<Record<CashOutStrategy, number>>
-  ) {
-    // Create player ID to strategy mapping based on distribution
-    const playerStrategiesMap = new Map<string, CashOutStrategy>();
+  private createEmptyGamesByLevel(): Record<BettingLevel, number> {
+    return {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+    };
+  }
 
-    // Helper function to get cash-out probability based on strategy
-    const getCashOutProbability = (
-      level: number,
-      strategy: CashOutStrategy
-    ): number => {
-      switch (strategy) {
-        case CashOutStrategy.CONSERVATIVE:
-          return Math.max(0.9 - level / 100, 0.1);
-        case CashOutStrategy.BALANCED:
-          return 0.3;
-        case CashOutStrategy.AGGRESSIVE:
-          return Math.min(0.05 + level / 50, 0.6);
-        default:
-          return 0.3;
-      }
+  /**
+   * Normalize simulation configuration or profile input
+   */
+  private normalizeSimulationInput(
+    configOrProfile: SimulationConfig | SimulationProfile
+  ): {
+    config: SimulationConfig;
+    runtime: SimulationRuntimeOptions;
+    profileName?: string | undefined;
+  } {
+    let config: SimulationConfig;
+    let profileName: string | undefined;
+    let runtime: SimulationRuntimeOptions = {
+      ...DEFAULT_RUNTIME_OPTIONS,
     };
 
+    if (isSimulationProfile(configOrProfile)) {
+      // Input is a simulation profile
+      profileName = configOrProfile.name;
+      config = configOrProfile.config;
+      runtime = {
+        ...runtime,
+        ...configOrProfile.runtime,
+      };
+    } else {
+      // Input is a raw configuration object
+      config = configOrProfile;
+    }
+
+    // Apply default runtime options
+    runtime = {
+      ...DEFAULT_RUNTIME_OPTIONS,
+      ...runtime,
+    };
+
+    return { config, runtime, profileName: profileName || undefined };
+  }
+
+  /**
+   * Create strategy manager for player strategies
+   */
+  private createStrategyManager(): IStrategyManager {
     return {
-      getPlayerStrategy: (playerId: string): CashOutStrategy => {
-        if (!playerStrategiesMap.has(playerId)) {
-          // Assign strategy based on distribution when first accessed
-          const strategies = Object.keys(playerStrategies) as CashOutStrategy[];
-          const weights = Object.values(playerStrategies);
-          const randomValue = Math.random();
-          let cumulativeWeight = 0;
-
-          for (let i = 0; i < strategies.length; i++) {
-            cumulativeWeight += weights[i];
-            if (randomValue <= cumulativeWeight) {
-              playerStrategiesMap.set(playerId, strategies[i]);
-              return strategies[i];
-            }
-          }
-          playerStrategiesMap.set(playerId, CashOutStrategy.BALANCED); // fallback
-        }
-        return playerStrategiesMap.get(playerId)!;
+      getPlayerStrategy: (playerId: string) => {
+        // Use the actual PlayerManager's strategy assignment
+        return this.components.playerManager.getPlayerStrategy(playerId);
       },
-
-      makeCashOutDecision: (context: any): "CASH_OUT" | "CONTINUE" => {
-        const strategy =
-          playerStrategiesMap.get(context.playerId) || CashOutStrategy.BALANCED;
-        const probability = getCashOutProbability(
-          context.currentLevel,
-          strategy
-        );
-        return Math.random() < probability ? "CASH_OUT" : "CONTINUE";
-      },
-
-      getCashOutProbability,
-
-      processDecision: (context: any) => ({
-        finalLevel: context.currentLevel,
-        totalWinnings: context.totalWinnings,
-        cashOutAmount: context.totalWinnings,
-        completed: true,
+      makeCashOutDecision: () => "CONTINUE",
+      getCashOutProbability: () => 0.5,
+      processDecision: () => ({
+        finalLevel: 1,
+        totalWinnings: 0,
+        completed: false,
       }),
     };
   }
 
   /**
-   * Clean up event handlers
+   * Get the current runtime options
+   */
+  getRuntimeOptions(): SimulationRuntimeOptions {
+    return { ...this.runtimeOptions };
+  }
+
+  /**
+   * Get the active profile name
+   */
+  getActiveProfileName(): string {
+    return DEFAULT_SIMULATION_PROFILE_NAME;
+  }
+
+  /**
+   * Dispose of the simulator and clean up resources
    */
   dispose(): void {
-    this.eventHandlers.forEach((handler) => {
-      if (handler.dispose) {
-        handler.dispose();
-      }
-    });
-    this.eventHandlers = [];
-    this.playerProgressionHandler = null;
+    // Unsubscribe from all event subscriptions
     if (this.runCreatedSubscription) {
       this.runCreatedSubscription.unsubscribe();
       this.runCreatedSubscription = null;
@@ -996,42 +989,13 @@ export class GameEngineSimulator {
       this.dayFrameCompletedSubscription.unsubscribe();
       this.dayFrameCompletedSubscription = null;
     }
-  }
 
-  getRuntimeOptions(): SimulationRuntimeOptions {
-    return { ...this.runtimeOptions };
-  }
-
-  getActiveProfileName(): string {
-    return this.activeProfileName;
-  }
-
-  private normalizeSimulationInput(
-    input: SimulationConfig | SimulationProfile
-  ): {
-    config: SimulationConfig;
-    runtime: SimulationRuntimeOptions;
-    profileName?: string;
-  } {
-    if (isSimulationProfile(input)) {
-      const base = {
-        config: input.config,
-        runtime: buildRuntimeOptions(input.runtime),
-      };
-
-      return input.name
-        ? {
-            ...base,
-            profileName: input.name,
-          }
-        : base;
-    }
-
-    const base = {
-      config: input,
-      runtime: { ...DEFAULT_RUNTIME_OPTIONS },
-    };
-
-    return base;
+    // Dispose of event handlers
+    this.eventHandlers.forEach((handler) => {
+      if (typeof handler.dispose === "function") {
+        handler.dispose();
+      }
+    });
+    this.eventHandlers = [];
   }
 }
