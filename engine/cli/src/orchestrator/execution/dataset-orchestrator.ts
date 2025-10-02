@@ -669,8 +669,8 @@ export class DatasetOrchestrator {
         },
         high: {
           conservative: 0.05, // 5% conservative cash-out
-          balanced: 0.25, // 25% balanced cash-out
-          aggressive: 0.7, // 70% aggressive cash-out
+          balanced: 0.2, // 20% balanced cash-out
+          aggressive: 0.75, // 75% aggressive cash-out
         },
       },
     };
