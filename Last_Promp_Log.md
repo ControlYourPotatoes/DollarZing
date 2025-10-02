@@ -435,3 +435,23 @@ If you want, I can:
 Run a quick 3-day simulation run (with events enabled) and show the Day 1/2/3 seed counts and level-tracking outputs.
 Add a CLI option to control initialPlayerSpreadDays and wire it into the orchestrator profiles.
 Add tests covering the new seeding logic.
+
+
+
+OK, i need you to find something for me. 
+
+I am looking at the clean up triggers here, and i am noticing false positives.  There used to be a lot more but we added this backoff logic as when a player is created, it makes 5 virtual dollars which the match making is ment to grab for a match, the issue is that it tends to grab two from the same owner, seem like the nature of event driven events. 
+
+The unique owners is a hard rule, not ment to be altered. 
+
+I know i just had an issue were the initial users first day spike was to high for the growth simulation to catch up so added some code to spread them throught the first n days. 
+
+Since the match making seems to grab the next dollar and it been an issue trying to get this to get unique owners first. I had an idea about spreading the virtual dollars of the a player created in a similar way but during the same day instead.
+
+Another related edge case i am suspecting is also happening since winning dollar during their run go up levels, and match making priorities the higher levels first. It might be also happenening when 2 dollar of the same owner move up to level 2 then the priority kicks in trying to match those two dollars of the same owner causing the clean up trigger contiditions as it tries to match those two wining dollars in a higher level so another false positive
+
+This has been a tough issue to resolve due to the hard rule of unique players. So speading the dollar im not sure if its feasable but im hoping you can look through the event lifecycle and provide me potencial solutions as mine feel like intencional bottlenecks because match making seems to have a bad personality. 
+
+Another thought is like i said the match making priority handles higher levels first but maybe add a condition for having more than one unique player. Since this issue happens in level 1 too, switching the priority order seems like a bandaid solution for one of my suspected edge cases. 
+
+Feel free to ask question for any doubt or asumption when you look throught the events. 

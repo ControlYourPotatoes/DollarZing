@@ -157,20 +157,31 @@ export class PlayerManager {
 
     // Spread initial players across the configured initialPlayerSpreadDays window
     if (this.pendingInitialPlayers > 0 && this.playerRegistry.size === 0) {
-      const remaining = this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
+      const remaining =
+        this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
       if (remaining > 0) {
         const dayIndex = Math.max(1, dayNumber);
         if (dayIndex <= this.initialPlayerSpreadDays) {
-          const basePerDay = Math.floor(this.pendingInitialPlayers / this.initialPlayerSpreadDays);
-          const remainder = this.pendingInitialPlayers % this.initialPlayerSpreadDays;
-          const toCreate = dayIndex < this.initialPlayerSpreadDays ? basePerDay : basePerDay + remainder;
+          const basePerDay = Math.floor(
+            this.pendingInitialPlayers / this.initialPlayerSpreadDays
+          );
+          const remainder =
+            this.pendingInitialPlayers % this.initialPlayerSpreadDays;
+          const toCreate =
+            dayIndex < this.initialPlayerSpreadDays
+              ? basePerDay
+              : basePerDay + remainder;
           // Ensure we create at least 1 on early days if basePerDay is 0
           const createNow = Math.min(Math.max(1, toCreate), remaining);
           this.initialPlayersSeededSoFar += createNow;
           this.totalPlayersCounter += createNow;
           if (!this.simulationTerminated) {
-            void this.createActives(createNow, playerStrategies, true).catch((error) =>
-              console.error("[PlayerManager] Failed to create initial actives:", error)
+            void this.createActives(createNow, playerStrategies, true).catch(
+              (error) =>
+                console.error(
+                  "[PlayerManager] Failed to create initial actives:",
+                  error
+                )
             );
           }
         } else {
@@ -180,8 +191,12 @@ export class PlayerManager {
           this.pendingInitialPlayers = 0;
           this.totalPlayersCounter += createNow;
           if (!this.simulationTerminated) {
-            void this.createActives(createNow, playerStrategies, true).catch((error) =>
-              console.error("[PlayerManager] Failed to create leftover initial actives:", error)
+            void this.createActives(createNow, playerStrategies, true).catch(
+              (error) =>
+                console.error(
+                  "[PlayerManager] Failed to create leftover initial actives:",
+                  error
+                )
             );
           }
         }
@@ -372,40 +387,47 @@ export class PlayerManager {
         ? PlayerManager.NEW_PLAYER_STARTING_DOLLARS
         : PlayerManager.ALLOWANCE_PER_DAY[strategy] ?? 3;
 
-      for (let k = 0; k < runsToCreate; k++) {
-        if (this.simulationTerminated) {
-          break;
-        }
-        const newRun = this.createNewRun({
-          playerId,
-          cashOutStrategy: strategy,
-          fundingSource: "DONATION",
-        });
-        if (newRun) {
-          void this.eventBus
-            .emit(EVENT_TYPES.NEW_RUN_CREATED, {
-              type: EVENT_TYPES.NEW_RUN_CREATED,
-              timestamp: new Date(),
-              playerId,
-              virtualDollarId: newRun.id,
-              fundingSource: "DONATION",
-              cashOutStrategy: strategy,
-              runCount:
-                this.playerRegistry.get(playerId)?.totalRunsCreated ?? 1,
-            } as NewRunCreatedEvent)
-            .catch((error) =>
-              console.error(
-                "[PlayerManager] Failed to emit NEW_RUN_CREATED:",
-                error
-              )
+      // Shuffle the order of dollar creation to interleave emissions and reduce same-owner clustering
+      const indices = Array.from({ length: runsToCreate }, (_, i) => i).sort(
+        () => Math.random() - 0.5
+      );
+
+      for (let i = 0; i < indices.length; i++) {
+        setTimeout(() => {
+          if (this.simulationTerminated) {
+            return;
+          }
+          const newRun = this.createNewRun({
+            playerId,
+            cashOutStrategy: strategy,
+            fundingSource: "DONATION",
+          });
+          if (newRun) {
+            void this.eventBus
+              .emit(EVENT_TYPES.NEW_RUN_CREATED, {
+                type: EVENT_TYPES.NEW_RUN_CREATED,
+                timestamp: new Date(),
+                playerId,
+                virtualDollarId: newRun.id,
+                fundingSource: "DONATION",
+                cashOutStrategy: strategy,
+                runCount:
+                  this.playerRegistry.get(playerId)?.totalRunsCreated ?? 1,
+              } as NewRunCreatedEvent)
+              .catch((error) =>
+                console.error(
+                  "[PlayerManager] Failed to emit NEW_RUN_CREATED:",
+                  error
+                )
+              );
+          } else {
+            console.warn(
+              `[PlayerManager] Failed to create run ${
+                indices[i] + 1
+              }/${runsToCreate} for ${playerId}`
             );
-        } else {
-          console.warn(
-            `[PlayerManager] Failed to create run ${
-              k + 1
-            }/${runsToCreate} for ${playerId}`
-          );
-        }
+          }
+        }, i * 50 + Math.random() * 20); // 50ms base delay per dollar with 0-20ms jitter for better interleaving
       }
     }
   }

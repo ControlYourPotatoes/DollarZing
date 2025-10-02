@@ -45,4 +45,4 @@ npm run simulate -- --days 1 2>&1 | tee sim.log
     --debug-events \
     --log-file engine/run.log
 
-    NODE_OPTIONS="--max-old-space-size=9126" node dist/scripts/run-orchestrator.js --days 3 --combo 15,high,10 --debug-events  --log-file run.log
+    NODE_OPTIONS="--max-old-space-size=9126" node dist/scripts/run-orchestrator.js --days 3 --combo 15,high,10 --log-file run.log

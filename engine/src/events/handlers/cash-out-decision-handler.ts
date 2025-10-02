@@ -33,6 +33,7 @@ export interface CashOutDecisionContext {
   gamesPlayed: number;
   playerId: string;
   virtualDollarId: string;
+  consecutiveWins: number;
 }
 
 /**
@@ -146,6 +147,7 @@ export class CashOutDecisionHandler {
       gamesPlayed: 1, // From the resolved game
       playerId: event.winnerId,
       virtualDollarId: event.winnerDollarId,
+      consecutiveWins: event.winnerLevel - 1, // Each level advancement represents a consecutive win
     };
 
     // Make cash-out decision using strategy manager
@@ -160,8 +162,14 @@ export class CashOutDecisionHandler {
       decision = Math.random() < probability ? "CASH_OUT" : "CONTINUE";
     } else if (strategy === CashOutStrategy.AGGRESSIVE) {
       // Aggressive (high-risk) strategy prefers to continue - LOW cash-out probability
-      // Start at 20% cash-out at level 1, increase to max 60% at level 8+
-      const cashOutProbability = Math.min(0.2 + event.winnerLevel * 0.05, 0.6);
+      // Start at 5% cash-out at level 1, increase to max 40% at level 12+
+      let cashOutProbability = Math.min(0.05 + event.winnerLevel * 0.03, 0.4);
+      
+      // Risk tolerance multiplier: reduce cashout probability for winning streaks
+      if (context.consecutiveWins >= 3) {
+        cashOutProbability *= 0.5; // Halve the probability on streaks of 3+ wins
+      }
+      
       decision = Math.random() < cashOutProbability ? "CASH_OUT" : "CONTINUE";
     } else if (strategy === CashOutStrategy.CONSERVATIVE) {
       // Conservative (low-risk) strategy cashes out early - HIGH cash-out probability
