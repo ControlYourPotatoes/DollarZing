@@ -12,6 +12,7 @@ import {
   EVENT_TYPES,
 } from "../event-types";
 import { CashOutStrategy } from "../../types/virtual-dollar-engine";
+import type { EventDebugInterface } from "../debug/index";
 
 /**
  * Strategy Manager interface for cash-out decision logic
@@ -60,11 +61,18 @@ export interface DecisionResult {
 
 export class CashOutDecisionHandler {
   private subscription: EventSubscription | null = null;
+  private debugInterface?: EventDebugInterface | undefined;
 
   constructor(
     private eventBus: EventBus,
-    private strategyManager: IStrategyManager
+    private strategyManager: IStrategyManager,
+    debugInterface?: EventDebugInterface
   ) {
+    this.debugInterface = debugInterface;
+    console.log(
+      "[CashOutDecisionHandler] attached, debugInterface:",
+      !!debugInterface
+    );
     this.setupEventSubscriptions();
     console.log("[CashOutDecisionHandler] attached");
   }
@@ -154,26 +162,55 @@ export class CashOutDecisionHandler {
     let decision: "CASH_OUT" | "CONTINUE";
 
     if (strategy === CashOutStrategy.BALANCED) {
-      // For balanced strategy, use probabilistic decision
-      const probability = this.strategyManager.getCashOutProbability(
-        event.winnerLevel,
-        strategy
-      );
-      decision = Math.random() < probability ? "CASH_OUT" : "CONTINUE";
+      // Balanced strategy - moderate cash-out probability
+      const cashOutProbability = Math.min(0.4 + event.winnerLevel * 0.04, 0.7);
+      if (this.debugInterface) {
+        console.log(
+          `DEBUG: [CashOutDecisionHandler] CashOut Probability - Balanced: ${(
+            cashOutProbability * 100
+          ).toFixed(2)}% at level ${event.winnerLevel} (player: ${
+            event.winnerId
+          })`
+        );
+      }
+      decision = Math.random() < cashOutProbability ? "CASH_OUT" : "CONTINUE";
     } else if (strategy === CashOutStrategy.AGGRESSIVE) {
       // Aggressive (high-risk) strategy prefers to continue - LOW cash-out probability
       // Start at 5% cash-out at level 1, increase to max 40% at level 12+
-      let cashOutProbability = Math.min(0.05 + event.winnerLevel * 0.03, 0.4);
+      let cashOutProbability = Math.min(0.05 + event.winnerLevel * 0.015, 0.4);
 
       // Risk tolerance multiplier: reduce cashout probability for winning streaks
+      // Stronger reduction at higher levels to encourage reaching level 10
+      let multiplier = 0.4; // Base 60% reduction
+      if (context.consecutiveWins >= 3 && event.winnerLevel >= 7) {
+        multiplier = 0.2; // 80% reduction at levels 7+
+      }
       if (context.consecutiveWins >= 3) {
-        cashOutProbability *= 0.5; // Halve the probability on streaks of 3+ wins
+        cashOutProbability *= multiplier;
       }
 
+      if (this.debugInterface) {
+        console.log(
+          `DEBUG: [CashOutDecisionHandler] CashOut Probability - Aggressive: ${(
+            cashOutProbability * 100
+          ).toFixed(2)}% at level ${event.winnerLevel} (consecutive wins: ${
+            context.consecutiveWins
+          }, multiplier: ${multiplier}) (player: ${event.winnerId})`
+        );
+      }
       decision = Math.random() < cashOutProbability ? "CASH_OUT" : "CONTINUE";
     } else if (strategy === CashOutStrategy.CONSERVATIVE) {
       // Conservative (low-risk) strategy cashes out early - HIGH cash-out probability
-      const cashOutProbability = Math.min(0.8 + event.winnerLevel * 0.05, 0.95);
+      const cashOutProbability = Math.min(0.7 + event.winnerLevel * 0.04, 0.8);
+      if (this.debugInterface) {
+        console.log(
+          `DEBUG: [CashOutDecisionHandler] CashOut Probability - Conservative: ${(
+            cashOutProbability * 100
+          ).toFixed(2)}% at level ${event.winnerLevel} (player: ${
+            event.winnerId
+          })`
+        );
+      }
       decision = Math.random() < cashOutProbability ? "CASH_OUT" : "CONTINUE";
     } else {
       // Fallback to strategy manager
