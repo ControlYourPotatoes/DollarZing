@@ -12,12 +12,14 @@ The investigation into "level-10 matches appearing when only one level-9 winner 
 ### Timeline Analysis from Production Logs
 
 **Player A (`vd_1759421471110_pw4jqopf2`):**
+
 - `16:11:11.134Z` - Wins at level 9 (game_981)
 - `16:11:11.135Z` - Advances to level 10
 - `16:11:11.135Z` - Added to pool at level 10
 - `16:11:20.821Z` - **Wins at level 10** (game_2142) - **9.7 seconds later**
 
 **Player B (`vd_1759421479652_yetghsz9e`):**
+
 - `16:11:20.818Z` - Advances to level 9
 - `16:11:20.818Z` - Added to pool at level 9
 - `16:11:20.819Z` - **Wins at level 9** (game_2141)
@@ -51,12 +53,12 @@ export interface LevelStats {
   cashouts: number;
   progressions: number;
   winnings: number;
-  
+
   // NEW: Transition tracking
-  playersAdvancedToNextLevel: number;  // Count of players who progressed FROM this level
-  playersArrivedFromPreviousLevel: number;  // Count of players who arrived AT this level
-  averageWaitTimeMs: number;  // Average time spent in pool before match
-  maxWaitTimeMs: number;  // Longest wait time in pool
+  playersAdvancedToNextLevel: number; // Count of players who progressed FROM this level
+  playersArrivedFromPreviousLevel: number; // Count of players who arrived AT this level
+  averageWaitTimeMs: number; // Average time spent in pool before match
+  maxWaitTimeMs: number; // Longest wait time in pool
 }
 ```
 
@@ -98,7 +100,7 @@ private async emitMatchFound(...): Promise<void> {
   const now = Date.now();
   const wait1 = entryTime1 ? now - entryTime1 : 0;
   const wait2 = entryTime2 ? now - entryTime2 : 0;
-  
+
   const event: MatchFoundEvent = {
     // ...existing fields...
     waitTimes: {
@@ -106,7 +108,7 @@ private async emitMatchFound(...): Promise<void> {
       player2WaitMs: wait2,
     },
   };
-  
+
   // Clean up entry time records
   this.poolEntryTimes.delete(dollar1.id);
   this.poolEntryTimes.delete(dollar2.id);
@@ -122,16 +124,16 @@ private async emitMatchFound(...): Promise<void> {
 private handleMatchFound(event: MatchFoundEvent): void {
   const level = event.matchedLevel as BettingLevel;
   const stats = dayStats.get(level) || this.createEmptyLevelStats();
-  
+
   // Track arrivals (both players arrived to create this match)
   stats.playersArrivedFromPreviousLevel += 2;
-  
+
   // Update wait time stats
   if (event.waitTimes) {
     const avgWait = (event.waitTimes.player1WaitMs + event.waitTimes.player2WaitMs) / 2;
     const maxWait = Math.max(event.waitTimes.player1WaitMs, event.waitTimes.player2WaitMs);
-    
-    stats.averageWaitTimeMs = 
+
+    stats.averageWaitTimeMs =
       (stats.averageWaitTimeMs * (totalGames - 1) + avgWait) / totalGames;
     stats.maxWaitTimeMs = Math.max(stats.maxWaitTimeMs, maxWait);
   }
@@ -141,7 +143,7 @@ private handleMatchFound(event: MatchFoundEvent): void {
 private handleVirtualDollarAdvanced(event: VirtualDollarAdvancedEvent): void {
   const fromLevel = event.previousLevel as BettingLevel;
   const stats = dayStats.get(fromLevel) || this.createEmptyLevelStats();
-  
+
   // Track departures from this level
   stats.playersAdvancedToNextLevel += 1;
 }
@@ -172,6 +174,7 @@ export interface LevelBreakdown {
 ### Test Run: 30-Day Simulation (growth-15_risk-high_charity-10)
 
 **Day 9 - Level 9:**
+
 ```json
 {
   "level": 9,
@@ -181,14 +184,15 @@ export interface LevelBreakdown {
   "progressions": 1,
   "winnings": 460.8,
   "losses": 1,
-  "playersAdvancedToNextLevel": 1,  // ✅ 1 player advanced to level 10
-  "playersArrivedFromPreviousLevel": 2,  // ✅ 2 players arrived at level 9
+  "playersAdvancedToNextLevel": 1, // ✅ 1 player advanced to level 10
+  "playersArrivedFromPreviousLevel": 2, // ✅ 2 players arrived at level 9
   "averageWaitTimeMs": 1355,
   "maxWaitTimeMs": 2710
 }
 ```
 
 **Day 9 - Level 10:**
+
 ```json
 {
   "level": 10,
@@ -198,10 +202,10 @@ export interface LevelBreakdown {
   "progressions": 1,
   "winnings": 921.6,
   "losses": 1,
-  "playersAdvancedToNextLevel": 0,  // ✅ No advancement from level 10 (jackpot)
-  "playersArrivedFromPreviousLevel": 2,  // ✅ 2 players arrived at level 10
-  "averageWaitTimeMs": 2614.5,  // ✅ Average wait: 2.6 seconds
-  "maxWaitTimeMs": 5229  // ✅ Max wait: 5.2 seconds (one player waited)
+  "playersAdvancedToNextLevel": 0, // ✅ No advancement from level 10 (jackpot)
+  "playersArrivedFromPreviousLevel": 2, // ✅ 2 players arrived at level 10
+  "averageWaitTimeMs": 2614.5, // ✅ Average wait: 2.6 seconds
+  "maxWaitTimeMs": 5229 // ✅ Max wait: 5.2 seconds (one player waited)
 }
 ```
 
@@ -215,21 +219,25 @@ export interface LevelBreakdown {
 ## Benefits of Enhanced Telemetry
 
 ### 1. **Visibility into Level Transitions**
+
 - Track how many players **arrive** at each level
 - Track how many players **depart** from each level
 - Validate that arrivals match expected game outcomes
 
 ### 2. **Wait Time Metrics**
+
 - Identify bottlenecks (high wait times indicate insufficient players at that level)
 - Detect rapid succession matches (low wait times)
 - Monitor pool health and matchmaking efficiency
 
 ### 3. **Cross-Day Carry-Over Detection**
+
 - If `playersArrivedFromPreviousLevel > 2 * gamesPlayed`, some players carried over from previous day
 - Example: Level 10 shows 1 game but 2 arrivals → both players came from level 9 (correct)
 - Example: Level 10 shows 1 game but only 1 arrival → one player carried over from previous day
 
 ### 4. **Validation and Debugging**
+
 - Quickly identify anomalies in level progression
 - Verify matchmaking integrity without deep log analysis
 - Provide actionable metrics for performance tuning
@@ -244,8 +252,8 @@ if (level === 10 && levelStats.gamesPlayed > 0) {
   if (levelStats.playersArrivedFromPreviousLevel < expectedArrivals) {
     console.warn(
       `Level 10 integrity check: ${levelStats.gamesPlayed} games ` +
-      `but only ${levelStats.playersArrivedFromPreviousLevel} arrivals. ` +
-      `Some players carried over from previous day.`
+        `but only ${levelStats.playersArrivedFromPreviousLevel} arrivals. ` +
+        `Some players carried over from previous day.`
     );
   }
 }
@@ -257,7 +265,7 @@ if (level === 10 && levelStats.gamesPlayed > 0) {
 if (levelStats.maxWaitTimeMs > 10000) {
   console.warn(
     `Level ${level} bottleneck detected: ` +
-    `Max wait time ${levelStats.maxWaitTimeMs}ms indicates insufficient players`
+      `Max wait time ${levelStats.maxWaitTimeMs}ms indicates insufficient players`
   );
 }
 ```
@@ -265,13 +273,13 @@ if (levelStats.maxWaitTimeMs > 10000) {
 ### Validating Level Progression
 
 ```javascript
-// For level N, players advancing should roughly equal 
+// For level N, players advancing should roughly equal
 // half the games played (winners advance, losers don't)
 const expectedAdvancement = Math.floor(levelStats.gamesPlayed / 2);
 if (Math.abs(levelStats.playersAdvancedToNextLevel - expectedAdvancement) > 2) {
   console.warn(
     `Level ${level} progression anomaly: ` +
-    `${levelStats.gamesPlayed} games but ${levelStats.playersAdvancedToNextLevel} advancements`
+      `${levelStats.gamesPlayed} games but ${levelStats.playersAdvancedToNextLevel} advancements`
   );
 }
 ```
@@ -301,6 +309,7 @@ if (Math.abs(levelStats.playersAdvancedToNextLevel - expectedAdvancement) > 2) {
 3. **Snapshot aggregation** that obscured the two distinct level-9 wins
 
 **Solution**: Enhanced telemetry now provides complete visibility into:
+
 - Player arrivals and departures at each level
 - Wait times in pool before matching
 - Cross-day carry-over detection
