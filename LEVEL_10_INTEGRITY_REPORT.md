@@ -11,24 +11,28 @@
 **The matchmaking system is working correctly.** The issue was a **telemetry visibility problem**, not a bug.
 
 ### What Was Happening:
+
 - Player A wins at level 9 → advances to level 10 → waits in pool (9.7 seconds)
 - Player B wins at level 9 → advances to level 10 → matches instantly (1ms)
 - Daily snapshot shows only 1 level-9 win (Player B's) because Player A's win occurred earlier
 
 ### Solution Implemented:
+
 **Enhanced Telemetry** - Added explicit tracking of:
+
 - ✅ `playersAdvancedToNextLevel` - Count of players who progressed FROM this level
-- ✅ `playersArrivedFromPreviousLevel` - Count of players who arrived AT this level  
+- ✅ `playersArrivedFromPreviousLevel` - Count of players who arrived AT this level
 - ✅ `averageWaitTimeMs` - Average time spent in pool before match
 - ✅ `maxWaitTimeMs` - Longest wait time in pool
 
 ### Verification (Day 9 from 30-day simulation):
+
 ```json
 {
   "level": 10,
   "gamesPlayed": 1,
-  "playersArrivedFromPreviousLevel": 2,  // ✅ 2 players arrived
-  "maxWaitTimeMs": 5229  // ✅ One player waited 5.2 seconds
+  "playersArrivedFromPreviousLevel": 2, // ✅ 2 players arrived
+  "maxWaitTimeMs": 5229 // ✅ One player waited 5.2 seconds
 }
 ```
 

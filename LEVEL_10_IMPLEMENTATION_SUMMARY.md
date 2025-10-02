@@ -6,12 +6,14 @@
 ## What Was Done
 
 ### 1. Investigation Phase
+
 - ✅ Analyzed 30-day simulation logs with debug enabled
 - ✅ Traced specific virtual dollar IDs through level 9 → 10 progression
 - ✅ Confirmed two distinct level-9 winners are required for level-10 matches
 - ✅ Identified rapid succession matching as the telemetry visibility issue
 
 ### 2. Implementation Phase
+
 - ✅ Extended `LevelStats` interface with 4 new fields
 - ✅ Added `waitTimes` to `MatchFoundEvent`
 - ✅ Implemented pool entry time tracking in `MatchmakingEventHandler`
@@ -19,6 +21,7 @@
 - ✅ Updated daily snapshot export to include new telemetry
 
 ### 3. Verification Phase
+
 - ✅ Built and tested with 5-day simulation
 - ✅ Verified with 30-day simulation showing level 9/10 activity
 - ✅ Confirmed telemetry fields correctly populated
@@ -27,6 +30,7 @@
 ## Key Metrics Now Available
 
 ### Per Level, Per Day:
+
 1. **playersAdvancedToNextLevel** - How many players progressed FROM this level
 2. **playersArrivedFromPreviousLevel** - How many players arrived AT this level
 3. **averageWaitTimeMs** - Average pool wait time before matching
@@ -48,6 +52,7 @@
 ```
 
 **Interpretation**:
+
 - ✅ 2 players arrived at level 10 (both from level 9 wins)
 - ✅ 1 game was played (correct: 2 players → 1 match)
 - ✅ Max wait of 5.2 seconds (one player waited, other arrived and matched)
@@ -55,16 +60,17 @@
 
 ## Files Changed
 
-| File | Changes |
-|------|---------|
-| `engine/src/events/handlers/level-tracking-handler.ts` | Added 4 fields to `LevelStats`, implemented 2 new event handlers |
-| `engine/src/events/event-types.ts` | Added `waitTimes` to `MatchFoundEvent` |
-| `engine/src/events/handlers/matchmaking-event-handler.ts` | Added `poolEntryTimes` Map, track entry/exit times |
-| `engine/src/simulation/post-processing/daily-aggregator.ts` | Extended `LevelBreakdown` interface, export new fields |
+| File                                                        | Changes                                                          |
+| ----------------------------------------------------------- | ---------------------------------------------------------------- |
+| `engine/src/events/handlers/level-tracking-handler.ts`      | Added 4 fields to `LevelStats`, implemented 2 new event handlers |
+| `engine/src/events/event-types.ts`                          | Added `waitTimes` to `MatchFoundEvent`                           |
+| `engine/src/events/handlers/matchmaking-event-handler.ts`   | Added `poolEntryTimes` Map, track entry/exit times               |
+| `engine/src/simulation/post-processing/daily-aggregator.ts` | Extended `LevelBreakdown` interface, export new fields           |
 
 ## Benefits
 
 ### Before:
+
 ```json
 {
   "level": 10,
@@ -72,9 +78,11 @@
   "wins": 1
 }
 ```
+
 ❓ **Question**: How did 1 game happen? Where did the players come from?
 
 ### After:
+
 ```json
 {
   "level": 10,
@@ -84,11 +92,13 @@
   "maxWaitTimeMs": 5229
 }
 ```
+
 ✅ **Answer**: 2 players arrived from level 9, one waited 5.2 seconds, then they matched.
 
 ## Validation Rules
 
 ### Cross-Day Carry-Over Detection:
+
 ```javascript
 if (playersArrivedFromPreviousLevel < gamesPlayed * 2) {
   // Some players carried over from previous day
@@ -96,6 +106,7 @@ if (playersArrivedFromPreviousLevel < gamesPlayed * 2) {
 ```
 
 ### Bottleneck Detection:
+
 ```javascript
 if (maxWaitTimeMs > 10000) {
   // Level has insufficient players (>10s wait time)
@@ -103,6 +114,7 @@ if (maxWaitTimeMs > 10000) {
 ```
 
 ### Progression Validation:
+
 ```javascript
 // Winners advance, losers don't
 const expectedAdvancement = Math.floor(gamesPlayed / 2);
