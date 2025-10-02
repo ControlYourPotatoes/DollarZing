@@ -50,6 +50,7 @@ export class MatchmakingEventHandler {
   private staleCycleStartLevel: number | null = null;
   private readonly maxStaleCyclesBeforeCleanup = 50; // Increased from 2 - only cleanup when truly stuck
   private readonly stalemateRetryDelayMs = 25;
+  private poolEntryTimes: Map<string, number> = new Map(); // Track when dollars enter pool
 
   constructor(
     private eventBus: EventBus,
@@ -155,6 +156,9 @@ export class MatchmakingEventHandler {
     if (this.terminationTriggered) {
       return;
     }
+    // Record when this dollar entered the pool for wait time tracking
+    this.poolEntryTimes.set(event.virtualDollarId, Date.now());
+    
     this.queueFifoUpdate(event.currentLevel);
     void this.attemptMatching();
   }
@@ -658,6 +662,14 @@ export class MatchmakingEventHandler {
     position1: number,
     position2: number
   ): Promise<void> {
+    // Calculate wait times
+    const now = Date.now();
+    const entryTime1 = this.poolEntryTimes.get(dollar1.id);
+    const entryTime2 = this.poolEntryTimes.get(dollar2.id);
+    
+    const wait1 = entryTime1 ? now - entryTime1 : 0;
+    const wait2 = entryTime2 ? now - entryTime2 : 0;
+
     const event: MatchFoundEvent = {
       type: EVENT_TYPES.MATCH_FOUND,
       timestamp: new Date(),
@@ -670,7 +682,15 @@ export class MatchmakingEventHandler {
         player1Position: position1,
         player2Position: position2,
       },
+      waitTimes: {
+        player1WaitMs: wait1,
+        player2WaitMs: wait2,
+      },
     };
+
+    // Clean up entry time records
+    this.poolEntryTimes.delete(dollar1.id);
+    this.poolEntryTimes.delete(dollar2.id);
 
     void this.eventBus
       .emit(EVENT_TYPES.MATCH_FOUND, event)

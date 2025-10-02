@@ -200,6 +200,10 @@ export interface MatchFoundEvent extends BaseEvent {
   player2Id: string;
   matchedLevel: number;
   fifoOrder: { player1Position: number; player2Position: number };
+  waitTimes?: {
+    player1WaitMs: number;
+    player2WaitMs: number;
+  };
 }
 
 export interface FifoQueueUpdatedEvent extends BaseEvent {

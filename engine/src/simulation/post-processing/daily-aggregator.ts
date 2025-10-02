@@ -50,6 +50,10 @@ export interface LevelBreakdown {
   progressions: number;
   winnings: number;
   losses: number;
+  playersAdvancedToNextLevel?: number;
+  playersArrivedFromPreviousLevel?: number;
+  averageWaitTimeMs?: number;
+  maxWaitTimeMs?: number;
 }
 
 export interface RunLifecycle {
@@ -441,6 +445,10 @@ function buildLevelBreakdown(
       progressions: 0,
       winnings: 0,
       losses: 0,
+      playersAdvancedToNextLevel: 0,
+      playersArrivedFromPreviousLevel: 0,
+      averageWaitTimeMs: 0,
+      maxWaitTimeMs: 0,
     }));
   }
 
@@ -456,6 +464,10 @@ function buildLevelBreakdown(
       progressions: levelStats.progressions,
       winnings: levelStats.winnings,
       losses: levelStats.losses,
+      playersAdvancedToNextLevel: levelStats.playersAdvancedToNextLevel,
+      playersArrivedFromPreviousLevel: levelStats.playersArrivedFromPreviousLevel,
+      averageWaitTimeMs: levelStats.averageWaitTimeMs,
+      maxWaitTimeMs: levelStats.maxWaitTimeMs,
     };
   });
 }
@@ -542,5 +554,9 @@ function createEmptyLevelStats(): LevelStats {
     cashouts: 0,
     progressions: 0,
     winnings: 0,
+    playersAdvancedToNextLevel: 0,
+    playersArrivedFromPreviousLevel: 0,
+    averageWaitTimeMs: 0,
+    maxWaitTimeMs: 0,
   };
 }

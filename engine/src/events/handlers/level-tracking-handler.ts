@@ -5,6 +5,8 @@ import {
   GameResolvedEvent,
   DayStartedEvent,
   CashOutCompletedEvent,
+  MatchFoundEvent,
+  VirtualDollarAdvancedEvent,
 } from "../event-types";
 import { BettingLevel } from "../../types/virtual-dollar-engine";
 
@@ -15,6 +17,12 @@ export interface LevelStats {
   cashouts: number;
   progressions: number;
   winnings: number;
+
+  // Transition tracking for level progression visibility
+  playersAdvancedToNextLevel: number; // Count of players who progressed FROM this level
+  playersArrivedFromPreviousLevel: number; // Count of players who arrived AT this level
+  averageWaitTimeMs: number; // Average time spent in pool before match
+  maxWaitTimeMs: number; // Longest wait time in pool at this level
 }
 
 export interface LevelTrackingSnapshot {
@@ -64,6 +72,18 @@ export class LevelTrackingHandler {
     this.eventBus.on(
       EVENT_TYPES.CASH_OUT_COMPLETED,
       this.handleCashOutCompleted.bind(this)
+    );
+
+    // Listen to MATCH_FOUND events to track arrivals and wait times
+    this.eventBus.on(
+      EVENT_TYPES.MATCH_FOUND,
+      this.handleMatchFound.bind(this)
+    );
+
+    // Listen to VIRTUAL_DOLLAR_ADVANCED events to track level progressions
+    this.eventBus.on(
+      EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
+      this.handleVirtualDollarAdvanced.bind(this)
     );
 
     console.log(
@@ -166,6 +186,68 @@ export class LevelTrackingHandler {
     }
   };
 
+  /**
+   * Handle MATCH_FOUND event to track player arrivals and wait times at each level
+   */
+  private handleMatchFound(event: MatchFoundEvent): void {
+    const level = event.matchedLevel as BettingLevel;
+    const day = this.getCurrentDay();
+    const dayStats = this.ensureDailyStats(day);
+    const stats = dayStats.get(level) || this.createEmptyLevelStats();
+
+    // Track arrivals at this level (both players arrived to create this match)
+    stats.playersArrivedFromPreviousLevel += 2;
+
+    // Update wait time stats if available
+    if (event.waitTimes) {
+      const avgWait =
+        (event.waitTimes.player1WaitMs + event.waitTimes.player2WaitMs) / 2;
+      const maxWait = Math.max(
+        event.waitTimes.player1WaitMs,
+        event.waitTimes.player2WaitMs
+      );
+
+      // Update running average
+      const totalGames = stats.gamesPlayed || 1;
+      stats.averageWaitTimeMs =
+        (stats.averageWaitTimeMs * (totalGames - 1) + avgWait) / totalGames;
+      stats.maxWaitTimeMs = Math.max(stats.maxWaitTimeMs, maxWait);
+    }
+
+    dayStats.set(level, stats);
+
+    // Update cumulative stats
+    const cumulativeStats =
+      this.cumulativeLevelStats.get(level) || this.createEmptyLevelStats();
+    cumulativeStats.playersArrivedFromPreviousLevel += 2;
+    this.cumulativeLevelStats.set(level, cumulativeStats);
+  }
+
+  /**
+   * Handle VIRTUAL_DOLLAR_ADVANCED event to track players leaving each level
+   */
+  private handleVirtualDollarAdvanced(event: VirtualDollarAdvancedEvent): void {
+    const fromLevel = event.previousLevel as BettingLevel;
+    const day = this.getCurrentDay();
+    const dayStats = this.ensureDailyStats(day);
+    const stats = dayStats.get(fromLevel) || this.createEmptyLevelStats();
+
+    // Track departures from this level
+    stats.playersAdvancedToNextLevel += 1;
+
+    dayStats.set(fromLevel, stats);
+
+    // Update cumulative stats
+    const cumulativeStats =
+      this.cumulativeLevelStats.get(fromLevel) || this.createEmptyLevelStats();
+    cumulativeStats.playersAdvancedToNextLevel += 1;
+    this.cumulativeLevelStats.set(fromLevel, cumulativeStats);
+
+    console.log(
+      `[LevelTrackingHandler #${this.instanceId}] Player advanced from level ${fromLevel} to ${event.currentLevel} on day ${day}`
+    );
+  }
+
   private createEmptyLevelStats(): LevelStats {
     return {
       gamesPlayed: 0,
@@ -174,6 +256,10 @@ export class LevelTrackingHandler {
       cashouts: 0,
       progressions: 0,
       winnings: 0,
+      playersAdvancedToNextLevel: 0,
+      playersArrivedFromPreviousLevel: 0,
+      averageWaitTimeMs: 0,
+      maxWaitTimeMs: 0,
     };
   }
 
