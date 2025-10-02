@@ -164,12 +164,12 @@ export class CashOutDecisionHandler {
       // Aggressive (high-risk) strategy prefers to continue - LOW cash-out probability
       // Start at 5% cash-out at level 1, increase to max 40% at level 12+
       let cashOutProbability = Math.min(0.05 + event.winnerLevel * 0.03, 0.4);
-      
+
       // Risk tolerance multiplier: reduce cashout probability for winning streaks
       if (context.consecutiveWins >= 3) {
         cashOutProbability *= 0.5; // Halve the probability on streaks of 3+ wins
       }
-      
+
       decision = Math.random() < cashOutProbability ? "CASH_OUT" : "CONTINUE";
     } else if (strategy === CashOutStrategy.CONSERVATIVE) {
       // Conservative (low-risk) strategy cashes out early - HIGH cash-out probability
