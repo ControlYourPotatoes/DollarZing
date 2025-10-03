@@ -167,7 +167,7 @@ export class MatchmakingEventHandler {
     }
     // Record when this dollar entered the pool for wait time tracking
     this.poolEntryTimes.set(event.virtualDollarId, Date.now());
-    
+
     this.queueFifoUpdate(event.currentLevel);
     void this.attemptMatching();
   }
@@ -681,7 +681,7 @@ export class MatchmakingEventHandler {
     const now = Date.now();
     const entryTime1 = this.poolEntryTimes.get(dollar1.id);
     const entryTime2 = this.poolEntryTimes.get(dollar2.id);
-    
+
     const wait1 = entryTime1 ? now - entryTime1 : 0;
     const wait2 = entryTime2 ? now - entryTime2 : 0;
 
