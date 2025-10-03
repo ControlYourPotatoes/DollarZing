@@ -20,25 +20,26 @@ import {
 } from "../../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../../types/factory-interfaces";
 import { GameMatchingEngine } from "../../core/game-matching-engine";
+import type { EventDebugInterface } from "../debug";
 
 export class PlayerProgressionHandler {
   private gameResolvedSubscription: EventSubscription | null = null;
   private continuePlaySubscription: EventSubscription | null = null;
-  private loggingEnabled: boolean;
 
   constructor(
     private eventBus: EventBus,
     private virtualDollarFactory: VirtualDollarFactory,
     private gameMatchingEngine: GameMatchingEngine,
-    options?: { loggingEnabled?: boolean }
+    options?: { loggingEnabled?: boolean },
+    private debugInterface?: EventDebugInterface,
+    private verbose?: boolean
   ) {
-    this.loggingEnabled = options?.loggingEnabled ?? true;
-    console.log("[PlayerProgressionHandler] attached");
+    // Suppress unused variable warning - options kept for compatibility
+    void options;
+    if (this.verbose) {
+      console.log("[PlayerProgressionHandler] attached");
+    }
     this.setupEventSubscriptions();
-  }
-
-  setLoggingEnabled(enabled: boolean): void {
-    this.loggingEnabled = enabled;
   }
 
   private setupEventSubscriptions(): void {
@@ -58,9 +59,11 @@ export class PlayerProgressionHandler {
   }
 
   private async handleGameResolved(event: GameResolvedEvent): Promise<void> {
-    console.log(
-      `[PlayerProgressionHandler] handleGameResolved: game ${event.gameId}, loser ${event.loserId}, level ${event.loserLevel}`
-    );
+    if (this.debugInterface) {
+      console.log(
+        `[PlayerProgressionHandler] handleGameResolved: game ${event.gameId}, loser ${event.loserId}, level ${event.loserLevel}`
+      );
+    }
     try {
       // Only process loser elimination - winners are processed after cash-out decision
       await this.processLoserElimination(event);
@@ -95,9 +98,11 @@ export class PlayerProgressionHandler {
   }
 
   private async handleContinuePlay(event: ContinuePlayEvent): Promise<void> {
-    console.log(
-      `[PlayerProgressionHandler] handleContinuePlay: player ${event.playerId}, level ${event.currentLevel}`
-    );
+    if (this.debugInterface) {
+      console.log(
+        `[PlayerProgressionHandler] handleContinuePlay: player ${event.playerId}, level ${event.currentLevel}`
+      );
+    }
     try {
       // Process winner progression only after they decided to continue
       await this.processWinnerProgression(event);
@@ -167,15 +172,18 @@ export class PlayerProgressionHandler {
         additionalWinnings
       );
 
-      if (this.loggingEnabled) {
+      if (this.debugInterface) {
         console.log(
           `[PlayerProgressionHandler] Winner ${event.playerId} advanced from Level ${event.currentLevel} to Level ${newLevel}, winnings: ${updatedDollar.currentRunWinnings}`
         );
       }
 
-      console.log(
-        `[PlayerProgressionHandler] Advanced dollar ${updatedDollar.id} now at level ${updatedDollar.currentLevel}`
-      );
+      // Advanced dollar logging moved inside debugInterface check
+      if (this.debugInterface) {
+        console.log(
+          `[PlayerProgressionHandler] Advanced dollar ${updatedDollar.id} now at level ${updatedDollar.currentLevel}`
+        );
+      }
 
       // Always re-pool the advanced winner for next level matching (including level 10)
       void this.rePoolAdvancedWinner(updatedDollar);
@@ -215,7 +223,7 @@ export class PlayerProgressionHandler {
         event.loserLevel as BettingLevel
       );
 
-      if (this.loggingEnabled) {
+      if (this.debugInterface) {
         console.log(
           `[PlayerProgressionHandler] Loser ${event.loserId} eliminated at Level ${event.loserLevel}`
         );
@@ -261,7 +269,7 @@ export class PlayerProgressionHandler {
         DollarState.POOLED
       );
 
-      if (this.loggingEnabled) {
+      if (this.debugInterface) {
         console.log(
           `[PlayerProgressionHandler] Preparing to re-pool dollar ${virtualDollar.id} at level ${virtualDollar.currentLevel}`
         );
@@ -278,7 +286,7 @@ export class PlayerProgressionHandler {
             return;
           }
 
-          if (this.loggingEnabled) {
+          if (this.debugInterface) {
             console.log(
               `[PlayerProgressionHandler] Re-pooled advanced winner ${virtualDollar.ownerId} (${virtualDollar.id}) at level ${virtualDollar.currentLevel}`
             );

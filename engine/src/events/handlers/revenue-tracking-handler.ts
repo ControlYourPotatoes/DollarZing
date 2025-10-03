@@ -21,6 +21,7 @@ import {
   BettingLevel,
   getBettingLevelValue,
 } from "../../types/virtual-dollar-engine";
+import type { EventDebugInterface } from "../debug";
 
 /**
  * Transaction record for comprehensive financial logging
@@ -75,8 +76,13 @@ export class RevenueTrackingHandler {
   constructor(
     private eventBus: EventBus,
     private revenueCalculator: RevenueCalculator,
-    config?: Partial<RevenueTrackingConfig>
+    config?: Partial<RevenueTrackingConfig>,
+    private debugInterface?: EventDebugInterface,
+    private verbose?: boolean
   ) {
+    // Suppress unused variable warning - verbose parameter kept for consistency
+    void this.verbose;
+
     this.config = {
       enableTransactionLogging: true,
       maxTransactionHistory: 10000,
@@ -183,7 +189,7 @@ export class RevenueTrackingHandler {
         void this.emitRevenueUpdate();
       }
 
-      if (this.config.loggingEnabled) {
+      if (this.debugInterface) {
         console.log(
           `[RevenueTrackingHandler] Processed game revenue: ${gameRevenue} for game ${event.gameId}`
         );
@@ -273,7 +279,7 @@ export class RevenueTrackingHandler {
         void this.emitRevenueUpdate();
       }
 
-      if (this.config.loggingEnabled) {
+      if (this.debugInterface) {
         console.log(
           `[RevenueTrackingHandler] Processed cash-out revenue: ${event.cashOutAmount} for player ${event.playerId}`
         );
@@ -506,7 +512,7 @@ export class RevenueTrackingHandler {
         throw new Error("Revenue calculator returned invalid revenue stream");
       }
 
-      if (this.config.loggingEnabled) {
+      if (this.debugInterface) {
         console.log(
           "[RevenueTrackingHandler] Revenue calculator integration validated"
         );

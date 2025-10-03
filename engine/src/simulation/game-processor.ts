@@ -1,6 +1,7 @@
 import { GameMatchingEngine } from "../core/game-matching-engine";
 import { EventBus } from "../events/event-bus";
 import { EVENT_TYPES, GameCreatedEvent } from "../events/event-types";
+import type { EventDebugInterface } from "../events/debug";
 
 /**
  * GameProcessor handles game creation and emits events for event-driven processing
@@ -12,17 +13,24 @@ import { EVENT_TYPES, GameCreatedEvent } from "../events/event-types";
 export class GameProcessor {
   constructor(
     _gameMatchingEngine: GameMatchingEngine,
-    private eventBus: EventBus
-  ) {}
+    private eventBus: EventBus,
+    private debugInterface?: EventDebugInterface,
+    private verbose?: boolean
+  ) {
+    // Suppress unused variable warning - verbose parameter kept for consistency
+    void this.verbose;
+  }
 
   /**
    * Create games and emit GAME_CREATED events for event-driven processing
    * GameEventHandler will listen to these events and handle resolution
    */
   async createGames(games: any[], dailySeed: string): Promise<void> {
-    console.log(
-      `[GameProcessor] Creating ${games.length} games and emitting GAME_CREATED events`
-    );
+    if (this.debugInterface) {
+      console.log(
+        `[GameProcessor] Creating ${games.length} games and emitting GAME_CREATED events`
+      );
+    }
 
     // Generate proper daily seed format (YYYY-MM-DD) from config or current date
     // Note: seed validation is done but not used in current implementation
@@ -44,9 +52,11 @@ export class GameProcessor {
         virtualDollar2Id: gameSession.dollar2?.id || "",
       };
 
-      console.log(
-        `[GameProcessor] Emitting GAME_CREATED for game ${gameSession.id}`
-      );
+      if (this.debugInterface) {
+        console.log(
+          `[GameProcessor] Emitting GAME_CREATED for game ${gameSession.id}`
+        );
+      }
       void this.eventBus
         .emit(EVENT_TYPES.GAME_CREATED, gameCreatedEvent)
         .catch((error) =>
@@ -74,9 +84,11 @@ export class GameProcessor {
    * This method should be called with fresh games that need to be processed
    */
   async processGameResults(games: any[]): Promise<void> {
-    console.log(
-      `[GameProcessor] Processing ${games.length} newly created games via GAME_CREATED events`
-    );
+    if (this.debugInterface) {
+      console.log(
+        `[GameProcessor] Processing ${games.length} newly created games via GAME_CREATED events`
+      );
+    }
 
     // Use today's date as default seed
     const dailySeed = new Date().toISOString().split("T")[0];

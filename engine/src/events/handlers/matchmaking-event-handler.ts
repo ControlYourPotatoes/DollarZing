@@ -24,6 +24,7 @@ import {
   DollarState,
   type VirtualDollar,
 } from "../../types/virtual-dollar-engine";
+import type { EventDebugInterface } from "../debug";
 
 /**
  * MatchmakingEventHandler - Handles matchmaking logic through event-driven architecture
@@ -56,8 +57,12 @@ export class MatchmakingEventHandler {
     private eventBus: EventBus,
     private gameMatchingEngine: GameMatchingEngine,
     private virtualDollarFactory: VirtualDollarFactory,
-    private gameSessionFactory: GameSessionFactory
+    private gameSessionFactory: GameSessionFactory,
+    private debugInterface?: EventDebugInterface,
+    private verbose?: boolean
   ) {
+    // Suppress unused variable warning - verbose parameter kept for consistency
+    void this.verbose;
     this.initialize();
   }
 
@@ -67,9 +72,11 @@ export class MatchmakingEventHandler {
   private initialize(): void {
     // Clear stale state at simulation start (handles EventBus reuse across runs)
     this.eventBus.on(EVENT_TYPES.SIMULATION_STARTED, () => {
-      console.log(
-        "[MatchmakingEventHandler] Simulation started - clearing stale IN_GAME flags"
-      );
+      if (this.debugInterface) {
+        console.log(
+          "[MatchmakingEventHandler] Simulation started - clearing stale IN_GAME flags"
+        );
+      }
       this.consecutiveNoMatchCycles = 0;
       this.staleCycleStartLevel = null;
       this.pendingFifoLevels.clear();
@@ -115,9 +122,11 @@ export class MatchmakingEventHandler {
     });
 
     this.eventBus.on(EVENT_TYPES.DAY_COMPLETED, () => {
-      console.log(
-        "[MatchmakingEventHandler] Day completed - resetting stalemate tracking and clearing stale state"
-      );
+      if (this.debugInterface) {
+        console.log(
+          "[MatchmakingEventHandler] Day completed - resetting stalemate tracking and clearing stale state"
+        );
+      }
       this.staleCycleStartLevel = null;
       this.consecutiveNoMatchCycles = 0;
       this.pendingFifoLevels.clear();
@@ -452,14 +461,18 @@ export class MatchmakingEventHandler {
 
                     // Re-pool at next level
                     await this.gameMatchingEngine.addToPool(advanced);
-                    console.log(
-                      `[MatchmakingEventHandler] Auto-advanced ${dollar.id} from level ${lastStalemateLevel} to ${nextLevel}`
-                    );
+                    if (this.debugInterface) {
+                      console.log(
+                        `[MatchmakingEventHandler] Auto-advanced ${dollar.id} from level ${lastStalemateLevel} to ${nextLevel}`
+                      );
+                    }
                   } else {
                     // Level 5 - they've won the jackpot by default
-                    console.log(
-                      `[MatchmakingEventHandler] ${dollar.id} reached jackpot by default`
-                    );
+                    if (this.debugInterface) {
+                      console.log(
+                        `[MatchmakingEventHandler] ${dollar.id} reached jackpot by default`
+                      );
+                    }
                   }
                 } catch (error) {
                   console.error(
@@ -554,9 +567,11 @@ export class MatchmakingEventHandler {
           }
         }
 
-        console.log(
-          `[MatchmakingEventHandler] Eliminated ${queueSnapshot.length} dollars from last player at level ${level}`
-        );
+        if (this.debugInterface) {
+          console.log(
+            `[MatchmakingEventHandler] Eliminated ${queueSnapshot.length} dollars from last player at level ${level}`
+          );
+        }
       } else {
         console.debug(
           `[MatchmakingEventHandler] Cleanup triggered at level ${level} but 0 stale dollars found to requeue`

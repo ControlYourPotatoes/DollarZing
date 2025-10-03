@@ -11,6 +11,8 @@ import {
   NewRunCreatedEvent,
 } from "../events/event-types";
 import { SimulationConfig } from "./game-engine-simulator";
+import { progression } from "../utils/progression-logger";
+import type { EventDebugInterface } from "../events/debug";
 
 /**
  * Configuration for daily processing
@@ -31,12 +33,16 @@ export class DayProcessor {
     private playerManager: PlayerManager,
     private dollarManager: VirtualDollarFactory,
     private eventBus: EventBus,
-    options?: { loggingEnabled?: boolean }
+    options?: {
+      loggingEnabled?: boolean;
+    },
+    private debugInterface?: EventDebugInterface,
+    private verbose?: boolean
   ) {
     this.loggingEnabled = options?.loggingEnabled ?? false;
     this.setupEventSubscriptions();
-    // Suppress unused variable warning - playerManager is kept for future use
-    void this.playerManager;
+    // Suppress unused variable warning - verbose parameter kept for consistency
+    void this.verbose;
   }
 
   private loggingEnabled: boolean;
@@ -100,7 +106,7 @@ export class DayProcessor {
     config: DayProcessingConfig,
     simulationConfig: SimulationConfig
   ): Promise<void> {
-    if (this.loggingEnabled) {
+    if (this.debugInterface) {
       console.log(`DEBUG: [DayProcessor] ===== PROCESSING DAY ${day} =====`);
     }
 
@@ -117,13 +123,17 @@ export class DayProcessor {
       growthModel: simulationConfig.growthModel,
       playerStrategies: simulationConfig.playerStrategies,
     } as DayStartedEvent);
+
+    // Log progression for CLI feedback
+    progression.dayStarted(eventDay, simulationConfig.durationDays);
+
     // Note: addNewRunsToPool() is now handled by PlayerManager via DAY_STARTED event
 
     // Process available games for the day
     const maxGamesPerDay = Math.max(25, config.initialPlayerCount * 2);
 
     const poolStats = this.gameMatchingEngine.getPoolStatistics();
-    if (this.loggingEnabled) {
+    if (this.debugInterface) {
       console.log(
         `DEBUG: Day ${day} - Pool stats - Total: ${poolStats.totalDollarsInPool}, Available: ${poolStats.availableForMatching}`
       );
@@ -133,7 +143,7 @@ export class DayProcessor {
     // attempt matchmaking when POOL_ADDED and POOL_UPDATED events are emitted
     // The daily loop is no longer needed as matchmaking happens reactively
 
-    if (this.loggingEnabled) {
+    if (this.debugInterface) {
       console.log(
         `DEBUG: Day ${day} - Matchmaking will be handled by MatchmakingEventHandler through events`
       );
@@ -148,14 +158,16 @@ export class DayProcessor {
 
     // Wait for event processing to complete
     // Keep checking until no new games are being resolved
-    let lastGameCount = this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
+    let lastGameCount =
+      this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
     let stableCount = 0;
     const maxWaitMs = 5000; // Max 5 seconds per day
     const startWait = Date.now();
 
-    while (stableCount < 3 && (Date.now() - startWait) < maxWaitMs) {
+    while (stableCount < 3 && Date.now() - startWait < maxWaitMs) {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      const currentGameCount = this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
+      const currentGameCount =
+        this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
       if (currentGameCount === lastGameCount) {
         stableCount++;
       } else {
@@ -164,8 +176,12 @@ export class DayProcessor {
       }
     }
 
-    if (this.loggingEnabled) {
-      console.log(`DEBUG: Day ${day} - Event processing stabilized after ${Date.now() - startWait}ms (${lastGameCount} resolved games)`);
+    if (this.debugInterface) {
+      console.log(
+        `DEBUG: Day ${day} - Event processing stabilized after ${
+          Date.now() - startWait
+        }ms (${lastGameCount} resolved games)`
+      );
     }
 
     // Emit day completed event
@@ -184,6 +200,7 @@ export class DayProcessor {
 
     void this.eventBus.emit(EVENT_TYPES.DAY_COMPLETED, completedPayload);
 
+    // Emit day frame completed event for handler state reset
     void this.eventBus.emit(EVENT_TYPES.DAY_FRAME_COMPLETED, {
       type: EVENT_TYPES.DAY_FRAME_COMPLETED,
       timestamp: new Date(),
@@ -195,6 +212,27 @@ export class DayProcessor {
         activePlayers: completedPayload.activePlayers,
       },
     } as DayFrameCompletedEvent);
+
+    // Log progression for CLI feedback
+    progression.dayEnded(eventDay, simulationConfig.durationDays, {
+      gamesProcessed: completedPayload.gamesProcessed,
+      newPlayers: completedPayload.newPlayers,
+      poolSize: completedPayload.poolSize,
+    });
+
+    // Additional progression logs for detailed tracking
+    progression.playerGrowth(
+      eventDay,
+      0, // activePlayers - would need to track this
+      dailyNewPlayers,
+      0 // eliminatedPlayers - would need to track this
+    );
+
+    progression.gamesCompleted(
+      eventDay,
+      completedPayload.gamesProcessed,
+      0 // totalGames - would need to accumulate this
+    );
   }
 
   /**
@@ -203,7 +241,7 @@ export class DayProcessor {
    * before capturing the daily stats and moving to the next day
    */
   private async waitForEventProcessing(): Promise<void> {
-    const maxWaitMs = 30000;  // Increased to 30 seconds for complex scenarios
+    const maxWaitMs = 50000; // Increased to 50 seconds for complex scenarios
     const pollIntervalMs = 100;
     const startTime = Date.now();
 
@@ -226,7 +264,7 @@ export class DayProcessor {
         stableCount++;
         if (stableCount >= requiredStablePolls) {
           const elapsed = Date.now() - startTime;
-          if (this.loggingEnabled) {
+          if (this.debugInterface) {
             console.log(
               `[DayProcessor] Event processing complete after ${elapsed}ms - pool stable at ${poolSize}, no active games`
             );

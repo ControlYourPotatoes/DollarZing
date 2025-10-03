@@ -592,6 +592,7 @@ export class DatasetOrchestrator {
           collectEventTraces,
         },
       },
+      verbose: this.orchestratorConfig.verbose,
       ...(collectEventTraces
         ? {
             debug: {
@@ -641,7 +642,7 @@ export class DatasetOrchestrator {
       baseSimulationDays: 365, // 1 year simulation
       basePlayerCount: 1000, // Base player count
       baseInitialDonation: 50, // $50 starting donation
-      maxSimulationTimeMs: 1800000, // 30 minutes max per simulation
+      maxSimulationTimeMs: 36e5, // 60 minutes max per simulation
 
       growthRateScaling: {
         playerCountMultiplier: {

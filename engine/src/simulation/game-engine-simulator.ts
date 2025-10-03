@@ -215,7 +215,8 @@ export class GameEngineSimulator {
     dayProcessor: any, // DayProcessor injected
     playerManager: any, // PlayerManager injected
     eventBus?: EventBus,
-    private debugInterface?: EventDebugInterface // Debug interface for event inspection
+    private debugInterface?: EventDebugInterface, // Debug interface for event inspection
+    private verbose?: boolean
   ) {
     // Initialize event system
     this.eventBus = eventBus || new EventBus();
@@ -242,17 +243,26 @@ export class GameEngineSimulator {
     // Initialize basic event handler system (strategy-dependent handlers created in executeSimulation)
     this.revenueTrackingHandler = new RevenueTrackingHandler(
       this.eventBus,
-      this.components.revenueCalculator
+      this.components.revenueCalculator,
+      undefined,
+      this.debugInterface,
+      this.verbose
     );
 
     // Initialize level tracking handler
-    this.levelTrackingHandler = new LevelTrackingHandler(this.eventBus);
+    this.levelTrackingHandler = new LevelTrackingHandler(
+      this.eventBus,
+      this.debugInterface,
+      this.verbose
+    );
 
     this.eventHandlers = [
       new GameEventHandler(
         this.eventBus,
         gameMatchingEngine,
-        revenueCalculator
+        revenueCalculator,
+        this.debugInterface,
+        this.verbose
       ),
       new MatchmakingEventHandler(
         this.eventBus,
@@ -264,7 +274,9 @@ export class GameEngineSimulator {
           prewarmCounts: { virtualDollar: 10, gameSession: 5 },
           enableBatchOptimizations: false,
           enablePerformanceMetrics: false,
-        })
+        }),
+        this.debugInterface,
+        this.verbose
       ),
       this.revenueTrackingHandler,
     ];
@@ -349,7 +361,7 @@ export class GameEngineSimulator {
     }
 
     if (this.playerProgressionHandler) {
-      this.playerProgressionHandler.setLoggingEnabled(loggingEnabled);
+      // PlayerProgressionHandler now uses debugInterface for logging control
     }
 
     const dayProcessor = this.components.dayProcessor as {
@@ -427,31 +439,40 @@ export class GameEngineSimulator {
     const strategyManager = this.createStrategyManager();
 
     // Create CashOutDecisionHandler with configured strategy manager
-    console.log("[Simulator] Attaching CashOutDecisionHandler");
+    if (this.verbose) {
+      console.log("[Simulator] Attaching CashOutDecisionHandler");
+    }
     const cashOutDecisionHandler = new CashOutDecisionHandler(
       this.eventBus,
       strategyManager,
-      this.debugInterface
+      this.debugInterface,
+      this.verbose
     );
     this.eventHandlers.push(cashOutDecisionHandler);
 
     // Create PlayerProgressionHandler with VirtualDollarFactory for event-driven progression
     const loggingEnabled = this.runtimeOptions.collectEventTraces;
-    console.log("[Simulator] Attaching PlayerProgressionHandler");
+    if (this.verbose) {
+      console.log("[Simulator] Attaching PlayerProgressionHandler");
+    }
     this.playerProgressionHandler = new PlayerProgressionHandler(
       this.eventBus,
       this.components.virtualDollarFactory,
       this.components.gameMatchingEngine,
-      { loggingEnabled }
+      { loggingEnabled },
+      this.debugInterface,
+      this.verbose
     );
     this.eventHandlers.push(this.playerProgressionHandler);
 
-    console.log(
-      `[Simulator] Total listener count: ${this.eventBus.getListenerCount()}`
-    );
-    console.log("[Simulator] Listener summary");
-    for (const [eventType, count] of this.eventBus.getListeners()) {
-      console.log(`  - ${eventType}: ${count}`);
+    if (this.verbose) {
+      console.log(
+        `[Simulator] Total listener count: ${this.eventBus.getListenerCount()}`
+      );
+      console.log("[Simulator] Listener summary");
+      for (const [eventType, count] of this.eventBus.getListeners()) {
+        console.log(`  - ${eventType}: ${count}`);
+      }
     }
 
     // Add level tracking handler
@@ -954,7 +975,10 @@ export class GameEngineSimulator {
       processDecision: (context: DecisionProcessContext) => {
         if (context.decision === "CASH_OUT") {
           // Get the virtual dollar's current winnings
-          const currentWinnings = this.components.playerManager.getVirtualDollarCurrentWinnings(context.virtualDollarId);
+          const currentWinnings =
+            this.components.playerManager.getVirtualDollarCurrentWinnings(
+              context.virtualDollarId
+            );
           return {
             finalLevel: context.currentLevel,
             totalWinnings: context.totalWinnings,

@@ -61,6 +61,7 @@ export interface SimulatorFactoryOptions {
   disablePooling?: boolean;
   performanceOverrides?: Partial<PerformanceConfig>;
   debug?: SimulatorDebugOptions;
+  verbose?: boolean;
 }
 
 export interface SimulatorDebugOptions {
@@ -168,7 +169,9 @@ function assembleSimulator(
     playerManager,
     virtualDollarFactory,
     eventBus,
-    { loggingEnabled: false }
+    { loggingEnabled: false },
+    debugInterface,
+    options.verbose
   );
 
   const simulator = new GameEngineSimulator(
@@ -178,7 +181,8 @@ function assembleSimulator(
     dayProcessor,
     playerManager,
     eventBus,
-    debugInterface
+    debugInterface,
+    options.verbose
   );
 
   const dispose = (): void => {

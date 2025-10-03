@@ -66,15 +66,18 @@ export class CashOutDecisionHandler {
   constructor(
     private eventBus: EventBus,
     private strategyManager: IStrategyManager,
-    debugInterface?: EventDebugInterface
+    debugInterface?: EventDebugInterface,
+    private verbose?: boolean
   ) {
     this.debugInterface = debugInterface;
-    console.log(
-      "[CashOutDecisionHandler] attached, debugInterface:",
-      !!debugInterface
-    );
+    if (this.verbose) {
+      console.log(
+        "[CashOutDecisionHandler] attached, debugInterface:",
+        !!debugInterface
+      );
+      console.log("[CashOutDecisionHandler] attached");
+    }
     this.setupEventSubscriptions();
-    console.log("[CashOutDecisionHandler] attached");
   }
 
   private setupEventSubscriptions(): void {
@@ -87,12 +90,14 @@ export class CashOutDecisionHandler {
   }
 
   private async handleGameResolved(event: GameResolvedEvent): Promise<void> {
-    console.log(
-      `[CashOutDecisionHandler] handleGameResolved: game ${event.gameId}, winner ${event.winnerId}, level ${event.winnerLevel}`
-    );
-    console.log(
-      `[CashOutDecisionHandler] handleGameResolved: game ${event.gameId}, winner ${event.winnerId}, level ${event.winnerLevel}`
-    );
+    if (this.debugInterface) {
+      console.log(
+        `[CashOutDecisionHandler] handleGameResolved: game ${event.gameId}, winner ${event.winnerId}, level ${event.winnerLevel}`
+      );
+      console.log(
+        `[CashOutDecisionHandler] handleGameResolved: game ${event.gameId}, winner ${event.winnerId}, level ${event.winnerLevel}`
+      );
+    }
     try {
       // Only process cash-out decisions for winners
       if (event.gameResult === "WIN") {
@@ -225,9 +230,11 @@ export class CashOutDecisionHandler {
       decision = this.strategyManager.makeCashOutDecision(context);
     }
 
-    console.log(
-      `[CashOutDecisionHandler] Winner ${event.winnerId} at level ${event.winnerLevel} with strategy ${strategy} decided to ${decision}`
-    );
+    if (this.verbose) {
+      console.log(
+        `[CashOutDecisionHandler] Winner ${event.winnerId} at level ${event.winnerLevel} with strategy ${strategy} decided to ${decision}`
+      );
+    }
 
     // Create reason string based on strategy and decision
     const reason = this.buildDecisionReason(

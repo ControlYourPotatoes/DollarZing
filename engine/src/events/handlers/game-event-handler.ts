@@ -17,6 +17,7 @@ import {
   BettingLevel,
   getBettingLevelValue,
 } from "../../types/virtual-dollar-engine";
+import type { EventDebugInterface } from "../debug";
 
 /**
  * Game Rules Constants - Matching CryptoZing Specifications
@@ -25,7 +26,8 @@ const BETTING_LEVELS: BettingLevel[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Betti
 const PLATFORM_FEE = 0.2; // $0.20 per game (10c per player × 2 players)
 const WINNINGS_MULTIPLIER = 1.8; // CryptoZing winnings formula
 const JACKPOT_LEVEL: BettingLevel = 10; // Level 10 (value = $512)
-const JACKPOT_AMOUNT = getBettingLevelValue(JACKPOT_LEVEL) * WINNINGS_MULTIPLIER;
+const JACKPOT_AMOUNT =
+  getBettingLevelValue(JACKPOT_LEVEL) * WINNINGS_MULTIPLIER;
 
 /**
  * GameEventHandler - Handles game resolution through event-driven architecture
@@ -44,8 +46,12 @@ export class GameEventHandler {
   constructor(
     private eventBus: EventBus,
     private gameMatchingEngine: GameMatchingEngine,
-    private revenueCalculator: RevenueCalculator
+    private revenueCalculator: RevenueCalculator,
+    private debugInterface?: EventDebugInterface,
+    private verbose?: boolean
   ) {
+    // Suppress unused variable warning - verbose parameter kept for consistency
+    void this.verbose;
     this.initialize();
   }
 
@@ -66,16 +72,20 @@ export class GameEventHandler {
    */
   private async handleGameCreated(event: GameCreatedEvent): Promise<void> {
     try {
-      console.log(
-        `[GameEventHandler] Resolving game ${event.gameId} at level ${event.player1Level}`
-      );
+      if (this.debugInterface) {
+        console.log(
+          `[GameEventHandler] Resolving game ${event.gameId} at level ${event.player1Level}`
+        );
+      }
       // Generate daily seed in proper format (YYYY-MM-DD)
       const dailySeed = this.generateDailySeed();
 
       // Resolve game through GameMatchingEngine
-      console.log(
-        `[GameEventHandler] Resolving game ${event.gameId} at level ${event.player1Level}`
-      );
+      if (this.debugInterface) {
+        console.log(
+          `[GameEventHandler] Resolving game ${event.gameId} at level ${event.player1Level}`
+        );
+      }
 
       const resolutionResult = this.gameMatchingEngine.resolveGame(
         event.gameId,
@@ -132,9 +142,11 @@ export class GameEventHandler {
         gameResult: "WIN",
       };
 
-      console.log(
-        `[GameEventHandler] Emitting GAME_RESOLVED for ${event.gameId} winner ${winnerDollar.id} at level ${winnerDollar.currentLevel}`
-      );
+      if (this.debugInterface) {
+        console.log(
+          `[GameEventHandler] Emitting GAME_RESOLVED for ${event.gameId} winner ${winnerDollar.id} at level ${winnerDollar.currentLevel}`
+        );
+      }
       void this.eventBus
         .emit(EVENT_TYPES.GAME_RESOLVED, gameResolvedEvent)
         .catch((error) =>
