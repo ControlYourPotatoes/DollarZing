@@ -703,12 +703,18 @@ export class GameMatchingEngine {
       const pooled = this.pooledDollars.get(dollarId);
       if (pooled) {
         // In pool: reset state and keep it there
-        this.virtualDollarFactory.updateDollarState(pooled.id, DollarState.POOLED);
+        this.virtualDollarFactory.updateDollarState(
+          pooled.id,
+          DollarState.POOLED
+        );
         this.dollarsInGame.delete(dollarId);
         requeueIds.push(pooled.id);
       } else {
         // Not in pool: force requeue it
-        this.virtualDollarFactory.updateDollarState(dollar.id, DollarState.POOLED);
+        this.virtualDollarFactory.updateDollarState(
+          dollar.id,
+          DollarState.POOLED
+        );
         this.forceRequeueDollar(dollar);
         this.dollarsInGame.delete(dollarId);
         requeueIds.push(dollar.id);
@@ -816,7 +822,9 @@ export class GameMatchingEngine {
   logGlobalAvailableForMatching(): void {
     const available = this.pooledDollars.size - this.dollarsInGame.size;
     if (available < 0) {
-      console.warn(`[GameMatchingEngine] Global availableForMatching negative: ${available} (pooled: ${this.pooledDollars.size}, inGame: ${this.dollarsInGame.size})`);
+      console.warn(
+        `[GameMatchingEngine] Global availableForMatching negative: ${available} (pooled: ${this.pooledDollars.size}, inGame: ${this.dollarsInGame.size})`
+      );
     }
   }
 }

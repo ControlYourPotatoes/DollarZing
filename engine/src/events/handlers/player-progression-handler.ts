@@ -13,7 +13,11 @@ import {
   PlayerTotalWinningsUpdatedEvent,
   EVENT_TYPES,
 } from "../event-types";
-import { BettingLevel, DollarState, VirtualDollar } from "../../types/virtual-dollar-engine";
+import {
+  BettingLevel,
+  DollarState,
+  VirtualDollar,
+} from "../../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../../types/factory-interfaces";
 import { GameMatchingEngine } from "../../core/game-matching-engine";
 
@@ -237,7 +241,9 @@ export class PlayerProgressionHandler {
   /**
    * Re-pool an advanced winner for continued matching at their new level
    */
-  private async rePoolAdvancedWinner(virtualDollar: VirtualDollar): Promise<void> {
+  private async rePoolAdvancedWinner(
+    virtualDollar: VirtualDollar
+  ): Promise<void> {
     // REMOVED THROTTLE: All dollars should queue normally
     // The "different owners" matching rule will prevent same-owner pairing
     // Cleanup only fires when truly stuck (end of day or long stalemate)
