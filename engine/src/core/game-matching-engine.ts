@@ -5,10 +5,7 @@
 import { VirtualDollar, DollarState } from "../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../types/factory-interfaces";
 import { ScoringEngine, ScoreResult } from "./scoring-engine";
-import {
-  GameSession,
-  BettingLevel,
-} from "../types/virtual-dollar-engine";
+import { GameSession, BettingLevel } from "../types/virtual-dollar-engine";
 import { GameSessionFactory } from "../types/factory-interfaces";
 import { EventBus } from "../events/event-bus";
 import {
@@ -119,7 +116,7 @@ export class GameMatchingEngine {
   private resolvedWinnings = 0;
 
   // Configuration
-  private maxConcurrentGames: number = 1000;
+  private maxConcurrentGames: number = 3000;
 
   constructor(
     virtualDollarFactory: VirtualDollarFactory,
