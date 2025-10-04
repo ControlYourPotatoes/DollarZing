@@ -500,8 +500,9 @@ export function WorkflowNode({
           const isHovered = ringHoverKey === desc.key;
           const pathId = `ring-path-${id}-${desc.key}`;
           // Dynamic color based on ring key for contrast
-          const textColor = desc.key === 'base' ? 'black' : 'white';
-          const label = desc.key === 'base' ? 'Base' : desc.key === 'mid' ? 'Mid' : 'High';
+          const textColor = desc.key === "base" ? "black" : "white";
+          const label =
+            desc.key === "base" ? "Base" : desc.key === "mid" ? "Mid" : "High";
           return (
             <text
               key={`text-${desc.key}`}
@@ -520,16 +521,32 @@ export function WorkflowNode({
         })}
         {/* Curved text for ring totals at the filled amount location */}
         {ringDescriptors.map((desc) => {
-          const segments = desc.key === 'base' ? layers : desc.key === 'mid' ? midSegments : highSegments;
+          const segments =
+            desc.key === "base"
+              ? layers
+              : desc.key === "mid"
+              ? midSegments
+              : highSegments;
           const totalValue = segments.reduce((sum, seg) => sum + seg.value, 0);
           const pathId = `ring-path-${id}-${desc.key}`;
           // Dynamic color based on ring key for contrast
-          const textColor = desc.key === 'base' ? 'black' : 'white';
+          const textColor = desc.key === "base" ? "black" : "white";
           // Calculate effectiveTarget as in computeArcs
           const sum = segments.reduce((s, l) => s + l.value, 0);
-          const target = desc.key === 'base' ? baseValue : desc.key === 'mid' ? midValue : highValue;
-          const effectiveTarget = target ? target * (desc.key === 'base' ? 1.3 : desc.key === 'mid' ? 1.2 : 1.5) : sum;
-          const percentage = effectiveTarget > 0 ? Math.min((totalValue / effectiveTarget) * 100, 100) : 0;
+          const target =
+            desc.key === "base"
+              ? baseValue
+              : desc.key === "mid"
+              ? midValue
+              : highValue;
+          const effectiveTarget = target
+            ? target *
+              (desc.key === "base" ? 1.3 : desc.key === "mid" ? 1.2 : 1.5)
+            : sum;
+          const percentage =
+            effectiveTarget > 0
+              ? Math.min((totalValue / effectiveTarget) * 100, 100)
+              : 0;
           return (
             <motion.text
               key={`total-${desc.key}`}
@@ -551,33 +568,40 @@ export function WorkflowNode({
           );
         })}
         <g transform="translate(0, -6)">
+          {label.split(" ").map((word, index, array) => {
+            const lineHeight = 16;
+            const totalHeight = array.length * lineHeight;
+            const startY = -totalHeight / 2 + lineHeight / 2;
+            return (
+              <text
+                key={index}
+                x={0}
+                y={startY + index * lineHeight}
+                textAnchor="middle"
+                fontSize={20}
+                fontWeight={600}
+                fill="#e2e8f0"
+                pointerEvents="none"
+              >
+                {word}
+              </text>
+            );
+          })}
           <text
             x={0}
-            y={-10}
+            y={35}
             textAnchor="middle"
-            fontSize={20}
-            fontWeight={600}
-            fill="#e2e8f0"
-            pointerEvents="none"
-          >
-            {label}
-          </text>
-          {/* Hide the old value text since totals are now in rings */}
-          {/* <text
-            x={0}
-            y={14}
-            textAnchor="middle"
-            fontSize={18}
+            fontSize={22}
             fontWeight={500}
             fill="#f8fafc"
             pointerEvents="none"
           >
             {valueLabel}
-          </text> */}
+          </text>
           {baseDeltaMeta.label && (
             <text
               x={0}
-              y={14}
+              y={35}
               textAnchor="middle"
               fontSize={16}
               fontWeight={600}
