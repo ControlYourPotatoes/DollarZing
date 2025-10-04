@@ -19,6 +19,7 @@ import {
   PoolUpdatedEvent,
 } from "../events/event-types";
 import type { SimulationAbortReason } from "../types/simulation-termination";
+import type { EventDebugInterface } from "../events/debug";
 
 // Legacy event types removed - using centralized EventBus instead
 
@@ -126,7 +127,8 @@ export class GameMatchingEngine {
     virtualDollarFactory: VirtualDollarFactory,
     scoringEngine: ScoringEngine,
     gameSessionFactory: GameSessionFactory,
-    eventBus: EventBus
+    eventBus: EventBus,
+    private debugInterface?: EventDebugInterface
   ) {
     this.virtualDollarFactory = virtualDollarFactory;
     this.scoringEngine = scoringEngine;
@@ -257,10 +259,11 @@ export class GameMatchingEngine {
     }
 
     this.enqueueDollar(dollar.currentLevel, dollar.id);
-
+    if (this.debugInterface) {
     console.log(
       `[GameMatchingEngine] Added ${dollar.id} owned by ${dollar.ownerId} into pool at level ${dollar.currentLevel}`
     );
+  }
 
     // Emit POOL_ADDED event
     const poolAddedEvent: PoolAddedEvent = {

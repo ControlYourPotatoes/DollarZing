@@ -161,7 +161,8 @@ function assembleSimulator(
     virtualDollarFactory,
     scoringEngine,
     gameSessionFactory,
-    eventBus
+    eventBus,
+    debugInterface
   );
   const playerManager = new PlayerManager(eventBus, virtualDollarFactory);
   const dayProcessor = new DayProcessor(
