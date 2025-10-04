@@ -38,6 +38,8 @@ node dist/scripts/run-orchestrator.js --days 365 --no-events
 NODE_OPTIONS="--max-old-space-size=9126" node dist/scripts/run-orchestrator.js --days 365 --no-events --combo 60,mid,10
 
 npm run simulate -- --days 1 2>&1 | tee sim.log
+
+
   NODE_OPTIONS="--max-old-space-size=9126" \
     node dist/scripts/run-orchestrator.js \
     --days 5 \
@@ -45,4 +47,7 @@ npm run simulate -- --days 1 2>&1 | tee sim.log
     --debug-events \
     --log-file engine/run.log
 
-    NODE_OPTIONS="--max-old-space-size=9126" node dist/scripts/run-orchestrator.js --days 3 --combo 15,high,10 --log-file run.log
+Lowbase high risk
+node dist/scripts/run-orchestrator.js --days 3 --combo 15,high,10 --log-file run.log
+Mid growth High risk
+node dist/scripts/run-orchestrator.js --days 3 --combo 35,high,10 --log-file run.log
