@@ -241,7 +241,6 @@ export class DayProcessor {
    * before capturing the daily stats and moving to the next day
    */
   private async waitForEventProcessing(): Promise<void> {
-    const maxWaitMs = 50000; // Increased to 50 seconds for complex scenarios
     const pollIntervalMs = 100;
     const startTime = Date.now();
 
@@ -250,7 +249,7 @@ export class DayProcessor {
     let stableCount = 0;
     const requiredStablePolls = 5; // Need 5 consecutive stable polls (500ms total)
 
-    while (Date.now() - startTime < maxWaitMs) {
+    while (true) {
       const poolStats = this.gameMatchingEngine.getPoolStatistics();
       const activeGames = this.gameMatchingEngine.getActiveGameCount();
       const poolSize = poolStats.totalDollarsInPool;
@@ -279,13 +278,6 @@ export class DayProcessor {
       lastActiveGames = activeGames;
       await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
     }
-
-    // Timeout reached - log warning but continue
-    const poolStats = this.gameMatchingEngine.getPoolStatistics();
-    const activeGames = this.gameMatchingEngine.getActiveGameCount();
-    console.warn(
-      `[DayProcessor] Event processing timeout after ${maxWaitMs}ms - continuing anyway (pool: ${poolStats.totalDollarsInPool}, active games: ${activeGames})`
-    );
   }
 
   /**
