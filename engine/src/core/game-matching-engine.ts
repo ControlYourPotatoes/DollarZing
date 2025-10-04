@@ -260,10 +260,10 @@ export class GameMatchingEngine {
 
     this.enqueueDollar(dollar.currentLevel, dollar.id);
     if (this.debugInterface) {
-    console.log(
-      `[GameMatchingEngine] Added ${dollar.id} owned by ${dollar.ownerId} into pool at level ${dollar.currentLevel}`
-    );
-  }
+      console.log(
+        `[GameMatchingEngine] Added ${dollar.id} owned by ${dollar.ownerId} into pool at level ${dollar.currentLevel}`
+      );
+    }
 
     // Emit POOL_ADDED event
     const poolAddedEvent: PoolAddedEvent = {
