@@ -8,7 +8,6 @@ import { ScoringEngine, ScoreResult } from "./scoring-engine";
 import {
   GameSession,
   BettingLevel,
-  PlayerBalanceManager,
 } from "../types/virtual-dollar-engine";
 import { GameSessionFactory } from "../types/factory-interfaces";
 import { EventBus } from "../events/event-bus";
@@ -90,7 +89,6 @@ export class GameMatchingEngine {
   private virtualDollarFactory: VirtualDollarFactory;
   private scoringEngine: ScoringEngine;
   private gameSessionFactory: GameSessionFactory;
-  private playerBalanceManager?: PlayerBalanceManager;
   private eventBus: EventBus; // Required EventBus for centralized event emission
 
   // Pool management
@@ -235,17 +233,6 @@ export class GameMatchingEngine {
       return {
         success: false,
         error: "Dollar already in pool",
-      };
-    }
-
-    // Validate player balance if balance manager is available
-    if (
-      this.playerBalanceManager &&
-      !this.playerBalanceManager.canPlayerPlay(dollar.ownerId)
-    ) {
-      return {
-        success: false,
-        error: "Player does not have sufficient balance to play games",
       };
     }
 
@@ -444,20 +431,6 @@ export class GameMatchingEngine {
       winner.potValue += loser.potValue; // Winner absorbs loser's pot value
       loser.potValue = 0; // Loser loses all pot value
 
-      // Process player balance transactions if balance manager is available
-      if (this.playerBalanceManager) {
-        // No game fees charged - Virtual Dollar Pool Engine handles all fees via pot system
-
-        // Add winnings to winner's progression
-        this.playerBalanceManager.addWinProgression(
-          winner.ownerId,
-          game.winnings
-        );
-
-        // Clear loser's progression
-        this.playerBalanceManager.loseProgression(loser.ownerId);
-      }
-
       // Update dollar states
       // Note: Winner state will be updated later by game processing logic based on cash-out decision
       // For now, winners remain in their current state until processed
@@ -611,13 +584,6 @@ export class GameMatchingEngine {
   }
 
   /**
-   * Set PlayerBalanceManager for balance validation
-   */
-  setPlayerBalanceManager(balanceManager: PlayerBalanceManager): void {
-    this.playerBalanceManager = balanceManager;
-  }
-
-  /**
    * Set EventBus for centralized event emission
    */
   setEventBus(eventBus: EventBus): void {
@@ -759,75 +725,75 @@ export class GameMatchingEngine {
       return [];
     }
 
-    return Array.from(levelSet)
-      .map((id) => this.pooledDollars.get(id))
-      .filter((dollar) => dollar !== undefined) as VirtualDollar[];
+    const result: VirtualDollar[] = [];
+    for (const dollarId of levelSet) {
+      const dollar = this.pooledDollars.get(dollarId);
+      if (dollar && dollar.state === DollarState.POOLED) {
+        result.push(dollar);
+      }
+    }
+
+    return result;
   }
 
   /**
-   * Check if dollar is in game
+   * Get level distribution of dollars in pool
+   */
+  getLevelDistribution(): Record<BettingLevel, number> {
+    const distribution: Record<BettingLevel, number> = {} as Record<
+      BettingLevel,
+      number
+    >;
+
+    for (let level = 1; level <= MAX_BETTING_LEVEL; level++) {
+      distribution[level as BettingLevel] = this.getPendingCountForLevel(
+        level as BettingLevel
+      );
+    }
+
+    return distribution;
+  }
+
+  /**
+   * Debugging: Log internal state (for development and testing)
+   */
+  debugLog(): void {
+    console.log("=== GameMatchingEngine Debug Log ===");
+    console.log("Pooled Dollars:", this.pooledDollars);
+    console.log("Dollars By Level:", this.dollarsByLevel);
+    console.log("Level Queues:", this.levelQueues);
+    console.log("Active Games:", this.activeGames);
+    console.log("Completed Games:", this.completedGames);
+    console.log("Dollars In Game:", this.dollarsInGame);
+    console.log("Resolved Game Count:", this.resolvedGameCount);
+    console.log("Resolved Games By Level:", this.resolvedGamesByLevel);
+    console.log("Resolved Platform Fees:", this.resolvedPlatformFees);
+    console.log("Resolved Winnings:", this.resolvedWinnings);
+    console.log("Max Concurrent Games:", this.maxConcurrentGames);
+    console.log("=====================================");
+  }
+
+  /**
+   * Check if a virtual dollar is currently in an active game
    */
   isDollarInGame(dollarId: string): boolean {
     return this.dollarsInGame.has(dollarId);
   }
 
   /**
-   * Add active game (for MatchmakingEventHandler)
+   * Add an active game to tracking
    */
   addActiveGame(game: GameSession): void {
     this.activeGames.set(game.id, game);
   }
 
   /**
-   * Get unique owners of pending queued dollars at a specific level
-   */
-  getQueuedOwnersAtLevel(level: BettingLevel): string[] {
-    const queue = this.getLevelQueue(level);
-    const owners: string[] = [];
-
-    for (const id of queue.items) {
-      if (!queue.pending.has(id)) {
-        continue;
-      }
-
-      const dollar = this.pooledDollars.get(id);
-      if (!dollar || dollar.state !== DollarState.POOLED) {
-        continue;
-      }
-
-      owners.push(dollar.ownerId);
-    }
-
-    return owners;
-  }
-
-  /**
-   * Get level distribution for pool statistics
-   */
-  private getLevelDistribution(): Record<number, number> {
-    const distribution: Record<number, number> = {};
-    for (const [level, dollarSet] of this.dollarsByLevel) {
-      distribution[level] = dollarSet.size;
-    }
-    return distribution;
-  }
-
-  /**
-   * Get factory statistics for performance monitoring
-   */
-  getFactoryStatistics() {
-    return this.gameSessionFactory.getStatistics();
-  }
-
-  /**
-   * Log global availableForMatching if negative (debug) - call from key methods like addToPool, removeFromPool, markDollarInGame
+   * Log global available for matching statistics
    */
   logGlobalAvailableForMatching(): void {
-    const available = this.pooledDollars.size - this.dollarsInGame.size;
-    if (available < 0) {
-      console.warn(
-        `[GameMatchingEngine] Global availableForMatching negative: ${available} (pooled: ${this.pooledDollars.size}, inGame: ${this.dollarsInGame.size})`
-      );
-    }
+    const stats = this.getPoolStatistics();
+    console.log(
+      `[GameMatchingEngine] Global available for matching: ${stats.availableForMatching} dollars (${stats.totalDollarsInPool} total in pool, ${stats.dollarsInGame} in games)`
+    );
   }
 }
