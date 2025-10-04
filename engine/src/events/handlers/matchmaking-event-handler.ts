@@ -25,6 +25,7 @@ import {
   type VirtualDollar,
 } from "../../types/virtual-dollar-engine";
 import type { EventDebugInterface } from "../debug";
+import { progression } from "../../utils/progression-logger";
 
 /**
  * MatchmakingEventHandler - Handles matchmaking logic through event-driven architecture
@@ -88,8 +89,9 @@ export class MatchmakingEventHandler {
           level as BettingLevel
         );
         if (cleared.length > 0) {
-          console.warn(
-            `[MatchmakingEventHandler] Simulation start cleanup: cleared ${cleared.length} stale dollars at level ${level}`
+          progression.simulationWarning(
+            `Simulation start cleanup: cleared ${cleared.length} stale dollars at level ${level}`,
+            { level, clearedCount: cleared.length, event: "simulation_start_cleanup" }
           );
         }
       }
@@ -138,9 +140,11 @@ export class MatchmakingEventHandler {
           level as BettingLevel
         );
         if (cleared.length > 0) {
-          console.warn(
-            `[MatchmakingEventHandler] End-of-day cleanup: cleared ${cleared.length} stale dollars at level ${level}`
-          );
+          if (this.debugInterface) {
+            console.warn(
+              `[MatchmakingEventHandler] End-of-day cleanup: cleared ${cleared.length} stale dollars at level ${level}`
+            );
+          }
         }
       }
     });
@@ -309,13 +313,15 @@ export class MatchmakingEventHandler {
 
           if (partnerIndex === -1) {
             deferredQueue.push(primary);
-            console.debug(
-              `[MatchmakingEventHandler] No eligible partner for ${
-                primary.dollar.ownerId
-              } at level ${level} (queue length: ${
-                matchingQueue.length + deferredQueue.length
-              })`
-            );
+            if (this.debugInterface) {
+              console.debug(
+                `[MatchmakingEventHandler] No eligible partner for ${
+                  primary.dollar.ownerId
+                } at level ${level} (queue length: ${
+                  matchingQueue.length + deferredQueue.length
+                })`
+              );
+            }
             continue;
           }
 
@@ -408,25 +414,31 @@ export class MatchmakingEventHandler {
 
         if (this.consecutiveNoMatchCycles % 10 === 0) {
           // Log every 10 cycles to reduce spam
-          console.warn(
-            `[MatchmakingEventHandler] Stalemate cycle ${this.consecutiveNoMatchCycles}/${this.maxStaleCyclesBeforeCleanup} at level ${lastStalemateLevel}`
-          );
+          if (this.debugInterface) {
+            console.warn(
+              `[MatchmakingEventHandler] Stalemate cycle ${this.consecutiveNoMatchCycles}/${this.maxStaleCyclesBeforeCleanup} at level ${lastStalemateLevel}`
+            );
+          }
         }
 
         if (lastStalemateLevel === this.staleCycleStartLevel) {
           if (this.consecutiveNoMatchCycles >= this.maxNoMatchCycles) {
-            console.warn(
-              `[MatchmakingEventHandler] Waiting for another unique player at level ${lastStalemateLevel}. ` +
-                `Cycles without match: ${this.consecutiveNoMatchCycles}`
-            );
+            if (this.debugInterface) {
+              console.warn(
+                `[MatchmakingEventHandler] Waiting for another unique player at level ${lastStalemateLevel}. ` +
+                  `Cycles without match: ${this.consecutiveNoMatchCycles}`
+              );
+            }
           }
 
           if (
             this.consecutiveNoMatchCycles >= this.maxStaleCyclesBeforeCleanup
           ) {
-            console.warn(
-              `[MatchmakingEventHandler] CLEANUP TRIGGERED at level ${lastStalemateLevel} after ${this.consecutiveNoMatchCycles} cycles - likely end of day or single player remaining`
-            );
+            if (this.debugInterface) {
+              console.warn(
+                `[MatchmakingEventHandler] CLEANUP TRIGGERED at level ${lastStalemateLevel} after ${this.consecutiveNoMatchCycles} cycles - likely end of day or single player remaining`
+              );
+            }
 
             // Check if this is a last-player-standing scenario
             const queueSnapshot = this.gameMatchingEngine.getDollarsAtLevel(
@@ -492,9 +504,11 @@ export class MatchmakingEventHandler {
             return;
           }
         } else {
-          console.debug(
-            `[MatchmakingEventHandler] Stalemate level changed from ${this.staleCycleStartLevel} to ${lastStalemateLevel}, resetting cycle counter`
-          );
+          if (this.debugInterface) {
+            console.debug(
+              `[MatchmakingEventHandler] Stalemate level changed from ${this.staleCycleStartLevel} to ${lastStalemateLevel}, resetting cycle counter`
+            );
+          }
           this.staleCycleStartLevel = lastStalemateLevel;
         }
       } else {
@@ -531,11 +545,15 @@ export class MatchmakingEventHandler {
     this.gameMatchingEngine.logGlobalAvailableForMatching();
 
     if (requeuedIds.length > 0) {
-      console.warn(
-        `[MatchmakingEventHandler] Requeued ${requeuedIds.length} stale dollars at level ${level} after ` +
-          `${this.consecutiveNoMatchCycles} idle cycles: ${requeuedIds
-            .slice(0, 5)
-            .join(", ")}${requeuedIds.length > 5 ? "…" : ""}`
+      progression.simulationWarning(
+        `Requeued ${requeuedIds.length} stale dollars at level ${level} after ${this.consecutiveNoMatchCycles} idle cycles`,
+        {
+          level,
+          requeuedCount: requeuedIds.length,
+          idleCycles: this.consecutiveNoMatchCycles,
+          sampleIds: requeuedIds.slice(0, 5),
+          event: "stale_dollars_requeued"
+        }
       );
     } else {
       // No stale dollars found - check if we have a single-owner queue (last player standing)
@@ -546,9 +564,14 @@ export class MatchmakingEventHandler {
 
       if (uniqueOwners.size === 1 && queueSnapshot.length > 0) {
         const lastOwner = Array.from(uniqueOwners)[0];
-        console.warn(
-          `[MatchmakingEventHandler] Single owner (${lastOwner}) remaining at level ${level} with ${queueSnapshot.length} dollars. ` +
-            `Eliminating as no matches possible (acceptable daily inaccuracy).`
+        progression.simulationWarning(
+          `Single owner (${lastOwner}) remaining at level ${level} with ${queueSnapshot.length} dollars - eliminating as no matches possible`,
+          {
+            level,
+            ownerId: lastOwner,
+            dollarCount: queueSnapshot.length,
+            event: "last_player_standing_elimination"
+          }
         );
 
         // Eliminate all dollars from the last player standing
@@ -573,9 +596,11 @@ export class MatchmakingEventHandler {
           );
         }
       } else {
-        console.debug(
-          `[MatchmakingEventHandler] Cleanup triggered at level ${level} but 0 stale dollars found to requeue`
-        );
+        if (this.debugInterface) {
+          console.debug(
+            `[MatchmakingEventHandler] Cleanup triggered at level ${level} but 0 stale dollars found to requeue`
+          );
+        }
       }
     }
 

@@ -593,7 +593,7 @@ export class DatasetOrchestrator {
         },
       },
       verbose: this.orchestratorConfig.verbose,
-      ...(collectEventTraces
+      ...(debugEvents
         ? {
             debug: {
               enableEventTracing: true,

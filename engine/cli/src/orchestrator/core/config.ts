@@ -17,7 +17,7 @@ export function createDefaultOrchestratorConfig(
     verbose: false,
     dryRun: false,
     collectDailySnapshots: true,
-    collectEventTraces: true,
+    collectEventTraces: false,
     collectPresentationSnapshots: true,
     debugEvents: false,
   };

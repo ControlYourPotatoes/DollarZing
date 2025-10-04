@@ -140,6 +140,24 @@ export const progression = {
       }
     );
   },
+
+  // Structured error logging - always visible
+  simulationError: (error: Error, context?: any) => {
+    progressionLogger.error(`Simulation error: ${error.message}`, {
+      event: "simulation_error",
+      error: error.message,
+      stack: error.stack,
+      ...context,
+    });
+  },
+
+  // Structured warning logging - could be always visible or verbose-only
+  simulationWarning: (message: string, context?: any) => {
+    progressionLogger.warn(`Simulation warning: ${message}`, {
+      event: "simulation_warning",
+      ...context,
+    });
+  },
 };
 
 // Export logger instance for custom logging

@@ -206,7 +206,7 @@ export class DayProcessor {
       timestamp: new Date(),
       dayNumber: eventDay,
       summary: {
-        gamesProcessed: completedPayload.gamesProcessed,
+        gamesProcessed: lastGameCount, // Use actual resolved games count
         newPlayers: completedPayload.newPlayers,
         poolSize: completedPayload.poolSize,
         activePlayers: completedPayload.activePlayers,
@@ -215,7 +215,7 @@ export class DayProcessor {
 
     // Log progression for CLI feedback
     progression.dayEnded(eventDay, simulationConfig.durationDays, {
-      gamesProcessed: completedPayload.gamesProcessed,
+      gamesProcessed: lastGameCount, // Use actual resolved games count
       newPlayers: completedPayload.newPlayers,
       poolSize: completedPayload.poolSize,
     });
@@ -230,7 +230,7 @@ export class DayProcessor {
 
     progression.gamesCompleted(
       eventDay,
-      completedPayload.gamesProcessed,
+      lastGameCount, // Use actual resolved games count
       0 // totalGames - would need to accumulate this
     );
   }

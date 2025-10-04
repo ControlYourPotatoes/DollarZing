@@ -152,7 +152,8 @@ function assembleSimulator(
   const { virtualDollarFactory, gameSessionFactory } = createFactories(
     poolingEnabled,
     performanceBase,
-    options.performanceOverrides
+    options.performanceOverrides,
+    debugInterface
   );
 
   const scoringEngine = new ScoringEngine();
@@ -262,7 +263,8 @@ function createProfile(
 function createFactories(
   poolingEnabled: boolean,
   base: PerformanceConfig,
-  overrides?: Partial<PerformanceConfig>
+  overrides?: Partial<PerformanceConfig>,
+  debugInterface?: EventDebugInterface
 ): {
   virtualDollarFactory: VirtualDollarFactory;
   gameSessionFactory: GameSessionFactory;
@@ -275,7 +277,7 @@ function createFactories(
       enableObjectPooling: true,
     };
     return {
-      virtualDollarFactory: new PooledVirtualDollarFactory(config),
+      virtualDollarFactory: new PooledVirtualDollarFactory(config, debugInterface),
       gameSessionFactory: new PooledGameSessionFactory(config),
     };
   }

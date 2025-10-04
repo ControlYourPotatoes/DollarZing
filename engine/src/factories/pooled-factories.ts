@@ -22,6 +22,7 @@ import {
   getObjectPoolManager,
   isObjectPoolingEnabled,
 } from "../utils/object-pool";
+import type { EventDebugInterface } from "../events/debug";
 
 /**
  * Performance tracking utility for timing operations
@@ -86,7 +87,10 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
   private dollarsByPlayer: Map<string, Set<string>> = new Map();
   private stateHistory: Map<string, StateTransition[]> = new Map();
 
-  constructor(config: PerformanceConfig) {
+  constructor(
+    config: PerformanceConfig,
+    private debugInterface?: EventDebugInterface
+  ) {
     this.config = config;
     this.performanceTracker = new PerformanceTracker();
 
@@ -481,9 +485,11 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
     // Update state to WON
     this.updateDollarState(dollarId, DollarState.WON);
 
-    console.log(
-      `[VirtualDollarFactory] advancePlayerLevel -> ${dollarId} now at level ${dollar.currentLevel}`
-    );
+    if (this.debugInterface) {
+      console.log(
+        `[VirtualDollarFactory] advancePlayerLevel -> ${dollarId} now at level ${dollar.currentLevel}`
+      );
+    }
 
     return dollar;
   }
