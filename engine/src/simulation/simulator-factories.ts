@@ -277,7 +277,10 @@ function createFactories(
       enableObjectPooling: true,
     };
     return {
-      virtualDollarFactory: new PooledVirtualDollarFactory(config, debugInterface),
+      virtualDollarFactory: new PooledVirtualDollarFactory(
+        config,
+        debugInterface
+      ),
       gameSessionFactory: new PooledGameSessionFactory(config),
     };
   }

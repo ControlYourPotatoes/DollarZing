@@ -91,7 +91,11 @@ export class MatchmakingEventHandler {
         if (cleared.length > 0) {
           progression.simulationWarning(
             `Simulation start cleanup: cleared ${cleared.length} stale dollars at level ${level}`,
-            { level, clearedCount: cleared.length, event: "simulation_start_cleanup" }
+            {
+              level,
+              clearedCount: cleared.length,
+              event: "simulation_start_cleanup",
+            }
           );
         }
       }
@@ -552,7 +556,7 @@ export class MatchmakingEventHandler {
           requeuedCount: requeuedIds.length,
           idleCycles: this.consecutiveNoMatchCycles,
           sampleIds: requeuedIds.slice(0, 5),
-          event: "stale_dollars_requeued"
+          event: "stale_dollars_requeued",
         }
       );
     } else {
@@ -570,7 +574,7 @@ export class MatchmakingEventHandler {
             level,
             ownerId: lastOwner,
             dollarCount: queueSnapshot.length,
-            event: "last_player_standing_elimination"
+            event: "last_player_standing_elimination",
           }
         );
 
