@@ -12,8 +12,8 @@
       "cashOutStrategy": 0,
       "charityShare": 0
     },
-    "days": 5,
-    "generatedAt": "2025-10-02T04:13:46.086Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:18:25.137Z"
   },
   {
     "scenarioId": "growth-15_risk-high_charity-10",
@@ -28,8 +28,8 @@
       "cashOutStrategy": 1,
       "charityShare": 0
     },
-    "days": 90,
-    "generatedAt": "2025-10-04T23:07:58.396Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:35:18.802Z"
   },
   {
     "scenarioId": "growth-35_risk-low_charity-10",
@@ -60,8 +60,8 @@
       "cashOutStrategy": 0,
       "charityShare": 0.5
     },
-    "days": 365,
-    "generatedAt": "2025-09-28T19:08:37.479Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:21:12.303Z"
   },
   {
     "scenarioId": "growth-15_risk-low_charity-30",
@@ -76,8 +76,8 @@
       "cashOutStrategy": 0,
       "charityShare": 1
     },
-    "days": 365,
-    "generatedAt": "2025-09-28T19:10:37.408Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:23:59.081Z"
   },
   {
     "scenarioId": "growth-15_risk-mid_charity-10",
@@ -92,8 +92,8 @@
       "cashOutStrategy": 0.5,
       "charityShare": 0
     },
-    "days": 365,
-    "generatedAt": "2025-09-24T04:44:46.995Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:26:47.256Z"
   },
   {
     "scenarioId": "growth-15_risk-mid_charity-20",
@@ -108,8 +108,8 @@
       "cashOutStrategy": 0.5,
       "charityShare": 0.5
     },
-    "days": 365,
-    "generatedAt": "2025-09-24T04:46:14.483Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:29:36.585Z"
   },
   {
     "scenarioId": "growth-15_risk-mid_charity-30",
@@ -124,8 +124,8 @@
       "cashOutStrategy": 0.5,
       "charityShare": 1
     },
-    "days": 365,
-    "generatedAt": "2025-09-24T04:47:44.494Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:32:23.922Z"
   },
   {
     "scenarioId": "growth-15_risk-high_charity-20",
@@ -140,8 +140,8 @@
       "cashOutStrategy": 1,
       "charityShare": 0.5
     },
-    "days": 365,
-    "generatedAt": "2025-09-24T04:50:44.590Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:38:15.150Z"
   },
   {
     "scenarioId": "growth-15_risk-high_charity-30",
@@ -156,8 +156,8 @@
       "cashOutStrategy": 1,
       "charityShare": 1
     },
-    "days": 365,
-    "generatedAt": "2025-09-24T04:52:14.351Z"
+    "days": 120,
+    "generatedAt": "2025-10-05T04:41:13.048Z"
   },
   {
     "scenarioId": "growth-35_risk-low_charity-20",
