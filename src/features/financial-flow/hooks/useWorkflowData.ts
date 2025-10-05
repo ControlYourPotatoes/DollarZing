@@ -7,10 +7,7 @@ import {
   PresentationWorkflowNode,
   PresentationWorkflowLayer,
 } from "@/shared/presentation";
-import {
-  DEFAULT_LAYOUT_CONFIG,
-  layoutWorkflow,
-} from "../layout/simpleLayout";
+import { DEFAULT_LAYOUT_CONFIG, layoutWorkflow } from "../layout/simpleLayout";
 import {
   useActiveTimelineDay,
   useActiveTimelineScenario,
@@ -80,7 +77,10 @@ export function useWorkflowData(): WorkflowLayoutResult {
         return;
       }
       const value = Math.max(0, rawValue);
-      nodeComparisonMax[nodeId] = Math.max(nodeComparisonMax[nodeId] ?? 0, value);
+      nodeComparisonMax[nodeId] = Math.max(
+        nodeComparisonMax[nodeId] ?? 0,
+        value
+      );
     };
     const scenariosToCheck = [scenario, midScenario, highScenario].filter(
       Boolean
@@ -126,26 +126,34 @@ export function useWorkflowData(): WorkflowLayoutResult {
     const sourceNodes = [...day.financialWorkflow.nodes];
     const sourceLinks = [...day.financialWorkflow.links];
 
-    // Use cumulative aggregates as the source of truth
-    const totalValue = Math.max(0, day.timelineTick.cumulativeRevenue || 0);
-    const platformValue = Math.max(0, day.timelineTick.cumulativeFees || 0);
-    const charityValue = Math.max(0, day.timelineTick.cumulativeCharity || 0);
-    const playersValue = Math.max(0, day.timelineTick.cumulativePayouts || 0);
+    // Use node aggregates as primary source, timelineTick as fallback
+    const totalValue =
+      sourceNodes.find((n) => n.id === "total")?.aggregateValue ||
+      Math.max(0, day.timelineTick.cumulativeRevenue || 0);
+    const platformValue =
+      sourceNodes.find((n) => n.id === "platform")?.aggregateValue ||
+      Math.max(0, day.timelineTick.cumulativeFees || 0);
+    const charityValue =
+      sourceNodes.find((n) => n.id === "charity")?.aggregateValue ||
+      Math.max(0, day.timelineTick.cumulativeCharity || 0);
+    const playersValue =
+      sourceNodes.find((n) => n.id === "players")?.aggregateValue ||
+      Math.max(0, day.timelineTick.cumulativePayouts || 0);
 
-    // Update existing nodes with cumulative values
+    // Update existing nodes with values (only if not set)
     sourceNodes.forEach((node) => {
       switch (node.id) {
         case "total":
-          node.aggregateValue = totalValue;
+          if (!node.aggregateValue) node.aggregateValue = totalValue;
           break;
         case "platform":
-          node.aggregateValue = platformValue;
+          if (!node.aggregateValue) node.aggregateValue = platformValue;
           break;
         case "charity":
-          node.aggregateValue = charityValue;
+          if (!node.aggregateValue) node.aggregateValue = charityValue;
           break;
         case "players":
-          node.aggregateValue = playersValue;
+          if (!node.aggregateValue) node.aggregateValue = playersValue;
           break;
       }
     });
@@ -329,7 +337,12 @@ export function useWorkflowData(): WorkflowLayoutResult {
           mid: "#38bdf8",
           high: "#a78bfa",
         } as const;
-        baseSegmentsOverride = mkGauge(baseValue, comparisonMax, COLORS.base, "base");
+        baseSegmentsOverride = mkGauge(
+          baseValue,
+          comparisonMax,
+          COLORS.base,
+          "base"
+        );
         midSegments = mkGauge(midValue, comparisonMax, COLORS.mid, "mid");
         highSegments = mkGauge(highValue, comparisonMax, COLORS.high, "high");
 

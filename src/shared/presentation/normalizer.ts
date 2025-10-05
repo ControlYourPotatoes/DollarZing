@@ -86,12 +86,8 @@ export function normalizePresentationSnapshot(
     const survivalRate =
       totalPlayers > 0 ? (activePlayers / totalPlayers) * 100 : 0;
 
-    const cumulativeRevenue = ensureNumber(
-      day.timelineTick.cumulativeRevenue
-    );
-    const cumulativePayouts = ensureNumber(
-      day.timelineTick.cumulativePayouts
-    );
+    const cumulativeRevenue = ensureNumber(day.timelineTick.cumulativeRevenue);
+    const cumulativePayouts = ensureNumber(day.timelineTick.cumulativePayouts);
     const netValue = cumulativeRevenue - cumulativePayouts;
 
     cohortAnalytics.push({
@@ -163,6 +159,19 @@ export function normalizePresentationSnapshot(
     };
   });
 
+  // Accumulate charity and payouts from daily snapshots
+  let cumulativeCharity = 0;
+  let cumulativePayouts = 0;
+  days.forEach((day) => {
+    const dailyEntry = dailyByDay.get(day.dayIndex + 1);
+    if (dailyEntry) {
+      cumulativeCharity += dailyEntry.totals?.charity || 0;
+      cumulativePayouts += dailyEntry.totals?.playerPayouts || 0;
+    }
+    day.timelineTick.cumulativeCharity = cumulativeCharity;
+    day.timelineTick.cumulativePayouts = cumulativePayouts;
+  });
+
   const dayLookup = days.reduce<Record<number, NormalizedPresentationDay>>(
     (lookup, day) => {
       lookup[day.dayIndex] = day;
@@ -232,7 +241,9 @@ export function assertSnapshotMatchesScenario(
   }
 }
 
-function indexEngineDataset(dataset?: PresentationSnapshotFile["engineDataset"]): Map<number, EngineDailyResult> {
+function indexEngineDataset(
+  dataset?: PresentationSnapshotFile["engineDataset"]
+): Map<number, EngineDailyResult> {
   const map = new Map<number, EngineDailyResult>();
   if (!dataset?.dailyResults) return map;
   dataset.dailyResults.forEach((entry) => {
@@ -242,7 +253,9 @@ function indexEngineDataset(dataset?: PresentationSnapshotFile["engineDataset"])
   return map;
 }
 
-function indexDailySnapshots(snapshots?: PresentationSnapshotFile["engineDailySnapshots"]): Map<number, EngineDailySnapshot> {
+function indexDailySnapshots(
+  snapshots?: PresentationSnapshotFile["engineDailySnapshots"]
+): Map<number, EngineDailySnapshot> {
   const map = new Map<number, EngineDailySnapshot>();
   if (!Array.isArray(snapshots)) return map;
   snapshots.forEach((entry) => {
