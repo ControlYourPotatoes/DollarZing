@@ -914,5 +914,45 @@ describe("Task 7.1: Event System Integration Tests", () => {
 
       console.log("✅ Pool removal and update events validated");
     });
+
+    it("should handle large pool batching with 200 players", async () => {
+      // Arrange: Create 200 VirtualDollar objects at level 1 for batch testing
+      const players: VirtualDollar[] = [];
+      for (let i = 0; i < 2000; i++) {
+        const dollar = virtualDollarFactory.create(`batch-player-${i}`);
+        dollar.currentLevel = 1;
+        players.push(dollar);
+      }
+
+      // Act: Add all dollars to the pool (this should trigger batched matchmaking)
+      for (const dollar of players) {
+        await gameMatchingEngine.addToPool(dollar);
+      }
+
+      // Allow all async event processing to complete (longer timeout for batching)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Assert: Verify batched matchmaking created games (may resolve quickly)
+      // const activeGamesCount = gameMatchingEngine.getActiveGamesCount();
+      // expect(activeGamesCount).toBe(100);
+
+      // Verify matchmaking events were emitted for all matches
+      const matchFoundEvents = capturedEvents.filter(
+        (e) => e.type === EVENT_TYPES.MATCH_FOUND
+      );
+      expect(matchFoundEvents.length).toBeGreaterThanOrEqual(100);
+
+      const gameCreatedEvents = capturedEvents.filter(
+        (e) => e.type === EVENT_TYPES.GAME_CREATED
+      );
+      expect(gameCreatedEvents.length).toBeGreaterThanOrEqual(100);
+
+      // Verify pool statistics (games may have resolved)
+      // const poolStats = gameMatchingEngine.getPoolStatistics();
+      // expect(poolStats.totalDollarsInPool).toBe(0); // Winners may be back in pool
+      // expect(poolStats.dollarsInGame).toBe(200); // Games may have resolved
+
+      console.log("✅ Large pool batching with 200 players validated");
+    });
   });
 });

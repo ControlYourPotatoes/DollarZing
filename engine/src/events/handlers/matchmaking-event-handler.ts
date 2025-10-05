@@ -244,15 +244,11 @@ export class MatchmakingEventHandler {
         maxConcurrentGames
       );
 
-      // Check concurrent game limit
-      if (activeGamesCount >= maxConcurrentGames) {
-        return; // Cannot create more games
-      }
-
       // Track whether we matched anything in this run
       let matchesMade = 0;
       let stalemateDetected = false;
       let lastStalemateLevel: number | null = null;
+      const promises: Promise<unknown>[] = [];
 
       // Try to match at each level, prioritizing lower tiers first to improve mixing at beginner levels
       for (let level = 1; level <= 10; level++) {
@@ -306,10 +302,7 @@ export class MatchmakingEventHandler {
         const matchingQueue = [...availableDollars];
         const deferredQueue: typeof availableDollars = [];
 
-        while (
-          matchingQueue.length > 1 &&
-          this.gameMatchingEngine.getActiveGamesCount() < maxConcurrentGames
-        ) {
+        while (matchingQueue.length > 1) {
           const primary = matchingQueue.shift()!;
           const partnerIndex = matchingQueue.findIndex(
             (candidate) => candidate.dollar.ownerId !== primary.dollar.ownerId
@@ -360,14 +353,9 @@ export class MatchmakingEventHandler {
                   error
                 )
               );
-            void this.gameMatchingEngine
-              .removeFromPool(partner.dollar.id)
-              .catch((error) =>
-                console.error(
-                  `[MatchmakingEventHandler] Failed to remove partner dollar ${partner.dollar.id} from pool:`,
-                  error
-                )
-              );
+            promises.push(
+              this.gameMatchingEngine.removeFromPool(partner.dollar.id)
+            );
 
             // Track active game
             this.gameMatchingEngine.addActiveGame(game);
@@ -382,6 +370,15 @@ export class MatchmakingEventHandler {
 
             void this.emitGameCreated(game, primary.dollar, partner.dollar);
             matchesMade++;
+            if (matchesMade % 500 === 0) {
+              Promise.all(promises).catch((error) =>
+                console.error(
+                  "[MatchmakingEventHandler] Error in batched removes:",
+                  error
+                )
+              );
+              promises.length = 0;
+            }
           } catch (error) {
             console.error(
               `[MatchmakingEventHandler] Failed to create or register game at level ${level}:`,
@@ -411,9 +408,20 @@ export class MatchmakingEventHandler {
         }
       }
 
+      await Promise.all(promises);
+
       if (matchesMade > 0) {
-        this.consecutiveNoMatchCycles = 0;
-      } else if (stalemateDetected && lastStalemateLevel !== null) {
+        const poolStats = this.gameMatchingEngine.getPoolStatistics();
+        if (matchesMade >= 5000) {
+          progression.matchmakingCompleted(
+            matchesMade,
+            matchesMade,
+            poolStats.totalDollarsInPool
+          );
+        }
+      }
+
+      if (stalemateDetected && lastStalemateLevel !== null) {
         this.consecutiveNoMatchCycles++;
 
         if (this.consecutiveNoMatchCycles % 10 === 0) {

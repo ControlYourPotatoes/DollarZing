@@ -582,6 +582,11 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
       throw new Error(`Dollar with ID ${dollarId} not found`);
     }
 
+    // Skip if already eliminated
+    if (dollar.state === DollarState.LOST) {
+      return dollar;
+    }
+
     // Update state to LOST
     this.updateDollarState(dollarId, DollarState.LOST);
 

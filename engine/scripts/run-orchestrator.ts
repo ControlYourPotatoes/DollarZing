@@ -5,6 +5,7 @@ import {
   promises as fsPromises,
 } from "fs";
 import { format } from "util";
+import cliProgress from "cli-progress";
 import { createDefaultOrchestratorConfig } from "../cli/src/orchestrator/core/config";
 import {
   DatasetOrchestrator,
@@ -18,6 +19,7 @@ import {
 import type { ParameterCombination } from "../cli/src/orchestrator/core/types";
 import { displayConfiguration } from "../cli/src/orchestrator/cli/cli";
 import { EventBus } from "../src/index";
+import { setProgressionDataCallback } from "../src/utils/progression-logger";
 
 interface RunnerOptions {
   outputDirectory: string;
@@ -238,6 +240,12 @@ async function main(): Promise<void> {
 
     const logProgress = (message: string) => appendLog("PROGRESS", message);
 
+    // Collect progression data for summary table
+    const progressionData: Array<{ event: string; data: any }> = [];
+    setProgressionDataCallback((event, data) => {
+      progressionData.push({ event, data });
+    });
+
     console.log(
       `🚀 Generating ${
         options.combination ? "single combination" : `${total} combinations`
@@ -276,6 +284,33 @@ async function main(): Promise<void> {
     }
 
     const duration = ((performance.now() - start) / 1000).toFixed(1);
+
+    // Display progression summary table
+    if (progressionData.length > 0) {
+      console.log("\n📊 Simulation Summary:");
+
+      // Group data by day
+      const daySummaries: { [day: number]: any } = {};
+      for (const { event, data } of progressionData) {
+        if (event === "day_ended" && data.currentDay) {
+          daySummaries[data.currentDay] = data;
+        }
+      }
+
+      // Display table
+      console.table(
+        Object.entries(daySummaries).map(([day, data]) => ({
+          Day: day,
+          "Games Processed": data.gamesProcessed || 0,
+          "New Players": data.newPlayers || 0,
+          "Pool Size": data.poolSize || 0,
+          Revenue: data.dailyRevenue
+            ? `$${data.dailyRevenue.toFixed(2)}`
+            : "$0.00",
+        }))
+      );
+    }
+
     console.log(
       `\n✅ Finished ${successful}/${total} combinations in ${duration}s`
     );
@@ -333,13 +368,21 @@ function createProgressPrinter(
     };
   }
 
+  // Inline mode with progress bar
+  let bar: cliProgress.SingleBar | null = null;
+
   return (_combination, progress) => {
-    const percent = ((progress.currentDay / progress.totalDays) * 100).toFixed(
-      1
-    );
-    const message = `    ${label}: day ${progress.currentDay}/${progress.totalDays} (${percent}%)`;
-    process.stdout.write(`${message}\r`);
-    logProgress?.(message);
+    if (!bar) {
+      bar = new cliProgress.SingleBar({
+        format: `    ${label} |{bar}| {percentage}% | Day {value}/{total} | ETA: {eta}s`,
+        barCompleteChar: "\u2588",
+        barIncompleteChar: "\u2591",
+        hideCursor: true,
+      });
+      bar.start(progress.totalDays, 0);
+    }
+    bar.update(progress.currentDay);
+    logProgress?.(`Day ${progress.currentDay}/${progress.totalDays}`);
   };
 }
 

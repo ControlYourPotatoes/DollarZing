@@ -16,6 +16,15 @@ export const PROGRESSION_LEVELS = {
 
 export type ProgressionLevel = keyof typeof PROGRESSION_LEVELS;
 
+// Optional callback for collecting progression data
+let progressionDataCallback: ((event: string, data: any) => void) | null = null;
+
+export function setProgressionDataCallback(
+  callback: (event: string, data: any) => void
+) {
+  progressionDataCallback = callback;
+}
+
 // Add colors to winston
 winston.addColors({
   error: "red",
@@ -54,20 +63,32 @@ const progressionLogger = winston.createLogger({
 // Helper functions for common progression events
 export const progression = {
   dayStarted: (day: number, totalDays: number) => {
-    progressionLogger.log("progression", `Day ${day}/${totalDays} started`, {
+    const data = {
       event: "day_started",
       currentDay: day,
       totalDays,
-    });
+    };
+    progressionLogger.log(
+      "progression",
+      `Day ${day}/${totalDays} started`,
+      data
+    );
+    progressionDataCallback?.("day_started", data);
   },
 
   dayEnded: (day: number, totalDays: number, stats: any) => {
-    progressionLogger.log("progression", `Day ${day}/${totalDays} completed`, {
+    const data = {
       event: "day_ended",
       currentDay: day,
       totalDays,
       ...stats,
-    });
+    };
+    progressionLogger.log(
+      "progression",
+      `Day ${day}/${totalDays} completed`,
+      data
+    );
+    progressionDataCallback?.("day_ended", data);
   },
 
   playerGrowth: (
@@ -76,87 +97,123 @@ export const progression = {
     newPlayers: number,
     eliminatedPlayers: number
   ) => {
+    const data = {
+      event: "player_growth",
+      day,
+      activePlayers,
+      newPlayers,
+      eliminatedPlayers,
+    };
     progressionLogger.log(
       "progression",
       `Player growth: ${activePlayers} active (+${newPlayers}, -${eliminatedPlayers})`,
-      {
-        event: "player_growth",
-        day,
-        activePlayers,
-        newPlayers,
-        eliminatedPlayers,
-      }
+      data
     );
+    progressionDataCallback?.("player_growth", data);
   },
 
   gamesCompleted: (day: number, gamesToday: number, totalGames: number) => {
+    const data = {
+      event: "games_completed",
+      day,
+      gamesToday,
+      totalGames,
+    };
     progressionLogger.log(
       "progression",
       `Games completed: ${gamesToday} today, ${totalGames} total`,
-      {
-        event: "games_completed",
-        day,
-        gamesToday,
-        totalGames,
-      }
+      data
     );
+    progressionDataCallback?.("games_completed", data);
   },
 
   revenueUpdate: (day: number, dailyRevenue: number, totalRevenue: number) => {
+    const data = {
+      event: "revenue_update",
+      day,
+      dailyRevenue,
+      totalRevenue,
+    };
     progressionLogger.log(
       "progression",
       `Revenue: $${dailyRevenue.toFixed(2)} today, $${totalRevenue.toFixed(
         2
       )} total`,
-      {
-        event: "revenue_update",
-        day,
-        dailyRevenue,
-        totalRevenue,
-      }
+      data
     );
+    progressionDataCallback?.("revenue_update", data);
   },
 
   poolStatus: (level: number, poolSize: number, waitingPlayers: number) => {
+    const data = {
+      event: "pool_status",
+      level,
+      poolSize,
+      waitingPlayers,
+    };
     progressionLogger.log(
       "progression",
       `Level ${level} pool: ${poolSize} dollars, ${waitingPlayers} waiting`,
-      {
-        event: "pool_status",
-        level,
-        poolSize,
-        waitingPlayers,
-      }
+      data
     );
+    progressionDataCallback?.("pool_status", data);
+  },
+
+  matchmakingCompleted: (
+    matchesMade: number,
+    gamesCreated: number,
+    poolSize: number
+  ) => {
+    const data = {
+      event: "matchmaking_completed",
+      matchesMade,
+      gamesCreated,
+      poolSize,
+    };
+    // Async logging to prevent blocking
+    process.nextTick(() => {
+      progressionLogger.log(
+        "progression",
+        `Matchmaking: ${matchesMade} matches, ${gamesCreated} games created, ${poolSize} remaining in pool`,
+        data
+      );
+      progressionDataCallback?.("matchmaking_completed", data);
+    });
   },
 
   simulationComplete: (totalDays: number, finalStats: any) => {
+    const data = {
+      event: "simulation_complete",
+      totalDays,
+      ...finalStats,
+    };
     progressionLogger.info(
       `Simulation completed: ${totalDays} days processed`,
-      {
-        event: "simulation_complete",
-        totalDays,
-        ...finalStats,
-      }
+      data
     );
+    progressionDataCallback?.("simulation_complete", data);
   },
 
   // Structured error logging - always visible
   simulationError: (error: Error, context?: any) => {
-    progressionLogger.error(`Simulation error: ${error.message}`, {
+    const data = {
       event: "simulation_error",
       error: error.message,
       stack: error.stack,
       ...context,
-    });
+    };
+    progressionLogger.error(`Simulation error: ${error.message}`, data);
+    progressionDataCallback?.("simulation_error", data);
   },
 
   // Structured warning logging - could be always visible or verbose-only
   simulationWarning: (message: string, context?: any) => {
-    progressionLogger.warn(`Simulation warning: ${message}`, {
+    const data = {
       event: "simulation_warning",
       ...context,
-    });
+    };
+    progressionLogger.warn(`Simulation warning: ${message}`, data);
+    progressionDataCallback?.("simulation_warning", data);
   },
 };
 
