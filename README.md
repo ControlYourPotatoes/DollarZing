@@ -48,7 +48,7 @@ npm run simulate -- --days 1 2>&1 | tee sim.log
     --log-file engine/run.log
 
 Lowbase high risk
-node dist/scripts/run-orchestrator.js --days 3 --combo 15,high,10 --log-file run.log
+node dist/scripts/run-orchestrator.js --days 90 --combo 15,high,10 --log-file run.log
 Mid growth High risk
 node dist/scripts/run-orchestrator.js --days 3 --combo 35,high,10 --log-file run.log
 
