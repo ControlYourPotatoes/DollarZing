@@ -9,6 +9,7 @@ import {
   DayCompletedEvent,
   DayFrameCompletedEvent,
   NewRunCreatedEvent,
+  RevenueUpdateEvent,
 } from "../events/event-types";
 import { SimulationConfig } from "./game-engine-simulator";
 import { progression } from "../utils/progression-logger";
@@ -50,6 +51,7 @@ export class DayProcessor {
   private loggingEnabled: boolean;
   private newRunSubscription: EventSubscription | null = null;
   private durationDays: number;
+  private totalRevenue: number = 0;
 
   setLoggingEnabled(enabled: boolean): void {
     this.loggingEnabled = enabled;
@@ -73,7 +75,16 @@ export class DayProcessor {
           gamesProcessed: event.summary.gamesProcessed,
           newPlayers: event.summary.newPlayers,
           poolSize: event.summary.poolSize,
+          totalRevenue: this.totalRevenue,
         });
+      }
+    );
+
+    // Subscribe to REVENUE_UPDATE to track total revenue
+    this.eventBus.on(
+      EVENT_TYPES.REVENUE_UPDATE,
+      (event: RevenueUpdateEvent) => {
+        this.totalRevenue = event.totalPlatformRevenue;
       }
     );
   }
@@ -173,30 +184,45 @@ export class DayProcessor {
     await this.waitForEventProcessing();
 
     // Wait for event processing to complete
-    // Keep checking until no new games are being resolved
-    let lastGameCount =
+    // Keep checking until no new games are being resolved and system is stable
+    let lastResolvedCount =
       this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
+    let lastActiveCount = this.gameMatchingEngine.getActiveGamesCount();
+    let lastPoolSize = this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
     let stableCount = 0;
     const maxWaitMs = 5000; // Max 5 seconds per day
     const startWait = Date.now();
 
     while (stableCount < 3 && Date.now() - startWait < maxWaitMs) {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      const currentGameCount =
+      
+      const currentResolvedCount =
         this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
-      if (currentGameCount === lastGameCount) {
+      const currentActiveCount = this.gameMatchingEngine.getActiveGamesCount();
+      const currentPoolSize = this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
+      
+      // Consider stable if: resolved games not increasing, active games decreasing or stable, pool size stable
+      const resolvedStable = currentResolvedCount >= lastResolvedCount; // Allow resolved count to increase
+      const activeStable = currentActiveCount <= lastActiveCount; // Active games should decrease or stay same
+      const poolStable = Math.abs(currentPoolSize - lastPoolSize) <= 2; // Allow small pool fluctuations
+      
+      if (resolvedStable && activeStable && poolStable) {
         stableCount++;
       } else {
         stableCount = 0;
-        lastGameCount = currentGameCount;
       }
+      
+      lastResolvedCount = currentResolvedCount;
+      lastActiveCount = currentActiveCount;
+      lastPoolSize = currentPoolSize;
     }
 
     if (this.debugInterface) {
+      const finalStats = this.gameMatchingEngine.getStatistics();
       console.log(
         `DEBUG: Day ${day} - Event processing stabilized after ${
           Date.now() - startWait
-        }ms (${lastGameCount} resolved games)`
+        }ms (${finalStats.resolvedGames ?? 0} resolved, ${this.gameMatchingEngine.getActiveGamesCount()} active games, pool: ${this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool})`
       );
     }
 
@@ -222,7 +248,7 @@ export class DayProcessor {
       timestamp: new Date(),
       dayNumber: eventDay,
       summary: {
-        gamesProcessed: lastGameCount, // Use actual resolved games count
+        gamesProcessed: lastResolvedCount, // Use actual resolved games count
         newPlayers: completedPayload.newPlayers,
         poolSize: completedPayload.poolSize,
         activePlayers: completedPayload.activePlayers,
@@ -231,7 +257,7 @@ export class DayProcessor {
 
     // Log progression for CLI feedback
     progression.dayEnded(eventDay, simulationConfig.durationDays, {
-      gamesProcessed: lastGameCount, // Use actual resolved games count
+      gamesProcessed: lastResolvedCount, // Use actual resolved games count
       newPlayers: completedPayload.newPlayers,
       poolSize: completedPayload.poolSize,
     });
@@ -246,8 +272,8 @@ export class DayProcessor {
 
     progression.gamesCompleted(
       eventDay,
-      lastGameCount, // Use actual resolved games count
-      0 // totalGames - would need to accumulate this
+      lastResolvedCount, // Use actual resolved games count
+      0, // totalGames - would need to track this across days
     );
   }
 

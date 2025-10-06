@@ -252,6 +252,12 @@ export class PlayerManager {
             error
           )
       );
+    } else if (dailyNewPlayers === 0 && playersToAdd === 0) {
+      // TEMPORARY: Equilibrium state reached - S-curve target met
+      // TODO: Implement proper equilibrium handling for event-driven architecture
+      // The system currently breaks when player growth stops due to event sequencing issues
+      this.dailyNewPlayersCounter = 0;
+      // Note: Equilibrium reached - no new player growth needed
     }
 
     // Note: we do not create passive players here; we only count them. Actives are created below to match DAU.

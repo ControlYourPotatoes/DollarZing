@@ -164,18 +164,21 @@ export const progression = {
     gamesCreated: number,
     poolSize: number
   ) => {
-    const data = {
-      event: "matchmaking_completed",
-      matchesMade,
-      gamesCreated,
-      poolSize,
-    };
-    progressionLogger.log(
-      "progression",
-      `Matchmaking: ${matchesMade} matches, ${gamesCreated} games created, ${poolSize} remaining in pool`,
-      data
-    );
-    progressionDataCallback?.("matchmaking_completed", data);
+    // Async logging to avoid blocking the event loop
+    process.nextTick(() => {
+      const data = {
+        event: "matchmaking_completed",
+        matchesMade,
+        gamesCreated,
+        poolSize,
+      };
+      progressionLogger.log(
+        "progression",
+        `Matchmaking: ${matchesMade} matches, ${gamesCreated} games created, ${poolSize} remaining in pool`,
+        data
+      );
+      progressionDataCallback?.("matchmaking_completed", data);
+    });
   },
 
   simulationComplete: (totalDays: number, finalStats: any) => {

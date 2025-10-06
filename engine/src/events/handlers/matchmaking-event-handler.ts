@@ -277,6 +277,14 @@ export class MatchmakingEventHandler {
 
     this.isMatching = true;
 
+    // Add timeout to prevent infinite matchmaking attempts
+    const timeoutId = setTimeout(() => {
+      if (this.debugInterface) {
+        console.warn('[MatchmakingEventHandler] Matchmaking timeout reached, terminating attempt');
+      }
+      this.terminationTriggered = true;
+    }, 30000); // 30 second timeout
+
     try {
       // Get current pool state
       const poolStats = this.gameMatchingEngine.getPoolStatistics();
@@ -583,6 +591,7 @@ export class MatchmakingEventHandler {
       }
     } finally {
       this.isMatching = false;
+      clearTimeout(timeoutId); // Clear the timeout on completion
       if (!this.terminationTriggered && this.pendingMatchAttempt) {
         this.pendingMatchAttempt = false;
         setTimeout(() => {
