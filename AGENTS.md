@@ -82,14 +82,6 @@ Context retrieval policy
 
 - Summarize before injecting: include minimal excerpts; link or reference paths for full text.
 
-Active work focus (as of 2025-09-30)
-
-- Task 9 only: legacy coupling removal and cleanup.
-
-  - Independence tests, remove direct cross-calls, event-driven DI, refactor tests.
-
-- Task 8 is DONE. Do not rework parameter plumbing (charity %, S-curve, risk/strategy, 1-to-1 VirtualDollar) unless fixing a confirmed bug.
-
 Repository guardrails (do-not-break rules)
 
 - Package boundaries:

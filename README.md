@@ -50,7 +50,7 @@ npm run simulate -- --days 1 2>&1 | tee sim.log
 Lowbase high risk
 node dist/scripts/run-orchestrator.js --days 90 --combo 15,high,10 --log-file run.log
 Mid growth High risk
-node dist/scripts/run-orchestrator.js --days 3 --combo 35,high,10 --log-file run.log
+node dist/scripts/run-orchestrator.js --days 30 --combo 35,high,10 --log-file run.log
 
 
 cd /workspace/engine && timeout 15s node dist/scripts/run-orchestrator.js --days 1 --combo 35,high,10 2>/dev/null | grep -E "(warn|progression)" | head -10
