@@ -281,8 +281,6 @@ const PrototypeDashboard = () => {
               </div>
             </div>
           </div>
-
-          
         </header>
 
         {/* Impact Display */}
@@ -311,7 +309,6 @@ const PrototypeDashboard = () => {
             </div>
           </div>
 
-          
           <aside className="flex flex-col gap-6">
             <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-slate-400">
