@@ -65,14 +65,17 @@ export class DayProcessor {
     );
 
     // Subscribe to DAY_FRAME_COMPLETED for accurate end-of-day progression logging
-    this.eventBus.on(EVENT_TYPES.DAY_FRAME_COMPLETED, (event: DayFrameCompletedEvent) => {
-      // Log progression at frame completion for accurate summaries
-      progression.dayEnded(event.dayNumber, this.durationDays, {
-        gamesProcessed: event.summary.gamesProcessed,
-        newPlayers: event.summary.newPlayers,
-        poolSize: event.summary.poolSize,
-      });
-    });
+    this.eventBus.on(
+      EVENT_TYPES.DAY_FRAME_COMPLETED,
+      (event: DayFrameCompletedEvent) => {
+        // Log progression at frame completion for accurate summaries
+        progression.dayEnded(event.dayNumber, this.durationDays, {
+          gamesProcessed: event.summary.gamesProcessed,
+          newPlayers: event.summary.newPlayers,
+          poolSize: event.summary.poolSize,
+        });
+      }
+    );
   }
 
   /**
