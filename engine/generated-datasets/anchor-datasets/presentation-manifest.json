@@ -29,7 +29,7 @@
       "charityShare": 0
     },
     "days": 120,
-    "generatedAt": "2025-10-05T09:30:50.510Z"
+    "generatedAt": "2025-10-06T06:18:42.383Z"
   },
   {
     "scenarioId": "growth-35_risk-low_charity-10",
@@ -252,8 +252,8 @@
       "cashOutStrategy": 1,
       "charityShare": 0
     },
-    "days": 365,
-    "generatedAt": "2025-09-24T05:21:38.118Z"
+    "days": 120,
+    "generatedAt": "2025-10-06T02:55:20.846Z"
   },
   {
     "scenarioId": "growth-35_risk-high_charity-20",
@@ -268,8 +268,8 @@
       "cashOutStrategy": 1,
       "charityShare": 0.5
     },
-    "days": 3,
-    "generatedAt": "2025-10-05T08:38:27.202Z"
+    "days": 10,
+    "generatedAt": "2025-10-06T04:36:56.178Z"
   },
   {
     "scenarioId": "growth-35_risk-high_charity-30",
