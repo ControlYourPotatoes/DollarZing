@@ -171,7 +171,7 @@ function assembleSimulator(
     playerManager,
     virtualDollarFactory,
     eventBus,
-    { loggingEnabled: false },
+    { loggingEnabled: false, durationDays: profile.config.durationDays },
     debugInterface,
     options.verbose
   );

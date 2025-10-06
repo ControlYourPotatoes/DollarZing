@@ -89,7 +89,8 @@ describe("DayProcessor", () => {
       mockGameMatchingEngine,
       mockPlayerManager,
       mockDollarManager,
-      mockEventBus
+      mockEventBus,
+      { loggingEnabled: false, durationDays: 1 }
     );
   });
 

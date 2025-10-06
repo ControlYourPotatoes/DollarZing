@@ -21,9 +21,9 @@ export interface EventBusOptions {
   maxListeners?: number;
 }
 
-const DEFAULT_MAX_LISTENERS = 100;
+const DEFAULT_MAX_LISTENERS = 200;
 const MAX_QUEUE_FLUSH = 2000;
-const MAX_DISPATCH_DEPTH = 5000; // Increased from 400 to handle multi-day simulations (365 days × ~10-15 depth per day)
+const MAX_DISPATCH_DEPTH = 8000; // Increased from 400 to handle multi-day simulations (365 days × ~10-15 depth per day)
 
 /**
  * Central event dispatcher using publish-subscribe pattern with typed events

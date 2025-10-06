@@ -17,7 +17,6 @@ import {
   generateDirectoryName,
 } from "../cli/src/orchestrator/parameters/matrix";
 import type { ParameterCombination } from "../cli/src/orchestrator/core/types";
-import { displayConfiguration } from "../cli/src/orchestrator/cli/cli";
 import { EventBus } from "../src/index";
 import { setProgressionDataCallback } from "../src/utils/progression-logger";
 
@@ -211,7 +210,9 @@ async function main(): Promise<void> {
     });
 
     if (options.verbose) {
-      displayConfiguration(orchestratorConfig);
+      console.log(
+        `Orchestrator Config: ${JSON.stringify(orchestratorConfig, null, 2)}`
+      );
     }
 
     const mappingOverrides: Partial<ParameterMappingConfig> = {};

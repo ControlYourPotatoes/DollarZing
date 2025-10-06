@@ -170,15 +170,12 @@ export const progression = {
       gamesCreated,
       poolSize,
     };
-    // Async logging to prevent blocking
-    process.nextTick(() => {
-      progressionLogger.log(
-        "progression",
-        `Matchmaking: ${matchesMade} matches, ${gamesCreated} games created, ${poolSize} remaining in pool`,
-        data
-      );
-      progressionDataCallback?.("matchmaking_completed", data);
-    });
+    progressionLogger.log(
+      "progression",
+      `Matchmaking: ${matchesMade} matches, ${gamesCreated} games created, ${poolSize} remaining in pool`,
+      data
+    );
+    progressionDataCallback?.("matchmaking_completed", data);
   },
 
   simulationComplete: (totalDays: number, finalStats: any) => {

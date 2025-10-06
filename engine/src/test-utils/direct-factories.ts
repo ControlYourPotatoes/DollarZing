@@ -294,6 +294,8 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
   private dollarsByPlayer: Map<string, Set<string>> = new Map();
   private stateHistory: Map<string, StateTransition[]> = new Map();
   private performanceTracker: PerformanceTracker;
+  private dollarPool: VirtualDollar[] = [];
+  private readonly MAX_POOL_SIZE = 50000;
 
   constructor(_config: PerformanceConfig) {
     this.performanceTracker = new PerformanceTracker();
@@ -311,38 +313,58 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
       throw new Error("Invalid player ID");
     }
 
-    // Generate unique serial number with collision detection
-    let serialNumber: string;
-    let attempts = 0;
-    const maxAttempts = 1000;
+    let dollar: VirtualDollar;
+    const pooled = this.dollarPool.pop();
+    if (pooled) {
+      // Reuse pooled instance
+      dollar = pooled;
+      dollar.id = this.generateUniqueId();
+      dollar.serialNumber = this.generateSerialNumber();
+      dollar.currentScore = 0;
+      dollar.currentLevel = 1;
+      dollar.state = DollarState.CREATED;
+      dollar.ownerId = playerId;
+      dollar.runId = this.generateRunId();
+      dollar.createdAt = new Date();
+      dollar.gameHistory = [];
+      dollar.gamesInThisRun = 0;
+      dollar.currentRunWinnings = 0;
+      dollar.isIndependentRun = true;
+      dollar.potValue = 1.0;
+    } else {
+      // Generate unique serial number with collision detection
+      let serialNumber: string;
+      let attempts = 0;
+      const maxAttempts = 1000;
 
-    do {
-      serialNumber = this.generateSerialNumber();
-      attempts++;
-      if (attempts > maxAttempts) {
-        throw new Error("Serial number collision detected");
-      }
-    } while (this.serialNumbers.has(serialNumber));
+      do {
+        serialNumber = this.generateSerialNumber();
+        attempts++;
+        if (attempts > maxAttempts) {
+          throw new Error("Serial number collision detected");
+        }
+      } while (this.serialNumbers.has(serialNumber));
 
-    const dollar: VirtualDollar = {
-      id: this.generateUniqueId(),
-      serialNumber,
-      currentScore: 0,
-      currentLevel: 1,
-      state: DollarState.CREATED,
-      ownerId: playerId,
-      runId: this.generateRunId(),
-      createdAt: new Date(),
-      gameHistory: [],
-      gamesInThisRun: 0,
-      currentRunWinnings: 0,
-      isIndependentRun: true,
-      potValue: 1.0,
-    };
+      dollar = {
+        id: this.generateUniqueId(),
+        serialNumber,
+        currentScore: 0,
+        currentLevel: 1,
+        state: DollarState.CREATED,
+        ownerId: playerId,
+        runId: this.generateRunId(),
+        createdAt: new Date(),
+        gameHistory: [],
+        gamesInThisRun: 0,
+        currentRunWinnings: 0,
+        isIndependentRun: true,
+        potValue: 1.0,
+      };
+    }
 
     // Store dollar and track serial number
     this.dollars.set(dollar.id, dollar);
-    this.serialNumbers.add(serialNumber);
+    this.serialNumbers.add(dollar.serialNumber);
 
     // Track by player
     if (!this.dollarsByPlayer.has(playerId)) {
@@ -528,6 +550,11 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
         this.dollarsByPlayer.delete(dollar.ownerId);
       }
     }
+
+    // Return to pool if not exceeding max pool size
+    if (this.dollarPool.length < this.MAX_POOL_SIZE) {
+      this.dollarPool.push(dollar);
+    }
   }
 
   cleanupCompletedDollars(): number {
@@ -590,7 +617,18 @@ export class UnifiedVirtualDollarFactory implements VirtualDollarFactory {
     // Update state to LOST
     this.updateDollarState(dollarId, DollarState.LOST);
 
+    // Recycle to pool for reuse
+    this.recycleVirtualDollar(dollar);
+
     return dollar;
+  }
+
+  private recycleVirtualDollar(dollar: VirtualDollar): void {
+    // Clear references to prevent memory leaks
+    dollar.gameHistory = [];
+    if (this.dollarPool.length < this.MAX_POOL_SIZE) {
+      this.dollarPool.push(dollar);
+    }
   }
 
   completeRun(

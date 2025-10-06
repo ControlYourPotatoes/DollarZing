@@ -28,6 +28,42 @@ import type { EventDebugInterface } from "../debug";
 import { progression } from "../../utils/progression-logger";
 
 /**
+ * Simple FIFO Queue implementation for efficient matchmaking pairing
+ */
+class Queue<T> {
+  private items: T[] = [];
+  private front = 0;
+
+  enqueue(item: T): void {
+    this.items.push(item);
+  }
+
+  dequeue(): T | undefined {
+    if (this.isEmpty()) return undefined;
+    const item = this.items[this.front];
+    this.front++;
+    // Reset front when queue is empty to prevent memory leak
+    if (this.front > this.items.length / 2) {
+      this.items = this.items.slice(this.front);
+      this.front = 0;
+    }
+    return item;
+  }
+
+  size(): number {
+    return this.items.length - this.front;
+  }
+
+  isEmpty(): boolean {
+    return this.size() === 0;
+  }
+
+  peek(): T | undefined {
+    return this.isEmpty() ? undefined : this.items[this.front];
+  }
+}
+
+/**
  * MatchmakingEventHandler - Handles matchmaking logic through event-driven architecture
  *
  * Responsibilities:
@@ -53,6 +89,7 @@ export class MatchmakingEventHandler {
   private readonly maxStaleCyclesBeforeCleanup = 50; // Increased from 2 - only cleanup when truly stuck
   private readonly stalemateRetryDelayMs = 25;
   private poolEntryTimes: Map<string, number> = new Map(); // Track when dollars enter pool
+  private dayFrameCompleted = false;
 
   constructor(
     private eventBus: EventBus,
@@ -160,6 +197,16 @@ export class MatchmakingEventHandler {
       this.lastFifoSnapshot.clear();
     });
 
+    // Subscribe to DAY_FRAME_COMPLETED to stop new matchmaking after day frame completes
+    this.eventBus.on(EVENT_TYPES.DAY_FRAME_COMPLETED, () => {
+      this.dayFrameCompleted = true;
+    });
+
+    // Reset termination flag at start of each day
+    this.eventBus.on(EVENT_TYPES.DAY_STARTED, () => {
+      this.dayFrameCompleted = false;
+    });
+
     // Track new runs so we can detect when inflow stops
     this.eventBus.on(EVENT_TYPES.NEW_RUN_CREATED, () => {
       this.consecutiveNoMatchCycles = 0;
@@ -170,7 +217,7 @@ export class MatchmakingEventHandler {
    * Handle POOL_ADDED event - Trigger matchmaking attempt
    */
   private handlePoolAdded(event: PoolAddedEvent): void {
-    if (this.terminationTriggered) {
+    if (this.terminationTriggered || this.dayFrameCompleted) {
       return;
     }
     // Record when this dollar entered the pool for wait time tracking
@@ -184,7 +231,7 @@ export class MatchmakingEventHandler {
    * Handle POOL_UPDATED event - Trigger matchmaking attempt
    */
   private handlePoolUpdated(event: PoolUpdatedEvent): void {
-    if (this.terminationTriggered) {
+    if (this.terminationTriggered || this.dayFrameCompleted) {
       return;
     }
     for (const level of Object.keys(event.levelDistribution)) {
@@ -299,30 +346,23 @@ export class MatchmakingEventHandler {
           continue;
         }
 
-        const matchingQueue = [...availableDollars];
-        const deferredQueue: typeof availableDollars = [];
+        // Shuffle for random pairing to improve owner diversity
+        for (let i = availableDollars.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [availableDollars[i], availableDollars[j]] = [
+            availableDollars[j],
+            availableDollars[i],
+          ];
+        }
 
-        while (matchingQueue.length > 1) {
-          const primary = matchingQueue.shift()!;
-          const partnerIndex = matchingQueue.findIndex(
-            (candidate) => candidate.dollar.ownerId !== primary.dollar.ownerId
-          );
+        const matchingQueue = new Queue<(typeof availableDollars)[0]>();
+        for (const item of availableDollars) {
+          matchingQueue.enqueue(item);
+        }
 
-          if (partnerIndex === -1) {
-            deferredQueue.push(primary);
-            if (this.debugInterface) {
-              console.debug(
-                `[MatchmakingEventHandler] No eligible partner for ${
-                  primary.dollar.ownerId
-                } at level ${level} (queue length: ${
-                  matchingQueue.length + deferredQueue.length
-                })`
-              );
-            }
-            continue;
-          }
-
-          const partner = matchingQueue.splice(partnerIndex, 1)[0];
+        while (matchingQueue.size() > 1) {
+          const primary = matchingQueue.dequeue()!;
+          const partner = matchingQueue.dequeue()!;
 
           // Create game session
           try {
@@ -387,9 +427,14 @@ export class MatchmakingEventHandler {
           }
         }
 
-        const remainingQueue = [...deferredQueue, ...matchingQueue];
-        if (remainingQueue.length > 0) {
-          const waiting = remainingQueue[0];
+        // Collect remaining players for waiting notification
+        const remainingItems: typeof availableDollars = [];
+        while (!matchingQueue.isEmpty()) {
+          remainingItems.push(matchingQueue.dequeue()!);
+        }
+
+        if (remainingItems.length > 0) {
+          const waiting = remainingItems[0];
           void this.emitPlayerWaiting(
             waiting.dollar,
             bettingLevel,
@@ -399,7 +444,7 @@ export class MatchmakingEventHandler {
 
         if (matchesMade === 0) {
           const uniqueOwners = new Set(
-            remainingQueue.map((entry) => entry.dollar.ownerId)
+            remainingItems.map((entry) => entry.dollar.ownerId)
           );
           if (uniqueOwners.size < 2) {
             stalemateDetected = true;

@@ -35,11 +35,13 @@ export class DayProcessor {
     private eventBus: EventBus,
     options?: {
       loggingEnabled?: boolean;
+      durationDays?: number;
     },
     private debugInterface?: EventDebugInterface,
     private verbose?: boolean
   ) {
     this.loggingEnabled = options?.loggingEnabled ?? false;
+    this.durationDays = options?.durationDays ?? 1;
     this.setupEventSubscriptions();
     // Suppress unused variable warning - verbose parameter kept for consistency
     void this.verbose;
@@ -47,6 +49,7 @@ export class DayProcessor {
 
   private loggingEnabled: boolean;
   private newRunSubscription: EventSubscription | null = null;
+  private durationDays: number;
 
   setLoggingEnabled(enabled: boolean): void {
     this.loggingEnabled = enabled;
@@ -60,6 +63,16 @@ export class DayProcessor {
       EVENT_TYPES.NEW_RUN_CREATED,
       this.handleNewRunCreated.bind(this)
     );
+
+    // Subscribe to DAY_FRAME_COMPLETED for accurate end-of-day progression logging
+    this.eventBus.on(EVENT_TYPES.DAY_FRAME_COMPLETED, (event: DayFrameCompletedEvent) => {
+      // Log progression at frame completion for accurate summaries
+      progression.dayEnded(event.dayNumber, this.durationDays, {
+        gamesProcessed: event.summary.gamesProcessed,
+        newPlayers: event.summary.newPlayers,
+        poolSize: event.summary.poolSize,
+      });
+    });
   }
 
   /**

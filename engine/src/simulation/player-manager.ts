@@ -678,27 +678,45 @@ export class PlayerManager {
   /**
    * Auto-create runs for eligible players (those with fewer than maxRunsPerPlayer)
    */
-  autoCreateRuns(maxRunsPerPlayer: number = 1): VirtualDollar[] {
+  async autoCreateRuns(maxRunsPerPlayer: number = 1): Promise<VirtualDollar[]> {
     const newRuns: VirtualDollar[] = [];
+    const batchSize = 1000; // Process in batches to avoid memory pressure
+    const maxConcurrentBatches = 5; // Limit concurrent batches
+    let activeBatches = 0;
 
-    for (const player of this.playerRegistry.values()) {
-      // Create runs for players with fewer than max concurrent runs
-      const runsNeeded = Math.max(
-        0,
-        maxRunsPerPlayer - player.activeRunIds.length
-      );
+    const players = Array.from(this.playerRegistry.values());
 
-      for (let i = 0; i < runsNeeded; i++) {
-        const newRun = this.createNewRun({
-          playerId: player.id,
-          cashOutStrategy: player.strategy,
-          fundingSource: "DONATION",
-        });
+    for (let i = 0; i < players.length; i += batchSize) {
+      const batch = players.slice(i, i + batchSize);
 
-        if (newRun) {
-          newRuns.push(newRun);
-        }
+      if (activeBatches >= maxConcurrentBatches) {
+        await new Promise((resolve) => setImmediate(resolve)); // Yield control
       }
+
+      activeBatches++;
+      Promise.all(
+        batch.flatMap((player) => {
+          const runsNeeded = Math.max(
+            0,
+            maxRunsPerPlayer - player.activeRunIds.length
+          );
+          return Array.from({ length: runsNeeded }, () =>
+            this.createNewRun({
+              playerId: player.id,
+              cashOutStrategy: player.strategy,
+              fundingSource: "DONATION",
+            })
+          ).filter(Boolean) as VirtualDollar[];
+        })
+      ).then((batchRuns) => {
+        newRuns.push(...batchRuns.flat());
+        activeBatches--;
+      });
+    }
+
+    // Wait for all batches to complete
+    while (activeBatches > 0) {
+      await new Promise((resolve) => setImmediate(resolve));
     }
 
     return newRuns;
