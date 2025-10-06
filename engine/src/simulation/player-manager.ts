@@ -8,7 +8,13 @@ import {
   PlayerCreatedEvent,
   CashOutCompletedEvent,
 } from "../events/event-types";
-import { createActivePlayers } from "./player-creation";
+import { createActivePlayers, CreateRunRequest } from "./player-creation";
+import {
+  PlayerRecord,
+  PlayerRegistry,
+  DormantPlayerStore,
+  InMemoryDormantPlayerStore,
+} from "./player-registry";
 
 /**
  * Configuration for player management
@@ -40,32 +46,17 @@ export interface PlayerStatistics {
  * Removed legacy dependencies on PlayerBalanceManager and PlayerRunManager
  */
 export class PlayerManager {
+  private eventBus: EventBus;
+  private virtualDollarFactory: VirtualDollarFactory;
   // Single player registry to avoid duplicate state management
-  private playerRegistry = new Map<
-    string,
-    {
-      id: string;
-      strategy: CashOutStrategy;
-      initialDonation: number;
-      createdAt: Date;
-      activeRunIds: string[]; // Track active virtual dollar runs
-      totalRunsCreated: number;
-    }
-  >();
-
-  constructor(
-    private eventBus: EventBus,
-    private virtualDollarFactory: VirtualDollarFactory
-  ) {
-    this.setupEventSubscriptions();
-  }
-
   private dayStartedSubscription: EventSubscription | null = null;
   private simulationStartedSubscription: EventSubscription | null = null;
   private dayFrameCompletedSubscription: EventSubscription | null = null;
   private runCompletedSubscription: EventSubscription | null = null;
   private playerCreatedSubscription: EventSubscription | null = null;
   private cashOutCompletedSubscription: EventSubscription | null = null;
+  private playerRegistry: PlayerRegistry = new Map();
+  private dormantStore: DormantPlayerStore = new InMemoryDormantPlayerStore();
   // No end-of-day clearing subscription; we clear at next DAY_STARTED to avoid race with late events
   private pendingInitialPlayers: number = 0;
   // Number of days to spread initial player seeding across (default: 14)
@@ -180,7 +171,6 @@ export class PlayerManager {
             dayIndex < this.initialPlayerSpreadDays
               ? basePerDay
               : basePerDay + remainder;
-          // Ensure we create at least 1 on early days if basePerDay is 0
           const createNow = Math.min(Math.max(1, toCreate), remaining);
           this.initialPlayersSeededSoFar += createNow;
           this.totalPlayersCounter += createNow;
@@ -194,7 +184,6 @@ export class PlayerManager {
             );
           }
         } else {
-          // Spread window passed; create remaining now
           const createNow = remaining;
           this.initialPlayersSeededSoFar += createNow;
           this.pendingInitialPlayers = 0;
@@ -278,11 +267,8 @@ export class PlayerManager {
     }
 
     if (deficit > 0) {
-      const inactiveStock = Math.max(
-        0,
-        this.totalPlayersCounter - currentActive
-      );
-      const reactivations = Math.min(deficit, inactiveStock);
+      const dormantAvailable = this.dormantStore.size();
+      const reactivations = Math.min(deficit, dormantAvailable);
       if (reactivations > 0) {
         void this.createActives(reactivations, playerStrategies, false).catch(
           (error) =>
@@ -320,8 +306,8 @@ export class PlayerManager {
       typeof event?.config?.initialPlayerSpreadDays === "number"
         ? event.config.initialPlayerSpreadDays
         : typeof event?.initialPlayerSpreadDays === "number"
-        ? event.initialPlayerSpreadDays
-        : undefined;
+          ? event.initialPlayerSpreadDays
+          : undefined;
 
     if (typeof spread === "number" && spread > 0) {
       this.initialPlayerSpreadDays = Math.max(1, Math.floor(spread));
@@ -357,8 +343,14 @@ export class PlayerManager {
       {
         eventBus: this.eventBus,
         playerRegistry: this.playerRegistry,
+        dormantStore: this.dormantStore,
         simulationTerminated: () => this.simulationTerminated,
-        createRun: (request) => this.createNewRun(request),
+        createRun: (request: CreateRunRequest) =>
+          this.createNewRun({
+            playerId: request.playerId,
+            cashOutStrategy: request.cashOutStrategy,
+            fundingSource: request.fundingSource,
+          }),
       }
     );
   }
@@ -368,22 +360,41 @@ export class PlayerManager {
     if (existing) {
       existing.strategy = event.cashOutStrategy;
       existing.initialDonation = event.initialDonationAmount;
+      if (existing.activeRunIds.length === 0) {
+        this.dormantStore.add(existing);
+      }
       return;
     }
 
-    this.playerRegistry.set(event.playerId, {
+    const record: PlayerRecord = {
       id: event.playerId,
       strategy: event.cashOutStrategy,
       initialDonation: event.initialDonationAmount,
       createdAt: event.timestamp,
       activeRunIds: [],
       totalRunsCreated: 0,
-    });
+    };
+
+    this.playerRegistry.set(event.playerId, record);
+    this.dormantStore.add(record);
   }
 
-  private handleCashOutCompleted(_event: CashOutCompletedEvent): void {
-    // Player balance updates are handled by RevenueTrackingHandler
-    // This handler ensures the event is processed for consistency
+  private handleCashOutCompleted(event: CashOutCompletedEvent): void {
+    const playerId = event.playerId;
+    const virtualDollarId = event.virtualDollarId;
+
+    if (!playerId || !virtualDollarId) {
+      return;
+    }
+
+    const player = this.playerRegistry.get(playerId);
+    if (!player) {
+      return;
+    }
+
+    this.removeActiveRun(playerId, virtualDollarId);
+    this.virtualDollarFactory.releaseDollar(virtualDollarId);
+    this.dormantStore.add(player);
   }
 
   /**
@@ -586,6 +597,7 @@ export class PlayerManager {
       if (player) {
         player.activeRunIds.push(virtualDollar.id);
         player.totalRunsCreated++;
+        this.dormantStore.remove(player.id);
       }
 
       return virtualDollar;
@@ -654,6 +666,9 @@ export class PlayerManager {
       const index = player.activeRunIds.indexOf(virtualDollarId);
       if (index > -1) {
         player.activeRunIds.splice(index, 1);
+        if (player.activeRunIds.length === 0) {
+          this.dormantStore.add(player);
+        }
       }
     }
   }
@@ -680,5 +695,14 @@ export class PlayerManager {
     this.cashOutCompletedSubscription = null;
     this.dayFrameCompletedSubscription = null;
     this.playerRegistry.clear();
+  }
+
+  constructor(
+    eventBus: EventBus,
+    virtualDollarFactory: VirtualDollarFactory
+  ) {
+    this.eventBus = eventBus;
+    this.virtualDollarFactory = virtualDollarFactory;
+    this.setupEventSubscriptions();
   }
 }
