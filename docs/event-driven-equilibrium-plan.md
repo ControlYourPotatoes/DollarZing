@@ -255,3 +255,23 @@ class EquilibriumMonitor {
 **Estimated Effort**: 8 weeks
 **Business Impact**: Enables reliable long-term simulations</content>
 </xai:function_call">Create comprehensive plan for handling equilibrium states in event-driven architecture.
+
+
+GitHub Copilot here.
+Key culprits I noticed:
+
+“Reactivations” are cloning brand-new players. The createActives(..., isNew=false) branch still mints fresh IDs, registers them, and increments counters. That erases the whole idea of a dormant roster and guarantees unchecked growth. You need a real dormant-player queue (populate it at creation time, pop from it for DAU reactivation, don’t bump totalPlayersCounter, reuse the existing registry entry, and only fall back to minting when no dormant stock remains).
+
+Daily progress gating is working, but the cleanup path never fires for cash-outs that skip VIRTUAL_DOLLAR_RUN_COMPLETED—there are code paths emitting only CASH_OUT_COMPLETED. Add explicit removeActiveRun + dollar release there to avoid dollars that sit in limbo and keep the pool “busy”.
+
+Stability detection in DayProcessor is lying.
+
+resolvedStable checks for non-decreasing counts, so a rising counter is treated as “stable”.
+We compare counts even when active games/pool size grow.
+Tighten that loop (monotonic resolved, non-increasing active, bounded pool, longer wait cap). Until that’s fixed, you should run extended logging so we can see whether days end while matches are still being spawned.
+Immediate actions I’d take:
+
+Implement a dormant-player store and reactivation queue, then collect a day of logs to verify the counter never rises on reactivation.
+Patch handleCashOutCompleted to release dollars/run slots.
+Harden waitForEventProcessing() and the day-end stabilization test to stop early exits, plus add debug instrumentation (per-level pool counts, active game IDs, run lifecycle deltas) when the loop exceeds the wait budget.
+Once those safeguards are in, rerun the equilibrium scenario; we’ll know if we still need deeper refactors.
