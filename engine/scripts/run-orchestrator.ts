@@ -305,13 +305,19 @@ async function main(): Promise<void> {
           "Games Processed": data.gamesProcessed || 0,
           "New Players": data.newPlayers || 0,
           "Pool Size": data.poolSize || 0,
-          Revenue: data.totalRevenue ? `$${data.totalRevenue.toFixed(2)}` : "$0.00",
+          Revenue: data.totalRevenue
+            ? `$${data.totalRevenue.toFixed(2)}`
+            : "$0.00",
         }))
       );
 
       // Add memory monitoring
       const memUsage = process.memoryUsage();
-      console.log(`Memory Usage: RSS=${(memUsage.rss / 1024 / 1024).toFixed(2)}MB, Heap=${(memUsage.heapUsed / 1024 / 1024).toFixed(2)}MB`);
+      console.log(
+        `Memory Usage: RSS=${(memUsage.rss / 1024 / 1024).toFixed(
+          2
+        )}MB, Heap=${(memUsage.heapUsed / 1024 / 1024).toFixed(2)}MB`
+      );
     }
 
     console.log(

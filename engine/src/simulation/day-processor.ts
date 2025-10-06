@@ -188,30 +188,32 @@ export class DayProcessor {
     let lastResolvedCount =
       this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
     let lastActiveCount = this.gameMatchingEngine.getActiveGamesCount();
-    let lastPoolSize = this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
+    let lastPoolSize =
+      this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
     let stableCount = 0;
     const maxWaitMs = 5000; // Max 5 seconds per day
     const startWait = Date.now();
 
     while (stableCount < 3 && Date.now() - startWait < maxWaitMs) {
       await new Promise((resolve) => setTimeout(resolve, 100));
-      
+
       const currentResolvedCount =
         this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
       const currentActiveCount = this.gameMatchingEngine.getActiveGamesCount();
-      const currentPoolSize = this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
-      
+      const currentPoolSize =
+        this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
+
       // Consider stable if: resolved games not increasing, active games decreasing or stable, pool size stable
       const resolvedStable = currentResolvedCount >= lastResolvedCount; // Allow resolved count to increase
       const activeStable = currentActiveCount <= lastActiveCount; // Active games should decrease or stay same
       const poolStable = Math.abs(currentPoolSize - lastPoolSize) <= 2; // Allow small pool fluctuations
-      
+
       if (resolvedStable && activeStable && poolStable) {
         stableCount++;
       } else {
         stableCount = 0;
       }
-      
+
       lastResolvedCount = currentResolvedCount;
       lastActiveCount = currentActiveCount;
       lastPoolSize = currentPoolSize;
@@ -222,7 +224,11 @@ export class DayProcessor {
       console.log(
         `DEBUG: Day ${day} - Event processing stabilized after ${
           Date.now() - startWait
-        }ms (${finalStats.resolvedGames ?? 0} resolved, ${this.gameMatchingEngine.getActiveGamesCount()} active games, pool: ${this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool})`
+        }ms (${
+          finalStats.resolvedGames ?? 0
+        } resolved, ${this.gameMatchingEngine.getActiveGamesCount()} active games, pool: ${
+          this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool
+        })`
       );
     }
 
@@ -273,7 +279,7 @@ export class DayProcessor {
     progression.gamesCompleted(
       eventDay,
       lastResolvedCount, // Use actual resolved games count
-      0, // totalGames - would need to track this across days
+      0 // totalGames - would need to track this across days
     );
   }
 

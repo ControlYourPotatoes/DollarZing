@@ -280,7 +280,9 @@ export class MatchmakingEventHandler {
     // Add timeout to prevent infinite matchmaking attempts
     const timeoutId = setTimeout(() => {
       if (this.debugInterface) {
-        console.warn('[MatchmakingEventHandler] Matchmaking timeout reached, terminating attempt');
+        console.warn(
+          "[MatchmakingEventHandler] Matchmaking timeout reached, terminating attempt"
+        );
       }
       this.terminationTriggered = true;
     }, 30000); // 30 second timeout
