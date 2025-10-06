@@ -77,7 +77,10 @@ export class PlayerCreationManager {
   /**
    * Process player creation for a day - coordinates all three sources
    */
-  async processDayStarted(event: DayStartedEvent, currentPlayerCount: number = 0): Promise<void> {
+  async processDayStarted(
+    event: DayStartedEvent,
+    currentPlayerCount: number = 0
+  ): Promise<void> {
     const { dayNumber, growthModel, playerStrategies } = event;
 
     if (this.simulationTerminated) {
@@ -85,7 +88,11 @@ export class PlayerCreationManager {
     }
 
     // Source 1: Initial players spread
-    await this.createInitialPlayers(dayNumber, playerStrategies, currentPlayerCount);
+    await this.createInitialPlayers(
+      dayNumber,
+      playerStrategies,
+      currentPlayerCount
+    );
 
     // Source 2: New players from S-curve growth
     await this.createGrowthPlayers(dayNumber, growthModel, playerStrategies);
@@ -106,7 +113,8 @@ export class PlayerCreationManager {
       return;
     }
 
-    const remaining = this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
+    const remaining =
+      this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
     if (remaining <= 0) {
       return;
     }
@@ -122,11 +130,14 @@ export class PlayerCreationManager {
       return;
     }
 
-    const basePerDay = Math.floor(this.pendingInitialPlayers / this.initialPlayerSpreadDays);
+    const basePerDay = Math.floor(
+      this.pendingInitialPlayers / this.initialPlayerSpreadDays
+    );
     const remainder = this.pendingInitialPlayers % this.initialPlayerSpreadDays;
-    const toCreate = dayIndex < this.initialPlayerSpreadDays
-      ? basePerDay
-      : basePerDay + remainder;
+    const toCreate =
+      dayIndex < this.initialPlayerSpreadDays
+        ? basePerDay
+        : basePerDay + remainder;
 
     const createNow = Math.min(Math.max(1, toCreate), remaining);
     this.initialPlayersSeededSoFar += createNow;
@@ -148,7 +159,8 @@ export class PlayerCreationManager {
     playerStrategies: Partial<Record<CashOutStrategy, number>>
   ): Promise<void> {
     // Use S-curve growth model
-    const x = (dayNumber - growthModel.midpointDay) / growthModel.steepnessFactor;
+    const x =
+      (dayNumber - growthModel.midpointDay) / growthModel.steepnessFactor;
     const adoptionProgress = 1 / (1 + Math.exp(-x));
     const targetPlayers = Math.floor(
       growthModel.baseMarket * growthModel.adoptionRate * adoptionProgress
@@ -263,7 +275,9 @@ export class PlayerCreationManager {
 
       // Create player ID
       const baseIdPrefix = isNew ? "player-new" : "player-reactivated";
-      const playerId = `${baseIdPrefix}-${this.totalPlayersCounter - count + i + 1}`;
+      const playerId = `${baseIdPrefix}-${
+        this.totalPlayersCounter - count + i + 1
+      }`;
 
       // Emit player created event
       const playerCreatedEvent: PlayerCreatedEvent = {
@@ -276,20 +290,33 @@ export class PlayerCreationManager {
       };
 
       try {
-        void this.eventBus.emit(EVENT_TYPES.PLAYER_CREATED, playerCreatedEvent).catch((error) =>
-          console.error("[PlayerCreationManager] Failed to emit PLAYER_CREATED:", error)
-        );
+        void this.eventBus
+          .emit(EVENT_TYPES.PLAYER_CREATED, playerCreatedEvent)
+          .catch((error) =>
+            console.error(
+              "[PlayerCreationManager] Failed to emit PLAYER_CREATED:",
+              error
+            )
+          );
       } catch (error) {
-        console.error("[PlayerCreationManager] Failed to emit PLAYER_CREATED:", error);
+        console.error(
+          "[PlayerCreationManager] Failed to emit PLAYER_CREATED:",
+          error
+        );
       }
 
       // Create virtual dollar runs based on daily allowance
       const allowance = this.config.allowancePerDay[strategy] || 1;
-      const runsToCreate = Math.max(1, Math.floor(allowance / this.config.newPlayerStartingDollars));
+      const runsToCreate = Math.max(
+        1,
+        Math.floor(allowance / this.config.newPlayerStartingDollars)
+      );
 
       for (let run = 0; run < runsToCreate; run++) {
         try {
-          const virtualDollar = await this.virtualDollarFactory.create(playerId);
+          const virtualDollar = await this.virtualDollarFactory.create(
+            playerId
+          );
 
           const newRunEvent: NewRunCreatedEvent = {
             type: EVENT_TYPES.NEW_RUN_CREATED,
@@ -301,11 +328,19 @@ export class PlayerCreationManager {
             runCount: 1, // Would need to track per player
           };
 
-          void this.eventBus.emit(EVENT_TYPES.NEW_RUN_CREATED, newRunEvent).catch((error) =>
-            console.error(`[PlayerCreationManager] Failed to emit NEW_RUN_CREATED:`, error)
-          );
+          void this.eventBus
+            .emit(EVENT_TYPES.NEW_RUN_CREATED, newRunEvent)
+            .catch((error) =>
+              console.error(
+                `[PlayerCreationManager] Failed to emit NEW_RUN_CREATED:`,
+                error
+              )
+            );
         } catch (error) {
-          console.error(`[PlayerCreationManager] Failed to create run for ${playerId}:`, error);
+          console.error(
+            `[PlayerCreationManager] Failed to create run for ${playerId}:`,
+            error
+          );
         }
       }
     }
