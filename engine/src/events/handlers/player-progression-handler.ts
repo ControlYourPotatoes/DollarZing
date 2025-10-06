@@ -16,7 +16,6 @@ import {
 import {
   BettingLevel,
   DollarState,
-  VirtualDollar,
 } from "../../types/virtual-dollar-engine";
 import { VirtualDollarFactory } from "../../types/factory-interfaces";
 import { GameMatchingEngine } from "../../core/game-matching-engine";
@@ -140,70 +139,62 @@ export class PlayerProgressionHandler {
     event: ContinuePlayEvent
   ): Promise<void> {
     try {
-      // Don't process progression for level 10 players - they should have cashed out
-      if (event.currentLevel >= 10) {
-        console.warn(
-          `[PlayerProgressionHandler] Attempted to progress player at level ${event.currentLevel} - this should not happen`
+      const virtualDollarId = event.virtualDollarId;
+      if (!virtualDollarId) {
+        throw new Error(
+          `Missing virtualDollarId in CONTINUE_PLAY (player=${event.playerId}, level=${event.currentLevel})`
+        );
+      }
+
+      const currentDollar = this.virtualDollarFactory.getDollar(
+        virtualDollarId
+      );
+      if (!currentDollar) {
+        throw new Error(
+          `Winner progression failed: virtual dollar ${virtualDollarId} not found`
+        );
+      }
+
+      if (currentDollar.state === DollarState.LOST) {
+        throw new Error(
+          `Winner progression failed: dollar ${virtualDollarId} already marked as LOST (state=${currentDollar.state})`
+        );
+      }
+
+      // Use the level provided in the event to avoid stale factory state
+      const currentLevel = event.currentLevel as BettingLevel;
+      if (currentLevel >= 10) {
+        await this.emitVirtualDollarRunCompleted(
+          event.playerId,
+          virtualDollarId,
+          currentLevel,
+          currentDollar.currentRunWinnings,
+          true
         );
         return;
       }
 
-      // Resolve a valid virtual dollar id (defensive in case event payload is missing it)
-      let vdId = event.virtualDollarId;
-      if (!vdId || typeof vdId !== "string" || vdId.length === 0) {
-        const activeRuns = this.virtualDollarFactory.getActiveRunsByPlayer(
-          event.playerId
-        );
-        vdId = activeRuns.length > 0 ? activeRuns[0].id : "";
-      }
-
-      if (!vdId) {
-        throw new Error("Missing virtualDollarId for winner progression");
-      }
-
-      // Calculate progression using factory
-      const newLevel = Math.min(10, event.currentLevel + 1) as BettingLevel;
-      const additionalWinnings = 0; // Winnings already added in resolution; preserve cumulative
-
-      // Use factory to advance player - handles all validation and state management
-      const updatedDollar = this.virtualDollarFactory.advancePlayerLevel(
-        vdId,
-        newLevel,
-        additionalWinnings
+      const nextLevel = (currentLevel + 1) as BettingLevel;
+      // Winnings already accumulated in factory; do not add again here
+      const advancedDollar = this.virtualDollarFactory.advancePlayerLevel(
+        virtualDollarId,
+        nextLevel,
+        0
       );
 
-      if (this.debugInterface) {
-        console.log(
-          `[PlayerProgressionHandler] Winner ${event.playerId} advanced from Level ${event.currentLevel} to Level ${newLevel}, winnings: ${updatedDollar.currentRunWinnings}`
-        );
+      const addResult = this.gameMatchingEngine.addToPool(advancedDollar);
+      if (addResult instanceof Promise) {
+        await addResult;
       }
 
-      // Advanced dollar logging moved inside debugInterface check
-      if (this.debugInterface) {
-        console.log(
-          `[PlayerProgressionHandler] Advanced dollar ${updatedDollar.id} now at level ${updatedDollar.currentLevel}`
-        );
-      }
-
-      // Always re-pool the advanced winner for next level matching (including level 10)
-      void this.rePoolAdvancedWinner(updatedDollar);
-
-      // Player advanced to next level - emit VIRTUAL_DOLLAR_ADVANCED event
-      this.emitVirtualDollarAdvanced(
+      await this.emitVirtualDollarAdvanced(
         event.playerId,
-        vdId,
-        event.currentLevel as BettingLevel,
-        newLevel,
-        updatedDollar.currentRunWinnings,
-        updatedDollar.gamesInThisRun
-      ).catch((error) =>
-        console.error(
-          "[PlayerProgressionHandler] Failed to emit VIRTUAL_DOLLAR_ADVANCED:",
-          error
-        )
+        virtualDollarId,
+        currentLevel,
+        nextLevel,
+        advancedDollar.currentRunWinnings,
+        advancedDollar.gamesInThisRun
       );
-
-      // For level 10, completion (cashout/jackpot) will be handled after the level 10 game resolves
     } catch (error) {
       throw new Error(
         `Winner progression failed: ${
@@ -242,68 +233,19 @@ export class PlayerProgressionHandler {
         `[PlayerProgressionHandler] Error processing loser elimination:`,
         error
       );
-      // Don't throw here - loser elimination shouldn't block winner progression
-    }
-  }
-
-  /**
-   * Re-pool an advanced winner for continued matching at their new level
-   */
-  private async rePoolAdvancedWinner(
-    virtualDollar: VirtualDollar
-  ): Promise<void> {
-    // REMOVED THROTTLE: All dollars should queue normally
-    // The "different owners" matching rule will prevent same-owner pairing
-    // Cleanup only fires when truly stuck (end of day or long stalemate)
-
-    try {
-      if (!virtualDollar || !virtualDollar.id) {
-        console.warn(
-          `[PlayerProgressionHandler] Skipping re-pool: missing virtual dollar id for player`
-        );
-        return;
-      }
-      // Update state from WON to POOLED for re-matching
-      this.virtualDollarFactory.updateDollarState(
-        virtualDollar.id,
-        DollarState.POOLED
+      const progressionFailedEvent: VirtualDollarProgressionFailedEvent = {
+        type: EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
+        timestamp: new Date(),
+        playerId: event.loserId,
+        virtualDollarId: event.loserDollarId,
+        currentLevel: event.loserLevel,
+        reason: "Loser elimination failed",
+        error: error instanceof Error ? error.message : String(error),
+      };
+      void this.eventBus.emit(
+        EVENT_TYPES.VIRTUAL_DOLLAR_PROGRESSION_FAILED,
+        progressionFailedEvent
       );
-
-      if (this.debugInterface) {
-        console.log(
-          `[PlayerProgressionHandler] Preparing to re-pool dollar ${virtualDollar.id} at level ${virtualDollar.currentLevel}`
-        );
-      }
-
-      // Add back to matching pool at new level
-      this.gameMatchingEngine
-        .addToPool(virtualDollar)
-        .then((result) => {
-          if (!result.success) {
-            console.warn(
-              `[PlayerProgressionHandler] Failed to re-pool advanced winner ${virtualDollar.id}: ${result.error}`
-            );
-            return;
-          }
-
-          if (this.debugInterface) {
-            console.log(
-              `[PlayerProgressionHandler] Re-pooled advanced winner ${virtualDollar.ownerId} (${virtualDollar.id}) at level ${virtualDollar.currentLevel}`
-            );
-          }
-        })
-        .catch((error) =>
-          console.error(
-            `[PlayerProgressionHandler] Error re-pooling advanced winner ${virtualDollar.id}:`,
-            error
-          )
-        );
-    } catch (error) {
-      console.error(
-        `[PlayerProgressionHandler] Error re-pooling advanced winner:`,
-        error
-      );
-      throw error; // Re-throw to trigger progression failure event
     }
   }
 
