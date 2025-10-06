@@ -41,7 +41,6 @@ const MANIFEST_CANDIDATES: string[] = [
 
 const PrototypeDashboard = () => {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [error, setError] = useState<string | null>(null);
 
   const loadManifest = usePresentationTimelineStore(
     (state) => state.loadManifest
@@ -143,7 +142,6 @@ const PrototypeDashboard = () => {
     let cancelled = false;
     async function bootstrap() {
       setStatus("loading");
-      setError(null);
       try {
         let manifest: PresentationManifestEntry[] | null = null;
         let lastErr: unknown = null;
@@ -170,12 +168,6 @@ const PrototypeDashboard = () => {
         setStatus("idle");
       } catch (err) {
         if (cancelled) return;
-        setStatus("error");
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to load presentation data"
-        );
       }
     }
 
@@ -212,48 +204,6 @@ const PrototypeDashboard = () => {
       }
     })();
   }, [ensureScenarioLoaded, highSelection, manifestIndex, midSelection]);
-
-  const stats = useMemo(() => {
-    if (!activeDay) {
-      return null;
-    }
-    return [
-      {
-        label: "Active Players",
-        value: activeDay.timelineTick.cumulativePlayers.toLocaleString(),
-      },
-      {
-        label: "Cumulative Revenue",
-        value: `$${activeDay.timelineTick.cumulativeRevenue.toLocaleString(
-          undefined,
-          {
-            maximumFractionDigits: 0,
-          }
-        )}`,
-      },
-      {
-        label: "Cumulative Charity",
-        value: `$${activeDay.timelineTick.cumulativeCharity.toLocaleString(
-          undefined,
-          {
-            maximumFractionDigits: 0,
-          }
-        )}`,
-      },
-    ];
-  }, [activeDay]);
-
-  // Keep selections valid if baseline changes to one of the selected comparisons
-  useEffect(() => {
-    if (midSelection === selectedScenarioId) setMidSelection(null);
-    if (highSelection === selectedScenarioId) setHighSelection(null);
-  }, [
-    highSelection,
-    midSelection,
-    selectedScenarioId,
-    setHighSelection,
-    setMidSelection,
-  ]);
 
   return (
     <div className="min-h-screen bg-slate-950 px-6 py-10 pb-28 text-slate-100">
@@ -332,29 +282,7 @@ const PrototypeDashboard = () => {
             </div>
           </div>
 
-          {status === "error" ? (
-            <div className="rounded-lg border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm text-red-200">
-              {error ?? "Unable to load presentation data."}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 text-sm text-slate-300 sm:grid-cols-3">
-              {stats?.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-xl border border-slate-800 bg-slate-900 p-4"
-                >
-                  <span className="text-xs uppercase tracking-widest text-slate-500">
-                    {stat.label}
-                  </span>
-                  <p className="mt-2 text-2xl font-semibold">{stat.value}</p>
-                </div>
-              )) ?? (
-                <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 text-slate-500">
-                  Loading snapshot metrics…
-                </div>
-              )}
-            </div>
-          )}
+          
         </header>
 
         {/* Impact Display */}

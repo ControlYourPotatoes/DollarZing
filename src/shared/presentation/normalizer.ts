@@ -83,6 +83,7 @@ export function normalizePresentationSnapshot(
         dailyEntry?.totals?.activePlayers ??
         totalPlayers
     );
+    const newPlayers = ensureNumber(dailyEntry?.totals?.newPlayers ?? 0);
     const survivalRate =
       totalPlayers > 0 ? (activePlayers / totalPlayers) * 100 : 0;
 
@@ -95,6 +96,7 @@ export function normalizePresentationSnapshot(
       label,
       totalPlayers,
       activePlayers,
+      newPlayers,
       survivalRate,
       cumulativeRevenue,
       cumulativePayouts,

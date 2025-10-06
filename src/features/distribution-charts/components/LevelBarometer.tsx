@@ -34,7 +34,7 @@ export function LevelBarometer() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-slate-100">
-          Level Retention Analysis
+          Level Progression Analysis
         </h3>
         <span className="text-sm text-slate-400">Day {activeDayIndex + 1}</span>
       </div>
@@ -42,7 +42,12 @@ export function LevelBarometer() {
       {/* Scenario Toggle Buttons */}
       <div className="flex gap-2">
         {availableScenarios.map((scenarioKey) => {
-          const scenario = series.find((s) => s.key === scenarioKey);
+          const scenarioLabel =
+            scenarioKey === "base"
+              ? "Base"
+              : scenarioKey === "mid"
+              ? "Mid"
+              : "High";
           return (
             <button
               key={scenarioKey}
@@ -53,7 +58,7 @@ export function LevelBarometer() {
                   : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
               }`}
             >
-              {scenario?.label || scenarioKey.toUpperCase()}
+              {scenarioLabel}
             </button>
           );
         })}
@@ -99,14 +104,14 @@ export function LevelBarometer() {
                     <div className="flex justify-between">
                       <span>Survival:</span>
                       <span className="text-blue-400">
-                        {(step.survivalRate * 100).toFixed(1)}%
+                        {step.survivalRate.toFixed(1)}%
                       </span>
                     </div>
 
                     <div className="flex justify-between">
                       <span>Retention:</span>
                       <span className="text-purple-400">
-                        {(step.retentionRate * 100).toFixed(1)}%
+                        {step.retentionRate.toFixed(1)}%
                       </span>
                     </div>
                   </div>

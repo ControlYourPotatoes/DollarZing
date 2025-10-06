@@ -28,8 +28,13 @@ export interface LevelStats {
 
 export interface LevelTrackingSnapshot {
   currentDay: number;
-  dailyLevelStats: Record<number, Record<BettingLevel, LevelStats>>;
-  cumulativeLevelStats: Record<BettingLevel, LevelStats>;
+  dailyLevelStats: Record<number, Partial<Record<BettingLevel, LevelStats>>>;
+  cumulativeLevelStats: Partial<Record<BettingLevel, LevelStats>>;
+}
+
+interface PlayerLevelInfo {
+  currentLevel: BettingLevel;
+  previousLevel: BettingLevel;
 }
 
 /**
@@ -191,10 +196,26 @@ export class LevelTrackingHandler {
   }
 
   private handleCashOutCompleted = (event: CashOutCompletedEvent): void => {
-    if (event.finalLevel === 10) {
-      if (this.debugInterface) {
-        console.log(`Cash-out processed for level 10 player ${event.playerId}`);
-      }
+    const level = event.finalLevel as BettingLevel;
+    const day = this.getCurrentDay();
+    const dayStats = this.ensureDailyStats(day);
+    const stats = dayStats.get(level) || this.createEmptyLevelStats();
+
+    // Track cashouts at this level
+    stats.cashouts += 1;
+
+    dayStats.set(level, stats);
+
+    // Update cumulative stats
+    const cumulativeStats =
+      this.cumulativeLevelStats.get(level) || this.createEmptyLevelStats();
+    cumulativeStats.cashouts += 1;
+    this.cumulativeLevelStats.set(level, cumulativeStats);
+
+    if (this.debugInterface) {
+      console.log(
+        `[LevelTrackingHandler #${this.instanceId}] Cash-out recorded at level ${level} for player ${event.playerId} on day ${day}`
+      );
     }
   };
 
@@ -288,9 +309,9 @@ export class LevelTrackingHandler {
     // Day events already provide 1-based indexing
     this.currentDay = event.dayNumber;
     this.ensureDailyStats(this.currentDay);
-    if (this.debugInterface) {
+    if (this.verbose) {
       console.log(
-        `[LevelTrackingHandler #${this.instanceId}] Day ${this.currentDay} started - daily stats initialized`
+        `[LevelTrackingHandler #${this.instanceId}] Day started: ${this.currentDay}`
       );
     }
   }
@@ -300,86 +321,36 @@ export class LevelTrackingHandler {
   }
 
   /**
-   * Get level statistics for a specific day
+   * Export the current state as a snapshot
    */
-  getDailyLevelStats(day: number): Map<BettingLevel, LevelStats> {
-    return this.dailyLevelStats.get(day) || new Map();
-  }
-
-  /**
-   * Get cumulative level statistics
-   */
-  getCumulativeLevelStats(): Map<BettingLevel, LevelStats> {
-    return this.cumulativeLevelStats;
-  }
-
-  /**
-   * Get current day's level statistics
-   */
-  getCurrentDayLevelStats(): Map<BettingLevel, LevelStats> {
-    return this.getDailyLevelStats(this.currentDay);
-  }
-
-  /**
-   * Export a serializable snapshot of tracked statistics
-   */
-  public exportSnapshot(): LevelTrackingSnapshot {
-    if (this.debugInterface) {
-      console.log(
-        `[LevelTrackingHandler #${
-          this.instanceId
-        }] Exporting snapshot - currentDay: ${
-          this.currentDay
-        }, dailyStats days: ${Array.from(this.dailyLevelStats.keys()).join(
-          ","
-        )}, cumulative levels: ${Array.from(
-          this.cumulativeLevelStats.keys()
-        ).join(",")}`
-      );
-    }
-
-    const daily: Record<number, Record<BettingLevel, LevelStats>> = {};
-    for (const [day, statsMap] of this.dailyLevelStats.entries()) {
-      const dayRecord: Record<BettingLevel, LevelStats> = {} as Record<
-        BettingLevel,
-        LevelStats
-      >;
-      for (const [level, stats] of statsMap.entries()) {
-        dayRecord[level] = { ...stats };
-      }
-      daily[day] = dayRecord;
-      if (this.debugInterface) {
-        console.log(
-          `[LevelTrackingHandler #${this.instanceId}] Day ${day} has ${statsMap.size} levels tracked`
-        );
+  exportSnapshot(): LevelTrackingSnapshot {
+    const dailyLevelStats: Record<
+      number,
+      Partial<Record<BettingLevel, LevelStats>>
+    > = {};
+    for (const [day, levelMap] of this.dailyLevelStats.entries()) {
+      dailyLevelStats[day] = {};
+      for (const [level, stats] of levelMap.entries()) {
+        dailyLevelStats[day][level] = { ...stats };
       }
     }
 
-    const cumulative: Record<BettingLevel, LevelStats> = {} as Record<
-      BettingLevel,
-      LevelStats
-    >;
+    const cumulativeLevelStats: Partial<Record<BettingLevel, LevelStats>> = {};
     for (const [level, stats] of this.cumulativeLevelStats.entries()) {
-      cumulative[level] = { ...stats };
-    }
-
-    if (this.debugInterface) {
-      console.log(
-        `[LevelTrackingHandler #${this.instanceId}] Snapshot exported with ${
-          Object.keys(daily).length
-        } days and ${Object.keys(cumulative).length} cumulative levels`
-      );
+      cumulativeLevelStats[level] = { ...stats };
     }
 
     return {
       currentDay: this.currentDay,
-      dailyLevelStats: daily,
-      cumulativeLevelStats: cumulative,
+      dailyLevelStats,
+      cumulativeLevelStats,
     };
   }
-}
 
-interface PlayerLevelInfo {
-  currentLevel: BettingLevel;
-  previousLevel: BettingLevel;
+  /**
+   * Get daily level stats for a specific day
+   */
+  getDailyLevelStats(day: number): Map<BettingLevel, LevelStats> {
+    return this.dailyLevelStats.get(day) || new Map();
+  }
 }

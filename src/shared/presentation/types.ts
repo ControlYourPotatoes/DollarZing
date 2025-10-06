@@ -262,6 +262,7 @@ export interface CohortAnalyticsPoint {
   label: string;
   totalPlayers: number;
   activePlayers: number;
+  newPlayers: number;
   survivalRate: number;
   cumulativeRevenue: number;
   cumulativePayouts: number;
