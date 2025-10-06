@@ -6,9 +6,9 @@ import {
   DayStartedEvent,
   DayFrameCompletedEvent,
   PlayerCreatedEvent,
-  NewRunCreatedEvent,
   CashOutCompletedEvent,
 } from "../events/event-types";
+import { createActivePlayers } from "./player-creation";
 
 /**
  * Configuration for player management
@@ -83,6 +83,7 @@ export class PlayerManager {
     [CashOutStrategy.AGGRESSIVE]: 0.45, // Whales: 45% DAU
   };
   private static readonly NEW_PLAYER_STARTING_DOLLARS = 5;
+  private static readonly INITIAL_DONATION_AMOUNT = 100;
   // Weekly allowance ranges from research (Base scenario) - divided by 7 for daily
   private static readonly ALLOWANCE_PER_DAY: Record<CashOutStrategy, number> = {
     [CashOutStrategy.CONSERVATIVE]: 4, // Light: $8-16/week = ~$1.1-2.3/day
@@ -344,106 +345,22 @@ export class PlayerManager {
       return;
     }
 
-    const strategies = Object.keys(playerStrategies) as CashOutStrategy[];
-    const weights = Object.values(playerStrategies);
-
-    const seededAt = new Date();
-    const baseIdPrefix = isNew ? "player-new" : "player-reactivated";
-
-    for (let i = 0; i < count; i++) {
-      if (this.simulationTerminated) {
-        break;
+    await createActivePlayers(
+      {
+        count,
+        isNew,
+        playerStrategies,
+        initialDonationAmount: PlayerManager.INITIAL_DONATION_AMOUNT,
+        newPlayerStartingDollars: PlayerManager.NEW_PLAYER_STARTING_DOLLARS,
+        allowancePerDay: PlayerManager.ALLOWANCE_PER_DAY,
+      },
+      {
+        eventBus: this.eventBus,
+        playerRegistry: this.playerRegistry,
+        simulationTerminated: () => this.simulationTerminated,
+        createRun: (request) => this.createNewRun(request),
       }
-      const playerId = `${baseIdPrefix}-${seededAt.getTime()}-${Math.random()
-        .toString(36)
-        .slice(2, 8)}-${i}`;
-
-      // Weighted pick
-      const r = Math.random();
-      let cum = 0;
-      let strategy: CashOutStrategy = CashOutStrategy.BALANCED;
-      for (let j = 0; j < strategies.length; j++) {
-        cum += weights[j] ?? 0;
-        if (r <= cum) {
-          strategy = strategies[j];
-          break;
-        }
-      }
-
-      this.playerRegistry.set(playerId, {
-        id: playerId,
-        strategy,
-        initialDonation: 100,
-        createdAt: new Date(),
-        activeRunIds: [],
-        totalRunsCreated: 0,
-      });
-
-      if (this.simulationTerminated) {
-        this.playerRegistry.delete(playerId);
-        return;
-      }
-
-      void this.eventBus
-        .emit(EVENT_TYPES.PLAYER_CREATED, {
-          type: EVENT_TYPES.PLAYER_CREATED,
-          timestamp: new Date(),
-          playerId,
-          initialDonationAmount: 100,
-          cashOutStrategy: strategy,
-          isNewPlayer: isNew,
-        } as PlayerCreatedEvent)
-        .catch((error) =>
-          console.error("[PlayerManager] Failed to emit PLAYER_CREATED:", error)
-        );
-
-      const runsToCreate = isNew
-        ? PlayerManager.NEW_PLAYER_STARTING_DOLLARS
-        : PlayerManager.ALLOWANCE_PER_DAY[strategy] ?? 3;
-
-      // Shuffle the order of dollar creation to interleave emissions and reduce same-owner clustering
-      const indices = Array.from({ length: runsToCreate }, (_, i) => i).sort(
-        () => Math.random() - 0.5
-      );
-
-      for (let i = 0; i < indices.length; i++) {
-        setTimeout(() => {
-          if (this.simulationTerminated) {
-            return;
-          }
-          const newRun = this.createNewRun({
-            playerId,
-            cashOutStrategy: strategy,
-            fundingSource: "DONATION",
-          });
-          if (newRun) {
-            void this.eventBus
-              .emit(EVENT_TYPES.NEW_RUN_CREATED, {
-                type: EVENT_TYPES.NEW_RUN_CREATED,
-                timestamp: new Date(),
-                playerId,
-                virtualDollarId: newRun.id,
-                fundingSource: "DONATION",
-                cashOutStrategy: strategy,
-                runCount:
-                  this.playerRegistry.get(playerId)?.totalRunsCreated ?? 1,
-              } as NewRunCreatedEvent)
-              .catch((error) =>
-                console.error(
-                  "[PlayerManager] Failed to emit NEW_RUN_CREATED:",
-                  error
-                )
-              );
-          } else {
-            console.warn(
-              `[PlayerManager] Failed to create run ${
-                indices[i] + 1
-              }/${runsToCreate} for ${playerId}`
-            );
-          }
-        }, i * 50 + Math.random() * 20); // 50ms base delay per dollar with 0-20ms jitter for better interleaving
-      }
-    }
+    );
   }
 
   private handlePlayerCreated(event: PlayerCreatedEvent): void {
