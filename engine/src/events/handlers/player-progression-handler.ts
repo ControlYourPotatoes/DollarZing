@@ -182,7 +182,15 @@ export class PlayerProgressionHandler {
         0
       );
 
-      const addResult = this.gameMatchingEngine.addToPool(advancedDollar);
+      const pooledDollar =
+        advancedDollar.state === DollarState.POOLED
+          ? advancedDollar
+          : this.virtualDollarFactory.updateDollarState(
+              virtualDollarId,
+              DollarState.POOLED
+            );
+
+      const addResult = this.gameMatchingEngine.addToPool(pooledDollar);
       if (addResult instanceof Promise) {
         await addResult;
       }
@@ -192,8 +200,8 @@ export class PlayerProgressionHandler {
         virtualDollarId,
         currentLevel,
         nextLevel,
-        advancedDollar.currentRunWinnings,
-        advancedDollar.gamesInThisRun
+        pooledDollar.currentRunWinnings,
+        pooledDollar.gamesInThisRun
       );
     } catch (error) {
       throw new Error(

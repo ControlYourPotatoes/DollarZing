@@ -477,6 +477,12 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
       throw new Error(`Dollar with ID ${dollarId} not found`);
     }
 
+    if (dollar.state === DollarState.LOST || dollar.state === DollarState.CASHED_OUT) {
+      throw new Error(
+        `Cannot advance dollar ${dollarId} from final state ${dollar.state}`
+      );
+    }
+
     // Update level and winnings
     dollar.currentLevel = newLevel;
     dollar.currentRunWinnings += additionalWinnings;
