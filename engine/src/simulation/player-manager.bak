@@ -8,7 +8,13 @@ import {
   PlayerCreatedEvent,
   CashOutCompletedEvent,
 } from "../events/event-types";
-import { PlayerCreationManager } from "./player-creation-manager";
+import { createActivePlayers, CreateRunRequest } from "./player-creation";
+import {
+  PlayerRecord,
+  PlayerRegistry,
+  DormantPlayerStore,
+  InMemoryDormantPlayerStore,
+} from "./player-registry";
 
 /**
  * Configuration for player management
@@ -40,39 +46,17 @@ export interface PlayerStatistics {
  * Removed legacy dependencies on PlayerBalanceManager and PlayerRunManager
  */
 export class PlayerManager {
+  private eventBus: EventBus;
+  private virtualDollarFactory: VirtualDollarFactory;
   // Single player registry to avoid duplicate state management
-  private playerRegistry = new Map<
-    string,
-    {
-      id: string;
-      strategy: CashOutStrategy;
-      initialDonation: number;
-      createdAt: Date;
-      activeRunIds: string[]; // Track active virtual dollar runs
-      totalRunsCreated: number;
-    }
-  >();
+
 
   constructor(
     private eventBus: EventBus,
     private virtualDollarFactory: VirtualDollarFactory
   ) {
     this.setupEventSubscriptions();
-    this.playerCreationManager = new PlayerCreationManager(
-      eventBus,
-      virtualDollarFactory,
-      {
-        initialPlayerSpreadDays: 14,
-        maxNewPlayersPerDay: PlayerManager.MAX_NEW_PLAYERS_PER_DAY,
-        dailyOnboardingRate: PlayerManager.DAILY_ONBOARDING_RATE,
-        dauTargets: PlayerManager.DAU_TARGETS,
-        allowancePerDay: PlayerManager.ALLOWANCE_PER_DAY,
-        newPlayerStartingDollars: PlayerManager.NEW_PLAYER_STARTING_DOLLARS,
-      }
-    );
   }
-
-  private playerCreationManager: PlayerCreationManager;
 
   private dayStartedSubscription: EventSubscription | null = null;
   private simulationStartedSubscription: EventSubscription | null = null;
@@ -80,6 +64,8 @@ export class PlayerManager {
   private runCompletedSubscription: EventSubscription | null = null;
   private playerCreatedSubscription: EventSubscription | null = null;
   private cashOutCompletedSubscription: EventSubscription | null = null;
+  private playerRegistry: PlayerRegistry = new Map();
+  private dormantStore: DormantPlayerStore = new InMemoryDormantPlayerStore();
   // No end-of-day clearing subscription; we clear at next DAY_STARTED to avoid race with late events
   private pendingInitialPlayers: number = 0;
   // Number of days to spread initial player seeding across (default: 14)
@@ -94,6 +80,7 @@ export class PlayerManager {
     [CashOutStrategy.AGGRESSIVE]: 0.45, // Whales: 45% DAU
   };
   private static readonly NEW_PLAYER_STARTING_DOLLARS = 5;
+  private static readonly INITIAL_DONATION_AMOUNT = 100;
   // Weekly allowance ranges from research (Base scenario) - divided by 7 for daily
   private static readonly ALLOWANCE_PER_DAY: Record<CashOutStrategy, number> = {
     [CashOutStrategy.CONSERVATIVE]: 4, // Light: $8-16/week = ~$1.1-2.3/day
@@ -170,23 +157,147 @@ export class PlayerManager {
    * Handle day started event - delegate player creation to PlayerCreationManager
    */
   private async handleDayStarted(event: DayStartedEvent): Promise<void> {
-    // Sync state with PlayerCreationManager
-    this.playerCreationManager.setInitialPlayers(
-      this.pendingInitialPlayers,
-      this.initialPlayerSpreadDays
+    const { dayNumber, growthModel, playerStrategies } = event;
+
+    // Note: do not clear here; we clear at DAY_COMPLETED to avoid racing in-flight events
+
+    // Spread initial players across the configured initialPlayerSpreadDays window
+    if (this.pendingInitialPlayers > 0 && this.playerRegistry.size === 0) {
+      const remaining =
+        this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
+      if (remaining > 0) {
+        const dayIndex = Math.max(1, dayNumber);
+        if (dayIndex <= this.initialPlayerSpreadDays) {
+          const basePerDay = Math.floor(
+            this.pendingInitialPlayers / this.initialPlayerSpreadDays
+          );
+          const remainder =
+            this.pendingInitialPlayers % this.initialPlayerSpreadDays;
+          const toCreate =
+            dayIndex < this.initialPlayerSpreadDays
+              ? basePerDay
+              : basePerDay + remainder;
+          const createNow = Math.min(Math.max(1, toCreate), remaining);
+          this.initialPlayersSeededSoFar += createNow;
+          this.totalPlayersCounter += createNow;
+          if (!this.simulationTerminated) {
+            void this.createActives(createNow, playerStrategies, true).catch(
+              (error) =>
+                console.error(
+                  "[PlayerManager] Failed to create initial actives:",
+                  error
+                )
+            );
+          }
+        } else {
+          const createNow = remaining;
+          this.initialPlayersSeededSoFar += createNow;
+          this.pendingInitialPlayers = 0;
+          this.totalPlayersCounter += createNow;
+          if (!this.simulationTerminated) {
+            void this.createActives(createNow, playerStrategies, true).catch(
+              (error) =>
+                console.error(
+                  "[PlayerManager] Failed to create leftover initial actives:",
+                  error
+                )
+            );
+          }
+        }
+      }
+      if (this.initialPlayersSeededSoFar >= this.pendingInitialPlayers) {
+        this.pendingInitialPlayers = 0;
+      }
+    }
+
+    if (this.simulationTerminated) {
+      return;
+    }
+
+    // Use S-curve growth model from event
+    const x =
+      (dayNumber - growthModel.midpointDay) / growthModel.steepnessFactor;
+    const adoptionProgress = 1 / (1 + Math.exp(-x));
+    const targetPlayers = Math.floor(
+      growthModel.baseMarket * growthModel.adoptionRate * adoptionProgress
     );
 
-    // Delegate all player creation logic
-    await this.playerCreationManager.processDayStarted(
-      event,
-      this.playerRegistry.size,
-      this.getActivePlayerCount()
+    // Calculate current total player count from counter (active-only model)
+    const currentPlayerCount = this.totalPlayersCounter;
+
+    // Add new players if we're below S-curve target (throttled)
+    const playersToAdd = Math.max(0, targetPlayers - currentPlayerCount);
+    const throttledFromRate = Math.max(
+      1,
+      Math.ceil(playersToAdd * PlayerManager.DAILY_ONBOARDING_RATE)
+    );
+    const dailyNewPlayers = Math.min(
+      playersToAdd,
+      throttledFromRate,
+      PlayerManager.MAX_NEW_PLAYERS_PER_DAY
     );
 
-    // Sync counters back
-    const stats = this.playerCreationManager.getStats();
-    this.totalPlayersCounter = stats.totalPlayersCounter;
-    this.dailyNewPlayersCounter = stats.dailyNewPlayersCounter;
+    // Create new players to reach S-curve target
+    if (dailyNewPlayers > 0 && !this.simulationTerminated) {
+      this.totalPlayersCounter += dailyNewPlayers;
+      this.dailyNewPlayersCounter += dailyNewPlayers;
+      void this.createActives(dailyNewPlayers, playerStrategies, true).catch(
+        (error) =>
+          console.error(
+            "[PlayerManager] Failed to create daily new actives:",
+            error
+          )
+      );
+    } else if (dailyNewPlayers === 0 && playersToAdd === 0) {
+      // TEMPORARY: Equilibrium state reached - S-curve target met
+      // TODO: Implement proper equilibrium handling for event-driven architecture
+      // The system currently breaks when player growth stops due to event sequencing issues
+      this.dailyNewPlayersCounter = 0;
+      // Note: Equilibrium reached - no new player growth needed
+    }
+
+    // Note: we do not create passive players here; we only count them. Actives are created below to match DAU.
+
+    // Create today's DAU actives: prefer reactivation, then mint new
+    // Calculate cohort-based targets from research
+    const cohortTargets = this.calculateCohortDAUTargets();
+    const totalTargetActives = Object.values(cohortTargets).reduce(
+      (sum, count) => sum + count,
+      0
+    );
+    const currentActive = this.getActivePlayerCount();
+    const deficit = Math.max(0, totalTargetActives - currentActive);
+
+    if (this.simulationTerminated || totalTargetActives <= 0) {
+      return;
+    }
+
+    if (deficit > 0) {
+      const dormantAvailable = this.dormantStore.size();
+      const reactivations = Math.min(deficit, dormantAvailable);
+      if (reactivations > 0) {
+        void this.createActives(reactivations, playerStrategies, false).catch(
+          (error) =>
+            console.error(
+              "[PlayerManager] Failed to reactivate players:",
+              error
+            )
+        );
+      }
+
+      const remaining = deficit - reactivations;
+      if (remaining > 0 && !this.simulationTerminated) {
+        this.totalPlayersCounter += remaining;
+        this.dailyNewPlayersCounter += remaining;
+        void this.createActives(remaining, playerStrategies, true).catch(
+          (error) =>
+            console.error(
+              "[PlayerManager] Failed to create remaining daily actives:",
+              error
+            )
+        );
+      }
+    }
   }
 
   private handleDayFrameCompleted(_event: DayFrameCompletedEvent): void {
@@ -202,8 +313,8 @@ export class PlayerManager {
       typeof event?.config?.initialPlayerSpreadDays === "number"
         ? event.config.initialPlayerSpreadDays
         : typeof event?.initialPlayerSpreadDays === "number"
-        ? event.initialPlayerSpreadDays
-        : undefined;
+          ? event.initialPlayerSpreadDays
+          : undefined;
 
     if (typeof spread === "number" && spread > 0) {
       this.initialPlayerSpreadDays = spread;
@@ -211,12 +322,43 @@ export class PlayerManager {
 
     if (typeof initial === "number" && initial > 0) {
       this.pendingInitialPlayers = initial;
+      this.initialPlayersSeededSoFar = 0;
+    }
+  }
+
+  /**
+   * Create active players (reactivated or new) and allocate runs per allowance
+   */
+  private async createActives(
+    count: number,
+    playerStrategies: Partial<Record<CashOutStrategy, number>>,
+    isNew: boolean
+  ): Promise<void> {
+    if (this.simulationTerminated || count <= 0) {
+      return;
     }
 
-    // Sync with PlayerCreationManager
-    this.playerCreationManager.setInitialPlayers(
-      this.pendingInitialPlayers,
-      this.initialPlayerSpreadDays
+    await createActivePlayers(
+      {
+        count,
+        isNew,
+        playerStrategies,
+        initialDonationAmount: PlayerManager.INITIAL_DONATION_AMOUNT,
+        newPlayerStartingDollars: PlayerManager.NEW_PLAYER_STARTING_DOLLARS,
+        allowancePerDay: PlayerManager.ALLOWANCE_PER_DAY,
+      },
+      {
+        eventBus: this.eventBus,
+        playerRegistry: this.playerRegistry,
+        dormantStore: this.dormantStore,
+        simulationTerminated: () => this.simulationTerminated,
+        createRun: (request: CreateRunRequest) =>
+          this.createNewRun({
+            playerId: request.playerId,
+            cashOutStrategy: request.cashOutStrategy,
+            fundingSource: request.fundingSource,
+          }),
+      }
     );
   }
 
@@ -225,22 +367,41 @@ export class PlayerManager {
     if (existing) {
       existing.strategy = event.cashOutStrategy;
       existing.initialDonation = event.initialDonationAmount;
+      if (existing.activeRunIds.length === 0) {
+        this.dormantStore.add(existing);
+      }
       return;
     }
 
-    this.playerRegistry.set(event.playerId, {
+    const record: PlayerRecord = {
       id: event.playerId,
       strategy: event.cashOutStrategy,
       initialDonation: event.initialDonationAmount,
       createdAt: event.timestamp,
       activeRunIds: [],
       totalRunsCreated: 0,
-    });
+    };
+
+    this.playerRegistry.set(event.playerId, record);
+    this.dormantStore.add(record);
   }
 
-  private handleCashOutCompleted(_event: CashOutCompletedEvent): void {
-    // Player balance updates are handled by RevenueTrackingHandler
-    // This handler ensures the event is processed for consistency
+  private handleCashOutCompleted(event: CashOutCompletedEvent): void {
+    const playerId = event.playerId;
+    const virtualDollarId = event.virtualDollarId;
+
+    if (!playerId || !virtualDollarId) {
+      return;
+    }
+
+    const player = this.playerRegistry.get(playerId);
+    if (!player) {
+      return;
+    }
+
+    this.removeActiveRun(playerId, virtualDollarId);
+    this.virtualDollarFactory.releaseDollar(virtualDollarId);
+    this.dormantStore.add(player);
   }
 
   /**
@@ -410,6 +571,7 @@ export class PlayerManager {
       if (player) {
         player.activeRunIds.push(virtualDollar.id);
         player.totalRunsCreated++;
+        this.dormantStore.remove(player.id);
       }
 
       return virtualDollar;
@@ -478,6 +640,9 @@ export class PlayerManager {
       const index = player.activeRunIds.indexOf(virtualDollarId);
       if (index > -1) {
         player.activeRunIds.splice(index, 1);
+        if (player.activeRunIds.length === 0) {
+          this.dormantStore.add(player);
+        }
       }
     }
   }
@@ -511,5 +676,14 @@ export class PlayerManager {
     this.cashOutCompletedSubscription = null;
     this.dayFrameCompletedSubscription = null;
     this.playerRegistry.clear();
+  }
+
+  constructor(
+    eventBus: EventBus,
+    virtualDollarFactory: VirtualDollarFactory
+  ) {
+    this.eventBus = eventBus;
+    this.virtualDollarFactory = virtualDollarFactory;
+    this.setupEventSubscriptions();
   }
 }

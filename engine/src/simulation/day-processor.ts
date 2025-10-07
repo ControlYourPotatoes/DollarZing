@@ -112,8 +112,7 @@ export class DayProcessor {
       .addToPool(virtualDollar)
       .catch((error) =>
         console.warn(
-          `[DayProcessor] Failed to add dollar ${
-            event.virtualDollarId
+          `[DayProcessor] Failed to add dollar ${event.virtualDollarId
           } to pool: ${error instanceof Error ? error.message : String(error)}`
         )
       );
@@ -191,27 +190,31 @@ export class DayProcessor {
     let lastPoolSize =
       this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
     let stableCount = 0;
-    const maxWaitMs = 5000; // Max 5 seconds per day
+    const maxWaitMs = 15000; // Max 15 seconds per day
     const startWait = Date.now();
 
     while (stableCount < 3 && Date.now() - startWait < maxWaitMs) {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const currentResolvedCount =
-        this.gameMatchingEngine.getStatistics().resolvedGames ?? 0;
+      const stats = this.gameMatchingEngine.getStatistics();
+      const currentResolvedCount = stats.resolvedGames ?? 0;
       const currentActiveCount = this.gameMatchingEngine.getActiveGamesCount();
-      const currentPoolSize =
-        this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
+      const poolStatsSnapshot = this.gameMatchingEngine.getPoolStatistics();
+      const currentPoolSize = poolStatsSnapshot.totalDollarsInPool;
 
-      // Consider stable if: resolved games not increasing, active games decreasing or stable, pool size stable
-      const resolvedStable = currentResolvedCount >= lastResolvedCount; // Allow resolved count to increase
-      const activeStable = currentActiveCount <= lastActiveCount; // Active games should decrease or stay same
-      const poolStable = Math.abs(currentPoolSize - lastPoolSize) <= 2; // Allow small pool fluctuations
+      const resolvedMonotonic = currentResolvedCount >= lastResolvedCount;
+      const activeNonIncreasing = currentActiveCount <= lastActiveCount;
+      const poolStable = Math.abs(currentPoolSize - lastPoolSize) <= 1;
 
-      if (resolvedStable && activeStable && poolStable) {
+      if (resolvedMonotonic && activeNonIncreasing && poolStable) {
         stableCount++;
       } else {
         stableCount = 0;
+        if (this.debugInterface) {
+          console.log(
+            `DEBUG: Day ${day} stability reset -> resolved: ${currentResolvedCount} (prev ${lastResolvedCount}), active: ${currentActiveCount} (prev ${lastActiveCount}), pool: ${currentPoolSize} (prev ${lastPoolSize})`
+          );
+        }
       }
 
       lastResolvedCount = currentResolvedCount;
@@ -219,16 +222,11 @@ export class DayProcessor {
       lastPoolSize = currentPoolSize;
     }
 
-    if (this.debugInterface) {
-      const finalStats = this.gameMatchingEngine.getStatistics();
-      console.log(
-        `DEBUG: Day ${day} - Event processing stabilized after ${
-          Date.now() - startWait
-        }ms (${
-          finalStats.resolvedGames ?? 0
-        } resolved, ${this.gameMatchingEngine.getActiveGamesCount()} active games, pool: ${
-          this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool
-        })`
+    if (Date.now() - startWait >= maxWaitMs && this.debugInterface) {
+      const stats = this.gameMatchingEngine.getStatistics();
+      const poolStatsSnapshot = this.gameMatchingEngine.getPoolStatistics();
+      console.warn(
+        `WARN: Day ${day} stabilization timeout after ${Date.now() - startWait}ms -> resolved=${stats.resolvedGames}, active=${this.gameMatchingEngine.getActiveGamesCount()}, pool=${poolStatsSnapshot.totalDollarsInPool}`
       );
     }
 

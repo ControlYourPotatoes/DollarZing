@@ -317,10 +317,7 @@ export class MatchmakingEventHandler {
           continue;
         }
 
-        const availableDollars: Array<{
-          dollar: VirtualDollar;
-          position: number;
-        }> = [];
+        const seenDollars = new Map<string, { dollar: VirtualDollar; position: number }>();
         for (const [index, dollar] of levelDollars.entries()) {
           if (!dollar) {
             continue;
@@ -342,8 +339,19 @@ export class MatchmakingEventHandler {
             continue;
           }
 
-          availableDollars.push({ dollar, position: index + 1 });
+          const position = index + 1;
+          const existing = seenDollars.get(dollar.id);
+          if (existing) {
+            if (position < existing.position) {
+              existing.position = position;
+            }
+            continue;
+          }
+
+          seenDollars.set(dollar.id, { dollar, position });
         }
+
+        const availableDollars = Array.from(seenDollars.values());
 
         if (availableDollars.length < 2) {
           if (availableDollars.length === 1) {

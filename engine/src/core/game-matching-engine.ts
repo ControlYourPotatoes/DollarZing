@@ -151,6 +151,9 @@ export class GameMatchingEngine {
 
   private enqueueDollar(level: BettingLevel, dollarId: string): void {
     const queue = this.getLevelQueue(level);
+    if (queue.pending.has(dollarId)) {
+      return;
+    }
     queue.items.push(dollarId);
     queue.pending.add(dollarId);
   }
@@ -693,8 +696,7 @@ export class GameMatchingEngine {
   /** Force requeue a dollar into the pool and level queue */
   forceRequeueDollar(dollar: VirtualDollar): void {
     this.pooledDollars.set(dollar.id, dollar);
-    this.getLevelQueue(dollar.currentLevel).pending.add(dollar.id);
-    this.getLevelQueue(dollar.currentLevel).items.push(dollar.id);
+    this.enqueueDollar(dollar.currentLevel, dollar.id);
     if (!this.dollarsByLevel.has(dollar.currentLevel)) {
       this.dollarsByLevel.set(dollar.currentLevel, new Set());
     }

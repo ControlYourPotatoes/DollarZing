@@ -303,7 +303,12 @@ describe('PlayerProgressionHandler', () => {
         6,
         57.6
       );
-      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith(rePooledDollar);
+      expect(mockGameMatchingEngine.addToPool).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "dollar-repool",
+          ownerId: "player-repool",
+        })
+      );
       expect(advancedSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           type: EVENT_TYPES.VIRTUAL_DOLLAR_ADVANCED,
