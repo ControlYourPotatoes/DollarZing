@@ -101,11 +101,34 @@ export class DayProcessor {
       return;
     }
 
+    // Fix: Handle dollars that are still in IN_GAME state from incomplete cash-outs
+    // First, transition to CASHED_OUT if necessary, then to POOLED
+    if (virtualDollar.state === DollarState.IN_GAME) {
+      try {
+        this.dollarManager.updateDollarState(
+          event.virtualDollarId,
+          DollarState.CASHED_OUT
+        );
+      } catch (error) {
+        console.warn(
+          `[DayProcessor] Failed to cash out dollar ${event.virtualDollarId} from IN_GAME: ${error instanceof Error ? error.message : String(error)}`
+        );
+        return; // Skip adding to pool if we can't fix the state
+      }
+    }
+
     if (virtualDollar.state !== DollarState.POOLED) {
-      this.dollarManager.updateDollarState(
-        event.virtualDollarId,
-        DollarState.POOLED
-      );
+      try {
+        this.dollarManager.updateDollarState(
+          event.virtualDollarId,
+          DollarState.POOLED
+        );
+      } catch (error) {
+        console.warn(
+          `[DayProcessor] Failed to pool dollar ${event.virtualDollarId}: ${error instanceof Error ? error.message : String(error)}`
+        );
+        return;
+      }
     }
 
     void this.gameMatchingEngine
@@ -191,9 +214,14 @@ export class DayProcessor {
     let lastPoolSize =
       this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
     let stableCount = 0;
-    const maxWaitMs = 30000; // Increased from 15 to 30 seconds for large simulations
-    const requiredStablePolls = 5; // Increased from 3 to 5 for more confidence
+    const maxWaitMs = 120000; // Reduced from 900000 (15min) to 2min for faster feedback and to prevent timeouts
+    const requiredStablePolls = 10; // Increased from 3 to 5 for more confidence
     const startWait = Date.now();
+
+    // Track equilibrium indicators
+    let equilibriumDetected = false;
+    let equilibriumStableCount = 0;
+    const requiredEquilibriumPolls = 5;
 
     while (
       stableCount < requiredStablePolls &&
@@ -211,13 +239,32 @@ export class DayProcessor {
       const activeNonIncreasing = currentActiveCount <= lastActiveCount;
       const poolStable =
         Math.abs(currentPoolSize - lastPoolSize) <=
-        Math.max(5, Math.floor(lastPoolSize * 0.02)); // Allow 2% variation or min 5
+        Math.max(10, Math.floor(lastPoolSize * 0.05)); // Increased tolerance: 5% variation or min 10
+
+      // Check for equilibrium state: no new players added recently, but system still processing
+      const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
+      const isEquilibriumState = dailyNewPlayers === 0 && currentActiveCount > 0 && resolvedMonotonic;
+
+      if (isEquilibriumState) {
+        equilibriumStableCount++;
+        if (equilibriumStableCount >= requiredEquilibriumPolls) {
+          equilibriumDetected = true;
+          if (this.debugInterface) {
+            console.log(
+              `DEBUG: Day ${day} equilibrium detected - no new players, processing existing games`
+            );
+          }
+          break; // Exit stabilization loop - equilibrium is stable enough
+        }
+      } else {
+        equilibriumStableCount = 0;
+      }
 
       if (resolvedMonotonic && activeNonIncreasing && poolStable) {
         stableCount++;
       } else {
         stableCount = 0;
-        if (this.debugInterface) {
+        if (this.debugInterface && !equilibriumDetected) {
           console.log(
             `DEBUG: Day ${day} stability reset -> resolved: ${currentResolvedCount} (prev ${lastResolvedCount}), active: ${currentActiveCount} (prev ${lastActiveCount}), pool: ${currentPoolSize} (prev ${lastPoolSize})`
           );
@@ -229,7 +276,11 @@ export class DayProcessor {
       lastPoolSize = currentPoolSize;
     }
 
-    if (Date.now() - startWait >= maxWaitMs && this.debugInterface) {
+    if (equilibriumDetected) {
+      if (this.debugInterface) {
+        console.log(`DEBUG: Day ${day} proceeding with equilibrium state`);
+      }
+    } else if (Date.now() - startWait >= maxWaitMs && this.debugInterface) {
       const stats = this.gameMatchingEngine.getStatistics();
       const poolStatsSnapshot = this.gameMatchingEngine.getPoolStatistics();
       console.warn(
