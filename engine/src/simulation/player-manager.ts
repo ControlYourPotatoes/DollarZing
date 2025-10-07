@@ -70,6 +70,7 @@ export class PlayerManager {
         newPlayerStartingDollars: PlayerManager.NEW_PLAYER_STARTING_DOLLARS,
       }
     );
+    this.playerCreationManager.init();
   }
 
   private playerCreationManager: PlayerCreationManager;

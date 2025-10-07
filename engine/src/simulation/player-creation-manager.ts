@@ -30,12 +30,29 @@ export class PlayerCreationManager {
   private totalPlayersCounter = 0;
   private dailyNewPlayersCounter = 0;
   private simulationTerminated = false;
+  private recentPoolSnapshot: {
+    totalDollarsInPool: number;
+    availableForMatching: number;
+    dollarsInGame: number;
+  } | null = null;
+  private static readonly BACKLOG_HARD_CAP = 2000;
+  private static readonly BACKLOG_SOFT_CAP = 750;
 
   constructor(
     private eventBus: EventBus,
     private virtualDollarFactory: VirtualDollarFactory,
     private config: PlayerCreationConfig
   ) {}
+
+  init(): void {
+    this.eventBus.on(EVENT_TYPES.POOL_UPDATED, (evt: any) => {
+      this.recentPoolSnapshot = {
+        totalDollarsInPool: evt.totalDollarsInPool ?? 0,
+        availableForMatching: evt.availableForMatching ?? 0,
+        dollarsInGame: evt.dollarsInPlay ?? 0,
+      };
+    });
+  }
 
   /**
    * Set initial player count for spreading
@@ -223,37 +240,58 @@ export class PlayerCreationManager {
     },
     playerStrategies: Partial<Record<CashOutStrategy, number>>
   ): Promise<void> {
-    const { initialPlayers, growthPlayers, dauReactivations, dauNewPlayers } =
+    const snapshot = this.recentPoolSnapshot;
+    let { initialPlayers, growthPlayers, dauReactivations, dauNewPlayers } =
       additions;
 
+    if (snapshot) {
+      const backlog =
+        snapshot.totalDollarsInPool - snapshot.availableForMatching;
+      if (backlog > PlayerCreationManager.BACKLOG_HARD_CAP) {
+        growthPlayers = 0;
+        dauNewPlayers = 0;
+      } else if (backlog > PlayerCreationManager.BACKLOG_SOFT_CAP) {
+        const scale = 1 - backlog / PlayerCreationManager.BACKLOG_HARD_CAP;
+        growthPlayers = Math.floor(growthPlayers * Math.max(scale, 0.1));
+        dauNewPlayers = Math.floor(dauNewPlayers * Math.max(scale, 0));
+      }
+    }
+
+    const { initialPlayers: finalInitial, growthPlayers: finalGrowth, dauReactivations: finalReactivations, dauNewPlayers: finalNew } = {
+      initialPlayers,
+      growthPlayers,
+      dauReactivations,
+      dauNewPlayers
+    };
+
     // Apply initial players
-    if (initialPlayers > 0) {
-      this.initialPlayersSeededSoFar += initialPlayers;
-      this.totalPlayersCounter += initialPlayers;
-      this.dailyNewPlayersCounter += initialPlayers;
+    if (finalInitial > 0) {
+      this.initialPlayersSeededSoFar += finalInitial;
+      this.totalPlayersCounter += finalInitial;
+      this.dailyNewPlayersCounter += finalInitial;
       if (this.initialPlayersSeededSoFar >= this.pendingInitialPlayers) {
         this.pendingInitialPlayers = 0;
       }
-      await this.createActives(initialPlayers, playerStrategies, true);
+      await this.createActives(finalInitial, playerStrategies, true);
     }
 
     // Apply growth players
-    if (growthPlayers > 0) {
-      this.totalPlayersCounter += growthPlayers;
-      this.dailyNewPlayersCounter += growthPlayers;
-      await this.createActives(growthPlayers, playerStrategies, true);
+    if (finalGrowth > 0) {
+      this.totalPlayersCounter += finalGrowth;
+      this.dailyNewPlayersCounter += finalGrowth;
+      await this.createActives(finalGrowth, playerStrategies, true);
     }
 
     // Apply DAU reactivations
-    if (dauReactivations > 0) {
-      await this.createActives(dauReactivations, playerStrategies, false);
+    if (finalReactivations > 0) {
+      await this.createActives(finalReactivations, playerStrategies, false);
     }
 
     // Apply DAU new players
-    if (dauNewPlayers > 0) {
-      this.totalPlayersCounter += dauNewPlayers;
-      this.dailyNewPlayersCounter += dauNewPlayers;
-      await this.createActives(dauNewPlayers, playerStrategies, true);
+    if (finalNew > 0) {
+      this.totalPlayersCounter += finalNew;
+      this.dailyNewPlayersCounter += finalNew;
+      await this.createActives(finalNew, playerStrategies, true);
     }
   }
 
