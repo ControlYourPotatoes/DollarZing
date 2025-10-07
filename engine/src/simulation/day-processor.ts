@@ -188,10 +188,10 @@ export class DayProcessor {
     let lastPoolSize =
       this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
     let stableCount = 0;
-    const maxWaitMs = 50000; 
+    const maxWaitMs = 50000;
     const startWait = Date.now();
 
-    while (stableCount < 5 && Date.now() - startWait < maxWaitMs) {
+    while (stableCount < 3 && Date.now() - startWait < maxWaitMs) {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const stats = this.gameMatchingEngine.getStatistics();
