@@ -179,7 +179,8 @@ export class PlayerManager {
     // Delegate all player creation logic
     await this.playerCreationManager.processDayStarted(
       event,
-      this.playerRegistry.size
+      this.playerRegistry.size,
+      this.getActivePlayerCount()
     );
 
     // Sync counters back

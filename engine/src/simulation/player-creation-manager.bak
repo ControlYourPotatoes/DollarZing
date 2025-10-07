@@ -79,7 +79,8 @@ export class PlayerCreationManager {
    */
   async processDayStarted(
     event: DayStartedEvent,
-    currentPlayerCount: number = 0
+    currentPlayerCount: number = 0,
+    currentActiveCount: number = 0
   ): Promise<void> {
     const { dayNumber, growthModel, playerStrategies } = event;
 
@@ -87,169 +88,160 @@ export class PlayerCreationManager {
       return;
     }
 
-    // Source 1: Initial players spread
-    await this.createInitialPlayers(
+    // Calculate all player additions upfront to avoid conflicts
+    const additions = await this.calculateAllAdditions(
       dayNumber,
-      playerStrategies,
-      currentPlayerCount
+      growthModel,
+      currentPlayerCount,
+      currentActiveCount
     );
 
-    // Source 2: New players from S-curve growth
-    await this.createGrowthPlayers(dayNumber, growthModel, playerStrategies);
-
-    // Source 3: DAU maintenance via reactivation and new players
-    await this.maintainDAU(playerStrategies);
+    // Apply all additions in a single batch
+    await this.applyAdditions(additions, playerStrategies);
   }
 
   /**
-   * Source 1: Spread initial players across configured days
+   * Calculate all player additions for the day without applying them
    */
-  private async createInitialPlayers(
-    dayNumber: number,
-    playerStrategies: Partial<Record<CashOutStrategy, number>>,
-    currentPlayerCount: number
-  ): Promise<void> {
-    if (this.pendingInitialPlayers <= 0 || currentPlayerCount > 0) {
-      return;
-    }
-
-    const remaining =
-      this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
-    if (remaining <= 0) {
-      return;
-    }
-
-    const dayIndex = Math.max(1, dayNumber);
-    if (dayIndex > this.initialPlayerSpreadDays) {
-      // Spread window passed; create remaining now
-      const createNow = remaining;
-      this.initialPlayersSeededSoFar += createNow;
-      this.pendingInitialPlayers = 0;
-      this.totalPlayersCounter += createNow;
-      await this.createActives(createNow, playerStrategies, true);
-      return;
-    }
-
-    const basePerDay = Math.floor(
-      this.pendingInitialPlayers / this.initialPlayerSpreadDays
-    );
-    const remainder = this.pendingInitialPlayers % this.initialPlayerSpreadDays;
-    const toCreate =
-      dayIndex < this.initialPlayerSpreadDays
-        ? basePerDay
-        : basePerDay + remainder;
-
-    const createNow = Math.min(Math.max(1, toCreate), remaining);
-    this.initialPlayersSeededSoFar += createNow;
-    this.totalPlayersCounter += createNow;
-
-    if (this.initialPlayersSeededSoFar >= this.pendingInitialPlayers) {
-      this.pendingInitialPlayers = 0;
-    }
-
-    await this.createActives(createNow, playerStrategies, true);
-  }
-
-  /**
-   * Source 2: Create new players based on S-curve growth model
-   */
-  private async createGrowthPlayers(
+  private async calculateAllAdditions(
     dayNumber: number,
     growthModel: any,
-    playerStrategies: Partial<Record<CashOutStrategy, number>>
-  ): Promise<void> {
-    // Use S-curve growth model
-    const x =
-      (dayNumber - growthModel.midpointDay) / growthModel.steepnessFactor;
+    currentPlayerCount: number,
+    currentActiveCount: number
+  ): Promise<{
+    initialPlayers: number;
+    growthPlayers: number;
+    dauReactivations: number;
+    dauNewPlayers: number;
+  }> {
+    let initialPlayers = 0;
+    let growthPlayers = 0;
+    let dauReactivations = 0;
+    let dauNewPlayers = 0;
+
+    /**
+     * Source 1: Spread initial players across configured days
+     */
+    if (this.pendingInitialPlayers > 0 && currentPlayerCount === 0) {
+      const remaining = this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
+      if (remaining > 0) {
+        const dayIndex = Math.max(1, dayNumber);
+        if (dayIndex <= this.initialPlayerSpreadDays) {
+          const basePerDay = Math.floor(this.pendingInitialPlayers / this.initialPlayerSpreadDays);
+          const remainder = this.pendingInitialPlayers % this.initialPlayerSpreadDays;
+          const toCreate = dayIndex < this.initialPlayerSpreadDays
+            ? basePerDay
+            : basePerDay + remainder;
+          initialPlayers = Math.min(Math.max(1, toCreate), remaining);
+        } else {
+          // Spread window passed; create remaining now
+          initialPlayers = remaining;
+        }
+      }
+    }
+
+    // Calculate projected totals after initial players
+    const projectedTotalAfterInitial = currentPlayerCount + initialPlayers;
+    const projectedActiveAfterInitial = currentActiveCount + initialPlayers; // Assume initial are active
+
+    /**
+     * Source 2: Create new players based on S-curve growth model
+     */
+    const x = (dayNumber - growthModel.midpointDay) / growthModel.steepnessFactor;
     const adoptionProgress = 1 / (1 + Math.exp(-x));
     const targetPlayers = Math.floor(
       growthModel.baseMarket * growthModel.adoptionRate * adoptionProgress
     );
 
-    const currentPlayerCount = this.totalPlayersCounter;
-    const playersToAdd = Math.max(0, targetPlayers - currentPlayerCount);
-
-    if (playersToAdd === 0) {
-      // Equilibrium reached - no new growth needed
-      this.dailyNewPlayersCounter = 0;
-      return;
+    const playersToAdd = Math.max(0, targetPlayers - projectedTotalAfterInitial);
+    if (playersToAdd > 0) {
+      // Throttle growth to prevent runaway
+      const throttledFromRate = Math.max(
+        1,
+        Math.ceil(playersToAdd * this.config.dailyOnboardingRate)
+      );
+      growthPlayers = Math.min(
+        playersToAdd,
+        throttledFromRate,
+        this.config.maxNewPlayersPerDay
+      );
     }
 
-    // Throttle growth to prevent runaway
-    const throttledFromRate = Math.max(
-      1,
-      Math.ceil(playersToAdd * this.config.dailyOnboardingRate)
-    );
-    const dailyNewPlayers = Math.min(
-      playersToAdd,
-      throttledFromRate,
-      this.config.maxNewPlayersPerDay
-    );
+    // Calculate projected totals after growth
+    const projectedTotalAfterGrowth = projectedTotalAfterInitial + growthPlayers;
+    const projectedActiveAfterGrowth = projectedActiveAfterInitial + growthPlayers;
 
-    if (dailyNewPlayers > 0) {
-      this.totalPlayersCounter += dailyNewPlayers;
-      this.dailyNewPlayersCounter += dailyNewPlayers;
-      await this.createActives(dailyNewPlayers, playerStrategies, true);
+    /**
+     * Source 3: DAU maintenance (based on projected active count)
+     * For simplicity, use a total DAU target based on projected total players
+     * In a full implementation, this would use cohort-based targets
+     */
+    const estimatedTotalPlayers = projectedTotalAfterGrowth;
+    const totalTargetActives = Math.floor(estimatedTotalPlayers * 0.25); // Simplified DAU rate
+
+    const deficit = Math.max(0, totalTargetActives - projectedActiveAfterGrowth);
+    if (deficit > 0) {
+      const inactiveStock = Math.max(0, projectedTotalAfterGrowth - projectedActiveAfterGrowth);
+      dauReactivations = Math.min(deficit, inactiveStock);
+      dauNewPlayers = deficit - dauReactivations;
     }
+
+    return {
+      initialPlayers,
+      growthPlayers,
+      dauReactivations,
+      dauNewPlayers,
+    };
   }
 
   /**
-   * Source 3: Maintain DAU through reactivation and new player creation
+   * Apply all calculated additions in a single batch
    */
-  private async maintainDAU(
+  private async applyAdditions(
+    additions: {
+      initialPlayers: number;
+      growthPlayers: number;
+      dauReactivations: number;
+      dauNewPlayers: number;
+    },
     playerStrategies: Partial<Record<CashOutStrategy, number>>
   ): Promise<void> {
-    // Calculate cohort-based DAU targets
-    const cohortTargets = this.calculateCohortDAUTargets();
-    const totalTargetActives = Object.values(cohortTargets).reduce(
-      (sum, count) => sum + count,
-      0
-    );
+    const {
+      initialPlayers,
+      growthPlayers,
+      dauReactivations,
+      dauNewPlayers,
+    } = additions;
 
-    if (totalTargetActives <= 0) {
-      return;
+    // Apply initial players
+    if (initialPlayers > 0) {
+      this.initialPlayersSeededSoFar += initialPlayers;
+      this.totalPlayersCounter += initialPlayers;
+      this.dailyNewPlayersCounter += initialPlayers;
+      if (this.initialPlayersSeededSoFar >= this.pendingInitialPlayers) {
+        this.pendingInitialPlayers = 0;
+      }
+      await this.createActives(initialPlayers, playerStrategies, true);
     }
 
-    // Get current active count (would need to be passed in or accessed)
-    // For now, assume we need to calculate deficit
-    // This would need integration with player registry to get active count
-    const currentActive = 0; // Placeholder - need to integrate
-    const deficit = Math.max(0, totalTargetActives - currentActive);
-
-    if (deficit <= 0) {
-      return;
+    // Apply growth players
+    if (growthPlayers > 0) {
+      this.totalPlayersCounter += growthPlayers;
+      this.dailyNewPlayersCounter += growthPlayers;
+      await this.createActives(growthPlayers, playerStrategies, true);
     }
 
-    // Prefer reactivation from inactive pool
-    const inactiveStock = Math.max(0, this.totalPlayersCounter - currentActive);
-    const reactivations = Math.min(deficit, inactiveStock);
-
-    if (reactivations > 0) {
-      await this.createActives(reactivations, playerStrategies, false);
+    // Apply DAU reactivations
+    if (dauReactivations > 0) {
+      await this.createActives(dauReactivations, playerStrategies, false);
     }
 
-    const remaining = deficit - reactivations;
-    if (remaining > 0) {
-      this.totalPlayersCounter += remaining;
-      this.dailyNewPlayersCounter += remaining;
-      await this.createActives(remaining, playerStrategies, true);
+    // Apply DAU new players
+    if (dauNewPlayers > 0) {
+      this.totalPlayersCounter += dauNewPlayers;
+      this.dailyNewPlayersCounter += dauNewPlayers;
+      await this.createActives(dauNewPlayers, playerStrategies, true);
     }
-  }
-
-  /**
-   * Calculate DAU targets by cohort
-   */
-  private calculateCohortDAUTargets(): Record<CashOutStrategy, number> {
-    const targets: Record<CashOutStrategy, number> = {
-      [CashOutStrategy.CONSERVATIVE]: 0,
-      [CashOutStrategy.BALANCED]: 0,
-      [CashOutStrategy.AGGRESSIVE]: 0,
-    };
-
-    // Calculate based on total players and DAU rates
-    // This would need current player distribution by cohort
-    // For now, return placeholder
-    return targets;
   }
 
   /**
