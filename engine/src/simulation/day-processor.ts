@@ -112,7 +112,8 @@ export class DayProcessor {
       .addToPool(virtualDollar)
       .catch((error) =>
         console.warn(
-          `[DayProcessor] Failed to add dollar ${event.virtualDollarId
+          `[DayProcessor] Failed to add dollar ${
+            event.virtualDollarId
           } to pool: ${error instanceof Error ? error.message : String(error)}`
         )
       );
@@ -194,7 +195,10 @@ export class DayProcessor {
     const requiredStablePolls = 5; // Increased from 3 to 5 for more confidence
     const startWait = Date.now();
 
-    while (stableCount < requiredStablePolls && Date.now() - startWait < maxWaitMs) {
+    while (
+      stableCount < requiredStablePolls &&
+      Date.now() - startWait < maxWaitMs
+    ) {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const stats = this.gameMatchingEngine.getStatistics();
@@ -205,7 +209,9 @@ export class DayProcessor {
 
       const resolvedMonotonic = currentResolvedCount >= lastResolvedCount;
       const activeNonIncreasing = currentActiveCount <= lastActiveCount;
-      const poolStable = Math.abs(currentPoolSize - lastPoolSize) <= Math.max(5, Math.floor(lastPoolSize * 0.02)); // Allow 2% variation or min 5
+      const poolStable =
+        Math.abs(currentPoolSize - lastPoolSize) <=
+        Math.max(5, Math.floor(lastPoolSize * 0.02)); // Allow 2% variation or min 5
 
       if (resolvedMonotonic && activeNonIncreasing && poolStable) {
         stableCount++;
@@ -227,7 +233,13 @@ export class DayProcessor {
       const stats = this.gameMatchingEngine.getStatistics();
       const poolStatsSnapshot = this.gameMatchingEngine.getPoolStatistics();
       console.warn(
-        `WARN: Day ${day} stabilization timeout after ${Date.now() - startWait}ms -> resolved=${stats.resolvedGames}, active=${this.gameMatchingEngine.getActiveGamesCount()}, pool=${poolStatsSnapshot.totalDollarsInPool}`
+        `WARN: Day ${day} stabilization timeout after ${
+          Date.now() - startWait
+        }ms -> resolved=${
+          stats.resolvedGames
+        }, active=${this.gameMatchingEngine.getActiveGamesCount()}, pool=${
+          poolStatsSnapshot.totalDollarsInPool
+        }`
       );
     }
 
