@@ -7,6 +7,7 @@ import {
   PlayerCreatedEvent,
   NewRunCreatedEvent,
 } from "../events/event-types";
+import { DormantPlayerStore } from "./player-registry";
 
 /**
  * Configuration for player creation
@@ -34,7 +35,8 @@ export class PlayerCreationManager {
   constructor(
     private eventBus: EventBus,
     private virtualDollarFactory: VirtualDollarFactory,
-    private config: PlayerCreationConfig
+    private config: PlayerCreationConfig,
+    private dormantStore: DormantPlayerStore
   ) {}
 
   /**
@@ -269,6 +271,77 @@ export class PlayerCreationManager {
       return;
     }
 
+    if (!isNew) {
+      // For reactivations, take existing players from dormant store
+      const reactivatedRecords = this.dormantStore.take(count);
+      for (const record of reactivatedRecords) {
+        // Emit player created event with existing player ID
+        const playerCreatedEvent: PlayerCreatedEvent = {
+          type: EVENT_TYPES.PLAYER_CREATED,
+          timestamp: new Date(),
+          playerId: record.id,
+          initialDonationAmount: record.initialDonation,
+          cashOutStrategy: record.strategy,
+          isNewPlayer: false,
+        };
+
+        try {
+          void this.eventBus
+            .emit(EVENT_TYPES.PLAYER_CREATED, playerCreatedEvent)
+            .catch((error) =>
+              console.error(
+                "[PlayerCreationManager] Failed to emit PLAYER_CREATED:",
+                error
+              )
+            );
+        } catch (error) {
+          console.error(
+            "[PlayerCreationManager] Failed to emit PLAYER_CREATED:",
+            error
+          );
+        }
+
+        // Create virtual dollar runs based on daily allowance
+        const allowance = this.config.allowancePerDay[record.strategy] || 1;
+        const runsToCreate = Math.max(
+          1,
+          Math.floor(allowance / this.config.newPlayerStartingDollars)
+        );
+
+        for (let run = 0; run < runsToCreate; run++) {
+          // Create new run for reactivated player
+          const newRun = this.virtualDollarFactory.create(record.id);
+          const newRunEvent: NewRunCreatedEvent = {
+            type: EVENT_TYPES.NEW_RUN_CREATED,
+            timestamp: new Date(),
+            playerId: record.id,
+            virtualDollarId: newRun.id,
+            fundingSource: "DONATION",
+            cashOutStrategy: record.strategy,
+            runCount: 1, // TODO: track actual run count
+          };
+
+          try {
+            void this.eventBus
+              .emit(EVENT_TYPES.NEW_RUN_CREATED, newRunEvent)
+              .catch((error) =>
+                console.error(
+                  "[PlayerCreationManager] Failed to emit NEW_RUN_CREATED:",
+                  error
+                )
+              );
+          } catch (error) {
+            console.error(
+              "[PlayerCreationManager] Failed to emit NEW_RUN_CREATED:",
+              error
+            );
+          }
+        }
+      }
+      return;
+    }
+
+    // For new players, create new IDs as before
     const strategies = Object.keys(playerStrategies) as CashOutStrategy[];
     const weights = Object.values(playerStrategies);
 
@@ -279,7 +352,7 @@ export class PlayerCreationManager {
       const strategy = this.selectWeightedStrategy(strategies, weights);
 
       // Create player ID
-      const baseIdPrefix = isNew ? "player-new" : "player-reactivated";
+      const baseIdPrefix = "player-new";
       const playerId = `${baseIdPrefix}-${
         this.totalPlayersCounter - count + i + 1
       }`;
@@ -291,7 +364,7 @@ export class PlayerCreationManager {
         playerId,
         initialDonationAmount: 0, // Would need to be configured
         cashOutStrategy: strategy,
-        isNewPlayer: isNew,
+        isNewPlayer: true,
       };
 
       try {
@@ -318,32 +391,29 @@ export class PlayerCreationManager {
       );
 
       for (let run = 0; run < runsToCreate; run++) {
+        const newRun = this.virtualDollarFactory.create(playerId);
+        const newRunEvent: NewRunCreatedEvent = {
+          type: EVENT_TYPES.NEW_RUN_CREATED,
+          timestamp: seededAt,
+          playerId,
+          virtualDollarId: newRun.id,
+          fundingSource: "DONATION",
+          cashOutStrategy: strategy,
+          runCount: 1, // TODO: track actual run count
+        };
+
         try {
-          const virtualDollar = await this.virtualDollarFactory.create(
-            playerId
-          );
-
-          const newRunEvent: NewRunCreatedEvent = {
-            type: EVENT_TYPES.NEW_RUN_CREATED,
-            timestamp: seededAt,
-            playerId,
-            virtualDollarId: virtualDollar.id,
-            fundingSource: "DONATION",
-            cashOutStrategy: strategy,
-            runCount: 1, // Would need to track per player
-          };
-
           void this.eventBus
             .emit(EVENT_TYPES.NEW_RUN_CREATED, newRunEvent)
             .catch((error) =>
               console.error(
-                `[PlayerCreationManager] Failed to emit NEW_RUN_CREATED:`,
+                "[PlayerCreationManager] Failed to emit NEW_RUN_CREATED:",
                 error
               )
             );
         } catch (error) {
           console.error(
-            `[PlayerCreationManager] Failed to create run for ${playerId}:`,
+            "[PlayerCreationManager] Failed to emit NEW_RUN_CREATED:",
             error
           );
         }

@@ -24,6 +24,7 @@ import {
   DirectGameSessionFactory,
   UnifiedVirtualDollarFactory,
 } from "../test-utils";
+import { InMemoryDormantPlayerStore } from "./player-registry";
 import type {
   GameSessionFactory,
   PerformanceConfig,
@@ -158,6 +159,7 @@ function assembleSimulator(
 
   const scoringEngine = new ScoringEngine();
   const revenueCalculator = new RevenueCalculator();
+  const dormantStore = new InMemoryDormantPlayerStore();
   const gameMatchingEngine = new GameMatchingEngine(
     virtualDollarFactory,
     scoringEngine,
@@ -165,7 +167,7 @@ function assembleSimulator(
     eventBus,
     debugInterface
   );
-  const playerManager = new PlayerManager(eventBus, virtualDollarFactory);
+  const playerManager = new PlayerManager(eventBus, virtualDollarFactory, dormantStore);
   const dayProcessor = new DayProcessor(
     gameMatchingEngine,
     playerManager,

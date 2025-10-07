@@ -190,10 +190,11 @@ export class DayProcessor {
     let lastPoolSize =
       this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
     let stableCount = 0;
-    const maxWaitMs = 15000; // Max 15 seconds per day
+    const maxWaitMs = 30000; // Increased from 15 to 30 seconds for large simulations
+    const requiredStablePolls = 5; // Increased from 3 to 5 for more confidence
     const startWait = Date.now();
 
-    while (stableCount < 3 && Date.now() - startWait < maxWaitMs) {
+    while (stableCount < requiredStablePolls && Date.now() - startWait < maxWaitMs) {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const stats = this.gameMatchingEngine.getStatistics();
@@ -204,7 +205,7 @@ export class DayProcessor {
 
       const resolvedMonotonic = currentResolvedCount >= lastResolvedCount;
       const activeNonIncreasing = currentActiveCount <= lastActiveCount;
-      const poolStable = Math.abs(currentPoolSize - lastPoolSize) <= 1;
+      const poolStable = Math.abs(currentPoolSize - lastPoolSize) <= Math.max(5, Math.floor(lastPoolSize * 0.02)); // Allow 2% variation or min 5
 
       if (resolvedMonotonic && activeNonIncreasing && poolStable) {
         stableCount++;

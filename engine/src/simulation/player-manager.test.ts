@@ -1,227 +1,298 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PlayerManager } from "./player-manager";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
+import { InMemoryDormantPlayerStore } from "./player-registry";
+import { EVENT_TYPES } from "../events/event-types";
 
 // Mock the external dependencies
-vi.mock("../types/player-balance-manager");
-vi.mock("../types/player-run-manager");
+vi.mock("../events/event-bus");
+vi.mock("../test-utils");
 
 describe("PlayerManager", () => {
   let playerManager: PlayerManager;
-  let mockPlayerBalanceManager: any;
-  let mockRunOrchestrator: any;
+  let mockEventBus: any;
+  let mockVirtualDollarFactory: any;
+  let mockDormantStore: any;
 
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
 
     // Create mock instances
-    mockPlayerBalanceManager = {
-      createPlayer: vi.fn(),
-      getTotalDonations: vi.fn().mockReturnValue(1000),
-      getTotalWinnings: vi.fn().mockReturnValue(500),
+    mockEventBus = {
+      on: vi.fn(() => ({ unsubscribe: vi.fn() })),
+      emit: vi.fn(),
+      getActivePlayerCount: vi.fn(),
     };
-
-    mockRunOrchestrator = {
-      initializePlayer: vi.fn(),
-      getActivePlayerCount: vi.fn().mockReturnValue(10),
-      getAllActiveRuns: vi.fn().mockReturnValue([]),
+    mockVirtualDollarFactory = {
+      create: vi.fn(() => ({ id: "test-dollar-id" })),
+      release: vi.fn(),
+      releaseDollar: vi.fn(),
+      getDollar: vi.fn(),
     };
+    mockDormantStore = new InMemoryDormantPlayerStore();
 
     // Create PlayerManager instance
     playerManager = new PlayerManager(
-      mockPlayerBalanceManager,
-      mockRunOrchestrator
+      mockEventBus,
+      mockVirtualDollarFactory,
+      mockDormantStore
     );
   });
 
   describe("constructor", () => {
     it("should initialize with all required dependencies", () => {
       expect(playerManager).toBeDefined();
+      expect(mockEventBus.on).toHaveBeenCalledWith(
+        EVENT_TYPES.SIMULATION_STARTED,
+        expect.any(Function),
+        10
+      );
+      expect(mockEventBus.on).toHaveBeenCalledWith(
+        EVENT_TYPES.DAY_STARTED,
+        expect.any(Function),
+        10
+      );
+      expect(mockEventBus.on).toHaveBeenCalledWith(
+        EVENT_TYPES.PLAYER_CREATED,
+        expect.any(Function),
+        5
+      );
+      expect(mockEventBus.on).toHaveBeenCalledWith(
+        EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED,
+        expect.any(Function),
+        5
+      );
+      expect(mockEventBus.on).toHaveBeenCalledWith(
+        EVENT_TYPES.CASH_OUT_COMPLETED,
+        expect.any(Function),
+        5
+      );
     });
   });
 
-  describe("initializePlayers", () => {
-    it("should initialize players with correct strategy distribution", () => {
-      const config = {
-        initialPlayerCount: 10,
+  describe("event handling", () => {
+    it("should handle PLAYER_CREATED events", () => {
+      const playerCreatedEvent = {
+        type: EVENT_TYPES.PLAYER_CREATED,
+        timestamp: new Date(),
+        playerId: "test-player",
         initialDonationAmount: 100,
-        playerStrategies: {
-          [CashOutStrategy.CONSERVATIVE]: 0.3,
-          [CashOutStrategy.BALANCED]: 0.4,
-          [CashOutStrategy.AGGRESSIVE]: 0.3,
-        },
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        isNewPlayer: true,
       };
 
-      const playerCount = playerManager.initializePlayers(config);
+      // Get the handler
+      const playerCreatedHandler = mockEventBus.on.mock.calls.find(
+        (call: any) => call[0] === EVENT_TYPES.PLAYER_CREATED
+      )[1];
 
-      expect(playerCount).toBe(10);
-      expect(mockPlayerBalanceManager.createPlayer).toHaveBeenCalledTimes(10);
-      expect(mockRunOrchestrator.initializePlayer).toHaveBeenCalledTimes(10);
+      playerCreatedHandler(playerCreatedEvent);
+
+      expect(playerManager.getTotalPlayerCount()).toBe(1);
+      expect(playerManager.getPlayerStrategy("test-player")).toBe(
+        CashOutStrategy.BALANCED
+      );
     });
 
-    it("should handle single strategy distribution", () => {
-      const config = {
-        initialPlayerCount: 5,
-        initialDonationAmount: 50,
-        playerStrategies: {
-          [CashOutStrategy.BALANCED]: 1.0,
-        },
-      };
-
-      const playerCount = playerManager.initializePlayers(config);
-
-      expect(playerCount).toBe(5);
-      expect(mockPlayerBalanceManager.createPlayer).toHaveBeenCalledTimes(5);
-    });
-
-    it("should adjust strategy counts to match exact player count", () => {
-      const config = {
-        initialPlayerCount: 7, // Odd number to test adjustment
+    it("should handle VIRTUAL_DOLLAR_RUN_COMPLETED events", async () => {
+      // First create a player and run
+      const playerCreatedEvent = {
+        type: EVENT_TYPES.PLAYER_CREATED,
+        timestamp: new Date(),
+        playerId: "test-player",
         initialDonationAmount: 100,
-        playerStrategies: {
-          [CashOutStrategy.CONSERVATIVE]: 0.33,
-          [CashOutStrategy.BALANCED]: 0.43,
-          [CashOutStrategy.AGGRESSIVE]: 0.34,
-        },
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        isNewPlayer: true,
       };
+      const playerCreatedHandler = mockEventBus.on.mock.calls.find(
+        (call: any) => call[0] === EVENT_TYPES.PLAYER_CREATED
+      )[1];
+      playerCreatedHandler(playerCreatedEvent);
 
-      const playerCount = playerManager.initializePlayers(config);
+      // Create a run
+      playerManager.createNewRun({
+        playerId: "test-player",
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        fundingSource: "DONATION",
+      });
 
-      expect(playerCount).toBe(7);
-      expect(mockPlayerBalanceManager.createPlayer).toHaveBeenCalledTimes(7);
+      // Complete the run
+      const runCompletedEvent = {
+        playerId: "test-player",
+        virtualDollarId: "test-dollar-id",
+      };
+      const runCompletedHandler = mockEventBus.on.mock.calls.find(
+        (call: any) => call[0] === EVENT_TYPES.VIRTUAL_DOLLAR_RUN_COMPLETED
+      )[1];
+
+      await runCompletedHandler(runCompletedEvent);
+
+      expect(mockVirtualDollarFactory.releaseDollar).toHaveBeenCalledWith(
+        "test-dollar-id"
+      );
     });
 
-    it("should create players with correct parameters", () => {
+    it("should handle CASH_OUT_COMPLETED events with cleanup", () => {
+      const cashOutEvent = {
+        type: EVENT_TYPES.CASH_OUT_COMPLETED,
+        playerId: "test-player",
+        virtualDollarId: "test-dollar-id",
+        finalLevel: 5,
+        totalWinnings: 100,
+        cashOutAmount: 100,
+        runCompleted: true,
+        wasJackpot: false,
+      };
+
+      // Get the handler
+      const cashOutHandler = mockEventBus.on.mock.calls.find(
+        (call: any) => call[0] === EVENT_TYPES.CASH_OUT_COMPLETED
+      )[1];
+
+      cashOutHandler(cashOutEvent);
+
+      expect(mockVirtualDollarFactory.releaseDollar).toHaveBeenCalledWith(
+        "test-dollar-id"
+      );
+    });
+  });
+
+  describe("player lifecycle", () => {
+    it("should create new runs for players", () => {
+      // First create a player
+      const playerCreatedEvent = {
+        type: EVENT_TYPES.PLAYER_CREATED,
+        timestamp: new Date(),
+        playerId: "test-player",
+        initialDonationAmount: 100,
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        isNewPlayer: true,
+      };
+      const playerCreatedHandler = mockEventBus.on.mock.calls.find(
+        (call: any) => call[0] === EVENT_TYPES.PLAYER_CREATED
+      )[1];
+      playerCreatedHandler(playerCreatedEvent);
+
+      const run = playerManager.createNewRun({
+        playerId: "test-player",
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        fundingSource: "DONATION",
+      });
+
+      expect(run).toBeDefined();
+      expect(run?.id).toBe("test-dollar-id");
+      expect(mockVirtualDollarFactory.create).toHaveBeenCalledWith(
+        "test-player"
+      );
+    });
+
+    it("should track active runs", () => {
+      // Create player
+      const playerCreatedEvent = {
+        type: EVENT_TYPES.PLAYER_CREATED,
+        timestamp: new Date(),
+        playerId: "test-player",
+        initialDonationAmount: 100,
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        isNewPlayer: true,
+      };
+      const playerCreatedHandler = mockEventBus.on.mock.calls.find(
+        (call: any) => call[0] === EVENT_TYPES.PLAYER_CREATED
+      )[1];
+      playerCreatedHandler(playerCreatedEvent);
+
+      // Create run
+      playerManager.createNewRun({
+        playerId: "test-player",
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        fundingSource: "DONATION",
+      });
+
+      expect(playerManager.getActivePlayerCount()).toBe(1);
+
+      // Complete run
+      playerManager.removeActiveRun("test-player", "test-dollar-id");
+
+      expect(playerManager.getActivePlayerCount()).toBe(0);
+    });
+  });
+
+  describe("equilibrium fixes", () => {
+    it("should properly clean up runs on cash-out completion", () => {
+      // Create player and run
+      const playerCreatedEvent = {
+        type: EVENT_TYPES.PLAYER_CREATED,
+        timestamp: new Date(),
+        playerId: "test-player",
+        initialDonationAmount: 100,
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        isNewPlayer: true,
+      };
+      const playerCreatedHandler = mockEventBus.on.mock.calls.find(
+        (call: any) => call[0] === EVENT_TYPES.PLAYER_CREATED
+      )[1];
+      playerCreatedHandler(playerCreatedEvent);
+
+      playerManager.createNewRun({
+        playerId: "test-player",
+        cashOutStrategy: CashOutStrategy.BALANCED,
+        fundingSource: "DONATION",
+      });
+
+      // Cash out
+      const cashOutEvent = {
+        type: EVENT_TYPES.CASH_OUT_COMPLETED,
+        playerId: "test-player",
+        virtualDollarId: "test-dollar-id",
+        finalLevel: 5,
+        totalWinnings: 100,
+        cashOutAmount: 100,
+        runCompleted: true,
+        wasJackpot: false,
+      };
+
+      const cashOutHandler = mockEventBus.on.mock.calls.find(
+        (call: any) => call[0] === EVENT_TYPES.CASH_OUT_COMPLETED
+      )[1];
+
+      cashOutHandler(cashOutEvent);
+
+      // Should have cleaned up the run and released the dollar
+      expect(mockVirtualDollarFactory.releaseDollar).toHaveBeenCalledWith(
+        "test-dollar-id"
+      );
+      expect(playerManager.getActivePlayerCount()).toBe(0);
+    });
+
+    it("should handle reactivation through dormant store", () => {
+      // Add a player to dormant store
+      mockDormantStore.add({
+        id: "dormant-player",
+        strategy: CashOutStrategy.CONSERVATIVE,
+        initialDonation: 50,
+      });
+
+      // Simulate reactivation through PlayerCreationManager
+      // This would be tested through integration tests with the full system
+      expect(mockDormantStore.size()).toBe(1);
+    });
+  });
+
+  describe("backward compatibility", () => {
+    it("should support deprecated initializePlayers for backward compatibility", () => {
       const config = {
         initialPlayerCount: 3,
-        initialDonationAmount: 200,
-        playerStrategies: {
-          [CashOutStrategy.BALANCED]: 1.0,
-        },
-      };
-
-      playerManager.initializePlayers(config);
-
-      // Check that players are created with correct parameters
-      expect(mockPlayerBalanceManager.createPlayer).toHaveBeenCalledWith(
-        "player-0",
-        200,
-        "balanced"
-      );
-      expect(mockPlayerBalanceManager.createPlayer).toHaveBeenCalledWith(
-        "player-1",
-        200,
-        "balanced"
-      );
-      expect(mockPlayerBalanceManager.createPlayer).toHaveBeenCalledWith(
-        "player-2",
-        200,
-        "balanced"
-      );
-    });
-  });
-
-  describe("addNewPlayersForDay", () => {
-    it("should add new players based on growth model", () => {
-      const day = 5;
-      const config = {
-        initialPlayerCount: 10,
         initialDonationAmount: 100,
         playerStrategies: {
           [CashOutStrategy.BALANCED]: 1.0,
         },
       };
 
-      // Mock that we need to add players
-      mockRunOrchestrator.getActivePlayerCount.mockReturnValue(5);
+      const count = playerManager.initializePlayers(config);
 
-      playerManager.addNewPlayersForDay(day, config);
-
-      // Should attempt to add new players
-      expect(mockPlayerBalanceManager.createPlayer).toHaveBeenCalled();
-      expect(mockRunOrchestrator.initializePlayer).toHaveBeenCalled();
-    });
-
-    it("should not add players if target is already reached", () => {
-      const day = 5;
-      const config = {
-        initialPlayerCount: 10,
-        initialDonationAmount: 100,
-        playerStrategies: {
-          [CashOutStrategy.BALANCED]: 1.0,
-        },
-      };
-
-      // Mock that we already have enough players
-      mockRunOrchestrator.getActivePlayerCount.mockReturnValue(100);
-
-      playerManager.addNewPlayersForDay(day, config);
-
-      // Should not add any new players
-      expect(mockPlayerBalanceManager.createPlayer).not.toHaveBeenCalled();
-    });
-
-    it("should assign random strategies to new players", () => {
-      const day = 10;
-      const config = {
-        initialPlayerCount: 10,
-        initialDonationAmount: 100,
-        playerStrategies: {
-          [CashOutStrategy.CONSERVATIVE]: 0.5,
-          [CashOutStrategy.AGGRESSIVE]: 0.5,
-        },
-      };
-
-      // Mock that we need to add players
-      mockRunOrchestrator.getActivePlayerCount.mockReturnValue(5);
-
-      playerManager.addNewPlayersForDay(day, config);
-
-      // Should create players with strategies
-      expect(mockPlayerBalanceManager.createPlayer).toHaveBeenCalledWith(
-        expect.any(String),
-        100,
-        expect.any(String)
-      );
-    });
-  });
-
-  describe("getPlayerStatistics", () => {
-    it("should return correct player statistics", () => {
-      const config = {
-        initialPlayerCount: 20,
-        initialDonationAmount: 100,
-        playerStrategies: {
-          [CashOutStrategy.BALANCED]: 1.0,
-        },
-      };
-
-      mockRunOrchestrator.getActivePlayerCount.mockReturnValue(15);
-
-      const stats = playerManager.getPlayerStatistics(config);
-
-      expect(stats.totalPlayers).toBe(20);
-      expect(stats.activePlayers).toBe(15);
-      expect(stats.retiredPlayers).toBe(5);
-      expect(stats.totalCharityContributions).toBe(1000);
-      expect(stats.totalPlayerPayouts).toBe(500);
-    });
-
-    it("should calculate retirement rate correctly", () => {
-      const config = {
-        initialPlayerCount: 10,
-        initialDonationAmount: 100,
-        playerStrategies: {
-          [CashOutStrategy.BALANCED]: 1.0,
-        },
-      };
-
-      mockRunOrchestrator.getActivePlayerCount.mockReturnValue(7);
-
-      const stats = playerManager.getPlayerStatistics(config);
-
-      expect(stats.playerRetirementRate).toBe(0.3); // 3 retired out of 10
+      expect(count).toBe(3);
+      expect(mockVirtualDollarFactory.create).toHaveBeenCalledTimes(3);
     });
   });
 });

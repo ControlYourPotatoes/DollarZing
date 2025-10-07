@@ -9,6 +9,7 @@ import { ScoringEngine } from "../core/scoring-engine";
 import { CashOutStrategy } from "../types/virtual-dollar-engine";
 import { DirectGameSessionFactory } from "../test-utils";
 import { DEFAULT_PERFORMANCE_CONFIG } from "../types/factory-interfaces";
+import { InMemoryDormantPlayerStore } from "./player-registry";
 
 // Mock only external dependencies
 vi.mock("console", () => ({
@@ -79,7 +80,11 @@ describe("GameEngineSimulator", () => {
       gameSessionFactory,
       eventBus
     );
-    mockPlayerManager = new PlayerManager(eventBus, mockVirtualDollarFactory);
+    mockPlayerManager = new PlayerManager(
+      eventBus,
+      mockVirtualDollarFactory,
+      new InMemoryDormantPlayerStore()
+    );
     mockRevenueCalculator = new RevenueCalculator();
 
     // Create GameEngineSimulator instance

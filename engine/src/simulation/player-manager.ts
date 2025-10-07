@@ -9,6 +9,7 @@ import {
   CashOutCompletedEvent,
 } from "../events/event-types";
 import { PlayerCreationManager } from "./player-creation-manager";
+import { DormantPlayerStore } from "./player-registry";
 
 /**
  * Configuration for player management
@@ -55,7 +56,8 @@ export class PlayerManager {
 
   constructor(
     private eventBus: EventBus,
-    private virtualDollarFactory: VirtualDollarFactory
+    private virtualDollarFactory: VirtualDollarFactory,
+    private dormantStore: DormantPlayerStore
   ) {
     this.setupEventSubscriptions();
     this.playerCreationManager = new PlayerCreationManager(
@@ -68,7 +70,8 @@ export class PlayerManager {
         dauTargets: PlayerManager.DAU_TARGETS,
         allowancePerDay: PlayerManager.ALLOWANCE_PER_DAY,
         newPlayerStartingDollars: PlayerManager.NEW_PLAYER_STARTING_DOLLARS,
-      }
+      },
+      this.dormantStore
     );
   }
 
@@ -238,7 +241,10 @@ export class PlayerManager {
     });
   }
 
-  private handleCashOutCompleted(_event: CashOutCompletedEvent): void {
+  private handleCashOutCompleted(event: CashOutCompletedEvent): void {
+    // Clean up active run and release dollar for cash-outs
+    this.removeActiveRun(event.playerId, event.virtualDollarId);
+    this.virtualDollarFactory.releaseDollar(event.virtualDollarId);
     // Player balance updates are handled by RevenueTrackingHandler
     // This handler ensures the event is processed for consistency
   }
@@ -253,7 +259,7 @@ export class PlayerManager {
    *
    * This method is kept temporarily for backward compatibility
    */
-  initializePlayers(_config: PlayerManagementConfig): number {
+  initializePlayers(config: PlayerManagementConfig): number {
     console.warn(
       `[PlayerManager] initializePlayers called - this method bypasses event-driven architecture`
     );
@@ -261,8 +267,22 @@ export class PlayerManager {
       `[PlayerManager] Consider using DAY_STARTED events with growth model to create initial players`
     );
 
-    // Deprecated implementation - should be replaced with event-driven approach
-    return 0; // Return 0 to indicate no players created via this deprecated path
+    // For backward compatibility, create initial players synchronously
+    const count = config.initialPlayerCount || 0;
+
+    for (let i = 0; i < count; i++) {
+      // Create player ID
+      const playerId = `player-${i}`;
+
+      // Create virtual dollar directly
+      this.virtualDollarFactory.create(playerId);
+
+      // Track player
+      this.totalPlayersCounter++;
+      this.dailyNewPlayersCounter++;
+    }
+
+    return count;
   }
 
   /**
