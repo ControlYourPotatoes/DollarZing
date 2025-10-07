@@ -243,7 +243,7 @@ export class DatasetOrchestrator {
                     totalDays: progress.totalDays,
                     progressPercentage:
                       (progress.currentDay / progress.totalDays) * 100,
-                    gamesProcessed: progress.gamesCompleted || 0,
+                    resolvedGames: progress.gamesCompleted || 0,
                     playersActive: progress.playersActive || 0,
                   } as DatasetGenerationProgressEvent);
                 }

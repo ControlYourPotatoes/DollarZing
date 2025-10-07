@@ -72,7 +72,7 @@ export class DayProcessor {
       (event: DayFrameCompletedEvent) => {
         // Log progression at frame completion for accurate summaries
         progression.dayEnded(event.dayNumber, this.durationDays, {
-          gamesProcessed: event.summary.gamesProcessed,
+          resolvedGames: event.summary.resolvedGames,
           newPlayers: event.summary.newPlayers,
           poolSize: event.summary.poolSize,
           totalRevenue: this.totalRevenue,
@@ -129,7 +129,7 @@ export class DayProcessor {
    */
   async processDay(
     day: number,
-    config: DayProcessingConfig,
+    _config: DayProcessingConfig,
     simulationConfig: SimulationConfig
   ): Promise<void> {
     if (this.debugInterface) {
@@ -155,9 +155,7 @@ export class DayProcessor {
 
     // Note: addNewRunsToPool() is now handled by PlayerManager via DAY_STARTED event
 
-    // Process available games for the day
-    const maxGamesPerDay = Math.max(25, config.initialPlayerCount * 2);
-
+    // Inspect current pool state before processing
     const poolStats = this.gameMatchingEngine.getPoolStatistics();
     if (this.debugInterface) {
       console.log(
@@ -190,10 +188,10 @@ export class DayProcessor {
     let lastPoolSize =
       this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
     let stableCount = 0;
-    const maxWaitMs = 15000; // Max 15 seconds per day
+    const maxWaitMs = 50000; 
     const startWait = Date.now();
 
-    while (stableCount < 3 && Date.now() - startWait < maxWaitMs) {
+    while (stableCount < 5 && Date.now() - startWait < maxWaitMs) {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const stats = this.gameMatchingEngine.getStatistics();
@@ -230,6 +228,8 @@ export class DayProcessor {
       );
     }
 
+    const resolvedGamesToday = lastResolvedCount;
+
     // Emit day completed event
     const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();
     const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
@@ -237,7 +237,7 @@ export class DayProcessor {
       type: EVENT_TYPES.DAY_COMPLETED,
       timestamp: new Date(),
       dayNumber: eventDay,
-      gamesProcessed: maxGamesPerDay, // Approximate
+      resolvedGames: resolvedGamesToday,
       newPlayers: dailyNewPlayers, // Track new players added today
       totalRevenue: 0, // Would need to track this through revenue events
       poolSize: finalPoolStats.totalDollarsInPool,
@@ -252,7 +252,7 @@ export class DayProcessor {
       timestamp: new Date(),
       dayNumber: eventDay,
       summary: {
-        gamesProcessed: lastResolvedCount, // Use actual resolved games count
+        resolvedGames: resolvedGamesToday,
         newPlayers: completedPayload.newPlayers,
         poolSize: completedPayload.poolSize,
         activePlayers: completedPayload.activePlayers,
@@ -261,7 +261,7 @@ export class DayProcessor {
 
     // Log progression for CLI feedback
     progression.dayEnded(eventDay, simulationConfig.durationDays, {
-      gamesProcessed: lastResolvedCount, // Use actual resolved games count
+      resolvedGames: resolvedGamesToday,
       newPlayers: completedPayload.newPlayers,
       poolSize: completedPayload.poolSize,
     });
@@ -276,7 +276,7 @@ export class DayProcessor {
 
     progression.gamesCompleted(
       eventDay,
-      lastResolvedCount, // Use actual resolved games count
+      resolvedGamesToday,
       0 // totalGames - would need to track this across days
     );
   }

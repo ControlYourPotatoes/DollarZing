@@ -258,7 +258,7 @@ describe("DayProcessor", () => {
         type: "DAY_COMPLETED",
         timestamp: expect.any(Date),
         dayNumber: 1,
-        gamesProcessed: expect.any(Number),
+        resolvedGames: expect.any(Number),
         newPlayers: expect.any(Number),
         activePlayers: expect.any(Number),
         poolSize: 100,
