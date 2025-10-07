@@ -111,7 +111,11 @@ export class DayProcessor {
         );
       } catch (error) {
         console.warn(
-          `[DayProcessor] Failed to cash out dollar ${event.virtualDollarId} from IN_GAME: ${error instanceof Error ? error.message : String(error)}`
+          `[DayProcessor] Failed to cash out dollar ${
+            event.virtualDollarId
+          } from IN_GAME: ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
         return; // Skip adding to pool if we can't fix the state
       }
@@ -125,7 +129,9 @@ export class DayProcessor {
         );
       } catch (error) {
         console.warn(
-          `[DayProcessor] Failed to pool dollar ${event.virtualDollarId}: ${error instanceof Error ? error.message : String(error)}`
+          `[DayProcessor] Failed to pool dollar ${event.virtualDollarId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
         return;
       }
@@ -243,7 +249,8 @@ export class DayProcessor {
 
       // Check for equilibrium state: no new players added recently, but system still processing
       const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
-      const isEquilibriumState = dailyNewPlayers === 0 && currentActiveCount > 0 && resolvedMonotonic;
+      const isEquilibriumState =
+        dailyNewPlayers === 0 && currentActiveCount > 0 && resolvedMonotonic;
 
       if (isEquilibriumState) {
         equilibriumStableCount++;
