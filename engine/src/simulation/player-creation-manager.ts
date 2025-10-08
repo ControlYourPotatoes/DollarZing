@@ -58,11 +58,13 @@ export class PlayerCreationManager {
    * Set initial player count for spreading
    */
   setInitialPlayers(count: number, spreadDays?: number): void {
+    console.log(`[PlayerCreationManager] setInitialPlayers: count=${count}, spreadDays=${spreadDays}`);
     this.pendingInitialPlayers = count;
     this.initialPlayersSeededSoFar = 0;
     if (spreadDays) {
       this.initialPlayerSpreadDays = Math.max(1, Math.floor(spreadDays));
     }
+    console.log(`[PlayerCreationManager] After setting: pendingInitialPlayers=${this.pendingInitialPlayers}, initialPlayerSpreadDays=${this.initialPlayerSpreadDays}`);
   }
 
   /**
@@ -139,11 +141,13 @@ export class PlayerCreationManager {
     /**
      * Source 1: Spread initial players across configured days
      */
+    console.log(`[PlayerCreationManager] calculateAllAdditions: dayNumber=${dayNumber}, pendingInitialPlayers=${this.pendingInitialPlayers}, initialPlayersSeededSoFar=${this.initialPlayersSeededSoFar}, currentPlayerCount=${currentPlayerCount}, initialPlayerSpreadDays=${this.initialPlayerSpreadDays}`);
     if (this.pendingInitialPlayers > 0 && currentPlayerCount === 0) {
       const remaining =
         this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
       if (remaining > 0) {
         const dayIndex = Math.max(1, dayNumber);
+        console.log(`[PlayerCreationManager] Day ${dayIndex}, remaining=${remaining}, initialPlayerSpreadDays=${this.initialPlayerSpreadDays}`);
         if (dayIndex <= this.initialPlayerSpreadDays) {
           const basePerDay = Math.floor(
             this.pendingInitialPlayers / this.initialPlayerSpreadDays
@@ -155,9 +159,11 @@ export class PlayerCreationManager {
               ? basePerDay
               : basePerDay + remainder;
           initialPlayers = Math.min(Math.max(1, toCreate), remaining);
+          console.log(`[PlayerCreationManager] Calculated initialPlayers=${initialPlayers} (basePerDay=${basePerDay}, remainder=${remainder}, toCreate=${toCreate})`);
         } else {
           // Spread window passed; create remaining now
           initialPlayers = remaining;
+          console.log(`[PlayerCreationManager] Spread window passed, creating remaining=${initialPlayers}`);
         }
       }
     }
@@ -250,10 +256,12 @@ export class PlayerCreationManager {
       if (backlog > PlayerCreationManager.BACKLOG_HARD_CAP) {
         growthPlayers = 0;
         dauNewPlayers = 0;
+        // Note: initialPlayers are not throttled
       } else if (backlog > PlayerCreationManager.BACKLOG_SOFT_CAP) {
         const scale = 1 - backlog / PlayerCreationManager.BACKLOG_HARD_CAP;
         growthPlayers = Math.floor(growthPlayers * Math.max(scale, 0.1));
         dauNewPlayers = Math.floor(dauNewPlayers * Math.max(scale, 0));
+        // Note: initialPlayers are not throttled
       }
     }
 

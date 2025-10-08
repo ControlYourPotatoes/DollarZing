@@ -34,6 +34,7 @@ export interface SimulationRunConfig {
   enableSanityMetrics?: boolean;
   profileName?: string;
   debugDashboard: boolean;
+  initialPlayerSpreadDays?: number;
 }
 
 export interface SimulationRunOutcome {
@@ -249,7 +250,7 @@ function buildConfigOverrides(
   const midpoint = Math.max(1, Math.floor(clampedDays / 2));
   const normalizedStrategies = normalizeStrategies(config.strategies);
 
-  return {
+  const configOverrides: any = {
     durationDays: clampedDays,
     initialPlayerCount: Math.max(1, Math.floor(config.players)),
     dailySeed: config.seed,
@@ -265,6 +266,14 @@ function buildConfigOverrides(
       steepnessFactor: 20,
     },
   };
+
+  if (config.initialPlayerSpreadDays !== undefined) {
+    configOverrides.initialPlayerSpreadDays = config.initialPlayerSpreadDays;
+  } else if (clampedDays === 1) {
+    configOverrides.initialPlayerSpreadDays = 1;
+  }
+
+  return configOverrides;
 }
 
 function buildRuntimeOverrides(
