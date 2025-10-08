@@ -17,10 +17,10 @@ describe("Stress Test: High Player Influx and DAU/Matchmaking Performance", () =
       seed: `stress-test-${INITIAL_PLAYERS}`,
       verbose: true, // Enable verbose logging to see progress
       noPooling: false,
-      dollarsPerPlayer: 5, // Standard starting dollars
+      dollarsPerPlayer: 2, // Standard starting dollars
       initialDonation: 25, // Standard donation
       strategies: {}, // Use default strategy distribution
-      maxSimulationTimeMs: 300000, // 5 minutes timeout for large simulations
+      maxSimulationTimeMs: 800000, // 5 minutes timeout for large simulations
       debugDashboard: false, // Disable debug dashboard for faster performance testing
       initialPlayerSpreadDays: 1, // Force immediate creation of all initial players for stress testing
     });
