@@ -5,11 +5,9 @@
 
 import { EventBus, EventSubscription } from "../event-bus";
 import { GameMatchingEngine } from "../../core/game-matching-engine";
-import { RevenueCalculator } from "../../core/revenue-calculator";
 import {
   GameCreatedEvent,
   GameResolvedEvent,
-  RevenueGameProcessedEvent,
   ErrorEvent,
   EVENT_TYPES,
 } from "../event-types";
@@ -23,7 +21,6 @@ import type { EventDebugInterface } from "../debug";
  * Game Rules Constants - Matching CryptoZing Specifications
  */
 const BETTING_LEVELS: BettingLevel[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // BettingLevel 1-10
-const PLATFORM_FEE = 0.2; // $0.20 per game (10c per player × 2 players)
 const WINNINGS_MULTIPLIER = 1.8; // CryptoZing winnings formula
 const JACKPOT_LEVEL: BettingLevel = 10; // Level 10 (value = $512)
 const JACKPOT_AMOUNT =
@@ -37,7 +34,6 @@ const JACKPOT_AMOUNT =
  * - Process game resolution with deterministic daily seed
  * - Emit GAME_RESOLVED events with winner/loser data
  * - Handle special jackpot level (512) logic
- * - Emit REVENUE_GAME_PROCESSED events for financial tracking
  * - Provide comprehensive error handling and event tracing
  */
 export class GameEventHandler {
@@ -46,7 +42,6 @@ export class GameEventHandler {
   constructor(
     private eventBus: EventBus,
     private gameMatchingEngine: GameMatchingEngine,
-    private revenueCalculator: RevenueCalculator,
     private debugInterface?: EventDebugInterface,
     private verbose?: boolean
   ) {
@@ -156,9 +151,6 @@ export class GameEventHandler {
           )
         );
 
-      // Process revenue tracking
-      await this.processGameRevenue(gameSession, winnings);
-
       // Release session after handlers complete
       this.gameMatchingEngine.finalizeGameSession(event.gameId);
     } catch (error) {
@@ -178,51 +170,6 @@ export class GameEventHandler {
   private calculateWinnings(level: BettingLevel): number {
     // All levels, including jackpot, follow the standard winnings multiplier
     return getBettingLevelValue(level) * WINNINGS_MULTIPLIER;
-  }
-
-  /**
-   * Process game revenue and emit revenue tracking events
-   */
-  private async processGameRevenue(
-    gameSession: any,
-    winnings: number
-  ): Promise<void> {
-    try {
-      // Process revenue through existing RevenueCalculator
-      this.revenueCalculator.processGameRevenue(gameSession);
-
-      // Calculate revenue components
-      const gameRevenue = winnings + PLATFORM_FEE; // Total revenue from this game
-      const platformRevenue = PLATFORM_FEE; // Fixed $0.20 platform fee
-      const charityContribution = 0; // Will be calculated later during cash-out
-
-      // Emit REVENUE_GAME_PROCESSED event
-      const revenueEvent: RevenueGameProcessedEvent = {
-        type: EVENT_TYPES.REVENUE_GAME_PROCESSED,
-        timestamp: new Date(),
-        gameId: gameSession.id,
-        gameRevenue,
-        platformRevenue,
-        charityContribution,
-        totalGameRevenue: gameRevenue,
-      };
-
-      void this.eventBus
-        .emit(EVENT_TYPES.REVENUE_GAME_PROCESSED, revenueEvent)
-        .catch((error) =>
-          console.error(
-            `[GameEventHandler] Failed to emit REVENUE_GAME_PROCESSED for ${gameSession.id}:`,
-            error
-          )
-        );
-    } catch (error) {
-      await this.emitGameResolutionError(
-        gameSession.id,
-        `Revenue processing failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
   }
 
   /**
@@ -265,7 +212,6 @@ export class GameEventHandler {
     isActive: boolean;
     subscriptionCount: number;
     supportedLevels: BettingLevel[];
-    platformFee: number;
     winningsMultiplier: number;
     jackpotLevel: number;
     jackpotAmount: number;
@@ -274,7 +220,6 @@ export class GameEventHandler {
       isActive: this.subscription !== null,
       subscriptionCount: this.subscription ? 1 : 0,
       supportedLevels: [...BETTING_LEVELS], // [1,2,3,4,5,6,7,8,9,10] -> values [1,2,4,8,16,32,64,128,256,512]
-      platformFee: PLATFORM_FEE,
       winningsMultiplier: WINNINGS_MULTIPLIER,
       jackpotLevel: JACKPOT_LEVEL,
       jackpotAmount: JACKPOT_AMOUNT,

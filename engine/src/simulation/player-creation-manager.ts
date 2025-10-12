@@ -8,6 +8,7 @@ import {
   NewRunCreatedEvent,
 } from "../events/event-types";
 import { DormantPlayerStore } from "./player-registry";
+import type { PoolStatistics } from "../core/game-matching-engine";
 
 /**
  * Configuration for player creation
@@ -43,7 +44,11 @@ export class PlayerCreationManager {
     private eventBus: EventBus,
     private virtualDollarFactory: VirtualDollarFactory,
     private config: PlayerCreationConfig,
-    private dormantStore: DormantPlayerStore
+    private dormantStore: DormantPlayerStore,
+    private poolSnapshotProvider: () => Pick<
+      PoolStatistics,
+      "totalDollarsInPool" | "availableForMatching" | "dollarsInGame"
+    > | null = () => null
   ) {}
 
   init(): void {
@@ -264,7 +269,13 @@ export class PlayerCreationManager {
     },
     playerStrategies: Partial<Record<CashOutStrategy, number>>
   ): Promise<void> {
-    const snapshot = this.recentPoolSnapshot;
+    const liveSnapshot = this.poolSnapshotProvider
+      ? this.poolSnapshotProvider()
+      : null;
+    if (liveSnapshot) {
+      this.recentPoolSnapshot = { ...liveSnapshot };
+    }
+    const snapshot = liveSnapshot ?? this.recentPoolSnapshot;
     let { initialPlayers, growthPlayers, dauReactivations, dauNewPlayers } =
       additions;
 

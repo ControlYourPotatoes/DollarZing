@@ -124,11 +124,7 @@ describe("Task 7.1: Event System Integration Tests", () => {
     } as IStrategyManager;
 
     // Initialize event handlers with real dependencies
-    gameEventHandler = new GameEventHandler(
-      eventBus,
-      gameMatchingEngine,
-      revenueCalculator
-    );
+    gameEventHandler = new GameEventHandler(eventBus, gameMatchingEngine);
     playerProgressionHandler = new PlayerProgressionHandler(
       eventBus,
       virtualDollarFactory,

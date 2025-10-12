@@ -114,7 +114,7 @@ describe("Level 10 Progression", () => {
       }
     };
 
-    gameHandler = new GameEventHandler(eventBus, matchingEngine, revenueCalculator);
+    gameHandler = new GameEventHandler(eventBus, matchingEngine);
     cashOutHandler = new CashOutDecisionHandler(eventBus, strategyManager);
     progressionHandler = new PlayerProgressionHandler(
       eventBus,

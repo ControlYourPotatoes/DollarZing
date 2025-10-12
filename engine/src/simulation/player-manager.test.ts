@@ -36,7 +36,12 @@ describe("PlayerManager", () => {
     playerManager = new PlayerManager(
       mockEventBus,
       mockVirtualDollarFactory,
-      mockDormantStore
+      mockDormantStore,
+      () => ({
+        totalDollarsInPool: 0,
+        availableForMatching: 0,
+        dollarsInGame: 0,
+      })
     );
   });
 

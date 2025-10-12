@@ -6,12 +6,10 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { EventBus } from "../event-bus";
 import { GameEventHandler } from "./game-event-handler";
 import { GameMatchingEngine } from "../../core/game-matching-engine";
-import { RevenueCalculator } from "../../core/revenue-calculator";
 import {
   GameCreatedEvent,
   GameResolvedEvent,
   EVENT_TYPES,
-  RevenueGameProcessedEvent,
 } from "../event-types";
 import {
   VirtualDollar,
@@ -70,7 +68,6 @@ describe("GameEventHandler", () => {
   let eventBus: EventBus;
   let gameEventHandler: GameEventHandler;
   let mockGameMatchingEngine: Partial<GameMatchingEngine>;
-  let mockRevenueCalculator: Partial<RevenueCalculator>;
 
   beforeEach(() => {
     eventBus = new EventBus({ enableTracing: true });
@@ -80,16 +77,9 @@ describe("GameEventHandler", () => {
       resolveGame: vi.fn(),
       getGameSession: vi.fn(),
     };
-
-    // Mock RevenueCalculator
-    mockRevenueCalculator = {
-      processGameRevenue: vi.fn(),
-    };
-
     gameEventHandler = new GameEventHandler(
       eventBus,
-      mockGameMatchingEngine as GameMatchingEngine,
-      mockRevenueCalculator as RevenueCalculator
+      mockGameMatchingEngine as GameMatchingEngine
     );
   });
 
@@ -216,59 +206,6 @@ describe("GameEventHandler", () => {
           winnings: 921.6,
           winnerLevel: 10,
           loserLevel: 10,
-        })
-      );
-    });
-
-    it("should emit revenue processing events with $0.20 platform fee", async () => {
-      // Arrange
-      const dollar1 = createMockVirtualDollar("dollar-1", "player-1", 2);
-      const dollar2 = createMockVirtualDollar("dollar-2", "player-2", 2);
-      const gameSession = createMockGameSession("game-1", dollar1, dollar2, 2);
-
-      (mockGameMatchingEngine.resolveGame as any).mockReturnValue({
-        success: true,
-        gameId: "game-1",
-        winner: dollar1,
-        loser: dollar2,
-        winnings: 3.6, // Level 2 × 1.8 = $3.60
-      });
-
-      (mockGameMatchingEngine.getGameSession as any).mockReturnValue({
-        ...gameSession,
-        winner: dollar1,
-        loser: dollar2,
-      });
-
-      const revenueProcessedHandler = vi.fn();
-      eventBus.on<RevenueGameProcessedEvent>(
-        EVENT_TYPES.REVENUE_GAME_PROCESSED,
-        revenueProcessedHandler
-      );
-
-      // Act
-      const gameCreatedEvent: GameCreatedEvent = {
-        type: EVENT_TYPES.GAME_CREATED,
-        timestamp: new Date(),
-        gameId: "game-1",
-        player1Id: "player-1",
-        player2Id: "player-2",
-        player1Level: 2,
-        player2Level: 2,
-        virtualDollar1Id: "dollar-1",
-        virtualDollar2Id: "dollar-2",
-      };
-
-      await eventBus.emit(EVENT_TYPES.GAME_CREATED, gameCreatedEvent);
-
-      // Assert
-      expect(mockRevenueCalculator.processGameRevenue).toHaveBeenCalled();
-      expect(revenueProcessedHandler).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: EVENT_TYPES.REVENUE_GAME_PROCESSED,
-          gameId: "game-1",
-          platformRevenue: 0.2, // Fixed $0.20 platform fee per game
-          gameRevenue: expect.any(Number),
         })
       );
     });

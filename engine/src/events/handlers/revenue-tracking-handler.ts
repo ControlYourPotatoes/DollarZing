@@ -142,7 +142,7 @@ export class RevenueTrackingHandler {
       }
 
       // Calculate revenue components
-      const platformFee = 0.2; // Standard platform fee per game
+      const platformFee = gameSession.platformFee ?? 0.2; // Default fallback if session missing fee
       const gameRevenue = platformFee;
       const platformRevenue = platformFee;
       const charityContribution = 0; // No charity from game fees

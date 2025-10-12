@@ -174,7 +174,12 @@ function assembleSimulator(
     eventBus,
     debugInterface
   );
-  const playerManager = new PlayerManager(eventBus, virtualDollarFactory, dormantStore);
+  const playerManager = new PlayerManager(
+    eventBus,
+    virtualDollarFactory,
+    dormantStore,
+    () => gameMatchingEngine.getPoolStatistics()
+  );
   const dayProcessor = new DayProcessor(
     gameMatchingEngine,
     playerManager,

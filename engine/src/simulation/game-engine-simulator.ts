@@ -127,6 +127,7 @@ export interface GameStatistics {
   averageRunLength: number;
   resolvedGames?: number;
   gamesByLevel?: Record<BettingLevel, number>;
+  peakPoolSize?: number;
 }
 
 /**
@@ -260,7 +261,6 @@ export class GameEngineSimulator {
       new GameEventHandler(
         this.eventBus,
         gameMatchingEngine,
-        revenueCalculator,
         this.debugInterface,
         this.verbose
       ),
@@ -338,11 +338,15 @@ export class GameEngineSimulator {
     }
 
     if (summary) {
-      existing.gameStatistics = {
+      const updatedGameStats: GameStatistics = {
         ...existing.gameStatistics,
         resolvedGames: summary.resolvedGames,
         activeRuns: summary.activePlayers,
       };
+      if (typeof summary.peakPoolSize === "number") {
+        updatedGameStats.peakPoolSize = summary.peakPoolSize;
+      }
+      existing.gameStatistics = updatedGameStats;
       existing.newPlayers = summary.newPlayers ?? existing.newPlayers;
       existing.playerStatistics = {
         ...existing.playerStatistics,
@@ -850,6 +854,7 @@ export class GameEngineSimulator {
       resolvedGames: matchingStats.resolvedGames ?? 0,
       gamesByLevel:
         matchingStats.gamesByLevelResolved ?? this.createEmptyGamesByLevel(),
+      peakPoolSize: pooledVirtualDollars,
     };
   }
 

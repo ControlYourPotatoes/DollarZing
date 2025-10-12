@@ -267,17 +267,21 @@ describe("DayProcessor", () => {
       await dayProcessor.processDay(day, config, mockSimulationConfig);
 
       // Verify DAY_FRAME_COMPLETED event was emitted with correct structure
-      expect(mockEventBus.emit).toHaveBeenCalledWith("DAY_FRAME_COMPLETED", {
-        type: "DAY_FRAME_COMPLETED",
-        timestamp: expect.any(Date),
-        dayNumber: expect.any(Number),
-        summary: {
-          gamesProcessed: expect.any(Number),
-          newPlayers: expect.any(Number),
-          poolSize: expect.any(Number),
-          activePlayers: expect.any(Number),
-        },
-      });
+      expect(mockEventBus.emit).toHaveBeenCalledWith(
+        "DAY_FRAME_COMPLETED",
+        expect.objectContaining({
+          type: "DAY_FRAME_COMPLETED",
+          timestamp: expect.any(Date),
+          dayNumber: expect.any(Number),
+          summary: expect.objectContaining({
+            resolvedGames: expect.any(Number),
+            newPlayers: expect.any(Number),
+            poolSize: expect.any(Number),
+            peakPoolSize: expect.any(Number),
+            activePlayers: expect.any(Number),
+          }),
+        })
+      );
     });
   });
 });

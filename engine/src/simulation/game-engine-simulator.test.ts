@@ -83,7 +83,8 @@ describe("GameEngineSimulator", () => {
     mockPlayerManager = new PlayerManager(
       eventBus,
       mockVirtualDollarFactory,
-      new InMemoryDormantPlayerStore()
+      new InMemoryDormantPlayerStore(),
+      () => mockGameMatchingEngine.getPoolStatistics()
     );
     mockRevenueCalculator = new RevenueCalculator();
 

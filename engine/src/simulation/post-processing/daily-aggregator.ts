@@ -81,6 +81,7 @@ export interface DailyAggregateSnapshot {
     depositedToday: number; // runs created today
     consumedToday: number; // games played today * 2 dollars
     outstanding: number; // dollars currently in pool
+    peakOutstanding?: number; // max dollars observed in pool during the day
   };
   cashouts?: {
     countToday: number;
@@ -261,6 +262,7 @@ export function generateDailyAggregates(
         depositedToday: dailyRuns,
         consumedToday: dailyGames * 2,
         outstanding: gameStats?.pooledVirtualDollars ?? 0,
+        peakOutstanding: gameStats?.peakPoolSize ?? gameStats?.pooledVirtualDollars ?? 0,
       },
       cashouts: {
         countToday: dailyCashoutsCount,

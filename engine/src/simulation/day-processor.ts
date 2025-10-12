@@ -75,6 +75,7 @@ export class DayProcessor {
           resolvedGames: event.summary.resolvedGames,
           newPlayers: event.summary.newPlayers,
           poolSize: event.summary.poolSize,
+          peakPoolSize: event.summary.peakPoolSize,
           totalRevenue: this.totalRevenue,
         });
       }
@@ -217,6 +218,7 @@ export class DayProcessor {
     let lastActiveCount = this.gameMatchingEngine.getActiveGamesCount();
     let lastPoolSize =
       this.gameMatchingEngine.getPoolStatistics().totalDollarsInPool;
+    let peakPoolSize = lastPoolSize;
     let stableCount = 0;
     const maxWaitMs = 120000; // Reduced from 900000 (15min) to 2min for faster feedback and to prevent timeouts
     const requiredStablePolls = 10; // Increased from 3 to 5 for more confidence
@@ -238,6 +240,7 @@ export class DayProcessor {
       const currentActiveCount = this.gameMatchingEngine.getActiveGamesCount();
       const poolStatsSnapshot = this.gameMatchingEngine.getPoolStatistics();
       const currentPoolSize = poolStatsSnapshot.totalDollarsInPool;
+      peakPoolSize = Math.max(peakPoolSize, currentPoolSize);
 
       const resolvedMonotonic = currentResolvedCount >= lastResolvedCount;
       const activeNonIncreasing = currentActiveCount <= lastActiveCount;
@@ -308,6 +311,7 @@ export class DayProcessor {
 
     // Emit day completed event
     const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();
+    peakPoolSize = Math.max(peakPoolSize, finalPoolStats.totalDollarsInPool);
     const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
     const completedPayload: DayCompletedEvent = {
       type: EVENT_TYPES.DAY_COMPLETED,
@@ -317,6 +321,7 @@ export class DayProcessor {
       newPlayers: dailyNewPlayers, // Track new players added today
       totalRevenue: 0, // Would need to track this through revenue events
       poolSize: finalPoolStats.totalDollarsInPool,
+      peakPoolSize,
       activePlayers: 0, // Would need to track this properly
     };
 
@@ -331,6 +336,7 @@ export class DayProcessor {
         resolvedGames: resolvedGamesToday,
         newPlayers: completedPayload.newPlayers,
         poolSize: completedPayload.poolSize,
+        peakPoolSize: completedPayload.peakPoolSize,
         activePlayers: completedPayload.activePlayers,
       },
     } as DayFrameCompletedEvent);

@@ -10,6 +10,7 @@ import {
 } from "../events/event-types";
 import { PlayerCreationManager } from "./player-creation-manager";
 import { DormantPlayerStore } from "./player-registry";
+import type { PoolStatistics } from "../core/game-matching-engine";
 
 /**
  * Configuration for player management
@@ -57,7 +58,11 @@ export class PlayerManager {
   constructor(
     private eventBus: EventBus,
     private virtualDollarFactory: VirtualDollarFactory,
-    private dormantStore: DormantPlayerStore
+    private dormantStore: DormantPlayerStore,
+    private poolSnapshotProvider: () => Pick<
+      PoolStatistics,
+      "totalDollarsInPool" | "availableForMatching" | "dollarsInGame"
+    > | null = () => null
   ) {
     this.setupEventSubscriptions();
     this.playerCreationManager = new PlayerCreationManager(
@@ -71,7 +76,8 @@ export class PlayerManager {
         allowancePerDay: PlayerManager.ALLOWANCE_PER_DAY,
         newPlayerStartingDollars: PlayerManager.NEW_PLAYER_STARTING_DOLLARS,
       },
-      this.dormantStore
+      this.dormantStore,
+      this.poolSnapshotProvider
     );
     this.playerCreationManager.init();
   }
