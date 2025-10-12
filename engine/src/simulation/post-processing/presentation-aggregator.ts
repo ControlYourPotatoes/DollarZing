@@ -42,6 +42,25 @@ export interface PresentationSnapshot {
   financialWorkflow: PresentationWorkflow;
   charts: PresentationCharts;
   levels?: PresentationLevelBreakdown[];
+  playerGrowth?: PresentationPlayerGrowth;
+}
+
+export interface PresentationPlayerGrowth {
+  totalPlayers: number;
+  activePlayers: number;
+  daily: {
+    newPlayers: number;
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    reactivatedPlayers: number;
+  };
+  cumulative: {
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    totalPlayers: number;
+  };
 }
 
 export interface PresentationTimelineTick {
@@ -162,6 +181,26 @@ function buildPresentationSnapshot(
     netChange: round(snapshot.totals.revenue - snapshot.totals.playerPayouts),
   };
 
+  const playerGrowth = snapshot.playerCreation
+    ? {
+        totalPlayers: snapshot.totals.totalPlayers,
+        activePlayers: snapshot.totals.activePlayers,
+        daily: {
+          newPlayers: snapshot.playerCreation.daily.totalNewPlayers,
+          initialPlayers: snapshot.playerCreation.daily.initialPlayers,
+          growthPlayers: snapshot.playerCreation.daily.growthPlayers,
+          dauNewPlayers: snapshot.playerCreation.daily.dauNewPlayers,
+          reactivatedPlayers: snapshot.playerCreation.daily.reactivatedPlayers,
+        },
+        cumulative: {
+          initialPlayers: snapshot.playerCreation.cumulative.initialPlayers,
+          growthPlayers: snapshot.playerCreation.cumulative.growthPlayers,
+          dauNewPlayers: snapshot.playerCreation.cumulative.dauNewPlayers,
+          totalPlayers: snapshot.playerCreation.cumulative.totalPlayers,
+        },
+      }
+    : undefined;
+
   return {
     dayIndex: index,
     date: snapshot.date,
@@ -177,6 +216,7 @@ function buildPresentationSnapshot(
     financialWorkflow: buildWorkflow(snapshot),
     charts: buildCharts(snapshot),
     levels: buildCumulativeLevelBreakdown(previousSnapshots),
+    playerGrowth,
   };
 }
 

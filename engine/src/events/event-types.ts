@@ -372,6 +372,12 @@ export interface DayCompletedEvent extends BaseEvent {
   dayNumber: number;
   resolvedGames: number;
   newPlayers: number;
+  playerCreation?: {
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    reactivatedPlayers: number;
+  };
   totalRevenue: number;
   poolSize: number;
   peakPoolSize?: number;
@@ -384,6 +390,12 @@ export interface DayFrameCompletedEvent extends BaseEvent {
   summary: {
     resolvedGames: number;
     newPlayers: number;
+    playerCreation?: {
+      initialPlayers: number;
+      growthPlayers: number;
+      dauNewPlayers: number;
+      reactivatedPlayers: number;
+    };
     poolSize: number;
     peakPoolSize?: number;
     activePlayers: number;

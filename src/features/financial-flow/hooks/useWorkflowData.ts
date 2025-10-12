@@ -123,40 +123,74 @@ export function useWorkflowData(): WorkflowLayoutResult {
     }
 
     // Derive canonical nodes/links if missing from snapshot
-    const sourceNodes = [...day.financialWorkflow.nodes];
-    const sourceLinks = [...day.financialWorkflow.links];
+    const sourceNodes = day.financialWorkflow.nodes.map((node) => ({
+      ...node,
+      layers: node.layers
+        ? node.layers.map((layer) => ({ ...layer }))
+        : undefined,
+    }));
+    const sourceLinks = day.financialWorkflow.links.map((link) => ({
+      ...link,
+    }));
 
-    // Use node aggregates as primary source, timelineTick as fallback
-    const totalValue =
-      sourceNodes.find((n) => n.id === "total")?.aggregateValue ||
-      Math.max(0, day.timelineTick.cumulativeRevenue || 0);
-    const platformValue =
-      sourceNodes.find((n) => n.id === "platform")?.aggregateValue ||
-      Math.max(0, day.timelineTick.cumulativeFees || 0);
-    const charityValue =
-      sourceNodes.find((n) => n.id === "charity")?.aggregateValue ||
-      Math.max(0, day.timelineTick.cumulativeCharity || 0);
-    const playersValue =
-      sourceNodes.find((n) => n.id === "players")?.aggregateValue ||
-      Math.max(0, day.timelineTick.cumulativePayouts || 0);
+    // Always prefer cumulative values from the timeline tick; fall back to node aggregates if needed
+    const totalValue = Math.max(
+      0,
+      day.timelineTick?.cumulativeRevenue ??
+        sourceNodes.find((n) => n.id === "total")?.aggregateValue ??
+        0
+    );
+    const platformValue = Math.max(
+      0,
+      day.timelineTick?.cumulativeFees ??
+        sourceNodes.find((n) => n.id === "platform")?.aggregateValue ??
+        0
+    );
+    const charityValue = Math.max(
+      0,
+      day.timelineTick?.cumulativeCharity ??
+        sourceNodes.find((n) => n.id === "charity")?.aggregateValue ??
+        0
+    );
+    const playersValue = Math.max(
+      0,
+      day.timelineTick?.cumulativePayouts ??
+        sourceNodes.find((n) => n.id === "players")?.aggregateValue ??
+        0
+    );
 
-    // Update existing nodes with values (only if not set)
-    sourceNodes.forEach((node) => {
-      switch (node.id) {
-        case "total":
-          if (!node.aggregateValue) node.aggregateValue = totalValue;
-          break;
-        case "platform":
-          if (!node.aggregateValue) node.aggregateValue = platformValue;
-          break;
-        case "charity":
-          if (!node.aggregateValue) node.aggregateValue = charityValue;
-          break;
-        case "players":
-          if (!node.aggregateValue) node.aggregateValue = playersValue;
-          break;
+    const applyCumulativeValue = (nodeId: string, targetValue: number) => {
+      const node = sourceNodes.find((candidate) => candidate.id === nodeId);
+      if (!node) return;
+      const safeValue = Number.isFinite(targetValue)
+        ? Math.max(0, targetValue)
+        : 0;
+      node.aggregateValue = safeValue;
+
+      if (node.layers && node.layers.length > 0) {
+        const totalLayerValue = node.layers.reduce(
+          (sum, layer) => sum + (layer.value ?? 0),
+          0
+        );
+        if (totalLayerValue > 0) {
+          const scale = safeValue / totalLayerValue;
+          node.layers = node.layers.map((layer) => ({
+            ...layer,
+            value: layer.value * scale,
+          }));
+        } else {
+          node.layers = node.layers.map((layer, idx) => ({
+            ...layer,
+            value: idx === 0 ? safeValue : 0,
+          }));
+        }
       }
-    });
+    };
+
+    applyCumulativeValue("total", totalValue);
+    applyCumulativeValue("platform", platformValue);
+    applyCumulativeValue("charity", charityValue);
+    applyCumulativeValue("players", playersValue);
 
     // Update existing links with cumulative values
     sourceLinks.forEach((link) => {

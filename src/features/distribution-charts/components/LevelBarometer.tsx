@@ -71,7 +71,7 @@ export function LevelBarometer() {
             {selectedSeries.label}
           </h4>
 
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {selectedSeries.steps.map((step) => (
               <div
                 key={step.level}

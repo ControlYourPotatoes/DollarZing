@@ -31,6 +31,10 @@ export class PlayerCreationManager {
   private initialPlayersSeededSoFar: number = 0;
   private totalPlayersCounter = 0;
   private dailyNewPlayersCounter = 0;
+  private dailyInitialPlayersCounter = 0;
+  private dailyGrowthPlayersCounter = 0;
+  private dailyDauNewPlayersCounter = 0;
+  private dailyDauReactivationsCounter = 0;
   private simulationTerminated = false;
   private recentPoolSnapshot: {
     totalDollarsInPool: number;
@@ -106,6 +110,10 @@ export class PlayerCreationManager {
       dailyNewPlayersCounter: this.dailyNewPlayersCounter,
       pendingInitialPlayers: this.pendingInitialPlayers,
       initialPlayersSeededSoFar: this.initialPlayersSeededSoFar,
+      dailyInitialPlayersCounter: this.dailyInitialPlayersCounter,
+      dailyGrowthPlayersCounter: this.dailyGrowthPlayersCounter,
+      dailyDauNewPlayersCounter: this.dailyDauNewPlayersCounter,
+      dailyDauReactivationsCounter: this.dailyDauReactivationsCounter,
     };
   }
 
@@ -114,6 +122,10 @@ export class PlayerCreationManager {
    */
   resetDailyCounters(): void {
     this.dailyNewPlayersCounter = 0;
+    this.dailyInitialPlayersCounter = 0;
+    this.dailyGrowthPlayersCounter = 0;
+    this.dailyDauNewPlayersCounter = 0;
+    this.dailyDauReactivationsCounter = 0;
   }
 
   /**
@@ -308,6 +320,7 @@ export class PlayerCreationManager {
       this.initialPlayersSeededSoFar += finalInitial;
       this.totalPlayersCounter += finalInitial;
       this.dailyNewPlayersCounter += finalInitial;
+      this.dailyInitialPlayersCounter += finalInitial;
       if (this.initialPlayersSeededSoFar >= this.pendingInitialPlayers) {
         this.pendingInitialPlayers = 0;
       }
@@ -321,11 +334,13 @@ export class PlayerCreationManager {
     if (finalGrowth > 0) {
       this.totalPlayersCounter += finalGrowth;
       this.dailyNewPlayersCounter += finalGrowth;
+      this.dailyGrowthPlayersCounter += finalGrowth;
       await this.createActives(finalGrowth, playerStrategies, true);
     }
 
     // Apply DAU reactivations
     if (finalReactivations > 0) {
+      this.dailyDauReactivationsCounter += finalReactivations;
       await this.createActives(finalReactivations, playerStrategies, false);
     }
 
@@ -333,6 +348,7 @@ export class PlayerCreationManager {
     if (finalNew > 0) {
       this.totalPlayersCounter += finalNew;
       this.dailyNewPlayersCounter += finalNew;
+      this.dailyDauNewPlayersCounter += finalNew;
       await this.createActives(finalNew, playerStrategies, true);
     }
   }

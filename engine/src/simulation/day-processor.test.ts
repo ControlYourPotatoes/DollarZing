@@ -62,6 +62,13 @@ describe("DayProcessor", () => {
       getPlayerStrategy: vi.fn().mockReturnValue("BALANCED"),
       createNewRun: vi.fn().mockReturnValue({ id: "new-run-1" }),
       getDailyNewPlayersCount: vi.fn().mockReturnValue(5),
+      consumeDailyPlayerCreationStats: vi.fn().mockReturnValue({
+        totalNewPlayers: 5,
+        initialPlayers: 2,
+        growthPlayers: 2,
+        dauNewPlayers: 1,
+        reactivatedPlayers: 0,
+      }),
     };
 
     mockDollarManager = {

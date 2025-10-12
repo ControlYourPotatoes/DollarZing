@@ -90,6 +90,25 @@ export interface PresentationSnapshot {
     cumulativeAmount?: number;
     cumulativeCount?: number;
   };
+  playerGrowth?: PresentationPlayerGrowth;
+}
+
+export interface PresentationPlayerGrowth {
+  totalPlayers: number;
+  activePlayers: number;
+  daily: {
+    newPlayers: number;
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    reactivatedPlayers: number;
+  };
+  cumulative: {
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    totalPlayers: number;
+  };
 }
 
 export interface PresentationSnapshotFile {
@@ -226,6 +245,7 @@ export interface NormalizedPresentationDay {
   };
   pool?: PresentationSnapshot["pool"];
   cashouts?: PresentationSnapshot["cashouts"];
+  playerGrowth?: PresentationPlayerGrowth;
 }
 
 export interface NormalizedPresentationScenario {
@@ -269,6 +289,21 @@ export interface CohortAnalyticsPoint {
   netValue: number;
 }
 
+export interface PlayerGrowthAnalyticsPoint {
+  dayIndex: number;
+  label: string;
+  totalPlayers: number;
+  activePlayers: number;
+  cumulativeInitialPlayers: number;
+  cumulativeGrowthPlayers: number;
+  cumulativeDauNewPlayers: number;
+  dailyInitialPlayers: number;
+  dailyGrowthPlayers: number;
+  dailyDauNewPlayers: number;
+  dailyReactivatedPlayers: number;
+  dailyNewPlayers: number;
+}
+
 export interface FlowAnalyticsPoint {
   dayIndex: number;
   label: string;
@@ -290,6 +325,7 @@ export interface NormalizedScenarioAnalytics {
   flow: FlowAnalyticsPoint[];
   games: GamesAnalyticsPoint[];
   levels: LevelAnalyticsPoint[];
+  playerGrowth: PlayerGrowthAnalyticsPoint[];
 }
 
 export interface LevelAnalyticsPoint {

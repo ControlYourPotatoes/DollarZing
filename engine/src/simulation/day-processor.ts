@@ -312,13 +312,36 @@ export class DayProcessor {
     // Emit day completed event
     const finalPoolStats = this.gameMatchingEngine.getPoolStatistics();
     peakPoolSize = Math.max(peakPoolSize, finalPoolStats.totalDollarsInPool);
-    const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
+    const managerWithBreakdown = this.playerManager as PlayerManager & {
+      consumeDailyPlayerCreationStats?: () => {
+        totalNewPlayers: number;
+        initialPlayers: number;
+        growthPlayers: number;
+        dauNewPlayers: number;
+        reactivatedPlayers: number;
+      };
+    };
+    const creationStats =
+      managerWithBreakdown.consumeDailyPlayerCreationStats?.() ?? {
+        totalNewPlayers: this.playerManager.getDailyNewPlayersCount(),
+        initialPlayers: 0,
+        growthPlayers: 0,
+        dauNewPlayers: 0,
+        reactivatedPlayers: 0,
+      };
+    const dailyNewPlayers = creationStats.totalNewPlayers;
     const completedPayload: DayCompletedEvent = {
       type: EVENT_TYPES.DAY_COMPLETED,
       timestamp: new Date(),
       dayNumber: eventDay,
       resolvedGames: resolvedGamesToday,
       newPlayers: dailyNewPlayers, // Track new players added today
+      playerCreation: {
+        initialPlayers: creationStats.initialPlayers,
+        growthPlayers: creationStats.growthPlayers,
+        dauNewPlayers: creationStats.dauNewPlayers,
+        reactivatedPlayers: creationStats.reactivatedPlayers,
+      },
       totalRevenue: 0, // Would need to track this through revenue events
       poolSize: finalPoolStats.totalDollarsInPool,
       peakPoolSize,
@@ -335,6 +358,7 @@ export class DayProcessor {
       summary: {
         resolvedGames: resolvedGamesToday,
         newPlayers: completedPayload.newPlayers,
+        playerCreation: completedPayload.playerCreation,
         poolSize: completedPayload.poolSize,
         peakPoolSize: completedPayload.peakPoolSize,
         activePlayers: completedPayload.activePlayers,

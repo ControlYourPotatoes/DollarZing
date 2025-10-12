@@ -139,6 +139,12 @@ export interface DailyResult {
   gameStatistics: GameStatistics;
   revenueStatistics: RevenueStatistics;
   newPlayers: number; // Number of new players added this day
+  playerCreation: {
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    reactivatedPlayers: number;
+  };
 }
 
 /**
@@ -203,6 +209,17 @@ export class GameEngineSimulator {
   };
   private runCreatedSubscription: EventSubscription | null = null;
   private dailyNewPlayers: number = 0; // Track new players for current day
+  private dailyPlayerCreation: {
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    reactivatedPlayers: number;
+  } = {
+    initialPlayers: 0,
+    growthPlayers: 0,
+    dauNewPlayers: 0,
+    reactivatedPlayers: 0,
+  };
   private pendingDailyResults: DailyResult[] = [];
   private dayCompletedSubscription: EventSubscription | null = null;
   private dayFrameCompletedSubscription: EventSubscription | null = null;
@@ -313,6 +330,18 @@ export class GameEngineSimulator {
 
     // Capture new players count from the day completed event
     this.dailyNewPlayers = event.newPlayers || 0;
+    const creation = event.playerCreation ?? {
+      initialPlayers: 0,
+      growthPlayers: 0,
+      dauNewPlayers: 0,
+      reactivatedPlayers: 0,
+    };
+    this.dailyPlayerCreation = {
+      initialPlayers: creation.initialPlayers ?? 0,
+      growthPlayers: creation.growthPlayers ?? 0,
+      dauNewPlayers: creation.dauNewPlayers ?? 0,
+      reactivatedPlayers: creation.reactivatedPlayers ?? 0,
+    };
   }
 
   private handleDayFrameCompleted(event: DayFrameCompletedEvent): void {
@@ -352,6 +381,22 @@ export class GameEngineSimulator {
         ...existing.playerStatistics,
         totalPlayers: summary.activePlayers,
       };
+      if (summary.playerCreation) {
+        existing.playerCreation = {
+          initialPlayers:
+            summary.playerCreation.initialPlayers ??
+            existing.playerCreation.initialPlayers,
+          growthPlayers:
+            summary.playerCreation.growthPlayers ??
+            existing.playerCreation.growthPlayers,
+          dauNewPlayers:
+            summary.playerCreation.dauNewPlayers ??
+            existing.playerCreation.dauNewPlayers,
+          reactivatedPlayers:
+            summary.playerCreation.reactivatedPlayers ??
+            existing.playerCreation.reactivatedPlayers,
+        };
+      }
     }
   }
 
@@ -596,6 +641,12 @@ export class GameEngineSimulator {
         gameStatistics: this.generateGameStatistics(),
         revenueStatistics: this.generateRevenueStatistics(),
         newPlayers: this.dailyNewPlayers,
+        playerCreation: {
+          initialPlayers: this.dailyPlayerCreation.initialPlayers,
+          growthPlayers: this.dailyPlayerCreation.growthPlayers,
+          dauNewPlayers: this.dailyPlayerCreation.dauNewPlayers,
+          reactivatedPlayers: this.dailyPlayerCreation.reactivatedPlayers,
+        },
       };
 
       dailyResults.push(dailyResult);
@@ -603,6 +654,12 @@ export class GameEngineSimulator {
 
       // Reset daily new players count for next day
       this.dailyNewPlayers = 0;
+      this.dailyPlayerCreation = {
+        initialPlayers: 0,
+        growthPlayers: 0,
+        dauNewPlayers: 0,
+        reactivatedPlayers: 0,
+      };
 
       // Report progress if enabled
       if (enableProgressReporting && progressCallback) {

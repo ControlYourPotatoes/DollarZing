@@ -1,279 +1,369 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  LineChart,
+  AreaChart,
+  Area,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
+
 import {
   useActiveTimelineDay,
   useActiveTimelineScenario,
 } from "@/features/timeline";
 import { useScenarioComparisons } from "@/shared/hooks/useScenarioComparisons";
 
-interface EngagementDataPoint {
+type PlayerGrowthScenarioKey = "base" | "mid" | "high";
+
+interface GrowthChartPoint {
   label: string;
-  baseActive: number;
-  midActive: number;
-  highActive: number;
-  baseGrowth: number;
-  midGrowth: number;
-  highGrowth: number;
+  dayIndex: number;
+  cumulativeInitial: number;
+  cumulativeGrowth: number;
+  cumulativeDauNew: number;
+  totalPlayers: number;
+  activePlayers: number;
+  dailyInitial: number;
+  dailyGrowth: number;
+  dailyDauNew: number;
+  dailyNewPlayers: number;
+  dailyReactivated: number;
 }
 
-const COLORS = {
-  base: "#0ea5e9", // sky-500
-  mid: "#10b981", // emerald-500
-  high: "#f59e0b", // amber-500
-};
+const STACK_COLORS = {
+  initial: "#38bdf8",
+  growth: "#34d399",
+  dau: "#f97316",
+} as const;
 
 export function PlayerEngagementChart() {
   const activeDay = useActiveTimelineDay();
   const baseScenario = useActiveTimelineScenario();
   const { mid: midScenario, high: highScenario } = useScenarioComparisons();
 
-  const engagementData = useMemo(() => {
-    if (!baseScenario?.analytics?.cohort || !activeDay) return null;
+  const [selectedScenario, setSelectedScenario] =
+    useState<PlayerGrowthScenarioKey>("base");
 
-    const availableDays = activeDay.dayIndex + 1;
-    const isDaily = availableDays <= 30;
-    const maxPoints = isDaily ? 30 : 17; // Show last 30 days or ~17 weeks
-    const aggregationSize = isDaily ? 1 : 7;
-    const startDayIndex = Math.max(
-      0,
-      activeDay.dayIndex - maxPoints * aggregationSize + 1
-    );
-    const data: EngagementDataPoint[] = [];
-
-    for (let period = 0; period < maxPoints; period++) {
-      const periodStart = startDayIndex + period * aggregationSize;
-      const periodEnd = Math.min(
-        periodStart + aggregationSize - 1,
-        activeDay.dayIndex
-      );
-      if (periodStart > activeDay.dayIndex) break;
-
-      let baseActiveSum = 0,
-        midActiveSum = 0,
-        highActiveSum = 0;
-      let baseGrowthSum = 0,
-        midGrowthSum = 0,
-        highGrowthSum = 0;
-      let count = 0;
-
-      for (let i = periodStart; i <= periodEnd; i++) {
-        const baseData = baseScenario.analytics.cohort[i];
-        const midData = midScenario?.analytics?.cohort?.[i];
-        const highData = highScenario?.analytics?.cohort?.[i];
-        if (!baseData) continue;
-
-        baseActiveSum += baseData.activePlayers || 0;
-        midActiveSum += midData?.activePlayers || 0;
-        highActiveSum += highData?.activePlayers || 0;
-
-        // Calculate growth rate as newPlayers / targetPlayers * 10
-        // targetPlayers = baseMarket * adoptionRate * adoptionProgress
-        const baseMarket = 1000000;
-        const midpointDay = 90;
-        const steepnessFactor = 20;
-        const dayNumber = i + 1; // dayIndex 0 corresponds to day 1
-        const x = (dayNumber - midpointDay) / steepnessFactor;
-        const adoptionProgress = 1 / (1 + Math.exp(-x));
-
-        const getAdoptionRate = (scenario?: {
-          coordinates?: { adoptionRate: number };
-        }) => {
-          const coord = scenario?.coordinates?.adoptionRate ?? 0;
-          return coord === 0 ? 0.15 : coord === 1 ? 0.35 : 0.6;
-        };
-
-        const baseAdoptionRate = getAdoptionRate(baseScenario);
-        const midAdoptionRate = getAdoptionRate(midScenario);
-        const highAdoptionRate = getAdoptionRate(highScenario);
-
-        const baseTarget = baseMarket * baseAdoptionRate * adoptionProgress;
-        const midTarget = baseMarket * midAdoptionRate * adoptionProgress;
-        const highTarget = baseMarket * highAdoptionRate * adoptionProgress;
-
-        baseGrowthSum += baseTarget
-          ? ((baseData.newPlayers || 0) / baseTarget) * 10
-          : 0;
-        midGrowthSum += midTarget
-          ? ((midData?.newPlayers || 0) / midTarget) * 10
-          : 0;
-        highGrowthSum += highTarget
-          ? ((highData?.newPlayers || 0) / highTarget) * 10
-          : 0;
-
-        count++;
+  const scenarioSeries = useMemo(() => {
+    const buildSeries = (
+      scenario: typeof baseScenario | undefined
+    ): GrowthChartPoint[] => {
+      if (!scenario?.analytics?.playerGrowth || !activeDay) {
+        return [];
       }
 
-      if (count > 0) {
-        const label = isDaily
-          ? `Day ${periodStart + 1}`
-          : `Week ${Math.floor(periodStart / 7) + 1}`;
+      const growthSeries = scenario.analytics.playerGrowth;
+      const lastAvailableIndex = Math.min(
+        activeDay.dayIndex,
+        growthSeries.length - 1
+      );
+
+      if (lastAvailableIndex < 0) {
+        return [];
+      }
+
+      const availablePoints = lastAvailableIndex + 1;
+      const useDailyGranularity = availablePoints <= 30;
+      const targetPointCount = useDailyGranularity ? 30 : 17;
+      const aggregationSize = useDailyGranularity
+        ? 1
+        : Math.max(1, Math.floor(availablePoints / targetPointCount));
+      const startIndex = Math.max(
+        0,
+        availablePoints - aggregationSize * targetPointCount
+      );
+
+      const data: GrowthChartPoint[] = [];
+
+      for (
+        let cursor = startIndex;
+        cursor <= lastAvailableIndex;
+        cursor += aggregationSize
+      ) {
+        const periodEnd = Math.min(cursor + aggregationSize - 1, lastAvailableIndex);
+        const point = growthSeries[periodEnd];
+        if (!point) continue;
+
+        const label = useDailyGranularity
+          ? `Day ${periodEnd + 1}`
+          : `Week ${Math.floor(periodEnd / 7) + 1}`;
+
         data.push({
           label,
-          baseActive: baseActiveSum / count,
-          midActive: midActiveSum / count,
-          highActive: highActiveSum / count,
-          baseGrowth: baseGrowthSum / count,
-          midGrowth: midGrowthSum / count,
-          highGrowth: highGrowthSum / count,
+          dayIndex: periodEnd,
+          cumulativeInitial: point.cumulativeInitialPlayers,
+          cumulativeGrowth: point.cumulativeGrowthPlayers,
+          cumulativeDauNew: point.cumulativeDauNewPlayers,
+          totalPlayers: point.totalPlayers,
+          activePlayers: point.activePlayers,
+          dailyInitial: point.dailyInitialPlayers,
+          dailyGrowth: point.dailyGrowthPlayers,
+          dailyDauNew: point.dailyDauNewPlayers,
+          dailyNewPlayers: point.dailyNewPlayers,
+          dailyReactivated: point.dailyReactivatedPlayers,
         });
       }
+
+      return data;
+    };
+
+    return {
+      base: buildSeries(baseScenario),
+      mid: buildSeries(midScenario),
+      high: buildSeries(highScenario),
+    } satisfies Record<PlayerGrowthScenarioKey, GrowthChartPoint[]>;
+  }, [activeDay, baseScenario, midScenario, highScenario]);
+
+  const availableScenarioKeys = useMemo(() => {
+    return (Object.keys(scenarioSeries) as PlayerGrowthScenarioKey[]).filter(
+      (key) => scenarioSeries[key].length > 0
+    );
+  }, [scenarioSeries]);
+
+  useEffect(() => {
+    if (availableScenarioKeys.length === 0) {
+      return;
     }
+    if (!availableScenarioKeys.includes(selectedScenario)) {
+      setSelectedScenario(availableScenarioKeys[0]);
+    }
+  }, [availableScenarioKeys, selectedScenario]);
 
-    return data;
-  }, [
-    activeDay,
-    baseScenario?.analytics?.cohort,
-    midScenario?.analytics?.cohort,
-    highScenario?.analytics?.cohort,
-  ]);
+  const selectedSeries = scenarioSeries[selectedScenario] ?? [];
 
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
+  const timeframeLabel = selectedSeries.length
+    ? `Last ${selectedSeries.length} ${
+        selectedSeries.length === 30 ? "days" : "weeks"
+      }`
+    : null;
+
+  const formatNumber = (value: number) =>
+    new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
-  };
 
-  const formatPercent = (value: number) => {
-    return `${(value * 100).toFixed(1)}%`;
-  };
+  const formatCompact = (value: number) =>
+    new Intl.NumberFormat("en-US", {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(value);
 
   const CustomTooltip = ({
     active,
     payload,
+    label,
   }: {
     active?: boolean;
-    payload?: Array<{ value: number; name: string }>;
+    payload?: Array<{ value: number; dataKey: string; payload: GrowthChartPoint }>;
+    label?: string;
   }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg">
-          <p className="font-semibold text-slate-100 mb-2">
-            Active Players (Avg)
-          </p>
-          <div className="space-y-1 text-sm">
-            <p className="text-sky-400">
-              Base: {formatNumber(payload[0]?.value || 0)}
-            </p>
-            <p className="text-emerald-400">
-              Mid: {formatNumber(payload[1]?.value || 0)}
-            </p>
-            <p className="text-amber-400">
-              High: {formatNumber(payload[2]?.value || 0)}
-            </p>
+    if (!active || !payload || payload.length === 0) {
+      return null;
+    }
+
+    const point = payload[0]?.payload;
+    if (!point) {
+      return null;
+    }
+
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-900/90 p-3 text-sm shadow-lg">
+        <div className="mb-2 font-semibold text-slate-100">{label}</div>
+        <div className="space-y-1 text-slate-300">
+          <div className="flex justify-between">
+            <span className="text-slate-400">Total Players</span>
+            <span className="font-semibold text-slate-100">
+              {formatNumber(point.totalPlayers)}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Active Players</span>
+            <span className="font-semibold text-sky-300">
+              {formatNumber(point.activePlayers)}
+            </span>
           </div>
         </div>
-      );
-    }
-    return null;
+        <div className="mt-3 border-t border-slate-800 pt-2 text-xs text-slate-400">
+          <div className="mb-1 font-semibold text-slate-200">
+            Prior Day Additions
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sky-300">Initial Seeding</span>
+            <span>{formatNumber(point.dailyInitial)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-emerald-300">Organic Growth</span>
+            <span>{formatNumber(point.dailyGrowth)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-amber-300">DAU Boost</span>
+            <span>{formatNumber(point.dailyDauNew)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-fuchsia-300">Reactivated</span>
+            <span>{formatNumber(point.dailyReactivated)}</span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  if (!engagementData || engagementData.length === 0) {
+  if (selectedSeries.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center text-slate-500">
-        <p>No engagement data available</p>
+        <p>No player growth data available yet.</p>
       </div>
     );
   }
 
+  const finalPoint = selectedSeries[selectedSeries.length - 1];
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-100">
-          Player Growth Trends
-        </h3>
-        <span className="text-sm text-slate-400">
-          Last {engagementData.length}{" "}
-          {engagementData.length === 30 ? "days" : "weeks"}
-        </span>
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-100">
+            Player Growth Trends
+          </h3>
+          {timeframeLabel && (
+            <span className="text-sm text-slate-400">{timeframeLabel}</span>
+          )}
+        </div>
+        <div className="flex gap-2 text-xs">
+          {availableScenarioKeys.map((scenarioKey) => {
+            const label =
+              scenarioKey === "base"
+                ? "Base"
+                : scenarioKey === "mid"
+                ? "Mid"
+                : "High";
+            return (
+              <button
+                key={scenarioKey}
+                onClick={() => setSelectedScenario(scenarioKey)}
+                className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
+                  selectedScenario === scenarioKey
+                    ? "bg-slate-700 text-slate-100"
+                    : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-100"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-sky-400"></div>
-          <span className="text-slate-300">Base Scenario</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-emerald-400"></div>
-          <span className="text-slate-300">Mid Scenario</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-amber-400"></div>
-          <span className="text-slate-300">High Scenario</span>
-        </div>
-      </div>
-
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          data={engagementData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+      <ResponsiveContainer width="100%" height={320}>
+        <AreaChart data={selectedSeries} margin={{ top: 20, right: 24, left: 4, bottom: 8 }}>
+          <defs>
+            <linearGradient id="initialFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={STACK_COLORS.initial} stopOpacity={0.7} />
+              <stop offset="95%" stopColor={STACK_COLORS.initial} stopOpacity={0.05} />
+            </linearGradient>
+            <linearGradient id="growthFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={STACK_COLORS.growth} stopOpacity={0.65} />
+              <stop offset="95%" stopColor={STACK_COLORS.growth} stopOpacity={0.05} />
+            </linearGradient>
+            <linearGradient id="dauFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={STACK_COLORS.dau} stopOpacity={0.55} />
+              <stop offset="95%" stopColor={STACK_COLORS.dau} stopOpacity={0.05} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
           <XAxis dataKey="label" stroke="#9ca3af" fontSize={12} />
-          <YAxis stroke="#9ca3af" fontSize={12} tickFormatter={formatNumber} />
+          <YAxis
+            stroke="#9ca3af"
+            fontSize={12}
+            tickFormatter={(value) => formatCompact(value)}
+          />
           <Tooltip content={<CustomTooltip />} />
-          <Legend />
-          <Line
+          <Area
             type="monotone"
-            dataKey="baseActive"
-            stroke={COLORS.base}
-            strokeWidth={2}
-            dot={{ r: 4 }}
-            name="Base Active Players (Avg)"
+            dataKey="cumulativeInitial"
+            stackId="players"
+            stroke={STACK_COLORS.initial}
+            fill="url(#initialFill)"
+            name="Initial Seeding"
+          />
+          <Area
+            type="monotone"
+            dataKey="cumulativeGrowth"
+            stackId="players"
+            stroke={STACK_COLORS.growth}
+            fill="url(#growthFill)"
+            name="Organic Growth"
+          />
+          <Area
+            type="monotone"
+            dataKey="cumulativeDauNew"
+            stackId="players"
+            stroke={STACK_COLORS.dau}
+            fill="url(#dauFill)"
+            name="DAU Boost"
           />
           <Line
             type="monotone"
-            dataKey="midActive"
-            stroke={COLORS.mid}
+            dataKey="activePlayers"
+            stroke="#facc15"
             strokeWidth={2}
-            dot={{ r: 4 }}
-            name="Mid Active Players (Avg)"
+            strokeDasharray="6 4"
+            dot={{ r: 3 }}
+            name="Active Players"
           />
-          <Line
-            type="monotone"
-            dataKey="highActive"
-            stroke={COLORS.high}
-            strokeWidth={2}
-            dot={{ r: 4 }}
-            name="High Active Players (Avg)"
-          />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-4 text-center">
-        <div className="bg-slate-800/50 rounded-lg p-3">
-          <div className="text-xs text-slate-400">Base Growth Rate</div>
-          <div className="text-lg font-semibold text-sky-400">
-            {formatPercent(
-              engagementData[engagementData.length - 1]?.baseGrowth || 0
-            )}
+      <div className="grid grid-cols-1 gap-4 text-center md:grid-cols-3">
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+          <div className="text-xs uppercase tracking-wide text-slate-400">
+            Total Players
+          </div>
+          <div className="mt-1 text-xl font-semibold text-slate-100">
+            {formatNumber(finalPoint.totalPlayers)}
           </div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-3">
-          <div className="text-xs text-slate-400">Mid Growth Rate</div>
-          <div className="text-lg font-semibold text-emerald-400">
-            {formatPercent(
-              engagementData[engagementData.length - 1]?.midGrowth || 0
-            )}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+          <div className="text-xs uppercase tracking-wide text-slate-400">
+            Active Players
+          </div>
+          <div className="mt-1 text-xl font-semibold text-sky-300">
+            {formatNumber(finalPoint.activePlayers)}
           </div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-3">
-          <div className="text-xs text-slate-400">High Growth Rate</div>
-          <div className="text-lg font-semibold text-amber-400">
-            {formatPercent(
-              engagementData[engagementData.length - 1]?.highGrowth || 0
-            )}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+          <div className="text-xs uppercase tracking-wide text-slate-400">
+            Prior Day Additions
+          </div>
+          <div className="mt-1 text-xs text-slate-400">
+            <div className="flex justify-between">
+              <span className="text-sky-300">Initial</span>
+              <span className="text-slate-200">
+                {formatNumber(finalPoint.dailyInitial)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-emerald-300">Organic</span>
+              <span className="text-slate-200">
+                {formatNumber(finalPoint.dailyGrowth)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-amber-300">DAU Boost</span>
+              <span className="text-slate-200">
+                {formatNumber(finalPoint.dailyDauNew)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-fuchsia-300">Reactivated</span>
+              <span className="text-slate-200">
+                {formatNumber(finalPoint.dailyReactivated)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

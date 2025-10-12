@@ -22,7 +22,7 @@ import {
 } from "@/features/distribution-charts";
 import { ImpactDisplay } from "@/features/impact";
 // import { useActiveTimelineScenario } from "@/features/timeline";
-import { useComparisonSelectionStore } from "@/shared/hooks/comparisonSelectionStore";
+import ScenarioSelector from "@/components/ScenarioSelector";
 
 // Optional runtime overrides to fetch manifest/snapshots from an external base or per-scenario URLs
 const { VITE_PRESENTATION_MANIFEST_URL } = ((
@@ -41,6 +41,35 @@ const MANIFEST_CANDIDATES: string[] = [
 
 const PrototypeDashboard = () => {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+
+  // Fixed scenarios - base is always 15%, mid is 35%, high is 60%
+  // All have mid risk and 30% charity
+  const availableScenarios = [
+    { 
+      id: "growth-15", 
+      growth: 15, 
+      risk: "mid", 
+      charity: 30, 
+      role: "base" as const,
+      label: "Base"
+    },
+    { 
+      id: "growth-35", 
+      growth: 35, 
+      risk: "mid", 
+      charity: 30, 
+      role: "mid" as const,
+      label: "Mid"
+    },
+    { 
+      id: "growth-60", 
+      growth: 60, 
+      risk: "mid", 
+      charity: 30, 
+      role: "high" as const,
+      label: "High"
+    },
+  ];
 
   const loadManifest = usePresentationTimelineStore(
     (state) => state.loadManifest
@@ -62,68 +91,14 @@ const PrototypeDashboard = () => {
 
   const activeDay = useActiveTimelineDay();
   // const activeScenario = useActiveTimelineScenario();
-  const midSelection = useComparisonSelectionStore((s) => s.midScenarioId);
-  const highSelection = useComparisonSelectionStore((s) => s.highScenarioId);
-  const setMidSelection = useComparisonSelectionStore(
-    (s) => s.setMidScenarioId
-  );
-  const setHighSelection = useComparisonSelectionStore(
-    (s) => s.setHighScenarioId
-  );
 
   const manifestEntries = useMemo(
     () => manifestIndex?.manifest ?? [],
     [manifestIndex]
   );
 
-  const sortedManifestEntries = useMemo(() => {
-    const sortOrder = { low: 0, mid: 1, high: 2 } as const;
-    const list = [...manifestEntries];
-    list.sort((a, b) => {
-      const ag =
-        sortOrder[
-          (a.parameters.adoptionRate as "low" | "mid" | "high") ?? "low"
-        ] ?? 0;
-      const bg =
-        sortOrder[
-          (b.parameters.adoptionRate as "low" | "mid" | "high") ?? "low"
-        ] ?? 0;
-      if (ag !== bg) return ag - bg; // growth: low → mid → high
-
-      const ar =
-        sortOrder[
-          (a.parameters.cashOutStrategy as "low" | "mid" | "high") ?? "low"
-        ] ?? 0;
-      const br =
-        sortOrder[
-          (b.parameters.cashOutStrategy as "low" | "mid" | "high") ?? "low"
-        ] ?? 0;
-      if (ar !== br) return ar - br; // risk: low → mid → high
-
-      const ac = parseInt(String(a.parameters.charityShare ?? "0"), 10);
-      const bc = parseInt(String(b.parameters.charityShare ?? "0"), 10);
-      return ac - bc; // charity: 10 → 20 → 30
-    });
-    return list;
-  }, [manifestEntries]);
   const selectedScenarioId =
-    activeScenarioId ?? sortedManifestEntries[0]?.scenarioId ?? "";
-
-  const formatScenarioLabel = useCallback(
-    (entry: PresentationManifestEntry) => {
-      const growth = String(entry.parameters.adoptionRate || "").toUpperCase();
-      const risk = String(entry.parameters.cashOutStrategy || "");
-      const charity = String(entry.parameters.charityShare || "");
-      return `${growth} growth · ${risk} risk · ${charity}% charity`;
-    },
-    []
-  );
-
-  const comparisonOptions = useMemo(
-    () =>
-      sortedManifestEntries.filter((e) => e.scenarioId !== selectedScenarioId),
-    [sortedManifestEntries, selectedScenarioId]
-  );
+    activeScenarioId ?? availableScenarios[0]?.id ?? "";
 
   const ensureScenarioLoaded = useCallback(
     async (entry: PresentationManifestEntry) => {
@@ -157,13 +132,26 @@ const PrototypeDashboard = () => {
           throw lastErr || new Error("Unable to load presentation manifest");
         }
         if (cancelled) return;
-        const index = loadManifest(manifest);
-        const firstEntry = index.manifest[0];
-        if (firstEntry) {
-          await ensureScenarioLoaded(firstEntry);
-          if (cancelled) return;
-          setActiveScenario(firstEntry.scenarioId);
-          setActiveDay(0);
+        loadManifest(manifest);
+        const firstScenario = availableScenarios[0];
+        if (firstScenario) {
+          // Use the direct mapping to get the correct scenario ID
+          const scenarioIdMap: Record<string, string> = {
+            "growth-15": "growth-15_risk-mid_charity-30",
+            "growth-35": "growth-35_risk-mid_charity-30",
+            "growth-60": "growth-60_risk-mid_charity-30",
+          };
+
+          const targetScenarioId = scenarioIdMap[firstScenario.id];
+          if (targetScenarioId) {
+            const targetEntry = manifest.find(entry => entry.scenarioId === targetScenarioId);
+            if (targetEntry) {
+              await ensureScenarioLoaded(targetEntry);
+              if (cancelled) return;
+              setActiveScenario(targetScenarioId);
+              setActiveDay(0);
+            }
+          }
         }
         setStatus("idle");
       } catch (err) {
@@ -181,29 +169,26 @@ const PrototypeDashboard = () => {
   const handleScenarioChange = useCallback(
     async (scenarioId: string) => {
       if (!manifestIndex) return;
-      const entry = manifestIndex.byId.get(scenarioId);
-      if (!entry) return;
-      await ensureScenarioLoaded(entry);
-      setActiveScenario(scenarioId);
+
+      // Direct mapping to the specific scenario IDs we want
+      const scenarioIdMap: Record<string, string> = {
+        "growth-15": "growth-15_risk-mid_charity-30",
+        "growth-35": "growth-35_risk-mid_charity-30",
+        "growth-60": "growth-60_risk-mid_charity-30",
+      };
+
+      const targetScenarioId = scenarioIdMap[scenarioId];
+      if (!targetScenarioId) return;
+
+      const targetEntry = manifestIndex.byId.get(targetScenarioId);
+      if (!targetEntry) return;
+
+      await ensureScenarioLoaded(targetEntry);
+      setActiveScenario(targetScenarioId);
       setActiveDay(0);
     },
     [ensureScenarioLoaded, manifestIndex, setActiveDay, setActiveScenario]
   );
-
-  // Ensure currently selected comparison scenarios are loaded if chosen
-  useEffect(() => {
-    if (!manifestIndex) return;
-    (async () => {
-      if (midSelection) {
-        const entry = manifestIndex.byId.get(midSelection);
-        if (entry) await ensureScenarioLoaded(entry);
-      }
-      if (highSelection) {
-        const entry = manifestIndex.byId.get(highSelection);
-        if (entry) await ensureScenarioLoaded(entry);
-      }
-    })();
-  }, [ensureScenarioLoaded, highSelection, manifestIndex, midSelection]);
 
   return (
     <div className="min-h-screen bg-slate-950 px-6 py-10 pb-28 text-slate-100">
@@ -229,56 +214,12 @@ const PrototypeDashboard = () => {
               >
                 Scenario
               </label>
-              <select
-                id="scenario"
-                className="mt-1 w-72 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none"
-                value={selectedScenarioId}
-                onChange={(event) => handleScenarioChange(event.target.value)}
+              <ScenarioSelector
+                scenarios={availableScenarios}
+                selectedScenarioId={selectedScenarioId}
+                onScenarioChange={handleScenarioChange}
                 disabled={status === "loading" || manifestEntries.length === 0}
-              >
-                {sortedManifestEntries.map((entry) => (
-                  <option key={entry.scenarioId} value={entry.scenarioId}>
-                    {entry.parameters.adoptionRate.toUpperCase()} growth ·{" "}
-                    {entry.parameters.cashOutStrategy} risk ·{" "}
-                    {entry.parameters.charityShare}% charity
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">
-              <span className="block text-sm font-bold uppercase tracking-widest text-slate-400">
-                Comparisons
-              </span>
-              <div className="mt-2 flex gap-3 items-center">
-                <label className="text-sm text-slate-400">Mid</label>
-                <select
-                  className="w-64 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none"
-                  value={midSelection ?? ""}
-                  onChange={(e) => setMidSelection(e.target.value || null)}
-                >
-                  <option value="">Default (mid/mid)</option>
-                  {comparisonOptions.map((entry) => (
-                    <option key={entry.scenarioId} value={entry.scenarioId}>
-                      {formatScenarioLabel(entry)}
-                    </option>
-                  ))}
-                </select>
-
-                <label className="ml-4 text-sm text-slate-400">High</label>
-                <select
-                  className="w-64 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none"
-                  value={highSelection ?? ""}
-                  onChange={(e) => setHighSelection(e.target.value || null)}
-                >
-                  <option value="">Default (high/high)</option>
-                  {comparisonOptions.map((entry) => (
-                    <option key={entry.scenarioId} value={entry.scenarioId}>
-                      {formatScenarioLabel(entry)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              />
             </div>
           </div>
         </header>
@@ -301,7 +242,7 @@ const PrototypeDashboard = () => {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
-              <LevelBarometer />
+              <PlayerEngagementChart />
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
@@ -318,7 +259,7 @@ const PrototypeDashboard = () => {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
-              <PlayerEngagementChart />
+              <LevelBarometer />
             </div>
           </aside>
         </section>

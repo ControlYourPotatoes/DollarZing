@@ -76,6 +76,25 @@ export interface DailyAggregateSnapshot {
     activePlayers: number;
     totalPlayers: number;
     newPlayers: number;
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    reactivatedPlayers: number;
+  };
+  playerCreation: {
+    daily: {
+      initialPlayers: number;
+      growthPlayers: number;
+      dauNewPlayers: number;
+      reactivatedPlayers: number;
+      totalNewPlayers: number;
+    };
+    cumulative: {
+      initialPlayers: number;
+      growthPlayers: number;
+      dauNewPlayers: number;
+      totalPlayers: number;
+    };
   };
   pool?: {
     depositedToday: number; // runs created today
@@ -142,6 +161,10 @@ export function generateDailyAggregates(
     runsFailed: 0,
   };
 
+  let cumulativeInitialPlayers = 0;
+  let cumulativeGrowthPlayers = 0;
+  let cumulativeDauNewPlayers = 0;
+
   if (!results.dailyResults || results.dailyResults.length === 0) {
     return aggregates;
   }
@@ -203,7 +226,15 @@ export function generateDailyAggregates(
       activePlayers: dailyResult.playerStatistics?.activePlayers ?? 0,
       totalPlayers: dailyResult.playerStatistics?.totalPlayers ?? 0,
       newPlayers: dailyResult.newPlayers ?? 0,
+      initialPlayers: dailyResult.playerCreation?.initialPlayers ?? 0,
+      growthPlayers: dailyResult.playerCreation?.growthPlayers ?? 0,
+      dauNewPlayers: dailyResult.playerCreation?.dauNewPlayers ?? 0,
+      reactivatedPlayers: dailyResult.playerCreation?.reactivatedPlayers ?? 0,
     };
+
+    cumulativeInitialPlayers += totals.initialPlayers;
+    cumulativeGrowthPlayers += totals.growthPlayers;
+    cumulativeDauNewPlayers += totals.dauNewPlayers;
 
     const workflowNodes = buildWorkflowNodes(
       totals.revenue,
@@ -275,6 +306,21 @@ export function generateDailyAggregates(
       workflowNodes,
       timelineTicks: [timelineTick],
       charts,
+      playerCreation: {
+        daily: {
+          initialPlayers: totals.initialPlayers,
+          growthPlayers: totals.growthPlayers,
+          dauNewPlayers: totals.dauNewPlayers,
+          reactivatedPlayers: totals.reactivatedPlayers,
+          totalNewPlayers: totals.newPlayers,
+        },
+        cumulative: {
+          initialPlayers: cumulativeInitialPlayers,
+          growthPlayers: cumulativeGrowthPlayers,
+          dauNewPlayers: cumulativeDauNewPlayers,
+          totalPlayers: totals.totalPlayers,
+        },
+      },
     });
 
     accumulator.platformFees = cumulativePlatform;

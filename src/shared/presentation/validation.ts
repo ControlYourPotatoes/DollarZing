@@ -12,6 +12,7 @@ import {
   EngineScenarioDataset,
   EngineDailySnapshot,
   EngineDailySnapshotLevel,
+  PresentationPlayerGrowth,
 } from "./types";
 
 class ValidationError extends Error {}
@@ -146,6 +147,82 @@ function validateWorkflowLink(
     source: link.source,
     target: link.target,
     value: link.value,
+  };
+}
+
+function validatePlayerGrowth(
+  value: unknown,
+  path: string
+): PresentationPlayerGrowth {
+  if (!isObject(value)) {
+    throw new ValidationError(`${path} must be an object`);
+  }
+
+  assertNumber(value.totalPlayers, `${path}.totalPlayers must be a number`);
+  assertNumber(value.activePlayers, `${path}.activePlayers must be a number`);
+
+  const daily = value.daily;
+  if (!isObject(daily)) {
+    throw new ValidationError(`${path}.daily must be an object`);
+  }
+  assertNumber(
+    daily.newPlayers,
+    `${path}.daily.newPlayers must be a number`
+  );
+  assertNumber(
+    daily.initialPlayers,
+    `${path}.daily.initialPlayers must be a number`
+  );
+  assertNumber(
+    daily.growthPlayers,
+    `${path}.daily.growthPlayers must be a number`
+  );
+  assertNumber(
+    daily.dauNewPlayers,
+    `${path}.daily.dauNewPlayers must be a number`
+  );
+  assertNumber(
+    daily.reactivatedPlayers,
+    `${path}.daily.reactivatedPlayers must be a number`
+  );
+
+  const cumulative = value.cumulative;
+  if (!isObject(cumulative)) {
+    throw new ValidationError(`${path}.cumulative must be an object`);
+  }
+  assertNumber(
+    cumulative.initialPlayers,
+    `${path}.cumulative.initialPlayers must be a number`
+  );
+  assertNumber(
+    cumulative.growthPlayers,
+    `${path}.cumulative.growthPlayers must be a number`
+  );
+  assertNumber(
+    cumulative.dauNewPlayers,
+    `${path}.cumulative.dauNewPlayers must be a number`
+  );
+  assertNumber(
+    cumulative.totalPlayers,
+    `${path}.cumulative.totalPlayers must be a number`
+  );
+
+  return {
+    totalPlayers: value.totalPlayers,
+    activePlayers: value.activePlayers,
+    daily: {
+      newPlayers: daily.newPlayers,
+      initialPlayers: daily.initialPlayers,
+      growthPlayers: daily.growthPlayers,
+      dauNewPlayers: daily.dauNewPlayers,
+      reactivatedPlayers: daily.reactivatedPlayers,
+    },
+    cumulative: {
+      initialPlayers: cumulative.initialPlayers,
+      growthPlayers: cumulative.growthPlayers,
+      dauNewPlayers: cumulative.dauNewPlayers,
+      totalPlayers: cumulative.totalPlayers,
+    },
   };
 }
 
@@ -337,6 +414,14 @@ function validateSnapshot(
     };
   }
 
+  let playerGrowth: PresentationSnapshot["playerGrowth"] | undefined;
+  if ((snapshot as any).playerGrowth !== undefined) {
+    playerGrowth = validatePlayerGrowth(
+      (snapshot as any).playerGrowth,
+      `days[${index}].playerGrowth`
+    );
+  }
+
   return {
     dayIndex: snapshot.dayIndex,
     date: snapshot.date,
@@ -365,6 +450,7 @@ function validateSnapshot(
     },
     ...(pool ? { pool } : {}),
     ...(cashouts ? { cashouts } : {}),
+    ...(playerGrowth ? { playerGrowth } : {}),
   };
 }
 

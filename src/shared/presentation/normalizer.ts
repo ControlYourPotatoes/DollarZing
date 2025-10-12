@@ -11,6 +11,7 @@ import {
   GamesAnalyticsPoint,
   LevelAnalyticsPoint,
   LevelAnalyticsStep,
+  PlayerGrowthAnalyticsPoint,
 } from "./types";
 
 import { validatePresentationSnapshotFile } from "./validation";
@@ -48,6 +49,7 @@ export function normalizePresentationSnapshot(
   const flowAnalytics: FlowAnalyticsPoint[] = [];
   const gamesAnalytics: GamesAnalyticsPoint[] = [];
   const levelAnalytics: LevelAnalyticsPoint[] = [];
+  const playerGrowthAnalytics: PlayerGrowthAnalyticsPoint[] = [];
 
   const days: NormalizedPresentationDay[] = snapshotFile.days.map((day) => {
     const distributionPoints = day.charts.distributionSeries.map((point) => ({
@@ -83,7 +85,12 @@ export function normalizePresentationSnapshot(
         dailyEntry?.totals?.activePlayers ??
         totalPlayers
     );
-    const newPlayers = ensureNumber(dailyEntry?.totals?.newPlayers ?? 0);
+    const newPlayers = ensureNumber(
+      day.playerGrowth?.daily.newPlayers ??
+        dailyEntry?.totals?.newPlayers ??
+        datasetEntry?.newPlayers ??
+        0
+    );
     const survivalRate =
       totalPlayers > 0 ? (activePlayers / totalPlayers) * 100 : 0;
 
@@ -101,6 +108,40 @@ export function normalizePresentationSnapshot(
       cumulativeRevenue,
       cumulativePayouts,
       netValue,
+    });
+
+    const dailyInitialPlayers = ensureNumber(
+      day.playerGrowth?.daily.initialPlayers ?? 0
+    );
+    const dailyGrowthPlayers = ensureNumber(
+      day.playerGrowth?.daily.growthPlayers ?? 0
+    );
+    const dailyDauNewPlayers = ensureNumber(
+      day.playerGrowth?.daily.dauNewPlayers ?? 0
+    );
+    const dailyReactivatedPlayers = ensureNumber(
+      day.playerGrowth?.daily.reactivatedPlayers ?? 0
+    );
+
+    playerGrowthAnalytics.push({
+      dayIndex: day.dayIndex,
+      label,
+      totalPlayers,
+      activePlayers,
+      cumulativeInitialPlayers: ensureNumber(
+        day.playerGrowth?.cumulative.initialPlayers ?? 0
+      ),
+      cumulativeGrowthPlayers: ensureNumber(
+        day.playerGrowth?.cumulative.growthPlayers ?? 0
+      ),
+      cumulativeDauNewPlayers: ensureNumber(
+        day.playerGrowth?.cumulative.dauNewPlayers ?? 0
+      ),
+      dailyInitialPlayers,
+      dailyGrowthPlayers,
+      dailyDauNewPlayers,
+      dailyReactivatedPlayers,
+      dailyNewPlayers: newPlayers,
     });
 
     flowAnalytics.push({
@@ -158,6 +199,7 @@ export function normalizePresentationSnapshot(
       },
       ...(day.pool ? { pool: { ...day.pool } } : {}),
       ...(day.cashouts ? { cashouts: { ...day.cashouts } } : {}),
+      ...(day.playerGrowth ? { playerGrowth: { ...day.playerGrowth } } : {}),
     };
   });
 
@@ -228,6 +270,7 @@ export function normalizePresentationSnapshot(
       flow: flowAnalytics,
       games: gamesAnalytics,
       levels: levelAnalytics,
+      playerGrowth: playerGrowthAnalytics,
     },
   };
 }

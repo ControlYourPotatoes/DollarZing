@@ -115,6 +115,10 @@ export class PlayerManager {
   private totalPlayersCounter = 0;
   private completedRunsCounter = 0; // Track players who completed their runs
   private dailyNewPlayersCounter = 0; // Track new players added today
+  private dailyInitialPlayersCount = 0;
+  private dailyGrowthPlayersCount = 0;
+  private dailyDauNewPlayersCount = 0;
+  private dailyDauReactivatedPlayersCount = 0;
   private lastInitialSeededSnapshot = 0;
 
   /**
@@ -209,6 +213,11 @@ export class PlayerManager {
     this.dailyNewPlayersCounter = stats.dailyNewPlayersCounter;
     this.pendingInitialPlayers = stats.pendingInitialPlayers;
     this.lastInitialSeededSnapshot = stats.initialPlayersSeededSoFar;
+    this.dailyInitialPlayersCount = stats.dailyInitialPlayersCounter ?? 0;
+    this.dailyGrowthPlayersCount = stats.dailyGrowthPlayersCounter ?? 0;
+    this.dailyDauNewPlayersCount = stats.dailyDauNewPlayersCounter ?? 0;
+    this.dailyDauReactivatedPlayersCount =
+      stats.dailyDauReactivationsCounter ?? 0;
   }
 
   private handleDayFrameCompleted(_event: DayFrameCompletedEvent): void {
@@ -410,13 +419,34 @@ export class PlayerManager {
     return this.dailyNewPlayersCounter;
   }
 
+  consumeDailyPlayerCreationStats(): {
+    totalNewPlayers: number;
+    initialPlayers: number;
+    growthPlayers: number;
+    dauNewPlayers: number;
+    reactivatedPlayers: number;
+  } {
+    const stats = {
+      totalNewPlayers: this.dailyNewPlayersCounter,
+      initialPlayers: this.dailyInitialPlayersCount,
+      growthPlayers: this.dailyGrowthPlayersCount,
+      dauNewPlayers: this.dailyDauNewPlayersCount,
+      reactivatedPlayers: this.dailyDauReactivatedPlayersCount,
+    };
+    this.dailyNewPlayersCounter = 0;
+    this.dailyInitialPlayersCount = 0;
+    this.dailyGrowthPlayersCount = 0;
+    this.dailyDauNewPlayersCount = 0;
+    this.dailyDauReactivatedPlayersCount = 0;
+    return stats;
+  }
+
   /**
    * Get daily new players count and reset for next day
    */
   getDailyNewPlayersCount(): number {
-    const count = this.dailyNewPlayersCounter;
-    this.dailyNewPlayersCounter = 0; // Reset for next day
-    return count;
+    const { totalNewPlayers } = this.consumeDailyPlayerCreationStats();
+    return totalNewPlayers;
   }
 
   /**
