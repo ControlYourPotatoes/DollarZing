@@ -340,7 +340,7 @@ export class GameEngineSimulator {
     if (summary) {
       existing.gameStatistics = {
         ...existing.gameStatistics,
-        resolvedGames: summary.gamesProcessed,
+        resolvedGames: summary.resolvedGames,
         activeRuns: summary.activePlayers,
       };
       existing.newPlayers = summary.newPlayers ?? existing.newPlayers;

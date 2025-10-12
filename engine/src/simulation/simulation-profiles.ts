@@ -131,6 +131,11 @@ function buildSimulationConfig(
     },
   };
 
+  // Add initialPlayerSpreadDays if provided
+  if (overrides.initialPlayerSpreadDays !== undefined) {
+    (baseConfig as any).initialPlayerSpreadDays = overrides.initialPlayerSpreadDays;
+  }
+
   return baseConfig;
 }
 

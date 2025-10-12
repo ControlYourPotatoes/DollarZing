@@ -370,7 +370,7 @@ export interface DayStartedEvent extends BaseEvent {
 export interface DayCompletedEvent extends BaseEvent {
   type: "DAY_COMPLETED";
   dayNumber: number;
-  gamesProcessed: number;
+  resolvedGames: number;
   newPlayers: number;
   totalRevenue: number;
   poolSize: number;
@@ -381,7 +381,7 @@ export interface DayFrameCompletedEvent extends BaseEvent {
   type: "DAY_FRAME_COMPLETED";
   dayNumber: number;
   summary: {
-    gamesProcessed: number;
+    resolvedGames: number;
     newPlayers: number;
     poolSize: number;
     activePlayers: number;
@@ -448,7 +448,7 @@ export interface DatasetGenerationProgressEvent extends BaseEvent {
   currentDay: number;
   totalDays: number;
   progressPercentage: number;
-  gamesProcessed: number;
+  resolvedGames: number;
   playersActive: number;
 }
 

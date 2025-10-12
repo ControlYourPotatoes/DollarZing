@@ -54,5 +54,3 @@ node dist/scripts/run-orchestrator.js --days 90 --combo 60,high,10 --no-events -
 node dist/scripts/run-orchestrator.js --days 60 --combo 60,mid,10 --no-events  --debug-events --verbose --log-file run.log
 
 cd /workspace/engine && timeout 15s node dist/scripts/run-orchestrator.js --days 1 --combo 35,high,10 2>/dev/null | grep -E "(warn|progression)" | head -10
-
-

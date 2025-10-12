@@ -73,6 +73,7 @@ export class PlayerManager {
       },
       this.dormantStore
     );
+    this.playerCreationManager.init();
   }
 
   private playerCreationManager: PlayerCreationManager;
@@ -198,6 +199,7 @@ export class PlayerManager {
   }
 
   private async handleSimulationStarted(event: any): Promise<void> {
+    console.log(`[PlayerManager] handleSimulationStarted: event.config=`, event.config);
     // Store initial player count for seeding when strategies are available on DAY_STARTED
     const initial =
       event?.initialPlayerCount || event?.config?.initialPlayerCount || 0;
@@ -208,6 +210,7 @@ export class PlayerManager {
         ? event.initialPlayerSpreadDays
         : undefined;
 
+    console.log(`[PlayerManager] initial=${initial}, spread=${spread}`);
     if (typeof spread === "number" && spread > 0) {
       this.initialPlayerSpreadDays = spread;
     }
@@ -215,6 +218,8 @@ export class PlayerManager {
     if (typeof initial === "number" && initial > 0) {
       this.pendingInitialPlayers = initial;
     }
+
+    console.log(`[PlayerManager] After setting: pendingInitialPlayers=${this.pendingInitialPlayers}, initialPlayerSpreadDays=${this.initialPlayerSpreadDays}`);
 
     // Sync with PlayerCreationManager
     this.playerCreationManager.setInitialPlayers(

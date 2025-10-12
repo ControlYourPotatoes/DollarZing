@@ -290,9 +290,13 @@ export class MatchmakingEventHandler {
     try {
       // Get current pool state
       const poolStats = this.gameMatchingEngine.getPoolStatistics();
-      const activeGamesCount = this.gameMatchingEngine.getActiveGamesCount();
+      let activeGamesCount = this.gameMatchingEngine.getActiveGamesCount();
       const maxConcurrentGames =
         this.gameMatchingEngine.getMaxConcurrentGames();
+      let remainingCapacity = Math.max(
+        0,
+        maxConcurrentGames - activeGamesCount
+      );
 
       // Emit matchmaking attempted event
       void this.emitMatchmakingAttempted(
@@ -378,7 +382,7 @@ export class MatchmakingEventHandler {
           matchingQueue.enqueue(item);
         }
 
-        while (matchingQueue.size() > 1) {
+        while (matchingQueue.size() > 1 && remainingCapacity > 0) {
           const primary = matchingQueue.dequeue()!;
           const partner = matchingQueue.dequeue()!;
 
@@ -417,6 +421,8 @@ export class MatchmakingEventHandler {
 
             // Track active game
             this.gameMatchingEngine.addActiveGame(game);
+            remainingCapacity--;
+            activeGamesCount++;
 
             void this.emitMatchFound(
               primary.dollar,
@@ -460,7 +466,7 @@ export class MatchmakingEventHandler {
           );
         }
 
-        if (matchesMade === 0) {
+        if (matchesMade === 0 || remainingCapacity === 0) {
           const uniqueOwners = new Set(
             remainingItems.map((entry) => entry.dollar.ownerId)
           );
@@ -604,9 +610,13 @@ export class MatchmakingEventHandler {
       clearTimeout(timeoutId); // Clear the timeout on completion
       if (!this.terminationTriggered && this.pendingMatchAttempt) {
         this.pendingMatchAttempt = false;
+        const currentActiveGames = this.gameMatchingEngine.getActiveGamesCount();
+        const maxConcurrent = this.gameMatchingEngine.getMaxConcurrentGames();
+        const remainingCapacity = Math.max(0, maxConcurrent - currentActiveGames);
+        const backoff = remainingCapacity === 0 ? 150 : 50;
         setTimeout(() => {
           void this.attemptMatching();
-        }, 50); // Backoff to prevent tight loop
+        }, backoff);
       } else {
         this.pendingMatchAttempt = false;
       }
