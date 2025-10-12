@@ -158,7 +158,14 @@ function assembleSimulator(
   );
 
   const scoringEngine = new ScoringEngine();
-  const revenueCalculator = new RevenueCalculator();
+  const configuredCharityPercentage = profile.config?.charityPercentage;
+  const charityPercentage =
+    typeof configuredCharityPercentage === "number" &&
+    configuredCharityPercentage >= 0.1 &&
+    configuredCharityPercentage <= 1
+      ? configuredCharityPercentage
+      : 0.15;
+  const revenueCalculator = new RevenueCalculator(charityPercentage);
   const dormantStore = new InMemoryDormantPlayerStore();
   const gameMatchingEngine = new GameMatchingEngine(
     virtualDollarFactory,

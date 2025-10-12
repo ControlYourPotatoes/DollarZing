@@ -59,10 +59,26 @@ export class PlayerCreationManager {
   /**
    * Set initial player count for spreading
    */
-  setInitialPlayers(count: number, spreadDays?: number): void {
-    console.log(`[PlayerCreationManager] setInitialPlayers: count=${count}, spreadDays=${spreadDays}`);
-    this.pendingInitialPlayers = count;
-    this.initialPlayersSeededSoFar = 0;
+  setInitialPlayers(
+    count: number,
+    spreadDays?: number,
+    options?: { resetSeedProgress?: boolean }
+  ): void {
+    const normalizedCount = Math.max(0, Math.floor(count));
+    const countChanged = normalizedCount !== this.pendingInitialPlayers;
+    console.log(
+      `[PlayerCreationManager] setInitialPlayers: count=${normalizedCount}, spreadDays=${spreadDays}`
+    );
+    if (options?.resetSeedProgress) {
+      this.initialPlayersSeededSoFar = 0;
+    } else if (countChanged) {
+      // Preserve seeded progress when re-applying the same configuration across days.
+      this.initialPlayersSeededSoFar = Math.min(
+        this.initialPlayersSeededSoFar,
+        normalizedCount
+      );
+    }
+    this.pendingInitialPlayers = normalizedCount;
     if (spreadDays) {
       this.initialPlayerSpreadDays = Math.max(1, Math.floor(spreadDays));
     }
@@ -144,7 +160,7 @@ export class PlayerCreationManager {
      * Source 1: Spread initial players across configured days
      */
     console.log(`[PlayerCreationManager] calculateAllAdditions: dayNumber=${dayNumber}, pendingInitialPlayers=${this.pendingInitialPlayers}, initialPlayersSeededSoFar=${this.initialPlayersSeededSoFar}, currentPlayerCount=${currentPlayerCount}, initialPlayerSpreadDays=${this.initialPlayerSpreadDays}`);
-    if (this.pendingInitialPlayers > 0 && currentPlayerCount === 0) {
+    if (this.pendingInitialPlayers > 0) {
       const remaining =
         this.pendingInitialPlayers - this.initialPlayersSeededSoFar;
       if (remaining > 0) {
@@ -276,12 +292,17 @@ export class PlayerCreationManager {
 
     // Apply initial players
     if (finalInitial > 0) {
+      const totalInitialTarget = this.pendingInitialPlayers;
+      const seededBefore = this.initialPlayersSeededSoFar;
       this.initialPlayersSeededSoFar += finalInitial;
       this.totalPlayersCounter += finalInitial;
       this.dailyNewPlayersCounter += finalInitial;
       if (this.initialPlayersSeededSoFar >= this.pendingInitialPlayers) {
         this.pendingInitialPlayers = 0;
       }
+      console.log(
+        `[PlayerCreationManager] Seeding initial players: created=${finalInitial}, seeded=${this.initialPlayersSeededSoFar}/${Math.max(totalInitialTarget, seededBefore + finalInitial)}`
+      );
       await this.createActives(finalInitial, playerStrategies, true);
     }
 

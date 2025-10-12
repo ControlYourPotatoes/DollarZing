@@ -79,4 +79,20 @@ describe("Simulator factory helpers", () => {
     expect(assembly.profile.runtime.attachDebugger).toBe(true);
     expect(assembly.profile.runtime.enablePooling).toBe(true);
   });
+
+  it("should apply profile charity percentage to the revenue calculator", () => {
+    const assembly = createDevelopmentSimulator({
+      profileOverrides: {
+        config: { charityPercentage: 0.45 },
+      },
+    });
+
+    try {
+      expect(
+        assembly.components.revenueCalculator.getCharityPercentage()
+      ).toBeCloseTo(0.45, 5);
+    } finally {
+      assembly.dispose();
+    }
+  });
 });

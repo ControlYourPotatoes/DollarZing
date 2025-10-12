@@ -246,7 +246,12 @@ export class DayProcessor {
         Math.max(10, Math.floor(lastPoolSize * 0.05)); // Increased tolerance: 5% variation or min 10
 
       // Check for equilibrium state: no new players added recently, but system still processing
-      const dailyNewPlayers = this.playerManager.getDailyNewPlayersCount();
+      const managerWithPeek = this.playerManager as PlayerManager & {
+        peekDailyNewPlayersCount?: () => number;
+      };
+      const dailyNewPlayers =
+        managerWithPeek.peekDailyNewPlayersCount?.() ??
+        managerWithPeek.getDailyNewPlayersCount();
       const isEquilibriumState =
         dailyNewPlayers === 0 && currentActiveCount > 0 && resolvedMonotonic;
 
@@ -330,14 +335,7 @@ export class DayProcessor {
       },
     } as DayFrameCompletedEvent);
 
-    // Log progression for CLI feedback
-    progression.dayEnded(eventDay, simulationConfig.durationDays, {
-      resolvedGames: resolvedGamesToday,
-      newPlayers: completedPayload.newPlayers,
-      poolSize: completedPayload.poolSize,
-    });
-
-    // Additional progression logs for detailed tracking
+    // Additional progression logs for detailed tracking (day summary emitted via DAY_FRAME_COMPLETED handler)
     progression.playerGrowth(
       eventDay,
       0, // activePlayers - would need to track this

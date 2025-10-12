@@ -109,6 +109,7 @@ export class PlayerManager {
   private totalPlayersCounter = 0;
   private completedRunsCounter = 0; // Track players who completed their runs
   private dailyNewPlayersCounter = 0; // Track new players added today
+  private lastInitialSeededSnapshot = 0;
 
   /**
    * Setup event subscriptions for event-driven processing
@@ -174,6 +175,15 @@ export class PlayerManager {
    * Handle day started event - delegate player creation to PlayerCreationManager
    */
   private async handleDayStarted(event: DayStartedEvent): Promise<void> {
+    if (
+      event.dayNumber > 1 &&
+      this.pendingInitialPlayers > 0 &&
+      this.lastInitialSeededSnapshot === 0
+    ) {
+      console.warn(
+        `[PlayerManager] Pending initial cohort (${this.pendingInitialPlayers}) has not advanced by day ${event.dayNumber - 1} - verify seeding.`
+      );
+    }
     // Sync state with PlayerCreationManager
     this.playerCreationManager.setInitialPlayers(
       this.pendingInitialPlayers,
@@ -191,6 +201,8 @@ export class PlayerManager {
     const stats = this.playerCreationManager.getStats();
     this.totalPlayersCounter = stats.totalPlayersCounter;
     this.dailyNewPlayersCounter = stats.dailyNewPlayersCounter;
+    this.pendingInitialPlayers = stats.pendingInitialPlayers;
+    this.lastInitialSeededSnapshot = stats.initialPlayersSeededSoFar;
   }
 
   private handleDayFrameCompleted(_event: DayFrameCompletedEvent): void {
@@ -224,7 +236,8 @@ export class PlayerManager {
     // Sync with PlayerCreationManager
     this.playerCreationManager.setInitialPlayers(
       this.pendingInitialPlayers,
-      this.initialPlayerSpreadDays
+      this.initialPlayerSpreadDays,
+      { resetSeedProgress: true }
     );
   }
 
@@ -382,6 +395,13 @@ export class PlayerManager {
       ) / Object.keys(PlayerManager.DAU_TARGETS).length;
 
     return Math.floor(totalPlayers * averageDAURate);
+  }
+
+  /**
+   * Peek at today's new player count without resetting the counter.
+   */
+  peekDailyNewPlayersCount(): number {
+    return this.dailyNewPlayersCounter;
   }
 
   /**
