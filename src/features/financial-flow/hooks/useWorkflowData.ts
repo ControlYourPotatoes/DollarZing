@@ -36,6 +36,22 @@ interface PositionedLink extends PresentationWorkflowLink {
   sourceY: number;
   targetX: number;
   targetY: number;
+  percentOfTotal?: number;
+}
+
+interface WorkflowStatusMetrics {
+  players: {
+    total: number;
+    active: number;
+    retired: number;
+    activeShare: number;
+  };
+  games: {
+    totalGames: number;
+    recentAverage: number;
+    cashouts: number;
+    jackpots: number;
+  };
 }
 
 export interface WorkflowLayoutResult {
@@ -44,6 +60,7 @@ export interface WorkflowLayoutResult {
   nodes: PositionedNode[];
   links: PositionedLink[];
   highlightedIds: string[];
+  statusMetrics?: WorkflowStatusMetrics;
 }
 
 const DEFAULT_NODE_RADIUS = 70;
@@ -66,7 +83,14 @@ export function useWorkflowData(): WorkflowLayoutResult {
 
   return useMemo(() => {
     if (!day || !scenario) {
-      return { scenario, day, nodes: [], links: [], highlightedIds: [] };
+      return {
+        scenario,
+        day,
+        nodes: [],
+        links: [],
+        highlightedIds: [],
+        statusMetrics: undefined,
+      };
     }
 
     let globalMax = 0;
@@ -544,22 +568,85 @@ export function useWorkflowData(): WorkflowLayoutResult {
       positionedNodes.map((node) => [node.id, node])
     );
 
-    const positionedLinks: PositionedLink[] = sourceLinks
-      .map((link) => {
-        const source = nodeById.get(link.source);
-        const target = nodeById.get(link.target);
-        if (!source || !target) {
-          return undefined;
-        }
-        return {
-          ...link,
-          sourceX: source.x + source.radius,
-          sourceY: source.y,
-          targetX: target.x - target.radius,
-          targetY: target.y,
-        };
-      })
-      .filter((link): link is PositionedLink => Boolean(link));
+    const positionedLinks: PositionedLink[] = [];
+    sourceLinks.forEach((link) => {
+      const source = nodeById.get(link.source);
+      const target = nodeById.get(link.target);
+      if (!source || !target) {
+        return;
+      }
+      const percentOfTotal =
+        link.source === "total" && totalValue > 0
+          ? Math.max(0, Math.min(1, link.value / totalValue))
+          : undefined;
+      positionedLinks.push({
+        ...link,
+        sourceX: source.x + source.radius,
+        sourceY: source.y,
+        targetX: target.x - target.radius,
+        targetY: target.y,
+        percentOfTotal,
+      });
+    });
+
+    // Status metrics for supplemental sidebar
+    const computeStatusMetrics = (): WorkflowStatusMetrics => {
+      const dayIndex = day.dayIndex ?? 0;
+      const cohortPoint =
+        scenario.analytics?.cohort?.[dayIndex] ?? undefined;
+
+      const totalPlayers =
+        day.playerGrowth?.totalPlayers ?? cohortPoint?.totalPlayers ?? 0;
+      const activePlayers =
+        day.playerGrowth?.activePlayers ?? cohortPoint?.activePlayers ?? 0;
+      const retiredPlayers = Math.max(0, totalPlayers - activePlayers);
+      const activeShare =
+        totalPlayers > 0 ? activePlayers / totalPlayers : 0;
+
+      const gamesSeries = scenario.analytics?.games ?? [];
+      const gamesUpTo = gamesSeries.slice(0, dayIndex + 1);
+      const totalGames = gamesUpTo.reduce(
+        (sum, point) => sum + (point?.totalGames ?? 0),
+        0
+      );
+      const windowStart = Math.max(0, dayIndex - 6);
+      const recentWindow = gamesSeries.slice(windowStart, dayIndex + 1);
+      const recentAverage =
+        recentWindow.length > 0
+          ? recentWindow.reduce(
+              (sum, point) => sum + (point?.totalGames ?? 0),
+              0
+            ) / recentWindow.length
+          : 0;
+
+      const levelSeries = scenario.analytics?.levels ?? [];
+      let cashouts = 0;
+      let jackpots = 0;
+      for (let i = 0; i <= dayIndex && i < levelSeries.length; i++) {
+        const levelSteps = levelSeries[i]?.steps ?? [];
+        cashouts += levelSteps.reduce(
+          (sum, step) => sum + (step.cashouts ?? 0),
+          0
+        );
+        const level10 = levelSteps.find((step) => step.level === 10);
+        jackpots += level10?.cashouts ?? 0;
+      }
+
+      return {
+        players: {
+          total: totalPlayers,
+          active: activePlayers,
+          retired: retiredPlayers,
+          activeShare,
+        },
+        games: {
+          totalGames,
+          recentAverage,
+          cashouts,
+          jackpots,
+        },
+      };
+    };
 
     return {
       scenario,
@@ -567,6 +654,7 @@ export function useWorkflowData(): WorkflowLayoutResult {
       nodes: positionedNodes,
       links: positionedLinks,
       highlightedIds: positionedNodes.map((node) => node.id),
+      statusMetrics: computeStatusMetrics(),
     };
   }, [day, scenario, midScenario, highScenario]);
 }

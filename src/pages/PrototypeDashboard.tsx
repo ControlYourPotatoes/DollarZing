@@ -193,35 +193,26 @@ const PrototypeDashboard = () => {
   return (
     <div className="min-h-screen bg-slate-950 px-6 py-10 pb-28 text-slate-100">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <header className="space-y-4">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
-                DollarZing Presentation
-              </p>
-              <h1 className="text-3xl font-semibold tracking-tight">
-                Snapshot Playback Sandbox
-              </h1>
-              <p className="text-slate-400">
-                Timeline scrubber and financial workflow powered by pregenerated
-                presentation snapshots.
-              </p>
-            </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">
-              <label
-                htmlFor="scenario"
-                className="block text-xs uppercase tracking-widest text-slate-400"
-              >
-                Scenario
-              </label>
-              <ScenarioSelector
-                scenarios={availableScenarios}
-                selectedScenarioId={selectedScenarioId}
-                onScenarioChange={handleScenarioChange}
-                disabled={status === "loading" || manifestEntries.length === 0}
-              />
-            </div>
+        <header className="space-y-3">
+          <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
+            DollarZing Presentation
+          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <h1 className="text-3xl font-semibold tracking-tight">
+              Snapshot Playback Sandbox
+            </h1>
+            <ScenarioSelector
+              scenarios={availableScenarios}
+              selectedScenarioId={selectedScenarioId}
+              onScenarioChange={handleScenarioChange}
+              disabled={status === "loading" || manifestEntries.length === 0}
+              variant="inline"
+            />
           </div>
+          <p className="text-slate-400">
+            Timeline scrubber and financial workflow powered by pregenerated
+            presentation snapshots.
+          </p>
         </header>
 
         {/* Impact Display */}

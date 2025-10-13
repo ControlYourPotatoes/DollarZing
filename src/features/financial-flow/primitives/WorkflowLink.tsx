@@ -8,6 +8,8 @@ export interface WorkflowLinkProps {
   targetY: number;
   value: number;
   highlighted?: boolean;
+  percentOfTotal?: number;
+  animated?: boolean;
 }
 
 function formatValue(value: number): string {
@@ -23,32 +25,59 @@ export function WorkflowLink({
   targetY,
   value,
   highlighted = false,
+  percentOfTotal,
+  animated = false,
 }: WorkflowLinkProps) {
-  const midX = (sourceX + targetX) / 2;
+  const deltaX = targetX - sourceX;
+  const elbowX = sourceX + deltaX * 0.55;
+  const labelX = (elbowX + targetX) / 2;
+  const labelY = targetY - 12;
+  const label =
+    percentOfTotal !== undefined
+      ? `${Math.round(percentOfTotal * 100)}%`
+      : formatValue(value);
+
   return (
     <g>
       <motion.path
-        d={`M ${sourceX} ${sourceY} C ${midX} ${sourceY}, ${midX} ${targetY}, ${targetX} ${targetY}`}
+        d={`M ${sourceX} ${sourceY} L ${elbowX} ${sourceY} L ${elbowX} ${targetY} L ${targetX} ${targetY}`}
         fill="transparent"
-        stroke={highlighted ? "#38bdf8" : "rgba(148, 163, 184, 0.35)"}
-        strokeWidth={highlighted ? 3 : 2}
+        stroke={highlighted ? "#38bdf8" : "rgba(148, 163, 184, 0.45)"}
+        strokeWidth={highlighted ? 3.2 : 2.2}
         strokeLinecap="round"
-        strokeDasharray="4 6"
-        initial={{ pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
+        strokeLinejoin="round"
+        strokeDasharray={animated ? "12 14" : "8 10"}
+        initial={{ pathLength: 0, opacity: 0, strokeDashoffset: 0 }}
+        animate={{
+          pathLength: 1,
+          opacity: 1,
+          strokeDashoffset: animated ? [0, -26] : 0,
+        }}
+        transition={{
+          pathLength: { duration: 0.45, delay: 0.15, ease: "easeOut" },
+          opacity: { duration: 0.45, delay: 0.15 },
+          strokeDashoffset: animated
+            ? {
+                duration: 0.9,
+                repeat: Infinity,
+                repeatType: "loop",
+                ease: "linear",
+              }
+            : { duration: 0.3, ease: "easeOut" },
+        }}
       />
       <motion.text
-        x={(sourceX + targetX) / 2}
-        y={(sourceY + targetY) / 2 - 12}
+        x={labelX}
+        y={labelY}
         textAnchor="middle"
-        fontSize={11}
-        fill="rgba(226,232,240,0.8)"
+        fontSize={12}
+        fontWeight={500}
+        fill={highlighted ? "#f8fafc" : "rgba(226,232,240,0.85)"}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        {formatValue(value)}
+        {label}
       </motion.text>
     </g>
   );

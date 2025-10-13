@@ -6,6 +6,7 @@ import { useWorkflowData } from "../hooks/useWorkflowData";
 import { WorkflowNode } from "../primitives/WorkflowNode";
 import { WorkflowLink } from "../primitives/WorkflowLink";
 import { WorkflowNodeTooltip } from "./WorkflowNodeTooltip";
+import { usePresentationTimelineStore } from "@/shared/hooks/presentationTimelineStore";
 
 export interface FinancialWorkflowDiagramProps {
   width?: number; // container hint; svg fills 100%
@@ -16,7 +17,7 @@ export function FinancialWorkflowDiagram({
   width = 720,
   height = 460,
 }: FinancialWorkflowDiagramProps) {
-  const { nodes, links, day } = useWorkflowData();
+  const { nodes, links, day, statusMetrics } = useWorkflowData();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -26,6 +27,15 @@ export function FinancialWorkflowDiagram({
     side: "left" | "right";
     offset: number;
   } | null>(null);
+  const isSimRunning = usePresentationTimelineStore(
+    (state) => state.isPlaying && state.simulationPhase === "running"
+  );
+  const formatNumber = (value: number) =>
+    new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 0,
+    }).format(Math.round(value));
+  const formatPercent = (value: number) =>
+    `${(value * 100).toFixed(1)}%`;
 
   const displayNodes = useMemo(() => {
     return nodes.map((node) => {
@@ -187,6 +197,7 @@ export function FinancialWorkflowDiagram({
                 ? link.target === hoveredId || link.source === hoveredId
                 : false
             }
+            animated={isSimRunning}
           />
         ))}
         {displayNodes.map((node) => (
@@ -222,6 +233,69 @@ export function FinancialWorkflowDiagram({
             side={tooltipPosition.side}
             offsetPx={tooltipPosition.offset}
           />
+        )}
+        {statusMetrics && (
+          <div className="pointer-events-none absolute left-4 bottom-4 flex w-64 max-w-full flex-col gap-3 text-slate-100">
+            <div className="pointer-events-auto rounded-lg border border-slate-800/70 bg-slate-900/80 p-3 shadow-xl backdrop-blur-sm">
+              <h4 className="text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                Player Pulse
+              </h4>
+              <div className="mt-2 space-y-2 text-sm">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-slate-300">Total players</span>
+                  <span className="font-semibold text-slate-100">
+                    {formatNumber(statusMetrics.players.total)}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between text-xs text-slate-400">
+                  <span>Active</span>
+                  <span className="font-semibold text-emerald-300">
+                    {formatNumber(statusMetrics.players.active)}
+                  </span>
+                  <span className="ml-2 text-[11px] text-emerald-200/80">
+                    {formatPercent(statusMetrics.players.activeShare)}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between text-xs text-slate-400">
+                  <span>Retired</span>
+                  <span className="font-medium text-slate-200">
+                    {formatNumber(statusMetrics.players.retired)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="pointer-events-auto rounded-lg border border-slate-800/70 bg-slate-900/80 p-3 shadow-xl backdrop-blur-sm">
+              <h4 className="text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                Match Momentum
+              </h4>
+              <div className="mt-2 space-y-2 text-sm">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-slate-300">Total games</span>
+                  <span className="font-semibold text-slate-100">
+                    {formatNumber(statusMetrics.games.totalGames)}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between text-xs text-slate-400">
+                  <span>7-day avg.</span>
+                  <span className="font-medium text-slate-200">
+                    {formatNumber(Math.round(statusMetrics.games.recentAverage))}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between text-xs text-slate-400">
+                  <span>Cashouts</span>
+                  <span className="font-medium text-slate-200">
+                    {formatNumber(statusMetrics.games.cashouts)}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between text-xs text-slate-400">
+                  <span>Jackpots reached</span>
+                  <span className="font-medium text-amber-300">
+                    {formatNumber(statusMetrics.games.jackpots)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
