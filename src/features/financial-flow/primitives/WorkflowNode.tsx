@@ -330,7 +330,7 @@ export function WorkflowNode({
           };
           const path = arcGenerator(arcShape);
           return (
-            <path
+            <motion.path
               className={`ring-path ${key}`}
               key={`${key}-${arc.data.id}`}
               d={path || ""}
@@ -343,6 +343,9 @@ export function WorkflowNode({
               stroke="#0f172a"
               strokeWidth={0.8}
               pointerEvents="none"
+              initial={false}
+              animate={{ d: path || "" }}
+              transition={{ duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
             />
           );
         })}
