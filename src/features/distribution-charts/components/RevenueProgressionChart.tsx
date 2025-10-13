@@ -1,16 +1,23 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useActiveTimelineScenario } from "@/features/timeline";
+import {
+  useActiveTimelineScenario,
+  useActiveTimelineDay,
+} from "@/features/timeline";
 import { useScenarioComparisons } from "@/shared/hooks/useScenarioComparisons";
+import type { TooltipProps } from "recharts";
+import type {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 interface ProgressionDataPoint {
   day: number;
@@ -38,23 +45,32 @@ const COLORS = {
 export function RevenueProgressionChart() {
   const baseScenario = useActiveTimelineScenario();
   const { mid: midScenario, high: highScenario } = useScenarioComparisons();
+  const activeDay = useActiveTimelineDay();
+  const [showDistribution, setShowDistribution] = useState({
+    base: true,
+    mid: true,
+    high: true,
+  });
 
   const chartData = useMemo(() => {
     if (!baseScenario?.analytics?.flow) return null;
 
-    const maxDays = Math.min(
-      7, // Start with 7 days
-      baseScenario.analytics.flow.length,
-      midScenario?.analytics?.flow?.length || 0,
-      highScenario?.analytics?.flow?.length || 0
+    const baseFlow = baseScenario.analytics.flow;
+    const midFlow = midScenario?.analytics?.flow;
+    const highFlow = highScenario?.analytics?.flow;
+
+    const activeIndex = activeDay?.dayIndex ?? 0;
+    const desiredLength = Math.max(
+      7,
+      Math.min(activeIndex + 1, baseFlow.length)
     );
 
     const data: ProgressionDataPoint[] = [];
 
-    for (let i = 0; i < maxDays; i++) {
-      const baseData = baseScenario.analytics.flow[i];
-      const midData = midScenario?.analytics?.flow?.[i];
-      const highData = highScenario?.analytics?.flow?.[i];
+    for (let i = 0; i < desiredLength; i++) {
+      const baseData = baseFlow[i];
+      const midData = midFlow?.[i];
+      const highData = highFlow?.[i];
 
       if (!baseData) break;
 
@@ -77,11 +93,7 @@ export function RevenueProgressionChart() {
     }
 
     return data;
-  }, [
-    baseScenario?.analytics?.flow,
-    midScenario?.analytics?.flow,
-    highScenario?.analytics?.flow,
-  ]);
+  }, [activeDay?.dayIndex, baseScenario?.analytics?.flow, midScenario?.analytics?.flow, highScenario?.analytics?.flow]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -95,31 +107,43 @@ export function RevenueProgressionChart() {
   const CustomTooltip = ({
     active,
     payload,
-  }: {
-    active?: boolean;
-    payload?: Array<{ value: number; name: string }>;
-  }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg">
-          <p className="font-semibold text-slate-100 mb-2">
-            Revenue Comparison
+    label,
+  }: TooltipProps<ValueType, NameType>) => {
+    if (!active) return null;
+    const point = payload?.[0]?.payload as ProgressionDataPoint | undefined;
+    if (!point) return null;
+
+    return (
+      <div className="rounded-lg border border-slate-600 bg-slate-800 p-3 text-sm shadow-lg">
+        <div className="mb-2 text-xs uppercase tracking-wide text-slate-400">
+          {label}
+        </div>
+        <div className="space-y-1">
+          <p className="text-sky-400">
+            Base: {formatCurrency(point.baseRevenue)}
           </p>
-          <div className="space-y-1 text-sm">
-            <p className="text-sky-400">
-              Base: {formatCurrency(payload[0]?.value || 0)}
-            </p>
-            <p className="text-emerald-400">
-              Mid: {formatCurrency(payload[1]?.value || 0)}
-            </p>
-            <p className="text-amber-400">
-              High: {formatCurrency(payload[2]?.value || 0)}
-            </p>
+          <p className="text-emerald-400">
+            Mid: {formatCurrency(point.midRevenue)}
+          </p>
+          <p className="text-amber-400">
+            High: {formatCurrency(point.highRevenue)}
+          </p>
+        </div>
+        <div className="mt-3 border-t border-slate-700 pt-2 text-xs text-slate-400">
+          <div className="font-semibold text-slate-300 mb-1">
+            Base Distribution
+          </div>
+          <div className="flex justify-between">
+            <span>Charity</span>
+            <span>{formatCurrency(point.baseCharity)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Player Payouts</span>
+            <span>{formatCurrency(point.basePayouts)}</span>
           </div>
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   };
 
   if (!chartData || chartData.length === 0) {
@@ -137,46 +161,95 @@ export function RevenueProgressionChart() {
           Revenue Progression
         </h3>
         <span className="text-sm text-slate-400">
-          Days 1-{chartData.length} of{" "}
+          Days 1-{chartData[chartData.length - 1]?.day ?? chartData.length} of{" "}
           {baseScenario?.analytics?.flow?.length || 0}
         </span>
       </div>
 
-      {/* Legend */}
-      <div className="flex gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-sky-400"></div>
-          <span className="text-slate-300">Base Scenario</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-emerald-400"></div>
-          <span className="text-slate-300">Mid Scenario</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-amber-400"></div>
-          <span className="text-slate-300">High Scenario</span>
-        </div>
+      <div className="grid gap-4 text-sm text-slate-300 md:grid-cols-3">
+        {(
+          [
+            { key: "base" as const, label: "Base Scenario", color: COLORS.base },
+            { key: "mid" as const, label: "Mid Scenario", color: COLORS.mid },
+            { key: "high" as const, label: "High Scenario", color: COLORS.high },
+          ] as const
+        ).map(({ key, label, color }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() =>
+              setShowDistribution((prev) => ({
+                ...prev,
+                [key]: !prev[key],
+              }))
+            }
+            className={`rounded-lg border p-3 text-left transition-colors ${
+              showDistribution[key]
+                ? "border-emerald-500/70 bg-slate-900/60"
+                : "border-slate-800 bg-slate-900/35 hover:border-slate-700"
+            }`}
+          >
+            <div className="mb-2 flex items-center gap-2 text-slate-100">
+              <span
+                className="inline-flex h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: color }}
+              />
+              <span className="font-semibold">{label}</span>
+              <span
+                className={`ml-auto inline-flex h-3 w-3 items-center justify-center rounded-full border ${
+                  showDistribution[key]
+                    ? "border-emerald-400 bg-emerald-400"
+                    : "border-slate-600 bg-slate-800"
+                }`}
+              >
+                <span
+                  className={`block h-1.5 w-1.5 rounded-full transition ${
+                    showDistribution[key]
+                      ? "bg-emerald-100"
+                      : "bg-transparent"
+                  }`}
+                />
+              </span>
+            </div>
+            <div className="space-y-1.5 text-xs text-slate-400">
+              {[
+                { label: "Revenue", dash: "", key: "revenue" },
+                { label: "Charity", dash: "6 3", key: "charity" },
+                { label: "Player Payouts", dash: "3 3", key: "payouts" },
+              ].map((line) => (
+                <div
+                  key={`${key}-${line.key}`}
+                  className={`flex items-center gap-2 ${
+                    line.key !== "revenue" && !showDistribution[key]
+                      ? "opacity-30"
+                      : ""
+                  }`}
+                >
+                  <svg width="32" height="6">
+                    <line
+                      x1="0"
+                      y1="3"
+                      x2="32"
+                      y2="3"
+                      stroke={color}
+                      strokeWidth={line.dash ? 2 : 3}
+                      strokeDasharray={line.dash || undefined}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span>{line.label}</span>
+                </div>
+              ))}
+            </div>
+          </button>
+        ))}
       </div>
 
       <ResponsiveContainer width="100%" height={400}>
-        <AreaChart
+        <LineChart
           data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
-          <defs>
-            <linearGradient id="baseGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={COLORS.base} stopOpacity={0.8} />
-              <stop offset="95%" stopColor={COLORS.base} stopOpacity={0.1} />
-            </linearGradient>
-            <linearGradient id="midGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={COLORS.mid} stopOpacity={0.8} />
-              <stop offset="95%" stopColor={COLORS.mid} stopOpacity={0.1} />
-            </linearGradient>
-            <linearGradient id="highGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={COLORS.high} stopOpacity={0.8} />
-              <stop offset="95%" stopColor={COLORS.high} stopOpacity={0.1} />
-            </linearGradient>
-          </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
           <XAxis dataKey="dayLabel" stroke="#9ca3af" fontSize={12} />
           <YAxis
@@ -185,35 +258,103 @@ export function RevenueProgressionChart() {
             tickFormatter={formatCurrency}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend />
-          <Area
+          <Line
             type="monotone"
             dataKey="baseRevenue"
-            stackId="revenue"
             stroke={COLORS.base}
-            fill={COLORS.base}
-            fillOpacity={0.8}
+            strokeWidth={2.4}
+            dot={false}
             name="Base Revenue"
           />
-          <Area
+          <Line
             type="monotone"
             dataKey="midRevenue"
-            stackId="revenue"
             stroke={COLORS.mid}
-            fill={COLORS.mid}
-            fillOpacity={0.8}
+            strokeWidth={2}
+            dot={false}
             name="Mid Revenue"
           />
-          <Area
+          <Line
             type="monotone"
             dataKey="highRevenue"
-            stackId="revenue"
             stroke={COLORS.high}
-            fill={COLORS.high}
-            fillOpacity={0.8}
+            strokeWidth={2}
+            dot={false}
             name="High Revenue"
           />
-        </AreaChart>
+          {showDistribution.base && (
+            <>
+              <Line
+                type="monotone"
+                dataKey="baseCharity"
+                stroke={COLORS.base}
+                strokeDasharray="6 3"
+                strokeWidth={1.6}
+                dot={false}
+                name="Base Charity"
+                opacity={0.7}
+              />
+              <Line
+                type="monotone"
+                dataKey="basePayouts"
+                stroke={COLORS.base}
+                strokeDasharray="3 3"
+                strokeWidth={1.6}
+                dot={false}
+                name="Base Player Payouts"
+                opacity={0.7}
+              />
+            </>
+          )}
+          {showDistribution.mid && (
+            <>
+              <Line
+                type="monotone"
+                dataKey="midCharity"
+                stroke={COLORS.mid}
+                strokeDasharray="6 3"
+                strokeWidth={1.4}
+                dot={false}
+                name="Mid Charity"
+                opacity={0.7}
+              />
+              <Line
+                type="monotone"
+                dataKey="midPayouts"
+                stroke={COLORS.mid}
+                strokeDasharray="3 3"
+                strokeWidth={1.4}
+                dot={false}
+                name="Mid Player Payouts"
+                opacity={0.7}
+              />
+            </>
+          )}
+          {showDistribution.high && (
+            <>
+              <Line
+                type="monotone"
+                dataKey="highCharity"
+                stroke={COLORS.high}
+                strokeDasharray="6 3"
+                strokeWidth={1.4}
+                dot={false}
+                name="High Charity"
+                opacity={0.7}
+              />
+              <Line
+                type="monotone"
+                dataKey="highPayouts"
+                stroke={COLORS.high}
+                strokeDasharray="3 3"
+                strokeWidth={1.4}
+                dot={false}
+                name="High Player Payouts"
+                opacity={0.7}
+              />
+            </>
+          )}
+        </LineChart>
       </ResponsiveContainer>
 
       {/* Summary Stats */}
@@ -235,6 +376,16 @@ export function RevenueProgressionChart() {
           <div className="text-lg font-semibold text-amber-400">
             {formatCurrency(chartData[chartData.length - 1]?.highRevenue || 0)}
           </div>
+        </div>
+        <div className="bg-slate-800/40 rounded-lg p-3 col-span-3 grid grid-cols-2 gap-3 text-left text-sm text-slate-400">
+          <span>Base Charity</span>
+          <span className="text-slate-200 font-semibold text-right">
+            {formatCurrency(chartData[chartData.length - 1]?.baseCharity || 0)}
+          </span>
+          <span>Base Player Payouts</span>
+          <span className="text-slate-200 font-semibold text-right">
+            {formatCurrency(chartData[chartData.length - 1]?.basePayouts || 0)}
+          </span>
         </div>
       </div>
     </div>

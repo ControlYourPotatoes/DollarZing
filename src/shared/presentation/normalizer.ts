@@ -76,12 +76,14 @@ export function normalizePresentationSnapshot(
     const label = day.timelineTick.label ?? `Day ${day.dayIndex + 1}`;
 
     const totalPlayers = ensureNumber(
-      datasetEntry?.playerStatistics?.totalPlayers ??
+      day.playerGrowth?.totalPlayers ??
+        datasetEntry?.playerStatistics?.totalPlayers ??
         dailyEntry?.totals?.totalPlayers ??
         day.timelineTick.cumulativePlayers
     );
     const activePlayers = ensureNumber(
-      datasetEntry?.playerStatistics?.activePlayers ??
+      day.playerGrowth?.activePlayers ??
+        datasetEntry?.playerStatistics?.activePlayers ??
         dailyEntry?.totals?.activePlayers ??
         totalPlayers
     );

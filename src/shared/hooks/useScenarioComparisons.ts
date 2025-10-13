@@ -9,8 +9,8 @@ import { loadPresentationSnapshot } from "@/shared/presentation";
 import { resolveSnapshotUrl } from "@/shared/presentation/url-resolver";
 // Remove getCoordinateKey import, add anchor imports
 import {
+  AnchorParameters,
   coordinatesToAnchorParams,
-  getRelativeAnchor,
   getAnchorKey,
 } from "@/shared/presentation/anchor-config";
 import { findScenarioByAnchorKey } from "@/shared/presentation/scenario-index";
@@ -52,19 +52,25 @@ export function useScenarioComparisons(): ComparisonScenarios {
       const candidates: PresentationManifestEntry[] = [];
       let midEntry: PresentationManifestEntry | undefined;
       let highEntry: PresentationManifestEntry | undefined;
+      const buildTargetEntry = (growth: number) => {
+        const targetParams: AnchorParameters = {
+          growth,
+          risk: baseParams.risk,
+          charity: baseParams.charity,
+        };
+        const key = getAnchorKey(targetParams);
+        return findScenarioByAnchorKey(manifestIndex, key);
+      };
+
       if (selectedMidId) {
         midEntry = manifestIndex.byId.get(selectedMidId);
       } else {
-        const midParams = getRelativeAnchor(baseParams, "mid");
-        const midKey = getAnchorKey(midParams);
-        midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
+        midEntry = buildTargetEntry(35);
       }
       if (selectedHighId) {
         highEntry = manifestIndex.byId.get(selectedHighId);
       } else {
-        const highParams = getRelativeAnchor(baseParams, "high");
-        const highKey = getAnchorKey(highParams);
-        highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
+        highEntry = buildTargetEntry(60);
       }
 
       if (midEntry) candidates.push(midEntry);
@@ -101,23 +107,26 @@ export function useScenarioComparisons(): ComparisonScenarios {
   return useMemo(() => {
     if (!manifestIndex || !base) return { base };
 
-    // Parse base params
     const baseParams = coordinatesToAnchorParams(base.coordinates);
 
-    // Resolve final mid/high ids: explicit overrides first, then relative defaults
+    const buildTargetId = (growth: number) => {
+      const params: AnchorParameters = {
+        growth,
+        risk: baseParams.risk,
+        charity: baseParams.charity,
+      };
+      const key = getAnchorKey(params);
+      return findScenarioByAnchorKey(manifestIndex, key)?.scenarioId;
+    };
+
+    // Resolve final mid/high ids: explicit overrides first, then default growth targets
     let midId: string | undefined = selectedMidId || undefined;
     let highId: string | undefined = selectedHighId || undefined;
     if (!midId) {
-      const midParams = getRelativeAnchor(baseParams, "mid");
-      const midKey = getAnchorKey(midParams);
-      const midEntry = findScenarioByAnchorKey(manifestIndex, midKey);
-      midId = midEntry?.scenarioId;
+      midId = buildTargetId(35);
     }
     if (!highId) {
-      const highParams = getRelativeAnchor(baseParams, "high");
-      const highKey = getAnchorKey(highParams);
-      const highEntry = findScenarioByAnchorKey(manifestIndex, highKey);
-      highId = highEntry?.scenarioId;
+      highId = buildTargetId(60);
     }
 
     return {

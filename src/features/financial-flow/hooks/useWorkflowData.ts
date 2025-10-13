@@ -221,6 +221,7 @@ export function useWorkflowData(): WorkflowLayoutResult {
         id: "total",
         label: "Total",
         aggregateValue: totalValue,
+        layers: undefined,
       });
     }
     if (!havePlatform) {
@@ -228,6 +229,7 @@ export function useWorkflowData(): WorkflowLayoutResult {
         id: "platform",
         label: "Platform Fees",
         aggregateValue: platformValue,
+        layers: undefined,
       });
     }
     if (!haveCharity) {
@@ -235,6 +237,7 @@ export function useWorkflowData(): WorkflowLayoutResult {
         id: "charity",
         label: "Charity",
         aggregateValue: charityValue,
+        layers: undefined,
       });
     }
     if (!havePlayers) {
@@ -242,6 +245,7 @@ export function useWorkflowData(): WorkflowLayoutResult {
         id: "players",
         label: "Player Payouts",
         aggregateValue: playersValue,
+        layers: undefined,
       });
     }
 
