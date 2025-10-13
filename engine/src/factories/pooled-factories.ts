@@ -181,20 +181,24 @@ export class PooledVirtualDollarFactory implements VirtualDollarFactory {
 
     try {
       const poolManager = getObjectPoolManager();
+      const originalId = dollar.id;
+      const originalSerial = dollar.serialNumber;
+      const originalOwner = dollar.ownerId;
+
       poolManager.virtualDollarPool.release(dollar);
 
-      // Remove from state management tracking
-      this.dollars.delete(dollar.id);
-      this.serialNumbers.delete(dollar.serialNumber);
-      this.pooledDollars.delete(dollar.id);
-      this.stateHistory.delete(dollar.id);
+      // Remove from state management tracking using original identifiers
+      this.dollars.delete(originalId);
+      this.serialNumbers.delete(originalSerial);
+      this.pooledDollars.delete(originalId);
+      this.stateHistory.delete(originalId);
 
       // Remove from player tracking
-      const playerDollars = this.dollarsByPlayer.get(dollar.ownerId);
+      const playerDollars = this.dollarsByPlayer.get(originalOwner);
       if (playerDollars) {
-        playerDollars.delete(dollar.id);
+        playerDollars.delete(originalId);
         if (playerDollars.size === 0) {
-          this.dollarsByPlayer.delete(dollar.ownerId);
+          this.dollarsByPlayer.delete(originalOwner);
         }
       }
 

@@ -216,7 +216,7 @@ function buildPresentationSnapshot(
     financialWorkflow: buildWorkflow(snapshot),
     charts: buildCharts(snapshot),
     levels: buildCumulativeLevelBreakdown(previousSnapshots),
-    playerGrowth,
+    ...(playerGrowth ? { playerGrowth } : {}),
   };
 }
 
