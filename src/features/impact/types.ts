@@ -1,21 +1,45 @@
 export interface ImpactMetrics {
   meals: number;
   lbs: number;
-  personDays: number;
+  personYears: number;
   liters: number;
+  personDays?: number;
 }
 
 export interface ImpactDisplayProps {
   cumulativeCharity?: number | null;
   foodConfig?: {
-    mealsPerDollar: number;
-    lbsPerDollar: number;
+    mealsPerDollar?: number;
+    lbsPerDollar?: number;
+    poundsPerMeal?: number;
   };
   waterConfig?: {
-    personDaysPerDollar: number;
-    litersPerDollar: number;
+    personYearsPerDollar?: number;
+    conservativePersonYearsPerDollar?: number;
+    costPerPersonYear?: number;
+    litersPerPersonDay?: number;
+    litersPerDollar?: number;
   };
   animationDuration?: number;
+}
+
+export interface ImpactProfiles {
+  food: {
+    meals: number;
+    lbs: number;
+  };
+  water: {
+    team: {
+      personYears: number;
+      personDays: number;
+      liters: number;
+    };
+    conservative: {
+      personYears: number;
+      personDays: number;
+      liters: number;
+    };
+  };
 }
 
 export function formatCurrency(value: number): string {

@@ -8,8 +8,8 @@ import { formatCurrency } from "../types";
 const DEFAULT_PROPS: Required<
   Pick<ImpactDisplayProps, "foodConfig" | "waterConfig" | "animationDuration">
 > = {
-  foodConfig: { mealsPerDollar: 10, lbsPerDollar: 1 },
-  waterConfig: { personDaysPerDollar: 20, litersPerDollar: 1000 },
+  foodConfig: { mealsPerDollar: 10, lbsPerDollar: 12 },
+  waterConfig: { personYearsPerDollar: 1, litersPerDollar: 1100 },
   animationDuration: 1500,
 };
 
@@ -25,8 +25,8 @@ export const ImpactDisplay = (props: ImpactDisplayProps) => {
   });
 
   const animatedMeals = useCountUp(metrics?.meals ?? 0, animationDuration);
-  const animatedPersonDays = useCountUp(
-    metrics?.personDays ?? 0,
+  const animatedPersonYears = useCountUp(
+    metrics?.personYears ?? 0,
     animationDuration
   );
 
@@ -110,7 +110,7 @@ export const ImpactDisplay = (props: ImpactDisplayProps) => {
           </span>
         </div>
         <p className="text-3xl font-semibold text-sky-400">
-          {animatedPersonDays.toLocaleString()} Person-Days
+          {animatedPersonYears.toLocaleString()} Person-Years
         </p>
         <p className="mt-1 text-xs text-slate-400">
           Of clean water access (via WaterAid)
