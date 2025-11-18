@@ -6,19 +6,19 @@ import type {
 } from "../types";
 
 const FOOD_PROFILE = {
-  mealsPerDollar: 10, // Feeding America style claim
-  poundsPerMeal: 1.2, // USDA/Feeding America conversion
+  mealsPerDollar: 9, // Refined to a mid-range 8-10 meals per dollar
+  poundsPerMeal: 1.1, // Moderated to stay aligned with meal sizing averages
 };
 
 const WATER_PROFILE_TEAM = {
-  personYearsPerDollar: 1, // Team Water: $1 = 1 person-year
-  litersPerPersonDay: 20, // UNHCR benchmark; UI hover can compare
-  litersPerDollar: 1100, // Preserve existing per-dollar default for UI
+  personYearsPerDollar: 1 / 40, // ~$40 per person-year
+  litersPerPersonDay: 35, // Average daily access target across common benchmarks
+  litersPerDollar: 500, // Keep override available, but tie defaults to person-days first
 };
 
 const WATER_PROFILE_CONSERVATIVE = {
-  personYearsPerDollar: 1 / 40, // ~$40/person-year
-  litersPerPersonDay: 20,
+  personYearsPerDollar: 1 / 50, // ~$50 per person-year as a conservative baseline
+  litersPerPersonDay: 35,
 };
 
 export const useImpactCalculations = (
@@ -72,7 +72,7 @@ export const useImpactCalculations = (
       return { personYears, personDays, liters };
     };
 
-    const teamWater = computeWater(teamPersonYearsPerDollar, true);
+    const teamWater = computeWater(teamPersonYearsPerDollar);
     const conservativeWater = computeWater(conservativePersonYearsPerDollar);
 
     const computedMetrics: ImpactMetrics = {
