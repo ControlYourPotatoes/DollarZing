@@ -1,21 +1,15 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { ImpactDisplay } from "./ImpactDisplay";
+import * as hooks from "../hooks/useImpactCalculations";
 
-// Mock requestAnimationFrame for animation tests
-const mockRequestAnimationFrame = vi.fn();
-const mockCancelAnimationFrame = vi.fn();
-
-beforeEach(() => {
-  vi.clearAllMocks();
-  global.requestAnimationFrame = mockRequestAnimationFrame;
-  global.cancelAnimationFrame = mockCancelAnimationFrame;
-
-  // Mock a single animation frame
-  mockRequestAnimationFrame.mockImplementation((callback) => {
-    setTimeout(() => callback(1000), 16); // 60fps
-    return 1;
-  });
+// Make animations synchronous in tests by mocking useCountUp to return the target immediately
+vi.mock("../hooks/useImpactCalculations", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../hooks/useImpactCalculations")>();
+  return {
+    ...actual,
+    useCountUp: (target: number) => target,
+  };
 });
 
 describe("ImpactDisplay", () => {
@@ -35,18 +29,18 @@ describe("ImpactDisplay", () => {
     render(<ImpactDisplay cumulativeCharity={100} />);
 
     expect(screen.getByText("1,000 Meals")).toBeInTheDocument();
-    expect(screen.getByText("100 lbs rescued")).toBeInTheDocument();
-    expect(screen.getByText("2,000 Person-Days")).toBeInTheDocument();
-    expect(screen.getByText("100,000 liters provided")).toBeInTheDocument();
+    expect(screen.getByText(/1,200 lbs rescued/i)).toBeInTheDocument();
+    expect(screen.getByText("100 Person-Years")).toBeInTheDocument();
+    expect(screen.getByText(/110,000 liters provided/i)).toBeInTheDocument();
   });
 
   it("calculates and displays correct metrics for large charity amount", () => {
     render(<ImpactDisplay cumulativeCharity={86735} />);
 
     expect(screen.getByText("867,350 Meals")).toBeInTheDocument();
-    expect(screen.getByText("86,735 lbs rescued")).toBeInTheDocument();
-    expect(screen.getByText("1,734,700 Person-Days")).toBeInTheDocument();
-    expect(screen.getByText("86,735,000 liters provided")).toBeInTheDocument();
+    expect(screen.getByText(/1,040,820 lbs rescued/i)).toBeInTheDocument();
+    expect(screen.getByText("86,735 Person-Years")).toBeInTheDocument();
+    expect(screen.getByText(/95,408,500 liters provided/i)).toBeInTheDocument();
   });
 
   it("overrides default metrics with custom configs", () => {
@@ -54,14 +48,14 @@ describe("ImpactDisplay", () => {
       <ImpactDisplay
         cumulativeCharity={100}
         foodConfig={{ mealsPerDollar: 5, lbsPerDollar: 2 }}
-        waterConfig={{ personDaysPerDollar: 10, litersPerDollar: 500 }}
+        waterConfig={{ personYearsPerDollar: 10, litersPerDollar: 500 }}
       />
     );
 
     expect(screen.getByText("500 Meals")).toBeInTheDocument();
-    expect(screen.getByText("200 lbs rescued")).toBeInTheDocument();
-    expect(screen.getByText("1,000 Person-Days")).toBeInTheDocument();
-    expect(screen.getByText("50,000 liters provided")).toBeInTheDocument();
+    expect(screen.getByText(/200 lbs rescued/i)).toBeInTheDocument();
+    expect(screen.getByText("1,000 Person-Years")).toBeInTheDocument();
+    expect(screen.getByText(/50,000 liters provided/i)).toBeInTheDocument();
   });
 
   it("displays correct aria-label", () => {
@@ -126,9 +120,9 @@ describe("ImpactDisplay", () => {
 
     // Should show metrics for $200
     expect(screen.getByText("2,000 Meals")).toBeInTheDocument();
-    expect(screen.getByText("200 lbs rescued")).toBeInTheDocument();
-    expect(screen.getByText("4,000 Person-Days")).toBeInTheDocument();
-    expect(screen.getByText("200,000 liters provided")).toBeInTheDocument();
+    expect(screen.getByText(/2,400 lbs rescued/i)).toBeInTheDocument();
+    expect(screen.getByText("200 Person-Years")).toBeInTheDocument();
+    expect(screen.getByText(/220,000 liters provided/i)).toBeInTheDocument();
   });
 
   it("shows no impact data when charity becomes 0", () => {
