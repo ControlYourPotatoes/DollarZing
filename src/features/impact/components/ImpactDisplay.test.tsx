@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { ImpactDisplay } from "./ImpactDisplay";
-import * as hooks from "../hooks/useImpactCalculations";
 
 // Make animations synchronous in tests by mocking useCountUp to return the target immediately
 vi.mock("../hooks/useImpactCalculations", async (importOriginal) => {
